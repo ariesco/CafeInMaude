@@ -3484,7 +3484,6 @@ the \verb"maps2maps" function shown above to the body:
                                  '\g 'Result: '\o metaPrettyPrint(M, T', po) ': Ty
                                  '\n .
 
-
 ***(%
 \end{comment}
 }
