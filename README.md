@@ -3,8 +3,10 @@ Cafe4Maude: A translation from CafeOBJ into Maude
 
 Cafe4Maude is a tool to introduce CafeOBJ specifications into the Maude system.
 This tool has the following features:
-* Supports
-* Open-close environment supported.
+* Supports operators, predicates, equations, and transitions, and all their related
+attributes.
+* Supports open-close environments.
+* Includes the predefined _=_ operator and the corresponding equations.
 * Full integration with Maude tools (such as the model checker or the citp).
 
 
