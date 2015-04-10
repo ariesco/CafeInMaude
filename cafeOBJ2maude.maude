@@ -2979,7 +2979,7 @@ parameter list from a term.
       QIL := cafeParamNames(PL) /\
       SM := cafeTheoryMap(PL) /\
       TSM' := restrictTheorySortMap(TSM, SM) /\
-      T3 := paramSortsMap(T'', TSM', QIL) [print TSM'] .
+      T3 := paramSortsMap(T'', TSM', QIL) .
 
   op restrictTheorySortMap : TheorySortMap SortMap -> TheorySortMap .
   eq restrictTheorySortMap((Q -> SS, TSM), (Q' |-> Q, SM)) =
@@ -3092,12 +3092,12 @@ to qualify sorts, and built it again by using the \verb@"$"@ used by Maude:
       St'' := substr(St, N + 1, length(St)) /\
       Q' := qid(St'') /\
       Q' in QIL /\
-      QI := qid(St'' + "$" + St') [print QI] .
+      QI := qid(St'' + "$" + St') .
 
   ceq paramSortsMap(C, (TN -> (TS ; SS), TSM), QIL) = upTerm(QI)
    if TS := downQid(C) /\
       St := string(TS) /\
-      QI := qid(string(TN) + "$" + St) [print QI] .
+      QI := qid(string(TN) + "$" + St) .
 
   ceq paramSortsMap(C, TSM, QIL) = upTerm(QI)
    if Q := downQid(C) /\
@@ -3131,7 +3131,7 @@ account that the name of the variable must be placed first in both cases:
       St''' := substr(St, N' + 1, length(St)) /\
       Q' := qid(St''') /\
       Q' in QIL /\
-      QI := qid(St' + St''' + "$" + St'') [print QI] .
+      QI := qid(St' + St''' + "$" + St'') .
 
   ceq paramSortsMap(C, (TN -> (TS ; SS), TSM), QIL) = upTerm(QI)
    if Q := downQid(C) /\
@@ -3140,7 +3140,7 @@ account that the name of the variable must be placed first in both cases:
       St' := substr(St, 0, N + 1) /\
       St'' := substr(St, N + 1, length(St)) /\
       TS := qid(St'') /\
-      QI := qid(St' + string(TN) + "$" + St'') [print QI] .
+      QI := qid(St' + string(TN) + "$" + St'') .
 
 ***(%
 \end{verbatim}
@@ -5435,7 +5435,7 @@ state:
 \end{comment}
 }
 
-We define the constant \verb"cafe2maude-init" as the initial system. The user has to
+We define the constant \verb"cafe4maude-init" as the initial system. The user has to
 rewrite it with the special command \verb"loop" to start the input/output loop.
 
 %  ---------------------------------------------------------------------------------------
@@ -5446,7 +5446,7 @@ rewrite it with the special command \verb"loop" to start the input/output loop.
 \begin{verbatim}
 %)
 
-  op cafe2maude-init : -> System .
+  op cafe4maude-init : -> System .
 
 ***(%
 \end{verbatim}
@@ -5466,9 +5466,9 @@ set to \verb"false":
 %)
 
   rl [init] :
-     cafe2maude-init
+     cafe4maude-init
   => [nil, < o : CafeDatabase | db : initialDatabase, input : nilTermList,
-                                output : ('\n '\t '\b 'CafeOBJ2Maude '1.0 '\o
+                                output : ('\n '\t '\b 'Cafe4Maude '1.1 '\o
                                           'started. '\n 'CafeOBJ 'specifications
                                           'can 'be 'introduced 'now 'into 'the
                                           'Full 'Maude 'database. '\n),

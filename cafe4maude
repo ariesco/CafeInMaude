@@ -13,7 +13,7 @@ do
    eval arg=\$$i
    cat $arg >> $ALL
 done
-echo "loop cafe2maude-init ." >> $INIT
+echo "loop cafe4maude-init ." >> $INIT
 java -jar $PARSER $ALL $TEMP
 $MAUDE full-maude.maude $CAFE2MAUDE $INIT $TEMP
 rm -f $ALL
