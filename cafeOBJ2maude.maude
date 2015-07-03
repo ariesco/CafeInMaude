@@ -1033,7 +1033,8 @@ endv
 fmod CafeDECL-PARSING is
   inc UNIT-DECL-PARSING .
   inc OPERATOR-Cafe .
-  pr MAP{Qid, Qid} * (sort Map{Qid, Qid} to SortMap) .
+  pr MAP{Qid, Qid} * (sort Map{Qid, Qid} to SortMap,
+                      op undefined to undefinedQQ) .
   pr MAP{Qid, SortSet} * (op _|->_ to _->_,
                           sort Map{Qid, SortSet} to TheorySortMap) .
 
@@ -3282,69 +3283,32 @@ of the \verb"evalPreModule" function:
 
   *** This is required because the unit does not carry import information
   op predefinedCafeEqual : Module ImportList -> Module .
-  ceq predefinedCafeEqual(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, IL') =
-                          fmod H is IL sorts SS . SSDS (ODS ODS') MAS EqS endfm
-   if ODS' := (createOpsFromSorts(SS) createOpsFromImports(IL')) .
-  ceq predefinedCafeEqual(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, IL') =
-                          mod H is IL sorts SS . SSDS (ODS ODS') MAS EqS RS endm
-   if ODS' := (createOpsFromSorts(SS) createOpsFromImports(IL')) .
-  ceq predefinedCafeEqual(fth H is IL sorts SS . SSDS ODS MAS EqS endfth, IL') =
-                          fth H is IL sorts SS . SSDS (ODS ODS') MAS EqS endfth
-   if ODS' := (createOpsFromSorts(SS) createOpsFromImports(IL')) .
-  ceq predefinedCafeEqual(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, IL') =
-                          th H is IL sorts SS . SSDS (ODS ODS') MAS EqS RS endth
-   if ODS' := (createOpsFromSorts(SS) createOpsFromImports(IL')) .
+  eq predefinedCafeEqual(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, IL') =
+                         fmod H is (IL protecting 'EQL .) sorts SS . SSDS ODS MAS EqS endfm .
+  eq predefinedCafeEqual(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, IL') =
+                         mod H is (IL protecting 'EQL .) sorts SS . SSDS ODS MAS EqS RS endm .
+  eq predefinedCafeEqual(fth H is IL sorts SS . SSDS ODS MAS EqS endfth, IL') =
+                         fth H is (IL protecting 'EQL .) sorts SS . SSDS ODS MAS EqS endfth .
+  eq predefinedCafeEqual(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, IL') =
+                         th H is (IL protecting 'EQL .) sorts SS . SSDS ODS MAS EqS RS endth .
   eq predefinedCafeEqual(M?, IL') = M? [owise] .
 
   op predefinedCafeEqual : Module -> Module .
-  ceq predefinedCafeEqual(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm) =
-                          fmod H is IL sorts SS . SSDS (ODS ODS') MAS EqS endfm
-   if ODS' := (createOpsFromSorts(SS) createOpsFromImports(IL)) .
-  ceq predefinedCafeEqual(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm) =
-                          mod H is IL sorts SS . SSDS (ODS ODS') MAS EqS RS endm
-   if ODS' := (createOpsFromSorts(SS) createOpsFromImports(IL)) .
-  ceq predefinedCafeEqual(fth H is IL sorts SS . SSDS ODS MAS EqS endfth) =
-                          fth H is IL sorts SS . SSDS (ODS ODS') MAS EqS endfth
-   if ODS' := (createOpsFromSorts(SS) createOpsFromImports(IL)) .
-  ceq predefinedCafeEqual(th H is IL sorts SS . SSDS ODS MAS EqS RS endth) =
-                          th H is IL sorts SS . SSDS (ODS ODS') MAS EqS RS endth
-   if ODS' := (createOpsFromSorts(SS) createOpsFromImports(IL)) .
+  eq predefinedCafeEqual(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm) =
+                          fmod H is (IL protecting 'EQL .) sorts SS . SSDS ODS MAS EqS endfm .
+  eq predefinedCafeEqual(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm) =
+                         mod H is (IL protecting 'EQL .) sorts SS . SSDS ODS MAS EqS RS endm .
+  eq predefinedCafeEqual(fth H is IL sorts SS . SSDS ODS MAS EqS endfth) =
+                         fth H is (IL protecting 'EQL .) sorts SS . SSDS ODS MAS EqS endfth .
+  eq predefinedCafeEqual(th H is IL sorts SS . SSDS ODS MAS EqS RS endth) =
+                         th H is (IL protecting 'EQL .) sorts SS . SSDS ODS MAS EqS RS endth .
   eq predefinedCafeEqual(M?) = M? [owise] .
-
-  op createOpsFromSorts : SortSet -> OpDeclSet .
-  eq createOpsFromSorts(none) = none .
-  eq createOpsFromSorts(Srt ; SS) = op '_=_ : Srt Srt -> 'Bool [comm metadata("built-in in CafeOBJ")] .
-                                    createOpsFromSorts(SS) .
 
   op createEqsFromSorts : SortSet -> EquationSet .
   eq createEqsFromSorts(none) = none .
   ceq createEqsFromSorts(Srt ; SS) = eq '_=_[V, V] = 'true.Bool [metadata("built-in in CafeOBJ")] .
                                      createEqsFromSorts(SS)
    if V := qid("V:" + string(Srt)) .
-
-  op createOpsFromImports : ImportList -> OpDeclSet .
-  eq createOpsFromImports(nil) = none .
-  eq createOpsFromImports(I IL) = createOpsFromImport(I) createOpsFromImports(IL) .
-
-  op createOpsFromImport : Import -> OpDeclSet .
-  eq createOpsFromImport(protecting ME .) = createOpsFromME(ME) .
-  eq createOpsFromImport(extending ME .) = createOpsFromME(ME) .
-  eq createOpsFromImport(including ME .) = createOpsFromME(ME) .
-
-  op createOpsFromME : ModuleExpression -> OpDeclSet .
-  eq createOpsFromME(Q) = getOps4Predefined(Q) .
-  eq createOpsFromME(ME + ME') = createOpsFromME(ME) createOpsFromME(ME') .
-  *** TODO: take care of renamings of predefined modules
-  eq createOpsFromME(ME * (RenS)) = createOpsFromME(ME) .
-  eq createOpsFromME(ME{ParamL}) = createOpsFromME(ME) .
-
-  op getOps4Predefined : Qid -> OpDeclSet .
-  eq getOps4Predefined('NAT) =
-             (op '_=_ : 'Zero 'Zero -> 'Bool [comm metadata("built-in in CafeOBJ")] .)
-             (op '_=_ : 'NzNat 'NzNat -> 'Bool [comm metadata("built-in in CafeOBJ")] .)
-             (op '_=_ : 'Nat 'Nat -> 'Bool [comm metadata("built-in in CafeOBJ")] .) .
-  *** TODO: add others
-  eq getOps4Predefined(Q) = none [owise] .
 
   op createEqsFromImports : ImportList -> EquationSet .
   eq createEqsFromImports(nil) = none .
@@ -4592,7 +4556,7 @@ if they appear in the operator set:
 
   op solveSecondTerm : Module Term Term OpDeclSet Database -> Term .
   ceq solveSecondTerm(M, 'bubble[T], 'bubble[T'], ODS, DB) = T2
-   if M' := addOps((ODS op '_=_ : 'Universal 'Universal -> '@@@ [poly(1 2)] .),
+   if M' := addOps((ODS op '_=_ : 'Universal 'Universal -> 'Bool [poly(1 2)] .),
                addSorts('@@@, M)) /\
       QIL := downQidList(T) /\
       QIL' := downQidList(T') /\
@@ -5546,3 +5510,97 @@ set print attribute on .
 }
 %)
 
+loop cafe4maude-init .
+
+(fmod EQL is
+  op _=_ : Universal Universal -> Bool [comm poly(1 2) prec 51] .
+
+  eq (true = false) = false .
+endfm)
+
+(mod RWL is
+  pr NAT .
+
+  sort NzNat* .
+  subsort NzNat < NzNat* .
+
+  op * : -> NzNat* [ctor prec 0] .
+  op _==>_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 51] .
+  op _=`(_`,_`)=>*_ : Universal NzNat* NzNat* Universal -> Bool
+                                         [poly(1 4) strat(0) prec 51] .
+  op _=`(_`,_`)=>+_ : Universal NzNat* NzNat* Universal -> Bool
+                                         [poly(1 4) strat(0) prec 51] .
+  op _=`(_`,_`)=>!_ : Universal NzNat* NzNat* Universal -> Bool
+                                         [poly(1 4) strat(0) prec 51] .
+  op _=`(_`,_`)=>*_suchThat_ : Universal NzNat* NzNat* Universal Bool -> Bool
+                                         [poly(1 4) strat(0) prec 51] .
+  op _=`(_`,_`)=>+_suchThat_ : Universal NzNat* NzNat* Universal Bool -> Bool
+                                         [poly(1 4) strat(0) prec 51] .
+  op _=`(_`,_`)=>!_suchThat_ : Universal NzNat* NzNat* Universal Bool -> Bool
+                                         [poly(1 4) strat(0) prec 51] .
+  op _=`(_`,_`)=>*_suchThat`{_`} : Universal NzNat* NzNat* Universal Bool -> Bool
+                                         [poly(1 4) strat(0) prec 51] .
+  op _=`(_`,_`)=>+_suchThat`{_`} : Universal NzNat* NzNat* Universal Bool -> Bool
+                                         [poly(1 4) strat(0) prec 51] .
+  op _=`(_`,_`)=>!_suchThat`{_`} : Universal NzNat* NzNat* Universal Bool -> Bool
+                                         [poly(1 4) strat(0) prec 51] .
+  op _=`(_`,_`)=>*_withStateEq_ : Universal NzNat* NzNat* Universal Universal -> Bool
+                                         [poly(1 4 5) strat(0) prec 51] .
+  op _=`(_`,_`)=>+_withStateEq_ : Universal NzNat* NzNat* Universal Universal -> Bool
+                                         [poly(1 4 5) strat(0) prec 51] .
+  op _=`(_`,_`)=>!_withStateEq_ : Universal NzNat* NzNat* Universal Universal -> Bool
+                                         [poly(1 4 5) strat(0) prec 51] .
+  op _==>*_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 51] .
+  op _==>+_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 51] .
+  op _==>!_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 51] .
+  op _==>1_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 51] .
+  op _==>*_withStateEq_ : Universal Universal Universal -> Bool
+                                         [poly(1 2 3) strat(0) prec 51] .
+  op _==>+_withStateEq_ : Universal Universal Universal -> Bool
+                                         [poly(1 2 3) strat(0) prec 51] .
+  op _==>!_withStateEq_ : Universal Universal Universal -> Bool
+                                         [poly(1 2 3) strat(0) prec 51] .
+  op _==>1_withStateEq_ : Universal Universal Universal -> Bool
+                                         [poly(1 2 3) strat(0) prec 51] .
+  op _==>*_suchThat_ : Universal Universal Bool -> Bool
+                                         [poly(1 2) strat(0) prec 51] .
+  op _==>+_suchThat_ : Universal Universal Bool -> Bool
+                                         [poly(1 2) strat(0) prec 51] .
+  op _==>!_suchThat_ : Universal Universal Bool -> Bool
+                                         [poly(1 2) strat(0) prec 51] .
+  op _==>1_suchThat_ : Universal Universal Bool -> Bool
+                                         [poly(1 2) strat(0) prec 51] .
+  op _=`(_`,_`)=>*_suchThat_withStateEq_ : Universal NzNat* NzNat* Universal Bool Universal -> Bool
+                                         [poly(1 4 6) strat(0) prec 51] .
+  op _=`(_`,_`)=>+_suchThat_withStateEq_ : Universal NzNat* NzNat* Universal Bool Universal -> Bool
+                                         [poly(1 4 6) strat(0) prec 51] .
+  op _=`(_`,_`)=>!_suchThat_withStateEq_ : Universal NzNat* NzNat* Universal Bool Universal -> Bool
+                                         [poly(1 4 6) strat(0) prec 51] .
+  op _=`(`,_`)=>*_ : Universal NzNat* Universal -> Bool
+                                         [poly(1 3) strat(0) prec 51] .
+  op _=`(`,_`)=>+_ : Universal NzNat* Universal -> Bool
+                                         [poly(1 3) strat(0) prec 51] .
+  op _=`(`,_`)=>!_ : Universal NzNat* Universal -> Bool
+                                         [poly(1 3) strat(0) prec 51] .
+  op _=`(`,_`)=>*_withStateEq_ : Universal NzNat* Universal Universal -> Bool
+                                         [poly(1 3 4) strat(0) prec 51] .
+  op _=`(`,_`)=>+_withStateEq_ : Universal NzNat* Universal Universal -> Bool
+                                         [poly(1 3 4) strat(0) prec 51] .
+  op _=`(`,_`)=>!_withStateEq_ : Universal NzNat* Universal Universal -> Bool
+                                         [poly(1 3 4) strat(0) prec 51] .
+  op _=`(`,_`)=>*_suchThat_ : Universal NzNat* Universal Bool -> Bool
+                                         [poly(1 3) strat(0) prec 51] .
+  op _=`(`,_`)=>+_suchThat_ : Universal NzNat* Universal Bool -> Bool
+                                         [poly(1 3) strat(0) prec 51] .
+  op _=`(`,_`)=>!_suchThat_ : Universal NzNat* Universal Bool -> Bool
+                                         [poly(1 3) strat(0) prec 51] .
+  op _=`(`,_`)=>*_suchThat_withStateEq_ : Universal NzNat* Universal Bool Universal -> Bool
+                                         [poly(1 3 5) strat(0) prec 51] .
+  op _=`(`,_`)=>+_suchThat_withStateEq_ : Universal NzNat* Universal Bool Universal -> Bool
+                                         [poly(1 3 5) strat(0) prec 51] .
+  op _=`(`,_`)=>!_suchThat_withStateEq_ : Universal NzNat* Universal Bool Universal -> Bool
+                                         [poly(1 3 5) strat(0) prec 51] .
+  op _=>_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 51] .
+  op _=`(_`,_`)=>+_if_suchThat_`{_`} : Universal NzNat* NzNat* Universal Bool Bool
+                                       Universal -> Bool [poly(1 4 7) strat(0) prec 51] .
+endm)
