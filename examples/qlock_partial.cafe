@@ -210,4 +210,82 @@ eq i(true,VSQ:ValSq) | IT:IndTr = IT .
 eq IT:IndTr | i(true,VSQ:ValSq) = IT .
 }
 
+-- a predicate for checking whether
+-- the predicate cj(m p1 p2 p3 p4 p5,S:State) is an invariant
+mod QLOCKmex {
+pr(QLOCKprop)
+
+[Qu&Err Pid&Err Label State < Val < ValSq]
+op _,_ : ValSq ValSq -> ValSq {assoc} .
+
+vars Q1 QQ2 : Qu&Err .
+vars P1 P2 PP3 : Pid&Err .
+vars L1 L2 LL3 : Label .
+var S1 : State .
+
+-- prePreds : predicates for pre-condition
+-- postPreds : predicates for post-condition
+ops prePreds postPreds : -> PnameSeq .
+-- predicate to be checked
+op v : ValSq -> Bool .
+eq v(Q1,P1,L1,P2,L2,S1,QQ2,PP3,LL3) =
+     ((((qu: Q1) (pc[P1]: L1) ((pc[P2]: L2) S1))
+       =(*,1)=>+
+       ((qu: QQ2) (pc[PP3]: LL3) ((pc[P2]: L2) S1)))
+      implies
+      not(((qu: Q1) (pc[P1]: L1) ((pc[P2]: L2) S1))
+          =(*,1)=>+
+          ((qu: QQ2) (pc[PP3]: LL3) ((pc[P2]: L2) S1))
+          suchThat
+          ((not(((cj(prePreds,((qu: Q1) (pc[P1]: L1) ((pc[P2]: L2) S1)))
+                 and
+                 cj(prePreds,((qu: Q1) (pc[P2]: L2) ((pc[P1]: L1) S1))))
+                implies
+                (cj(postPreds,((qu: QQ2) (pc[PP3]: LL3) ((pc[P2]: L2) S1)))
+                 and
+                 cj(postPreds,((qu: QQ2) (pc[P2]: L2) ((pc[PP3]: LL3) S1)))))
+                == true))))) .
+}
+
+-- facts to be used
+mod FACTtbu {
+pr(NAT)
+-- necessary facts about _=_ on Nat
+var N : Nat .
+eq (1 = 0) = false .
+eq ((1 + N) = 0) = false .
+eq ((2 + N) = 0) = false .
+eq ((2 + N) = 1) = false .
+eq (1 + N = 1) = (N = 0) .
+eq ((N = 0) and (N = 1)) = false .
+}
+
+view VQLOCKmex from PREDtbC to QLOCKmex-MODCAFE {
+ sort Val -> Val,
+ sort ValSq -> ValSq,
+ op v -> v
+}
+
+-- check all possible cases
+mod CKallCases {
+pr(GENcases(QLOCKmex))
+pr(FACTtbu)
+ops r1 r2 r3 : -> PidLt .
+op q : -> Qu .
+op s : -> State .
+var QQ2 : Qu&Err .
+var PP3 : Pid&Err .
+var LL3 : Label .
+op ck : Qu&Err Pid&Err Label -> IndTr .
+eq ck(QQ2,PP3,LL3) =
+    ($ | mmi[(empQ;(r1 & q)),
+             (r1;r2),
+             (rs;ws;cs),
+             (r1;r2;r3),
+             (rs;ws;cs),
+             (s),
+             (QQ2),(PP3),(LL3)]) .
+}
+
+
 

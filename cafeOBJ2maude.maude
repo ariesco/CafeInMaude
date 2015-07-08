@@ -1478,13 +1478,38 @@ the view identifier itself, and the database.
       T' := 'sort_to_.['sortToken[upTerm(Srt)], 'sortToken[upTerm(Srt')]] /\
       TV := 'view_from_to_is_endv['token[T], 'token[upTerm(ME)], 'token[T], T'] /\
       DB' := procView(TV, DB) .
+  *** The names of the sorts and ops are the same, so it is enough to use the module name.
+  ceq parseCafeViewExp(Q :: ME, 'token[T], PSM, DB) = < 'viewToken[T''], DB' >
+   if Q' := downQid(T) /\
+      not getView(Q', DB) :: View /\
+      M := getTopModule(Q', DB) /\
+      M' := getTopModule(ME, DB) /\
+      SS := getSorts(M') /\
+      SS' := removeBool(SS) /\
+      T'' := upTerm(newName(M, Q')) /\
+      T' := createMapsForSorts(SS') /\
+      TV := 'view_from_to_is_endv['token[T''], 'token[upTerm(ME)], 'token[T''], T'] /\
+      DB' := procView(TV, DB) [owise] .
   eq parseCafeViewExp(PDL, '_<=_[T, T'], PSM, DB) = parseCafeViewExp(PDL, T', PSM, DB) .
   ceq parseCafeViewExp(PDL, '_`,_[TL], PSM, DB) = < '_`,_[TL'], DB' >
    if < TL', DB' > := parseCafeViewExp*(PDL, TL, PSM, DB) .
 
+  op newName : Module Qid -> Qid .
+  eq newName(M, Q) = if M :: FTheory or M :: STheory
+                     then qid(string(Q) + "-MODCAFE")
+                     else Q
+                     fi .
+
   op removeBool : SortSet -> SortSet .
   eq removeBool('Bool ; SS) = SS .
   eq removeBool(SS) = SS [owise] .
+
+  op createMapsForSorts : SortSet ~> Term .
+  eq createMapsForSorts(Srt) = 'sort_to_.['sortToken[upTerm(Srt)], 'sortToken[upTerm(Srt)]] .
+  ceq createMapsForSorts(Srt ; SS) =
+                     '__['sort_to_.['sortToken[upTerm(Srt)], 'sortToken[upTerm(Srt)]],
+                         createMapsForSorts(SS)]
+   if SS =/= none .
 
 ***(%
 \end{verbatim}
@@ -3225,7 +3250,7 @@ of the \verb"evalPreModule" function:
    if F =/= '__ /\
       < PDR, nil, DB' > := parseCafeDecl(F[TL], PU, U, VDS, PSM, TSM, DB) /\
       DB'' := evalPreModule(predefinedCafeEqual(preModule(PDR)),
-                            predefinedCafeEqual(unit(PDR), getImports(preModule(PDR))),
+                            predefinedCafeEqual(unit(PDR)),
                             vars(PDR), insTermModule(getName(U), T, DB')) /\
       DB3 := updateDatabase4cafe(getName(U), DB'') .
 
@@ -3239,7 +3264,7 @@ of the \verb"evalPreModule" function:
   var  RenS : RenamingSet .
   var  ParamL : ParameterList .
 
-  vars U'' U3 U4 : Module .
+  vars U'' U3 U4 U5 : Module .
 ***  var  VDS : OpDeclSet .
   vars MNS MNS' MNS'' MNS3 MNS4 MNS5 MNS6 : Set{ModuleName} .
   vars VES VES' VES'' VES3 : Set{ViewExp} .
@@ -3247,17 +3272,21 @@ of the \verb"evalPreModule" function:
   var  VIS : Set{ViewInfo} .
 
   op updateDatabase4cafe : ModuleExpression Database -> Database .
-  eq updateDatabase4cafe(ME, db(< ME ; T ; U' ; U'' ; U3 ; VDS ; MNS ; VES > MIS,
-          MNS', VIS, VES', MNS'', MNS3, MNS4, QIL)) =
-             db(< ME ; T ; addEqualEqs(U') ; addEqualEqs(U'') ; U3 ; VDS ; MNS ; VES > MIS,
-          MNS', VIS, VES', MNS'', MNS3, MNS4, QIL) .
+  ceq updateDatabase4cafe(ME, DB) =
+             db(< ME ; T ; addEqual&SearchEqs(U', SS) ; addEqual&SearchEqs(U'', SS) ; U3 ;
+                  VDS ; MNS ; VES > MIS, MNS', VIS, VES', MNS'', MNS3, MNS4, QIL)
+   if db(< ME ; T ; U' ; U'' ; U3 ; VDS ; MNS ; VES > MIS, MNS', VIS, VES', MNS'',
+           MNS3, MNS4, QIL) := DB /\
+      U5 := getFlatModule(modExp(evalModExp(ME, DB)),
+                 database(evalModExp(ME, DB))) /\
+      SS := getRulesSorts(U5, getRls(U'')) .
   eq updateDatabase4cafe(ME, DB) = DB [owise] .
 
   var  H : Header .
   var  I : Import .
   vars IL IL' : ImportList .
   var  Srt : Sort .
-  var  SS : SortSet .
+  vars SS SS' : SortSet .
   var  SSDS : SubsortDeclSet .
   vars ODS ODS' : OpDeclSet .
   var  MAS : MembAxSet .
@@ -3266,42 +3295,36 @@ of the \verb"evalPreModule" function:
   var  M? : [Module] .
   var  M' : Module .
   vars DB'' DB3 : Database .
+  var  AtS : AttrSet .
+  var  CND : Condition .
 
-  op addEqualEqs : Module ~> Module .
-  ceq addEqualEqs(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm) =
-                          fmod H is IL sorts SS . SSDS ODS MAS (EqS EqS') endfm
+  op addEqual&SearchEqs : Module SortSet ~> Module .
+  ceq addEqual&SearchEqs(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, SS') =
+                         fmod H is IL sorts SS . SSDS ODS MAS (EqS EqS') endfm
    if EqS' := createEqsFromSorts(SS) createEqsFromImports(IL) .
-  ceq addEqualEqs(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm) =
-                          mod H is IL sorts SS . SSDS ODS MAS (EqS EqS') RS endm
-   if EqS' :=  createEqsFromSorts(SS) createEqsFromImports(IL) .
-  ceq addEqualEqs(fth H is IL sorts SS . SSDS ODS MAS EqS endfth) =
-                          fth H is IL sorts SS . SSDS ODS MAS (EqS EqS') endfth
+  ceq addEqual&SearchEqs(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, SS') =
+                         mod H is IL sorts SS . SSDS ODS MAS (EqS EqS') RS endm
+   if EqS' := createEqsFromSorts(SS) createSearchEqsFromSorts(SS') createEqsFromImports(IL) .
+  ceq addEqual&SearchEqs(fth H is IL sorts SS . SSDS ODS MAS EqS endfth, SS') =
+                         fth H is IL sorts SS . SSDS ODS MAS (EqS EqS') endfth
    if EqS' := createEqsFromSorts(SS) createEqsFromImports(IL) .
-  ceq addEqualEqs(th H is IL sorts SS . SSDS ODS MAS EqS RS endth) =
-                          th H is IL sorts SS . SSDS ODS MAS (EqS EqS') RS endth
-   if EqS' :=  createEqsFromSorts(SS) createEqsFromImports(IL) .
-
-  *** This is required because the unit does not carry import information
-  op predefinedCafeEqual : Module ImportList -> Module .
-  eq predefinedCafeEqual(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, IL') =
-                         fmod H is (IL protecting 'EQL .) sorts SS . SSDS ODS MAS EqS endfm .
-  eq predefinedCafeEqual(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, IL') =
-                         mod H is (IL protecting 'EQL .) sorts SS . SSDS ODS MAS EqS RS endm .
-  eq predefinedCafeEqual(fth H is IL sorts SS . SSDS ODS MAS EqS endfth, IL') =
-                         fth H is (IL protecting 'EQL .) sorts SS . SSDS ODS MAS EqS endfth .
-  eq predefinedCafeEqual(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, IL') =
-                         th H is (IL protecting 'EQL .) sorts SS . SSDS ODS MAS EqS RS endth .
-  eq predefinedCafeEqual(M?, IL') = M? [owise] .
+  ceq addEqual&SearchEqs(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, SS') =
+                         th H is IL sorts SS . SSDS ODS MAS (EqS EqS') RS endth
+   if EqS' := createEqsFromSorts(SS) createSearchEqsFromSorts(SS') createEqsFromImports(IL) .
 
   op predefinedCafeEqual : Module -> Module .
-  eq predefinedCafeEqual(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm) =
-                          fmod H is (IL protecting 'EQL .) sorts SS . SSDS ODS MAS EqS endfm .
-  eq predefinedCafeEqual(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm) =
-                         mod H is (IL protecting 'EQL .) sorts SS . SSDS ODS MAS EqS RS endm .
-  eq predefinedCafeEqual(fth H is IL sorts SS . SSDS ODS MAS EqS endfth) =
-                         fth H is (IL protecting 'EQL .) sorts SS . SSDS ODS MAS EqS endfth .
-  eq predefinedCafeEqual(th H is IL sorts SS . SSDS ODS MAS EqS RS endth) =
-                         th H is (IL protecting 'EQL .) sorts SS . SSDS ODS MAS EqS RS endth .
+  ceq predefinedCafeEqual(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm) =
+                          fmod H is IL' sorts SS . SSDS ODS MAS EqS endfm
+   if IL' := (IL protecting 'EQL .) .
+  ceq predefinedCafeEqual(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm) =
+                          mod H is IL' sorts SS . SSDS ODS MAS EqS RS endm
+   if IL' := (IL protecting 'EQL . protecting 'RWL .) .
+  ceq predefinedCafeEqual(fth H is IL sorts SS . SSDS ODS MAS EqS endfth) =
+                          fth H is IL' sorts SS . SSDS ODS MAS EqS endfth
+   if IL' := (IL protecting 'EQL .) .
+  ceq predefinedCafeEqual(th H is IL sorts SS . SSDS ODS MAS EqS RS endth) =
+                          th H is IL' sorts SS . SSDS ODS MAS EqS RS endth
+   if IL' := (IL protecting 'EQL . protecting 'RWL .) .
   eq predefinedCafeEqual(M?) = M? [owise] .
 
   op createEqsFromSorts : SortSet -> EquationSet .
@@ -3309,6 +3332,216 @@ of the \verb"evalPreModule" function:
   ceq createEqsFromSorts(Srt ; SS) = eq '_=_[V, V] = 'true.Bool [metadata("built-in in CafeOBJ")] .
                                      createEqsFromSorts(SS)
    if V := qid("V:" + string(Srt)) .
+
+  op getRulesSorts : Module RuleSet -> SortSet .
+  eq getRulesSorts(M, none) = none .
+  eq getRulesSorts(M, rl T => T' [AtS] . RS) = getType(metaReduce(M, T)) ;
+                                               getRulesSorts(M, RS) .
+  eq getRulesSorts(M, crl T => T' if CND [AtS] . RS) = getType(metaReduce(M, T)) ;
+                                                       getRulesSorts(M, RS) .
+
+  op createSearchEqsFromSorts : SortSet -> EquationSet .
+  eq createSearchEqsFromSorts(none) = none .
+  ceq createSearchEqsFromSorts(Srt ; SS) =
+               createSearchEqsFromSorts(SS)
+               eq '_==>_[CXU, CYU] = '_=`(_`,_`)=>*_[CXU, 's_['0.Zero], '*.NzNat*, CYU]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_==>1_[CXU, CYU] = '_=`(_`,_`)=>+_[CXU, 's_['0.Zero], '*.NzNat*, CYU]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_==>*_[CXU, CYU] = '_=`(_`,_`)=>*_[CXU, '*.NzNat*, '*.NzNat*, CYU]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_==>!_[CXU, CYU] = '_=`(_`,_`)=>!_[CXU, '*.NzNat*, '*.NzNat*, CYU]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_==>+_[CXU, CYU] = '_=`(_`,_`)=>+_[CXU, '*.NzNat*, '*.NzNat*, CYU]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_==>1_suchThat_[CXU, CYU, COND] =
+                        '_=`(_`,_`)=>+_suchThat_[CXU, 's_['0.Zero], '*.NzNat*, CYU, COND]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_==>*_suchThat_[CXU, CYU, COND] =
+                        '_=`(_`,_`)=>*_suchThat_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_==>!_suchThat_[CXU, CYU, COND] =
+                        '_=`(_`,_`)=>!_suchThat_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_==>+_suchThat_[CXU, CYU, COND] =
+                        '_=`(_`,_`)=>+_suchThat_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_==>1_withStateEq_[CXU, CYU, PRED] =
+                        '_=`(_`,_`)=>+_withStateEq_[CXU, 's_['0.Zero], '*.NzNat*, CYU, PRED]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_==>*_withStateEq_[CXU, CYU, PRED] =
+                        '_=`(_`,_`)=>*_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, PRED]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_==>!_withStateEq_[CXU, CYU, PRED] =
+                        '_=`(_`,_`)=>!_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, PRED]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_==>+_withStateEq_[CXU, CYU, PRED] =
+                        '_=`(_`,_`)=>+_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, PRED]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_==>1_suchThat_withStateEq_[CXU, CYU, COND, PRED]  =
+                        '_=`(_`,_`)=>+_suchThat_withStateEq_[CXU, 's_['0.Zero], '*.NzNat*, CYU, COND, PRED]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_==>*_suchThat_withStateEq_[CXU, CYU, COND, PRED]  =
+                        '_=`(_`,_`)=>*_suchThat_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND, PRED]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_==>!_suchThat_withStateEq_[CXU, CYU, COND, PRED]  =
+                        '_=`(_`,_`)=>!_suchThat_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND, PRED]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_==>+_suchThat_withStateEq_[CXU, CYU, COND, PRED]  =
+                        '_=`(_`,_`)=>+_suchThat_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND, PRED]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(_`)=>*_[CXU, MAX-R, CYU] = '_=`(_`,_`)=>*_[CXU, MAX-R, '*.NzNat*, CYU]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(_`)=>!_[CXU, MAX-R, CYU] = '_=`(_`,_`)=>!_[CXU, MAX-R, '*.NzNat*, CYU]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(_`)=>+_[CXU, MAX-R, CYU] = '_=`(_`,_`)=>+_[CXU, MAX-R, '*.NzNat*, CYU]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(_`)=>*_suchThat_[CXU, MAX-R, CYU, COND] =
+                        '_=`(_`,_`)=>*_suchThat_[CXU, MAX-R, '*.NzNat*, CYU, COND]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(_`)=>!_suchThat_[CXU, MAX-R, CYU, COND] =
+                        '_=`(_`,_`)=>!_suchThat_[CXU, MAX-R, '*.NzNat*, CYU, COND]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(_`)=>+_suchThat_[CXU, MAX-R, CYU, COND] =
+                        '_=`(_`,_`)=>+_suchThat_[CXU, MAX-R, '*.NzNat*, CYU, COND]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(_`)=>*_withStateEq_[CXU, MAX-R, CYU, PRED] =
+                        '_=`(_`,_`)=>*_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, PRED]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(_`)=>!_withStateEq_[CXU, MAX-R, CYU, PRED] =
+                        '_=`(_`,_`)=>!_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, PRED]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(_`)=>+_withStateEq_[CXU, MAX-R, CYU, PRED] =
+                        '_=`(_`,_`)=>+_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, PRED]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(_`)=>*_suchThat_withStateEq_[CXU, MAX-R, CYU, COND, PRED] =
+                        '_=`(_`,_`)=>*_suchThat_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, COND, PRED]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(_`)=>!_suchThat_withStateEq_[CXU, MAX-R, CYU, COND, PRED] =
+                        '_=`(_`,_`)=>!_suchThat_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, COND, PRED]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(_`)=>+_suchThat_withStateEq_[CXU, MAX-R, CYU, COND, PRED] =
+                        '_=`(_`,_`)=>+_suchThat_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, COND, PRED]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(`,_`)=>*_[CXU, MAX-D, CYU] = '_=`(_`,_`)=>*_[CXU, '*.NzNat*, MAX-D, CYU]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(`,_`)=>!_[CXU, MAX-D, CYU] = '_=`(_`,_`)=>!_[CXU, '*.NzNat*, MAX-D, CYU]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(`,_`)=>+_[CXU, MAX-D, CYU] = '_=`(_`,_`)=>+_[CXU, '*.NzNat*, MAX-D, CYU]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(`,_`)=>*_suchThat_[CXU, MAX-D, CYU, COND] =
+                        '_=`(_`,_`)=>*_suchThat_[CXU, '*.NzNat*, MAX-D, CYU, COND]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(`,_`)=>!_suchThat_[CXU, MAX-D, CYU, COND] =
+                        '_=`(_`,_`)=>!_suchThat_[CXU, '*.NzNat*, MAX-D, CYU, COND]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(`,_`)=>+_suchThat_[CXU, MAX-D, CYU, COND] =
+                        '_=`(_`,_`)=>+_suchThat_[CXU, '*.NzNat*, MAX-D, CYU, COND]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(`,_`)=>*_withStateEq_[CXU, MAX-D, CYU, PRED] =
+                        '_=`(_`,_`)=>*_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, PRED]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(`,_`)=>!_withStateEq_[CXU, MAX-D, CYU, PRED] =
+                        '_=`(_`,_`)=>!_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, PRED]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(`,_`)=>+_withStateEq_[CXU, MAX-D, CYU, PRED] =
+                        '_=`(_`,_`)=>+_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, PRED]
+                                                 [metadata("built-in in CafeOBJ")] .
+
+               eq '_=`(`,_`)=>*_suchThat_withStateEq_[CXU, MAX-D, CYU, COND, PRED] =
+                        '_=`(_`,_`)=>*_suchThat_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, COND, PRED]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(`,_`)=>!_suchThat_withStateEq_[CXU, MAX-D, CYU, COND, PRED] =
+                        '_=`(_`,_`)=>!_suchThat_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, COND, PRED]
+                                                 [metadata("built-in in CafeOBJ")] .
+               eq '_=`(`,_`)=>+_suchThat_withStateEq_[CXU, MAX-D, CYU, COND, PRED] =
+                        '_=`(_`,_`)=>+_suchThat_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, COND, PRED]
+                                                 [metadata("built-in in CafeOBJ")] .
+
+   if CXU := qid("CXU:" + string(Srt)) /\
+      CYU := qid("CYU:" + string(Srt)) /\
+      COND := qid("COND:Bool") /\
+      MAX-R := qid("MAX-R:NzNat*") /\
+      MAX-D := qid("MAX-D:NzNat*") /\
+      PRED := qid("PRED:" + string(Srt)) /\
+      BIND := qid("BIND:" + string(Srt)) .
+
+  vars CXU CYU COND MAX-R MAX-D PRED BIND : Variable .
+
+***(
+
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>* CYU)
+        = #!! (rwl-sch-set-result
+               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
+                           max-d :zero? t)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>! CYU)
+        = #!! (rwl-sch-set-result
+               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
+                           max-d :final? t)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>+ CYU)
+        = #!! (rwl-sch-set-result
+               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
+                           max-d)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>* CYU suchThat COND:Bool)
+        = #!! (rwl-sch-set-result
+               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
+                           max-d :zero? t :cond cond)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>* CYU suchThat COND:Bool { BIND
+       }) = #!! (rwl-sch-set-result
+                 (rwl-search :term cxu :pattern cyu :max-result max-r
+                             :max-depth max-d :zero? t :cond cond :bind bind)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>! CYU suchThat COND:Bool)
+        = #!! (rwl-sch-set-result
+               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
+                           max-d :final? t :cond cond)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>! CYU suchThat COND:Bool { BIND
+       }) = #!! (rwl-sch-set-result
+                 (rwl-search :term cxu :pattern cyu :max-result max-r
+                             :max-depth max-d :final? t :cond cond :bind bind)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>+ CYU suchThat COND:Bool)
+        = #!! (rwl-sch-set-result
+               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
+                           max-d :cond cond)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>+ CYU suchThat COND:Bool { BIND
+       }) = #!! (rwl-sch-set-result
+                 (rwl-search :term cxu :pattern cyu :max-result max-r
+                             :max-depth max-d :cond cond :bind bind)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>* CYU withStateEq PRED)
+        = #!! (rwl-sch-set-result
+               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
+                           max-d :zero? t :pred pred)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>! CYU withStateEq PRED)
+        = #!! (rwl-sch-set-result
+               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
+                           max-d :final? t :pred pred)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>+ CYU withStateEq PRED)
+        = #!! (rwl-sch-set-result
+               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
+                           max-d :pred pred)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>* CYU suchThat COND:Bool
+       withStateEq PRED) = #!! (rwl-sch-set-result
+                                (rwl-search :term cxu :pattern cyu :max-result
+                                            max-r :max-depth max-d :zero? t
+                                            :cond cond :pred pred)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>! CYU suchThat COND:Bool
+       withStateEq PRED) = #!! (rwl-sch-set-result
+                                (rwl-search :term cxu :pattern cyu :max-result
+                                            max-r :max-depth max-d :final? t
+                                            :cond cond :pred pred)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>+ CYU suchThat COND:Bool
+       withStateEq PRED) = #!! (rwl-sch-set-result
+                                (rwl-search :term cxu :pattern cyu :max-result
+                                            max-r :max-depth max-d :cond cond
+                                            :pred pred)) .
+    eq (S = ( MR:NzNat* , MD:NzNat ) =>+ SS if CC:Bool suchThat P:Bool { B })
+        = #!! (rwl-sch-set-result
+               (rwl-search :term s :pattern ss :max-result mr :max-depth md
+                           :zero? nil :final? nil :cond p :if cc :bind b)) .
+
+    *** Transformar reglas
+    eq (CXU => CYU) = (CXU = ( 1 , * ) =>* CYU) .
+
+)
 
   op createEqsFromImports : ImportList -> EquationSet .
   eq createEqsFromImports(nil) = none .
@@ -5524,7 +5757,12 @@ endfm)
   sort NzNat* .
   subsort NzNat < NzNat* .
 
-  op * : -> NzNat* [ctor prec 0] .
+  op * : -> NzNat* [ctor] .
+
+  op decrease : NzNat* ~> NzNat* .
+  eq decrease(*) = * .
+  eq decrease(s(N:NzNat)) = N:NzNat .
+
   op _==>_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 51] .
   op _=`(_`,_`)=>*_ : Universal NzNat* NzNat* Universal -> Bool
                                          [poly(1 4) strat(0) prec 51] .
@@ -5570,12 +5808,24 @@ endfm)
                                          [poly(1 2) strat(0) prec 51] .
   op _==>1_suchThat_ : Universal Universal Bool -> Bool
                                          [poly(1 2) strat(0) prec 51] .
+  op _==>1_suchThat_withStateEq_ : Universal Universal Bool Universal -> Bool
+                                         [poly(1 2 4) strat(0) prec 51] .
+  op _==>*_suchThat_withStateEq_ : Universal Universal Bool Universal -> Bool
+                                         [poly(1 2 4) strat(0) prec 51] .
+  op _==>!_suchThat_withStateEq_ : Universal Universal Bool Universal -> Bool
+                                         [poly(1 2 4) strat(0) prec 51] .
+  op _==>+_suchThat_withStateEq_ : Universal Universal Bool Universal -> Bool
+                                         [poly(1 2 4) strat(0) prec 51] .
+  op _=`(_`,_`)=>1_suchThat_withStateEq_ : Universal NzNat* NzNat* Universal Bool Universal -> Bool
+                                         [poly(1 4 6) strat(0) prec 51] .
   op _=`(_`,_`)=>*_suchThat_withStateEq_ : Universal NzNat* NzNat* Universal Bool Universal -> Bool
                                          [poly(1 4 6) strat(0) prec 51] .
   op _=`(_`,_`)=>+_suchThat_withStateEq_ : Universal NzNat* NzNat* Universal Bool Universal -> Bool
                                          [poly(1 4 6) strat(0) prec 51] .
   op _=`(_`,_`)=>!_suchThat_withStateEq_ : Universal NzNat* NzNat* Universal Bool Universal -> Bool
                                          [poly(1 4 6) strat(0) prec 51] .
+  op _=`(`,_`)=>1_ : Universal NzNat* Universal -> Bool
+                                         [poly(1 3) strat(0) prec 51] .
   op _=`(`,_`)=>*_ : Universal NzNat* Universal -> Bool
                                          [poly(1 3) strat(0) prec 51] .
   op _=`(`,_`)=>+_ : Universal NzNat* Universal -> Bool
@@ -5594,13 +5844,41 @@ endfm)
                                          [poly(1 3) strat(0) prec 51] .
   op _=`(`,_`)=>!_suchThat_ : Universal NzNat* Universal Bool -> Bool
                                          [poly(1 3) strat(0) prec 51] .
+  op _=`(`,_`)=>1_suchThat_withStateEq_ : Universal NzNat* Universal Bool Universal -> Bool
+                                         [poly(1 3 5) strat(0) prec 51] .
   op _=`(`,_`)=>*_suchThat_withStateEq_ : Universal NzNat* Universal Bool Universal -> Bool
                                          [poly(1 3 5) strat(0) prec 51] .
   op _=`(`,_`)=>+_suchThat_withStateEq_ : Universal NzNat* Universal Bool Universal -> Bool
                                          [poly(1 3 5) strat(0) prec 51] .
   op _=`(`,_`)=>!_suchThat_withStateEq_ : Universal NzNat* Universal Bool Universal -> Bool
                                          [poly(1 3 5) strat(0) prec 51] .
-  op _=>_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 51] .
   op _=`(_`,_`)=>+_if_suchThat_`{_`} : Universal NzNat* NzNat* Universal Bool Bool
                                        Universal -> Bool [poly(1 4 7) strat(0) prec 51] .
+  op _=`(_`)=>*_ : Universal NzNat* Universal -> Bool
+                                         [poly(1 3) strat(0) prec 51] .
+  op _=`(_`)=>+_ : Universal NzNat* Universal -> Bool
+                                         [poly(1 3) strat(0) prec 51] .
+  op _=`(_`)=>!_ : Universal NzNat* Universal -> Bool
+                                         [poly(1 3) strat(0) prec 51] .
+  op _=`(_`)=>*_withStateEq_ : Universal NzNat* Universal Universal -> Bool
+                                         [poly(1 3 4) strat(0) prec 51] .
+  op _=`(_`)=>+_withStateEq_ : Universal NzNat* Universal Universal -> Bool
+                                         [poly(1 3 4) strat(0) prec 51] .
+  op _=`(_`)=>!_withStateEq_ : Universal NzNat* Universal Universal -> Bool
+                                         [poly(1 3 4) strat(0) prec 51] .
+  op _=`(_`)=>*_suchThat_ : Universal NzNat* Universal Bool -> Bool
+                                         [poly(1 3) strat(0) prec 51] .
+  op _=`(_`)=>+_suchThat_ : Universal NzNat* Universal Bool -> Bool
+                                         [poly(1 3) strat(0) prec 51] .
+  op _=`(_`)=>!_suchThat_ : Universal NzNat* Universal Bool -> Bool
+                                         [poly(1 3) strat(0) prec 51] .
+  op _=`(_`)=>*_suchThat_withStateEq_ : Universal NzNat* Universal Bool Universal -> Bool
+                                         [poly(1 3 5) strat(0) prec 51] .
+  op _=`(_`)=>+_suchThat_withStateEq_ : Universal NzNat* Universal Bool Universal -> Bool
+                                         [poly(1 3 5) strat(0) prec 51] .
+  op _=`(_`)=>!_suchThat_withStateEq_ : Universal NzNat* Universal Bool Universal -> Bool
+                                         [poly(1 3 5) strat(0) prec 51] .
+
+  *** Standard rule
+  *** op _=>_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 51] .
 endm)
