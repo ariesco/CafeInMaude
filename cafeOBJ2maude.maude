@@ -3650,10 +3650,11 @@ the \verb"maps2maps" function shown above to the body:
   ceq procOpenCloseEnv(T, T', PSM, TSM, DB) = < DB' | QIL | QIL' >
    if T1 := 'CafeToken[openCloseModNameUp] /\
       T2 := '__['inc`(_`)[T], T'] /\
-      < DB', QIL > := procCafeMod('cmod!_`{_`}[T1, T2], PSM, TSM, DB) /\
+      < DB', PSM', QIL > := procCafeMod('cmod!_`{_`}[T1, T2], PSM, TSM, DB) /\
       M := getFlatModule(openCloseModName, DB') /\
       TL := getRedCommands(T') /\
       QIL' := processRedCommands(M, DB', TL) .
+  eq procOpenCloseEnv(T, T', PSM, TSM, DB) = < DB | nil | 'Environment 'not 'parsed. > [owise] .
 
   op getRedCommands : Term -> TermList .
   eq getRedCommands('__[T, T']) = getRedCommands(T), getRedCommands(T') .
@@ -5519,6 +5520,7 @@ CafeOBJ statement:
       Q' == 'ctrans or-else Q' == 'bctrans or-else Q' == 'trns or-else
       Q' == 'ctrns or-else Q' == 'btrns or-else Q' == 'bctrns or-else
       Q' == 'pred or-else Q' == 'red or-else Q' == 'reduce .
+  eq normalizeOpenClose(Q '. QIL) = Q '. normOpenCloseAux(QIL) .
   eq normalizeOpenClose(Q Q' QIL) = Q normalizeOpenClose(Q' QIL) [owise] .
 
 
@@ -5668,8 +5670,12 @@ set to \verb"false":
                                           'started. '\n 'CafeOBJ 'specifications
                                           'can 'be 'introduced 'now 'into 'the
                                           'Full 'Maude 'database. '\n),
-                                default : 'CONVERSION, strict : false, psorts : empty >,
+                                default : 'CONVERSION, strict : false,
+                                psorts : initialPrincipalSorts >,
                                 nil] .
+
+  op initialPrincipalSorts : -> SortMap .
+  eq initialPrincipalSorts = ('NAT |-> 'Nat) .
 
 ***(%
 \end{verbatim}
@@ -5745,140 +5751,4 @@ set print attribute on .
 
 loop cafe4maude-init .
 
-(fmod EQL is
-  op _=_ : Universal Universal -> Bool [comm poly(1 2) prec 51] .
-
-  eq (true = false) = false .
-endfm)
-
-(mod RWL is
-  pr NAT .
-
-  sort NzNat* .
-  subsort NzNat < NzNat* .
-
-  op * : -> NzNat* [ctor] .
-
-  op decrease : NzNat* ~> NzNat* .
-  eq decrease(*) = * .
-  eq decrease(s(N:NzNat)) = N:NzNat .
-
-  op _==>_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 51] .
-  op _=`(_`,_`)=>*_ : Universal NzNat* NzNat* Universal -> Bool
-                                         [poly(1 4) strat(0) prec 51] .
-  op _=`(_`,_`)=>+_ : Universal NzNat* NzNat* Universal -> Bool
-                                         [poly(1 4) strat(0) prec 51] .
-  op _=`(_`,_`)=>!_ : Universal NzNat* NzNat* Universal -> Bool
-                                         [poly(1 4) strat(0) prec 51] .
-  op _=`(_`,_`)=>*_suchThat_ : Universal NzNat* NzNat* Universal Bool -> Bool
-                                         [poly(1 4) strat(0) prec 51] .
-  op _=`(_`,_`)=>+_suchThat_ : Universal NzNat* NzNat* Universal Bool -> Bool
-                                         [poly(1 4) strat(0) prec 51] .
-  op _=`(_`,_`)=>!_suchThat_ : Universal NzNat* NzNat* Universal Bool -> Bool
-                                         [poly(1 4) strat(0) prec 51] .
-  op _=`(_`,_`)=>*_suchThat`{_`} : Universal NzNat* NzNat* Universal Bool -> Bool
-                                         [poly(1 4) strat(0) prec 51] .
-  op _=`(_`,_`)=>+_suchThat`{_`} : Universal NzNat* NzNat* Universal Bool -> Bool
-                                         [poly(1 4) strat(0) prec 51] .
-  op _=`(_`,_`)=>!_suchThat`{_`} : Universal NzNat* NzNat* Universal Bool -> Bool
-                                         [poly(1 4) strat(0) prec 51] .
-  op _=`(_`,_`)=>*_withStateEq_ : Universal NzNat* NzNat* Universal Universal -> Bool
-                                         [poly(1 4 5) strat(0) prec 51] .
-  op _=`(_`,_`)=>+_withStateEq_ : Universal NzNat* NzNat* Universal Universal -> Bool
-                                         [poly(1 4 5) strat(0) prec 51] .
-  op _=`(_`,_`)=>!_withStateEq_ : Universal NzNat* NzNat* Universal Universal -> Bool
-                                         [poly(1 4 5) strat(0) prec 51] .
-  op _==>*_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 51] .
-  op _==>+_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 51] .
-  op _==>!_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 51] .
-  op _==>1_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 51] .
-  op _==>*_withStateEq_ : Universal Universal Universal -> Bool
-                                         [poly(1 2 3) strat(0) prec 51] .
-  op _==>+_withStateEq_ : Universal Universal Universal -> Bool
-                                         [poly(1 2 3) strat(0) prec 51] .
-  op _==>!_withStateEq_ : Universal Universal Universal -> Bool
-                                         [poly(1 2 3) strat(0) prec 51] .
-  op _==>1_withStateEq_ : Universal Universal Universal -> Bool
-                                         [poly(1 2 3) strat(0) prec 51] .
-  op _==>*_suchThat_ : Universal Universal Bool -> Bool
-                                         [poly(1 2) strat(0) prec 51] .
-  op _==>+_suchThat_ : Universal Universal Bool -> Bool
-                                         [poly(1 2) strat(0) prec 51] .
-  op _==>!_suchThat_ : Universal Universal Bool -> Bool
-                                         [poly(1 2) strat(0) prec 51] .
-  op _==>1_suchThat_ : Universal Universal Bool -> Bool
-                                         [poly(1 2) strat(0) prec 51] .
-  op _==>1_suchThat_withStateEq_ : Universal Universal Bool Universal -> Bool
-                                         [poly(1 2 4) strat(0) prec 51] .
-  op _==>*_suchThat_withStateEq_ : Universal Universal Bool Universal -> Bool
-                                         [poly(1 2 4) strat(0) prec 51] .
-  op _==>!_suchThat_withStateEq_ : Universal Universal Bool Universal -> Bool
-                                         [poly(1 2 4) strat(0) prec 51] .
-  op _==>+_suchThat_withStateEq_ : Universal Universal Bool Universal -> Bool
-                                         [poly(1 2 4) strat(0) prec 51] .
-  op _=`(_`,_`)=>1_suchThat_withStateEq_ : Universal NzNat* NzNat* Universal Bool Universal -> Bool
-                                         [poly(1 4 6) strat(0) prec 51] .
-  op _=`(_`,_`)=>*_suchThat_withStateEq_ : Universal NzNat* NzNat* Universal Bool Universal -> Bool
-                                         [poly(1 4 6) strat(0) prec 51] .
-  op _=`(_`,_`)=>+_suchThat_withStateEq_ : Universal NzNat* NzNat* Universal Bool Universal -> Bool
-                                         [poly(1 4 6) strat(0) prec 51] .
-  op _=`(_`,_`)=>!_suchThat_withStateEq_ : Universal NzNat* NzNat* Universal Bool Universal -> Bool
-                                         [poly(1 4 6) strat(0) prec 51] .
-  op _=`(`,_`)=>1_ : Universal NzNat* Universal -> Bool
-                                         [poly(1 3) strat(0) prec 51] .
-  op _=`(`,_`)=>*_ : Universal NzNat* Universal -> Bool
-                                         [poly(1 3) strat(0) prec 51] .
-  op _=`(`,_`)=>+_ : Universal NzNat* Universal -> Bool
-                                         [poly(1 3) strat(0) prec 51] .
-  op _=`(`,_`)=>!_ : Universal NzNat* Universal -> Bool
-                                         [poly(1 3) strat(0) prec 51] .
-  op _=`(`,_`)=>*_withStateEq_ : Universal NzNat* Universal Universal -> Bool
-                                         [poly(1 3 4) strat(0) prec 51] .
-  op _=`(`,_`)=>+_withStateEq_ : Universal NzNat* Universal Universal -> Bool
-                                         [poly(1 3 4) strat(0) prec 51] .
-  op _=`(`,_`)=>!_withStateEq_ : Universal NzNat* Universal Universal -> Bool
-                                         [poly(1 3 4) strat(0) prec 51] .
-  op _=`(`,_`)=>*_suchThat_ : Universal NzNat* Universal Bool -> Bool
-                                         [poly(1 3) strat(0) prec 51] .
-  op _=`(`,_`)=>+_suchThat_ : Universal NzNat* Universal Bool -> Bool
-                                         [poly(1 3) strat(0) prec 51] .
-  op _=`(`,_`)=>!_suchThat_ : Universal NzNat* Universal Bool -> Bool
-                                         [poly(1 3) strat(0) prec 51] .
-  op _=`(`,_`)=>1_suchThat_withStateEq_ : Universal NzNat* Universal Bool Universal -> Bool
-                                         [poly(1 3 5) strat(0) prec 51] .
-  op _=`(`,_`)=>*_suchThat_withStateEq_ : Universal NzNat* Universal Bool Universal -> Bool
-                                         [poly(1 3 5) strat(0) prec 51] .
-  op _=`(`,_`)=>+_suchThat_withStateEq_ : Universal NzNat* Universal Bool Universal -> Bool
-                                         [poly(1 3 5) strat(0) prec 51] .
-  op _=`(`,_`)=>!_suchThat_withStateEq_ : Universal NzNat* Universal Bool Universal -> Bool
-                                         [poly(1 3 5) strat(0) prec 51] .
-  op _=`(_`,_`)=>+_if_suchThat_`{_`} : Universal NzNat* NzNat* Universal Bool Bool
-                                       Universal -> Bool [poly(1 4 7) strat(0) prec 51] .
-  op _=`(_`)=>*_ : Universal NzNat* Universal -> Bool
-                                         [poly(1 3) strat(0) prec 51] .
-  op _=`(_`)=>+_ : Universal NzNat* Universal -> Bool
-                                         [poly(1 3) strat(0) prec 51] .
-  op _=`(_`)=>!_ : Universal NzNat* Universal -> Bool
-                                         [poly(1 3) strat(0) prec 51] .
-  op _=`(_`)=>*_withStateEq_ : Universal NzNat* Universal Universal -> Bool
-                                         [poly(1 3 4) strat(0) prec 51] .
-  op _=`(_`)=>+_withStateEq_ : Universal NzNat* Universal Universal -> Bool
-                                         [poly(1 3 4) strat(0) prec 51] .
-  op _=`(_`)=>!_withStateEq_ : Universal NzNat* Universal Universal -> Bool
-                                         [poly(1 3 4) strat(0) prec 51] .
-  op _=`(_`)=>*_suchThat_ : Universal NzNat* Universal Bool -> Bool
-                                         [poly(1 3) strat(0) prec 51] .
-  op _=`(_`)=>+_suchThat_ : Universal NzNat* Universal Bool -> Bool
-                                         [poly(1 3) strat(0) prec 51] .
-  op _=`(_`)=>!_suchThat_ : Universal NzNat* Universal Bool -> Bool
-                                         [poly(1 3) strat(0) prec 51] .
-  op _=`(_`)=>*_suchThat_withStateEq_ : Universal NzNat* Universal Bool Universal -> Bool
-                                         [poly(1 3 5) strat(0) prec 51] .
-  op _=`(_`)=>+_suchThat_withStateEq_ : Universal NzNat* Universal Bool Universal -> Bool
-                                         [poly(1 3 5) strat(0) prec 51] .
-  op _=`(_`)=>!_suchThat_withStateEq_ : Universal NzNat* Universal Bool Universal -> Bool
-                                         [poly(1 3 5) strat(0) prec 51] .
-
-  *** Standard rule
-  *** op _=>_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 51] .
-endm)
+load predefined.maude
