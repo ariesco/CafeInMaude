@@ -21,7 +21,7 @@ endfm)
   eq (true = false) = false .
 endfm)
 
-(mod RWL is
+(fmod RWL-BASE is
   pr NAT .
 
   sort NzNat* .
@@ -151,4 +151,13 @@ endfm)
 
   *** Standard rule
   *** op _=>_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 51] .
-endm)
+endfm)
+
+(fmod RWL is
+  pr RWL-BASE .
+  *** For Maude implementation
+  *** pr META-LEVEL .
+
+  *** Maude implementation
+  *** op maudeSearch : Term -> Bool .
+endfm)

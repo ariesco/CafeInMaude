@@ -69,7 +69,7 @@ op (pc[_]:_) : Pid&Err Label -> Obs {constr} .
 }
 
 -- generic set
-mod! SET(X :: TRIV) {
+mod! MY-SET(X :: TRIV) {
   [Elt.X < Set]
   op empty : -> Set {constr} .
   op _ _ : Set Set -> Set {constr assoc comm id: empty} .
@@ -78,7 +78,7 @@ mod! SET(X :: TRIV) {
 }
 
 -- a state is defined as a set of observers
-mod! STATE {pr(SET(OBS{sort Elt -> Obs})
+mod! STATE {pr(MY-SET(OBS{sort Elt -> Obs})
                *{sort Set -> State})}
 
 -- QLOCK (mutual exclusion protocol with queue of pids)

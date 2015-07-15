@@ -1,0 +1,8 @@
+mod* FLAG {
+ *[ Flag ]*
+ bops (up_) (dn_) (rev_) : Flag -> Flag -- methods
+ bop up?_ : Flag -> Bool var F : Flag
+ eq up? up F = true .
+ eq up? dn F = false .
+ eq up? rev F = not up? F .
+}

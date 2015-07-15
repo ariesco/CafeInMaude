@@ -20,14 +20,14 @@ import java.io.*;
  * @author adrian
  */
 public class Parser {
-	
+
 	// This attribute indicates whether the first block has been found.
 	private boolean started;
 
 	public Parser(){
 		started = false;
 	}
-	
+
 	/**
 	 * It receives the path of a CafeOBJ file, reads its
 	 * contents and modifies the program to be run by Full
@@ -58,13 +58,13 @@ public class Parser {
 		    PrintWriter writer = new PrintWriter(result);
 		    writer.print(text);
 		    writer.close();
-		} 
+		}
 		catch (IOException e) {
 			ok = false;
 		}
 		return ok;
 	}
-	
+
 	/**
 	 * This function corrects the position of the parentheses introduced
 	 * in the previous steps by removing the first one and placing it at
@@ -76,13 +76,12 @@ public class Parser {
 	 */
 	private String balance(String text){
 		String res = text;
-		int pos = res.indexOf(")");
-		if (pos != -1){
+		if (started){
 			res = res + ")";
 		}
 		return res;
 	}
-	
+
 	/**
 	 * This method is in charge of applying all the transformation to
 	 * each line of the original module. Note that the order of the
@@ -103,7 +102,7 @@ public class Parser {
 		res = membershipAxiomTrans(res);
 		return res;
 	}
-	
+
 	private String membershipAxiomTrans(String line){
 		String res = line;
 		int pos = res.indexOf(":is");
@@ -113,7 +112,7 @@ public class Parser {
 		}
 		return res;
 	}
-	
+
 	/**
 	 * This funcion checks whether a comment with metadata information has been
 	 * written at the end of the line. If this is the case, then the comment is
@@ -139,7 +138,7 @@ public class Parser {
 		}
 		return res;
 	}
-	
+
 	/**
 	 * This function receives as argument a line and an attribute that was
 	 * previously commented. Then, it introduces the attribute (taking care
@@ -165,7 +164,7 @@ public class Parser {
 		}
 		return res;
 	}
-	
+
 	/**
 	 * This function receives a line and removes everything coming after
 	 * a CafeOBJ comment.
@@ -187,7 +186,7 @@ public class Parser {
 		}
 		return res;
 	}
-	
+
 	/**
 	 * This function looks for the metadata attribute placed after a comment.
 	 * @param line Line where the metadata attribute is looked for.
@@ -206,7 +205,7 @@ public class Parser {
 		}
 		return pos;
 	}
-	
+
 	/**
 	 * This function transforms CafeOBJ comments into Maude comments.
 	 * @param line The line to be transformed.
@@ -229,7 +228,7 @@ public class Parser {
 		}
 		return res;
 	}
-	
+
 	/**
 	 * This function transforms, in the given line, the first appearance
 	 * of init by fin.
@@ -249,7 +248,7 @@ public class Parser {
 		}
 		return res;
 	}
-	
+
 	/**
 	 * This function places parentheses when a new module or view
 	 * is found, closing the previous one.
@@ -284,9 +283,9 @@ public class Parser {
 		}
 		return res;
 	}
-	
+
 	/**
-	 * This function adds the special character "`" preceding 
+	 * This function adds the special character "`" preceding
 	 * scape characters if they are used to define a new operator.
 	 * @param line Line to be modified.
 	 * @return A new line with the character "`" preceding commas,
@@ -311,7 +310,7 @@ public class Parser {
 		}
 		return res;
 	}
-	
+
 	/**
 	 * This transformation makes sure that ";", which are scape characters for CafeOBJ but not
 	 * for Maude, have whitespaces surrounding them.
@@ -324,7 +323,7 @@ public class Parser {
 		}
 		return line;
 	}
-	
+
 	private String dealWithParensInOp(String line){
 		String res = line;
 		int last = res.lastIndexOf(" ->");
@@ -341,7 +340,7 @@ public class Parser {
 			pos = res.indexOf("))");
 			last = res.lastIndexOf(" ->");
 		}
-		
+
 		// We remove the no required ones.
 		pos = res.indexOf("(");
 		while (pos != -1 && pos < last){
@@ -360,7 +359,7 @@ public class Parser {
 		res = res.replace("$#@", "`)");
 		return res;
 	}
-	
+
 	/**
 	 * This function adds the character "`" to the scape character indicated
 	 * by the argument ch.
@@ -382,7 +381,7 @@ public class Parser {
 		}
 		return res;
 	}
-	
+
 	/**
 	 * This function checks whether the String given as first argument
 	 * starts with the word given as second argument.
@@ -406,7 +405,7 @@ public class Parser {
 		}
 		return ok;
 	}
-	
+
 	public static void main(String[] args) {
 		Parser parser = new Parser();
 		//String res = parser.addScapeChars("op ((_)) : A -> B [ctor] .", "))");

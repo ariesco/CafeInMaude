@@ -510,6 +510,7 @@ declared or not:
                        -> @CafeOpDecl@ [ctor] .
   op bops_:_->_`{_`}. : @NeCafeTokenList@ @CafeTypeList@ @CafeType@ @CafeAttrList@
                         -> @CafeOpDecl@ [ctor] .
+  op beq_=_. : @CafeBubble@ @CafeBubble@ -> @CafeEqDecl@ [ctor] .
   op bceq_=_if_. : @CafeBubble@ @CafeBubble@ @CafeBubble@ ->
                    @BehaviorEquationDecl@ [ctor] .
   op bcq_=_if_. : @CafeBubble@ @CafeBubble@ @CafeBubble@ ->
@@ -1064,7 +1065,7 @@ successful.
 %)
 
   sort CafeParseResult .
-  op <_,_,_> : ParseDeclResult QidList Database -> CafeParseResult [ctor] .
+  op <_,_,_,_> : ParseDeclResult QidList SortSet Database -> CafeParseResult [ctor] .
 
 ***(%
 \end{verbatim}
@@ -1105,6 +1106,7 @@ successful.
   var  PDL : ParameterDeclList .
   var  ME : ModuleExpression .
   vars SM SM' VM VM' PSM PSM' : SortMap .
+  var  HSM HSM' : TheorySortMap .
   var  V : Variable .
   var  C : Constant .
   vars St St' St'' St''' : String .
@@ -1318,11 +1320,11 @@ Full Maude function
 
   op parseCafeDecl : Term Module Module OpDeclSet SortMap TheorySortMap Database
      -> CafeParseResult .
-  ceq parseCafeDecl('protecting`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, DB' >
+  ceq parseCafeDecl('protecting`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB' >
    if TS := changeTheoryByModule(T, isATheory(U), DB) /\
       < T', DB' > := parseCafeModExp(TS, PSM, DB) /\
       PDR := parseDecl('protecting_.[T'], PU, U, VDS) .
-  ceq parseCafeDecl('pr`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, DB' >
+  ceq parseCafeDecl('pr`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB' >
    if TS := changeTheoryByModule(T, isATheory(U), DB) /\
       < T', DB' > := parseCafeModExp(TS, PSM, DB) /\
       PDR := parseDecl('protecting_.[T'], PU, U, VDS) .
@@ -1336,27 +1338,27 @@ Full Maude function
 \begin{comment}
 %)
 
-  ceq parseCafeDecl('extending`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, DB' >
+  ceq parseCafeDecl('extending`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB' >
    if TS := changeTheoryByModule(T, isATheory(U), DB) /\
       < T', DB' > := parseCafeModExp(TS, PSM, DB) /\
       PDR := parseDecl('extending_.[T'], PU, U, VDS) .
-  ceq parseCafeDecl('ex`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, DB' >
+  ceq parseCafeDecl('ex`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB' >
    if TS := changeTheoryByModule(T, isATheory(U), DB) /\
       < T', DB' > := parseCafeModExp(TS, PSM, DB) /\
       PDR := parseDecl('extending_.[T'], PU, U, VDS) .
-  ceq parseCafeDecl('inc`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, DB' >
+  ceq parseCafeDecl('inc`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB' >
    if TS := changeTheoryByModule(T, isATheory(U), DB) /\
       < T', DB' > := parseCafeModExp(TS, PSM, DB) /\
       PDR := parseDecl('including_.[T'], PU, U, VDS) .
-  ceq parseCafeDecl('including`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, DB' >
+  ceq parseCafeDecl('including`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB' >
    if TS := changeTheoryByModule(T, isATheory(U), DB) /\
       < T', DB' > := parseCafeModExp(TS, PSM, DB) /\
       PDR := parseDecl('including_.[T'], PU, U, VDS) .
-  ceq parseCafeDecl('using`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, DB' >
+  ceq parseCafeDecl('using`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB' >
    if TS := changeTheoryByModule(T, isATheory(U), DB) /\
       < T', DB' > := parseCafeModExp(TS, PSM, DB) /\
       PDR := parseDecl('including_.[T'], PU, U, VDS) .
-  ceq parseCafeDecl('us`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, DB' >
+  ceq parseCafeDecl('us`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB' >
    if TS := changeTheoryByModule(T, isATheory(U), DB) /\
       < T', DB' > := parseCafeModExp(TS, PSM, DB) /\
       PDR := parseDecl('including_.[T'], PU, U, VDS) .
@@ -1463,8 +1465,8 @@ the view identifier itself, and the database.
       M' := getTopModule(Q', DB) /\
       SS := getSorts(M) /\
       SS' := getSorts(M') /\
-      Srt := removeBool(SS) /\
-      Srt' := removeBool(SS') /\
+      Srt := removePredef(SS) /\
+      Srt' := removePredef(SS') /\
       T' := 'sort_to_.['sortToken[upTerm(Srt)], 'sortToken[upTerm(Srt')]] /\
       TV := 'view_from_to_is_endv['token[T], 'token[upTerm(ME)], 'token[T], T'] /\
       DB' := procView(TV, DB) .
@@ -1473,7 +1475,7 @@ the view identifier itself, and the database.
       not getView(Q', DB) :: View /\
       M := getTopModule(ME, DB) /\
       SS := getSorts(M) /\
-      Srt := removeBool(SS) /\
+      Srt := removePredef(SS) /\
       (Q' |-> Srt', PSM') := PSM /\
       T' := 'sort_to_.['sortToken[upTerm(Srt)], 'sortToken[upTerm(Srt')]] /\
       TV := 'view_from_to_is_endv['token[T], 'token[upTerm(ME)], 'token[T], T'] /\
@@ -1485,7 +1487,7 @@ the view identifier itself, and the database.
       M := getTopModule(Q', DB) /\
       M' := getTopModule(ME, DB) /\
       SS := getSorts(M') /\
-      SS' := removeBool(SS) /\
+      SS' := removePredef(SS) /\
       T'' := upTerm(newName(M, Q')) /\
       T' := createMapsForSorts(SS') /\
       TV := 'view_from_to_is_endv['token[T''], 'token[upTerm(ME)], 'token[T''], T'] /\
@@ -1500,9 +1502,12 @@ the view identifier itself, and the database.
                      else Q
                      fi .
 
-  op removeBool : SortSet -> SortSet .
-  eq removeBool('Bool ; SS) = SS .
-  eq removeBool(SS) = SS [owise] .
+  op removePredef : SortSet -> SortSet .
+  eq removePredef('Bool ; SS) = removePredef(SS) .
+  eq removePredef('Nat ; SS) = removePredef(SS) .
+  eq removePredef('NzNat ; SS) = removePredef(SS) .
+  eq removePredef('Zero ; SS) = removePredef(SS) .
+  eq removePredef(SS) = SS [owise] .
 
   op createMapsForSorts : SortSet ~> Term .
   eq createMapsForSorts(Srt) = 'sort_to_.['sortToken[upTerm(Srt)], 'sortToken[upTerm(Srt)]] .
@@ -1988,7 +1993,8 @@ as standard Maude sorts:
 \begin{verbatim}
 %)
 
-  ceq parseCafeDecl('*`[_`]*['CafeToken[T]], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, DB >
+  ceq parseCafeDecl('*`[_`]*['CafeToken[T]], PU, U, VDS, PSM, TSM, DB) =
+                                                        < PDR, nil, downQid(T), DB >
    if PDR := parseDecl('sort_.['sortToken[T]], PU, U, VDS) .
 
 ***(%
@@ -2005,7 +2011,7 @@ modules with the Full Maude function \verb"parseDecl":
 \begin{verbatim}
 %)
 
-  ceq parseCafeDecl('`[_`]['CafeToken[T]], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, DB >
+  ceq parseCafeDecl('`[_`]['CafeToken[T]], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if T' := addSortToken('CafeToken[T]) /\
       PDR := parseDecl('sorts_.[T'], PU, U, VDS) .
 
@@ -2021,7 +2027,7 @@ and added to the current module:
 \begin{verbatim}
 %)
 
-  ceq parseCafeDecl('`[_`]['__[T, T']], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, DB >
+  ceq parseCafeDecl('`[_`]['__[T, T']], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if T'' := addSortToken(T) /\
       T''' := addSortToken(T') /\
       PDR := parseDecl('sorts_.['__[T'', T''']], PU, U, VDS) .
@@ -2039,7 +2045,7 @@ thus obtained:
 \begin{verbatim}
 %)
 
-  ceq parseCafeDecl('`[_`]['_<_[T, T']], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, DB >
+  ceq parseCafeDecl('`[_`]['_<_[T, T']], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if T'' := addSortToken(T) /\
       T''' := addSortToken(T') /\
       TS := sub2sort('_<_[T, T']) /\
@@ -2113,7 +2119,7 @@ and then add the operator declaration with \verb"parseDecl":
 %)
 
   ceq parseCafeDecl('op_:_->_`{_`}.['CafeToken[T], T', 'CafeToken[T''], T'''],  PU, U,
-                    VDS, PSM, TSM, DB) = < PDR, nil, DB >
+                    VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if T4 := addSortToken(T') /\
       PDR := parseDecl('op_:_->_`[_`].['token[T], T4, 'sortToken[T''],
                        map2MaudeAttr(T''')], PU, U, VDS) .
@@ -2127,7 +2133,7 @@ and then add the operator declaration with \verb"parseDecl":
 %)
 
   ceq parseCafeDecl('op_:_->_`{_`}.['__[TL], T', 'CafeToken[T''], T'''],  PU, U, VDS,
-                    PSM, TSM, DB) = < PDR, nil, DB >
+                    PSM, TSM, DB) = < PDR, nil, none, DB >
    if T4 := addSortToken(T') /\
       PDR := parseDecl('op_:_->_`[_`].['token[upTerm(tokenList2token(TL))], T4,
                        'sortToken[T''], map2MaudeAttr(T''')], PU, U, VDS) .
@@ -2141,12 +2147,12 @@ and then add the operator declaration with \verb"parseDecl":
 %)
 
   ceq parseCafeDecl('op_:_->_.['CafeToken[T], T', 'CafeToken[T'']],  PU, U, VDS, PSM,
-                    TSM, DB) = < PDR, nil, DB >
+                    TSM, DB) = < PDR, nil, none, DB >
    if T4 := addSortToken(T') /\
       PDR := parseDecl('op_:_->_.['token[T], T4, cafeType2maudeType(T'')], PU, U, VDS) .
 
   ceq parseCafeDecl('op_:_->_.['__[TL], T', 'CafeToken[T'']],  PU, U, VDS, PSM,
-                    TSM, DB) = < PDR, nil, DB >
+                    TSM, DB) = < PDR, nil, none, DB >
    if T4 := addSortToken(T') /\
       PDR := parseDecl('op_:_->_.['token[upTerm(tokenList2token(TL))], T4,
                                                 cafeType2maudeType(T'')], PU, U, VDS) .
@@ -2162,7 +2168,7 @@ The declaration of constants simplifies the task, since the arity does not appea
 %)
 
   ceq parseCafeDecl('op_:`->_`{_`}.['CafeToken[T], 'CafeToken[T''], T'''],  PU, U, VDS,
-                    PSM, TSM, DB) = < PDR, nil, DB >
+                    PSM, TSM, DB) = < PDR, nil, none, DB >
    if PDR := parseDecl('op_:`->_`[_`].['token[T], cafeType2maudeType(T''),
                                        map2MaudeAttr(T''')], PU, U, VDS) .
 
@@ -2175,11 +2181,11 @@ The declaration of constants simplifies the task, since the arity does not appea
 %)
 
   ceq parseCafeDecl('op_:`->_.['CafeToken[T], 'CafeToken[T'']],  PU, U, VDS, PSM,
-                    TSM, DB) = < PDR, nil, DB >
+                    TSM, DB) = < PDR, nil, none, DB >
    if PDR := parseDecl('op_:`->_.['token[T], cafeType2maudeType(T'')], PU, U, VDS) .
 
   ceq parseCafeDecl('ops_:_->_`{_`}.['neCafeTokenList[T], T', 'CafeToken[T''], T'''], PU,
-                    U, VDS, PSM, TSM, DB) = < PDR, nil, DB >
+                    U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if T4 := addSortToken(T') /\
       PDR := parseDecl('ops_:_->_`[_`].['neTokenList[T], T4, cafeType2maudeType(T''),
                                         map2MaudeAttr(T''')], PU, U, VDS) .
@@ -2196,7 +2202,7 @@ list of Maude tokens, and then introduced into the current module:
 %)
 
   ceq parseCafeDecl('ops_:_->_.['neCafeTokenList[T], T', 'CafeToken[T'']], PU, U, VDS,
-                    PSM, TSM, DB) = < PDR, nil, DB >
+                    PSM, TSM, DB) = < PDR, nil, none, DB >
    if T4 := addSortToken(T') /\
       PDR := parseDecl('ops_:_->_.['neTokenList[T], T4, cafeType2maudeType(T'')],
                        PU, U, VDS) .
@@ -2210,32 +2216,41 @@ list of Maude tokens, and then introduced into the current module:
 %)
 
   ceq parseCafeDecl('ops_:`->_`{_`}.['neCafeTokenList[T], 'CafeToken[T''], T'''],  PU, U,
-                    VDS, PSM, TSM, DB) = < PDR, nil, DB >
+                    VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if PDR := parseDecl('ops_:`->_`[_`].['neTokenList[T], cafeType2maudeType(T''),
                                         map2MaudeAttr(T''')], PU, U, VDS) .
 
   ceq parseCafeDecl('ops_:`->_.['neCafeTokenList[T], 'CafeToken[T'']], PU, U, VDS, PSM,
-                    TSM, DB) = < PDR, nil, DB >
+                    TSM, DB) = < PDR, nil, none, DB >
    if PDR := parseDecl('ops_:`->_.['neTokenList[T], cafeType2maudeType(T'')], PU, U, VDS) .
 
   ceq parseCafeDecl('bop_:_->_.['CafeToken[T], T', 'CafeToken[T'']],  PU, U, VDS, PSM,
-                    TSM, DB) = < PDR, nil, DB >
-   if T4 := addSortToken(T') /\
-      PDR := parseDecl('op_:_->_.['token[T], T4, cafeType2maudeType(T'')], PU, U, VDS) .
-
-  ceq parseCafeDecl('bop_:_->_`{_`}.['CafeToken[T], T', 'CafeToken[T''], T'''], PU, U,
-                    VDS, PSM, TSM, DB) = < PDR, nil, DB >
+                    TSM, DB) = < PDR, nil, none, DB >
    if T4 := addSortToken(T') /\
       PDR := parseDecl('op_:_->_`[_`].['token[T], T4, cafeType2maudeType(T''),
-                                       map2MaudeAttr(T''')], PU, U, VDS) .
+                                       behavioral], PU, U, VDS) .
+
+  op behavioral : -> Term .
+  eq behavioral = 'metadata_['token[''"behavioral".Sort]] .
+
+  op addBehavioral : Term -> Term .
+  eq addBehavioral('__[TL]) = '__[TL, behavioral] .
+  eq addBehavioral(T) = '__[T, behavioral] [owise] .
+
+  ceq parseCafeDecl('bop_:_->_`{_`}.['CafeToken[T], T', 'CafeToken[T''], T'''], PU, U,
+                    VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
+   if T4 := addSortToken(T') /\
+      PDR := parseDecl('op_:_->_`[_`].['token[T], T4, cafeType2maudeType(T''),
+                                       addBehavioral(map2MaudeAttr(T'''))], PU, U, VDS) .
 
   ceq parseCafeDecl('bops_:_->_.['neCafeTokenList[T], T', 'CafeToken[T'']], PU, U, VDS,
-                    PSM, TSM, DB) = < PDR, nil, DB >
+                    PSM, TSM, DB) = < PDR, nil, none, DB >
    if T4 := addSortToken(T') /\
-      PDR := parseDecl('ops_:_->_.['neTokenList[T], T4, cafeType2maudeType(T'')], PU, U, VDS) .
+      PDR := parseDecl('ops_:_->_`[_`].['neTokenList[T], T4, cafeType2maudeType(T''),
+                                        behavioral], PU, U, VDS) .
 
   ceq parseCafeDecl('ops_:_->_`{_`}.['neCafeTokenList[T], T', 'CafeToken[T''], T'''], PU,
-                    U, VDS, PSM, TSM, DB) = < PDR, nil, DB >
+                    U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if T4 := addSortToken(T') /\
       PDR := parseDecl('ops_:_->_`[_`].['neTokenList[T], T4, cafeType2maudeType(T''),
                                         map2MaudeAttr(T''')], PU, U, VDS) .
@@ -2252,7 +2267,7 @@ with coarity \verb"Bool", which must be meta-represented as a token:
 %)
 
   ceq parseCafeDecl('pred_:_`{_`}.['CafeToken[T], T', T'''],  PU, U, VDS, PSM, TSM, DB) =
-                                                                  < PDR, nil, DB >
+                                                                  < PDR, nil, none, DB >
    if T4 := addSortToken(T') /\
       PDR := parseDecl('op_:_->_`[_`].['token[T], T4, 'sortToken[''Bool.Qid],
                        map2MaudeAttr(T''')], PU, U, VDS) .
@@ -2266,7 +2281,7 @@ with coarity \verb"Bool", which must be meta-represented as a token:
 %)
 
   ceq parseCafeDecl('pred_:_.['CafeToken[T], T'],  PU, U, VDS, PSM,
-                    TSM, DB) = < PDR, nil, DB >
+                    TSM, DB) = < PDR, nil, none, DB >
    if T4 := addSortToken(T') /\
       PDR := parseDecl('op_:_->_.['token[T], T4, 'sortToken[''Bool.Qid]], PU, U, VDS) .
 
@@ -2429,8 +2444,8 @@ declarations.
 %)
 
   ceq parseCafeDecl('var_:_.['neCafeTokenList[T], T'], PU, U, VDS, PSM, TSM, DB) =
-                                                          < PDR, QIL, DB' >
-   if < PDR, QIL, DB' > := parseCafeDecl('vars_:_.['neCafeTokenList[T], T'],
+                                                          < PDR, QIL, none, DB' >
+   if < PDR, QIL, none, DB' > := parseCafeDecl('vars_:_.['neCafeTokenList[T], T'],
                                          PU, U, VDS, PSM, TSM, DB) .
 
 ***(%
@@ -2445,7 +2460,7 @@ used to parse terms in the current module:
 %)
 
   ceq parseCafeDecl('vars_:_.['neCafeTokenList[T], 'CafeToken[T']], PU, U, VDS, PSM,
-                    TSM, DB) = < PDR, nil, DB >
+                    TSM, DB) = < PDR, nil, none, DB >
    if PDR := < PU ; U ; VDS parseVars(downQidList(T), parseType('sortToken[T'])) > .
 
 ***(%
@@ -2462,7 +2477,7 @@ the attributes and then using \verb"parseDecl":
 %)
 
   ceq parseCafeDecl('eq_=_.['CafeBubble[T], 'CafeBubble[T']], PU, U, VDS, PSM, TSM, DB) =
-                                              < PDR, nil, DB >
+                                              < PDR, nil, none, DB >
    if QIL := downQidList(T) /\
       VDS' := opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
@@ -2478,11 +2493,11 @@ the attributes and then using \verb"parseDecl":
 %)
 
   ceq parseCafeDecl('beq_=_.['CafeBubble[T], 'CafeBubble[T']], PU, U, VDS, PSM, TSM, DB) =
-                                              < PDR, nil, DB >
+                                              < PDR, nil, none, DB >
    if QIL := downQidList(T) /\
       VDS' := opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
-      TOTF' := renameOnTheFly(cafeEqAtS2maudeEqAts(T'), VDS') /\
+      TOTF' := behavioralEq(renameOnTheFly(cafeEqAtS2maudeEqAts(T'), VDS')) /\
       PDR := parseDecl('eq_=_.['bubble[TOTF], 'bubble[TOTF']], PU, U, VDS) .
 
 ***(%
@@ -2497,7 +2512,7 @@ the \verb"parseDecl" function:
 %)
 
   ceq parseCafeDecl('ceq_=_if_.['CafeBubble[T], 'CafeBubble[T'], 'CafeBubble[T'']],
-                    PU, U, VDS, PSM, TSM, DB) = < PDR, nil, DB >
+                    PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if QIL := downQidList(T) /\
       VDS' := opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
@@ -2514,7 +2529,7 @@ the \verb"parseDecl" function:
 %)
 
   ceq parseCafeDecl('cq_=_if_.['CafeBubble[T], 'CafeBubble[T'], 'CafeBubble[T'']], PU, U,
-                    VDS, PSM, TSM, DB) = < PDR, nil, DB >
+                    VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if QIL := downQidList(T) /\
       VDS' := opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
@@ -2523,21 +2538,21 @@ the \verb"parseDecl" function:
       PDR := parseDecl('ceq_=_if_.['bubble[TOTF], 'bubble[TOTF'], 'bubble[TOTF'']], PU, U, VDS) .
 
   ceq parseCafeDecl('bceq_=_if_.['CafeBubble[T], 'CafeBubble[T'], 'CafeBubble[T'']], PU, U,
-                    VDS, PSM, TSM, DB) = < PDR, nil, DB >
+                    VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if QIL := downQidList(T) /\
       VDS' := opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
       TOTF' := renameOnTheFly(T', VDS') /\
-      TOTF'' := renameOnTheFly(cafeEqAtS2maudeEqAts(T''), VDS') /\
+      TOTF'' := behavioralEq(renameOnTheFly(cafeEqAtS2maudeEqAts(T''), VDS')) /\
       PDR := parseDecl('ceq_=_if_.['bubble[TOTF], 'bubble[TOTF'], 'bubble[TOTF'']], PU, U, VDS) .
 
   ceq parseCafeDecl('bcq_=_if_.['CafeBubble[T], 'CafeBubble[T'], 'CafeBubble[T'']], PU, U,
-                    VDS, PSM, TSM, DB) = < PDR, nil, DB >
+                    VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if QIL := downQidList(T) /\
       VDS' := opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
       TOTF' := renameOnTheFly(T', VDS') /\
-      TOTF'' := renameOnTheFly(cafeEqAtS2maudeEqAts(T''), VDS') /\
+      TOTF'' := behavioralEq(renameOnTheFly(cafeEqAtS2maudeEqAts(T''), VDS')) /\
       PDR := parseDecl('ceq_=_if_.['bubble[TOTF], 'bubble[TOTF'], 'bubble[TOTF'']], PU, U, VDS) .
 
 ***(%
@@ -2552,7 +2567,7 @@ by \verb"parseDecl" is a Maude rule:
 %)
 
   ceq parseCafeDecl('trans_=>_.['CafeBubble[T], 'CafeBubble[T']], PU, U,
-                    VDS, PSM, TSM, DB) = < PDR, nil, DB >
+                    VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if QIL := downQidList(T) /\
       VDS' := opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
@@ -2568,7 +2583,7 @@ by \verb"parseDecl" is a Maude rule:
 %)
 
   ceq parseCafeDecl('trns_=>_.['CafeBubble[T], 'CafeBubble[T']], PU, U, VDS, PSM,
-                    TSM, DB) = < PDR, nil, DB >
+                    TSM, DB) = < PDR, nil, none, DB >
    if QIL := downQidList(T) /\
       VDS' := opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
@@ -2576,7 +2591,7 @@ by \verb"parseDecl" is a Maude rule:
       PDR := parseDecl('rl_=>_.['bubble[TOTF], 'bubble[TOTF']], PU, U, VDS) .
 
   ceq parseCafeDecl('ctrans_=>_if_.['CafeBubble[T], 'CafeBubble[T'], 'CafeBubble[T'']],
-                    PU, U, VDS, PSM, TSM, DB) = < PDR, nil, DB >
+                    PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if QIL := downQidList(T) /\
       VDS' := opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
@@ -2585,7 +2600,7 @@ by \verb"parseDecl" is a Maude rule:
       PDR := parseDecl('crl_=>_if_.['bubble[TOTF], 'bubble[TOTF'], 'bubble[TOTF'']], PU, U, VDS) .
 
   ceq parseCafeDecl('ctrns_=>_if_.['CafeBubble[T], 'CafeBubble[T'], 'CafeBubble[T'']],
-                    PU, U, VDS, PSM, TSM, DB) = < PDR, nil, DB >
+                    PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if QIL := downQidList(T) /\
       VDS' := VDS opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
@@ -2594,37 +2609,37 @@ by \verb"parseDecl" is a Maude rule:
       PDR := parseDecl('crl_=>_if_.['bubble[TOTF], 'bubble[TOTF'], 'bubble[TOTF'']], PU, U, VDS') .
 
   ceq parseCafeDecl('btrans_=>_.['CafeBubble[T], 'CafeBubble[T']], PU, U, VDS, PSM,
-                    TSM, DB) = < PDR, nil, DB >
+                    TSM, DB) = < PDR, nil, none, DB >
    if QIL := downQidList(T) /\
       VDS' := opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
-      TOTF' := renameOnTheFly(cafeEqAtS2maudeEqAts(T'), VDS') /\
+      TOTF' := behavioralEq(renameOnTheFly(cafeEqAtS2maudeEqAts(T'), VDS')) /\
       PDR := parseDecl('rl_=>_.['bubble[TOTF], 'bubble[TOTF']], PU, U, VDS) .
 
   ceq parseCafeDecl('btrns_=>_.['CafeBubble[T], 'CafeBubble[T']], PU, U, VDS, PSM,
-                    TSM, DB) = < PDR, nil, DB >
+                    TSM, DB) = < PDR, nil, none, DB >
    if QIL := downQidList(T) /\
       VDS' := opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
-      TOTF' := renameOnTheFly(cafeEqAtS2maudeEqAts(T'), VDS') /\
+      TOTF' := behavioralEq(renameOnTheFly(cafeEqAtS2maudeEqAts(T'), VDS')) /\
       PDR := parseDecl('rl_=>_.['bubble[TOTF], 'bubble[TOTF']], PU, U, VDS) .
 
   ceq parseCafeDecl('bctrans_=>_if_.['CafeBubble[T], 'CafeBubble[T'], 'CafeBubble[T'']],
-                    PU, U, VDS, PSM, TSM, DB) = < PDR, nil, DB >
+                    PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if QIL := downQidList(T) /\
       VDS' := opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
       TOTF' := renameOnTheFly(T', VDS') /\
-      TOTF'' := renameOnTheFly(cafeEqAtS2maudeEqAts(T''), VDS') /\
+      TOTF'' := behavioralEq(renameOnTheFly(cafeEqAtS2maudeEqAts(T''), VDS')) /\
       PDR := parseDecl('crl_=>_if_.['bubble[TOTF], 'bubble[TOTF'], 'bubble[TOTF'']], PU, U, VDS) .
 
   ceq parseCafeDecl('bctrns_=>_if_.['CafeBubble[T], 'CafeBubble[T'], 'CafeBubble[T'']],
-                    PU, U, VDS, PSM, TSM, DB) = < PDR, nil, DB >
+                    PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if QIL := downQidList(T) /\
       VDS' := VDS opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
       TOTF' := renameOnTheFly(T', VDS') /\
-      TOTF'' := renameOnTheFly(cafeEqAtS2maudeEqAts(T''), VDS') /\
+      TOTF'' := behavioralEq(renameOnTheFly(cafeEqAtS2maudeEqAts(T''), VDS')) /\
       PDR := parseDecl('crl_=>_if_.['bubble[TOTF], 'bubble[TOTF'], 'bubble[TOTF'']], PU, U, VDS) .
 
 ***(%
@@ -2664,6 +2679,18 @@ the possible attributes appearing in equations and transitions:
   eq cafeEqAtS2maudeEqAts*((TL, ''`{.Qid, ''metadata.Qid, TL'', ''`}.Qid)) =
                       TL, ''`[.Qid, ''metadata.Qid, TL'', ''`].Qid .
   eq cafeEqAtS2maudeEqAts*(TL) = TL [owise] .
+
+  op behavioralEq : Term -> TermList .
+  eq behavioralEq('__[TL]) = '__[behavioralEq*(TL)] .
+  eq behavioralEq(T) = '__[T, ''`[.Qid, ''metadata.Qid, ''"behavioral".Sort, ''`].Qid] [owise] .
+
+  op behavioralEq* : TermList -> TermList .
+  eq behavioralEq*((TL, ''`{.Qid, ''nonexec.Qid, TL'', ''`}.Qid)) =
+                      TL, ''`[.Qid, ''nonexec.Qid, TL'', ''metadata.Qid, ''"behavioral".Sort,''`].Qid .
+  eq behavioralEq*((TL, ''`{.Qid, ''metadata.Qid, TL'', ''`}.Qid)) =
+                      TL, ''`[.Qid, ''metadata.Qid, TL'', ''metadata.Qid, ''"behavioral".Sort,''`].Qid .
+  eq behavioralEq*(TL) = TL, ''`[.Qid, ''metadata.Qid, ''"behavioral".Sort,''`].Qid [owise] .
+
 
 ***(%
 \end{verbatim}
@@ -2717,10 +2744,10 @@ identifiers to extend the variable set with the variables defined on the fly in 
 \begin{comment}
 %)
 
-  ceq parseCafeDecl('reduce_.[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, DB >
+  ceq parseCafeDecl('reduce_.[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if PDR := < PU ; U ; VDS > .
 
-  ceq parseCafeDecl('red_.[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, DB >
+  ceq parseCafeDecl('red_.[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if PDR := < PU ; U ; VDS > .
 
 ***(%
@@ -2759,7 +2786,7 @@ a list of quoted identifiers reporting the errors found during the parsing proce
 %)
 
   op <_,_> : Database QidList -> CafeParseResult [ctor] .
-  op <_,_,_> : Database SortMap QidList -> CafeParseResult [ctor] .
+  op <_,_,_,_> : Database SortMap TheorySortMap QidList -> CafeParseResult [ctor] .
 
 ***(%
 \end{verbatim}
@@ -2805,6 +2832,7 @@ a list of quoted identifiers reporting the errors found during the parsing proce
   **** PSM: Principal Sort Map
   vars PSM PSM' SM SM' : SortMap .
   vars TSM TSM' : TheorySortMap .
+  vars HSM HSM' : TheorySortMap .
   vars QS QS' : QidSet .
 
 ***(%
@@ -2839,8 +2867,8 @@ the term to be parsed and calls to \verb"procCafeMod2":
 \begin{verbatim}
 %)
 
-  op procCafeMod : Term SortMap TheorySortMap Database -> CafeParseResult .
-  eq procCafeMod(T, PSM, TSM, DB) = procCafeMod2(T, T, PSM, TSM, DB) .
+  op procCafeMod : Term SortMap TheorySortMap TheorySortMap Database -> CafeParseResult .
+  eq procCafeMod(T, PSM, HSM, TSM, DB) = procCafeMod2(T, T, PSM, HSM, TSM, DB) .
 
 ***(%
 \end{verbatim}
@@ -2856,21 +2884,22 @@ it has tight semantics:
 \begin{verbatim}
 %)
 
-  op procCafeMod2 : Term Term SortMap TheorySortMap Database -> CafeParseResult .
-  eq procCafeMod2(T, 'cmod!_`{_`}['CafeToken[T'], T''], PSM, TSM, DB) =
+  op procCafeMod2 : Term Term SortMap TheorySortMap TheorySortMap Database
+                    -> CafeParseResult .
+  eq procCafeMod2(T, 'cmod!_`{_`}['CafeToken[T'], T''], PSM, HSM, TSM, DB) =
                       procCafeMod3(T, 'CafeToken[T'], empty, T'',
-                                   emptyFModule, PSM, TSM, DB) .
-  eq procCafeMod2(T, 'cmod!_`{_`}['_`(_`)[T', T''], T3], PSM, TSM, DB) =
-                      procCafeMod3(T, T', T'', T3, emptyFModule, PSM, TSM, DB) .
+                                   emptyFModule, PSM, HSM, TSM, DB) .
+  eq procCafeMod2(T, 'cmod!_`{_`}['_`(_`)[T', T''], T3], PSM, HSM, TSM, DB) =
+                      procCafeMod3(T, T', T'', T3, emptyFModule, PSM, HSM, TSM, DB) .
   ceq procCafeMod2(T, 'cmod!_`{_`}['_`[_`]['CafeToken[T'], 'CafeToken[TP]], T3], PSM,
-                   TSM, DB) =
-                 procCafeMod3(T, 'CafeToken[T'], empty, T3, emptyFModule, PSM', TSM, DB)
+                   HSM, TSM, DB) =
+                 procCafeMod3(T, 'CafeToken[T'], empty, T3, emptyFModule, PSM', HSM, TSM, DB)
    if QI := downQid(T') /\
       QI' := downQid(TP) /\
       PSM' := add2PrincipalMap(QI, QI', PSM) .
   ceq procCafeMod2(T, 'cmod!_`{_`}['_`{_|_`}['CafeToken[T'], T'', 'CafeToken[TP]], T3],
-                   PSM, TSM, DB) =
-                      procCafeMod3(T, 'CafeToken[T'], T'', T3, emptyFModule, PSM', TSM, DB)
+                   PSM, HSM, TSM, DB) =
+                      procCafeMod3(T, 'CafeToken[T'], T'', T3, emptyFModule, PSM', HSM, TSM, DB)
    if QI := downQid(T') /\
       QI' := downQid(TP) /\
       PSM' := add2PrincipalMap(QI, QI', PSM) .
@@ -2896,40 +2925,40 @@ want to use:
 \begin{verbatim}
 %)
 
-  ceq procCafeMod2(T, 'cmod*_`{_`}['CafeToken[T'], T''], PSM, TSM, DB) =
+  ceq procCafeMod2(T, 'cmod*_`{_`}['CafeToken[T'], T''], PSM, HSM, TSM, DB) =
         if QIL == nil
-        then procCafeMod3(T, T3, empty, T'', emptyFModule, PSM', TSM, DB')
-        else < DB', PSM', QIL >
+        then procCafeMod3(T, T3, empty, T'', emptyFModule, PSM', HSM', TSM, DB')
+        else < DB', PSM', HSM', QIL >
         fi
-   if < DB', PSM', QIL > := procCafeMod3(T, 'CafeToken[T'], empty, addBool(T''),
-                                         emptyFTheory, PSM, TSM, DB) /\
+   if < DB', PSM', HSM', QIL > := procCafeMod3(T, 'CafeToken[T'], empty, addBool(T''),
+                                         emptyFTheory, PSM, HSM, TSM, DB) /\
       QI := downQid(T') /\
       QI' := qid(string(QI) + "-MODCAFE") /\
       T3 := 'CafeToken[upTerm(QI')] .
   ceq procCafeMod2(T, 'cmod*_`{_`}['_`[_`]['CafeToken[T'], 'CafeToken[TP]], T''], PSM,
-                   TSM, DB) =
+                   HSM, TSM, DB) =
         if QIL == nil
-        then procCafeMod3(T, T3, empty, T'', emptyFModule, PSM', TSM, DB')
-        else < DB', PSM', QIL >
+        then procCafeMod3(T, T3, empty, T'', emptyFModule, PSM', HSM', TSM, DB')
+        else < DB', PSM', HSM', QIL >
         fi
    if QI := downQid(T') /\
       Q := downQid(TP) /\
       QI' := qid(string(QI) + "-MODCAFE") /\
       T3 := 'CafeToken[upTerm(QI')] /\
       PSM' := add2PrincipalMap(QI, Q, PSM) /\
-      < DB', PSM', QIL > := procCafeMod3(T, 'CafeToken[T'], empty, addBool(T''),
-                                         emptyFTheory, PSM', TSM, DB) .
+      < DB', PSM', HSM', QIL > := procCafeMod3(T, 'CafeToken[T'], empty, addBool(T''),
+                                         emptyFTheory, PSM', HSM, TSM, DB) .
   ceq procCafeMod2(T, 'cmod*_`{_`}['_`{_|_`}['CafeToken[T'], T'','CafeToken[TP]], T3],
-                   PSM, TSM, DB) =
+                   PSM, HSM, TSM, DB) =
         if QIL == nil
-        then < DB', PSM', paramThWarn >
-        else < DB', PSM', QIL >
+        then < DB', PSM', HSM', paramThWarn >
+        else < DB', PSM', HSM', QIL >
         fi
    if QI := downQid(T') /\
       Q := downQid(TP) /\
       PSM' := add2PrincipalMap(QI, Q, PSM) /\
-      < DB', PSM', QIL > := procCafeMod3(T, 'CafeToken[T'], T'', addBool(T3),
-                                         emptyFModule, PSM', TSM, DB) .
+      < DB', PSM', HSM', QIL > := procCafeMod3(T, 'CafeToken[T'], T'', addBool(T3),
+                                         emptyFModule, PSM', HSM, TSM, DB) .
 
  op addBool : Term -> Term .
  eq addBool(T) = if addsBool?(T)
@@ -2977,10 +3006,10 @@ modules is not parameterized we just set the name of the module and apply the
 \begin{verbatim}
 %)
 
-  op procCafeMod3 : Term Term Term Term Module SortMap TheorySortMap Database
-                    -> CafeParseResult .
-  ceq procCafeMod3(T, 'CafeToken[T'], empty, T'', U, PSM, TSM, DB) =
-         procCafeMod4(T, T'', setName(U, QI), setName(U, QI), none, PSM, TSM, DB)
+  op procCafeMod3 : Term Term Term Term Module SortMap TheorySortMap TheorySortMap
+                    Database -> CafeParseResult .
+  ceq procCafeMod3(T, 'CafeToken[T'], empty, T'', U, PSM, HSM, TSM, DB) =
+         procCafeMod4(T, T'', setName(U, QI), setName(U, QI), none, PSM, HSM, TSM, DB)
    if QI := downQid(T') .
 
 ***(%
@@ -2996,9 +3025,9 @@ parameter list from a term.
 \begin{verbatim}
 %)
 
-  ceq procCafeMod3(T, 'CafeToken[T'], PL, T'', U, PSM, TSM, DB) =
+  ceq procCafeMod3(T, 'CafeToken[T'], PL, T'', U, PSM, HSM, TSM, DB) =
          procCafeMod4(T, T3, setPars(setName(U, QI), parseParList(PL')),
-                      setName(U, QI), none, PSM, TSM, DB)
+                      setName(U, QI), none, PSM, HSM, TSM, DB)
    if PL =/= empty /\
       PL' := cafeParam2maudeParam(PL) /\
       QI := downQid(T') /\
@@ -3028,7 +3057,7 @@ In other case an error is returned:
 \begin{verbatim}
 %)
 
-  eq procCafeMod3(T, T', PL, T'', U, PSM, TSM, DB) = < DB, PSM, errModName > [owise] .
+  eq procCafeMod3(T, T', PL, T'', U, PSM, HSM, TSM, DB) = < DB, PSM, HSM, errModName > [owise] .
 
 ***(%
 \end{verbatim}
@@ -3226,14 +3255,19 @@ The function \verb"procCafeMod4" traverses the module, applying the function
 \begin{verbatim}
 %)
 
-  op procCafeMod4 : Term Term Module Module OpDeclSet SortMap TheorySortMap Database
-                    -> CafeParseResult .
-  ceq procCafeMod4(T, '__[T', T''], PU, U, VDS, PSM, TSM, DB) =
+  op procCafeMod4 : Term Term Module Module OpDeclSet SortMap TheorySortMap TheorySortMap
+                    Database -> CafeParseResult .
+  ceq procCafeMod4(T, '__[T', T''], PU, U, VDS, PSM, HSM, TSM, DB) =
         if QIL == nil
-        then procCafeMod4(T, T'', preModule(PDR), unit(PDR), vars(PDR), PSM, TSM, DB')
-        else < DB, PSM, QIL >
+        then procCafeMod4(T, T'', preModule(PDR), unit(PDR), vars(PDR), PSM, HSM', TSM, DB')
+        else < DB, PSM, HSM', QIL >
         fi
-   if < PDR, QIL, DB' > := parseCafeDecl(T', PU, U, VDS, PSM, TSM, DB) .
+   if < PDR, QIL, SS, DB' > := parseCafeDecl(T', PU, U, VDS, PSM, TSM, DB) /\
+      HSM' := addHiddenSort(HSM, getName(U), SS) .
+
+  op addHiddenSort : TheorySortMap Qid SortSet -> TheorySortMap .
+  eq addHiddenSort((Q -> SS, HSM), Q, SS') = (Q -> (SS ; SS'), HSM) .
+  eq addHiddenSort(HSM, Q, SS) = Q -> SS, HSM [owise] .
 
 ***(%
 \end{verbatim}
@@ -3246,25 +3280,27 @@ of the \verb"evalPreModule" function:
 \begin{verbatim}
 %)
 
-  ceq procCafeMod4(T, F[TL], PU, U, VDS, PSM, TSM, DB) = < DB3, PSM, nil >
+  ceq procCafeMod4(T, F[TL], PU, U, VDS, PSM, HSM, TSM, DB) = < DB3, PSM, HSM', nil >
    if F =/= '__ /\
-      < PDR, nil, DB' > := parseCafeDecl(F[TL], PU, U, VDS, PSM, TSM, DB) /\
+      < PDR, nil, SS, DB' > := parseCafeDecl(F[TL], PU, U, VDS, PSM, TSM, DB) /\
       DB'' := evalPreModule(predefinedCafeEqual(preModule(PDR)),
                             predefinedCafeEqual(unit(PDR)),
                             vars(PDR), insTermModule(getName(U), T, DB')) /\
-      DB3 := updateDatabase4cafe(getName(U), DB'') .
+      DB3 := updateDatabase4cafe(getName(U), DB'') /\
+      HSM' := addHiddenSort(HSM, getName(U), SS) .
 
-  ceq procCafeMod4(T, F[TL], PU, U, VDS, PSM, TSM, DB) = < DB, PSM, QIL >
+  ceq procCafeMod4(T, F[TL], PU, U, VDS, PSM, HSM, TSM, DB) = < DB, PSM, HSM', QIL >
    if F =/= '__ /\
-      < PDR, QIL, DB' > := parseCafeDecl(F[TL], PU, U, VDS, PSM, TSM, DB) /\
-      QIL =/= nil .
+      < PDR, QIL, SS, DB' > := parseCafeDecl(F[TL], PU, U, VDS, PSM, TSM, DB) /\
+      QIL =/= nil /\
+      HSM' := addHiddenSort(HSM, getName(U), SS) .
 
 ***  vars Set Set' : SET .
   vars ME ME' : ModuleExpression .
   var  RenS : RenamingSet .
   var  ParamL : ParameterList .
 
-  vars U'' U3 U4 U5 : Module .
+  vars U'' U3 U4 U5 TM TM' FM FM' : Module .
 ***  var  VDS : OpDeclSet .
   vars MNS MNS' MNS'' MNS3 MNS4 MNS5 MNS6 : Set{ModuleName} .
   vars VES VES' VES'' VES3 : Set{ViewExp} .
@@ -3272,7 +3308,94 @@ of the \verb"evalPreModule" function:
   var  VIS : Set{ViewInfo} .
 
   op updateDatabase4cafe : ModuleExpression Database -> Database .
-  ceq updateDatabase4cafe(ME, DB) =
+  ceq updateDatabase4cafe(ME, DB) = DB''
+   if DB' := updateDatabase4cafeAux(ME, DB) /\
+      DB'' := updateDatabaseWithMetaSearch(ME, DB') .
+  eq updateDatabase4cafe(ME, DB) = DB [owise] .
+
+  op updateDatabaseWithMetaSearch : ModuleExpression Database -> Database .
+  ***(
+  ceq updateDatabaseWithMetaSearch(ME, DB) = DB1
+   if db(< ME ; T ; U' ; U'' ; U3 ; VDS ; MNS ; VES > MIS, MNS', VIS, VES', MNS'',
+           MNS3, MNS4, QIL) := DB /\
+      isSystem(TM) .
+  )
+  eq updateDatabaseWithMetaSearch(ME, DB) = DB [owise] .
+
+  op addMetaSearchModule : Module Module -> Module .
+  ceq addMetaSearchModule(M, M) =
+            mod H is IL sorts SS . SSDS ODS MAS EqS' RS endm
+   if mod H is IL sorts SS . SSDS ODS MAS EqS RS endm := M /\
+      EqS' := filterPredefEqs(EqS) .
+  eq addMetaSearchModule(M, M) = M [owise] .
+
+  op modifySearchConditions : Module EquationSet -> EquationSet .
+  eq modifySearchConditions(M, ceq T = T' if CND [AtS] . EqS) =
+                ceq T = T' if modifySearchConditionsCond(M, CND) [AtS] .
+                modifySearchConditions(M, EqS) .
+  eq modifySearchConditions(M, EqS) = EqS [owise] .
+
+  op modifySearchConditionsCond : Module Condition -> Condition .
+  eq modifySearchConditionsCond(M, nil) = nil .
+  eq modifySearchConditionsCond(M, T => T' /\ CND) = T => T' /\
+                                                     modifySearchConditionsCond(M, CND) .
+  eq modifySearchConditionsCond(M, T := T' /\ CND) = T := T' /\
+                                                     modifySearchConditionsCond(M, CND) .
+  eq modifySearchConditionsCond(M, T : Srt /\ CND) = T : Srt /\
+                                                     modifySearchConditionsCond(M, CND) .
+  ceq modifySearchConditionsCond(M, T = T' /\ CND) = T3 = T4 /\
+                                                     modifySearchConditionsCond(M, CND)
+   if T1 := getTerm(metaReduce(M, T)) /\
+      T2 := getTerm(metaReduce(M, T')) /\
+      T3 := modifySearchConditions(M, T1) /\
+      T4 := modifySearchConditions(M, T2) .
+
+  op modifySearchConditions : Module Term -> Term .
+  eq modifySearchConditions(M, C) = C .
+  eq modifySearchConditions(M, V) = V .
+  ceq modifySearchConditions(M, Q[TL]) = Q[modifySearchConditions*(M, TL)]
+   if not isSearchCommand(Q) .
+  ceq modifySearchConditions(M, Q[TL]) = transformSearch(M, Q[TL])
+   if isSearchCommand(Q) .
+
+  op transformSearch : Module Term -> Term .
+  eq transformSearch(M, '_=`(_`,_`)=>*_[T1, T2, T3, T4]) =
+      'maudeSearch[upTerm(T1), upTerm(T2), upTerm(T3), upTerm(T4), upTerm('*.Qid),  'nil.Cond] .
+  eq transformSearch(M, T) = T .
+
+  op modifySearchConditions* : Module TermList -> TermList .
+  eq modifySearchConditions*(M, empty) = empty .
+  eq modifySearchConditions*(M, (T, TL)) = modifySearchConditions(M, T),
+                                           modifySearchConditions*(M, TL) .
+
+  op filterPredefEqs : EquationSet -> EquationSet .
+  eq filterPredefEqs(eq T = T' [AtS metadata("built-in in CafeOBJ")] . EqS) =
+                                        filterPredefEqs(EqS) .
+  eq filterPredefEqs(ceq T = T' if CND [AtS metadata("built-in in CafeOBJ")] . EqS) =
+                                        filterPredefEqs(EqS) .
+  eq filterPredefEqs(EqS) = EqS [owise] .
+
+  op isSearchCommand : Qid -> Bool .
+  eq isSearchCommand(Q) = Q == '_=`(_`,_`)=>*_ or
+                          Q == '_=`(_`,_`)=>!_ or
+                          Q == '_=`(_`,_`)=>+_ or
+                          Q == '_==>*_suchThat_withStateEq_ or
+                          Q == '_==>!_suchThat_withStateEq_ or
+                          Q == '_==>+_suchThat_withStateEq_ or
+                          Q == '_==>*_withStateEq_ or
+                          Q == '_==>!_withStateEq_ or
+                          Q == '_==>+_withStateEq_ or
+                          Q == '_==>*_suchThat_ or
+                          Q == '_==>!_suchThat_ or
+                          Q == '_==>+_suchThat_ .
+
+  op isSystem : Module -> Bool .
+  eq isSystem(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm) = true .
+  eq isSystem(th H is IL sorts SS . SSDS ODS MAS EqS RS endth) = true .
+  eq isSystem(M) = false [owise] .
+
+  op updateDatabase4cafeAux : ModuleExpression Database -> Database .
+  ceq updateDatabase4cafeAux(ME, DB) =
              db(< ME ; T ; addEqual&SearchEqs(U', SS) ; addEqual&SearchEqs(U'', SS) ; U3 ;
                   VDS ; MNS ; VES > MIS, MNS', VIS, VES', MNS'', MNS3, MNS4, QIL)
    if db(< ME ; T ; U' ; U'' ; U3 ; VDS ; MNS ; VES > MIS, MNS', VIS, VES', MNS'',
@@ -3280,7 +3403,7 @@ of the \verb"evalPreModule" function:
       U5 := getFlatModule(modExp(evalModExp(ME, DB)),
                  database(evalModExp(ME, DB))) /\
       SS := getRulesSorts(U5, getRls(U'')) .
-  eq updateDatabase4cafe(ME, DB) = DB [owise] .
+  eq updateDatabase4cafeAux(ME, DB) = DB [owise] .
 
   var  H : Header .
   var  I : Import .
@@ -3468,81 +3591,6 @@ of the \verb"evalPreModule" function:
 
   vars CXU CYU COND MAX-R MAX-D PRED BIND : Variable .
 
-***(
-
-    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>* CYU)
-        = #!! (rwl-sch-set-result
-               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
-                           max-d :zero? t)) .
-    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>! CYU)
-        = #!! (rwl-sch-set-result
-               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
-                           max-d :final? t)) .
-    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>+ CYU)
-        = #!! (rwl-sch-set-result
-               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
-                           max-d)) .
-    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>* CYU suchThat COND:Bool)
-        = #!! (rwl-sch-set-result
-               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
-                           max-d :zero? t :cond cond)) .
-    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>* CYU suchThat COND:Bool { BIND
-       }) = #!! (rwl-sch-set-result
-                 (rwl-search :term cxu :pattern cyu :max-result max-r
-                             :max-depth max-d :zero? t :cond cond :bind bind)) .
-    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>! CYU suchThat COND:Bool)
-        = #!! (rwl-sch-set-result
-               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
-                           max-d :final? t :cond cond)) .
-    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>! CYU suchThat COND:Bool { BIND
-       }) = #!! (rwl-sch-set-result
-                 (rwl-search :term cxu :pattern cyu :max-result max-r
-                             :max-depth max-d :final? t :cond cond :bind bind)) .
-    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>+ CYU suchThat COND:Bool)
-        = #!! (rwl-sch-set-result
-               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
-                           max-d :cond cond)) .
-    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>+ CYU suchThat COND:Bool { BIND
-       }) = #!! (rwl-sch-set-result
-                 (rwl-search :term cxu :pattern cyu :max-result max-r
-                             :max-depth max-d :cond cond :bind bind)) .
-    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>* CYU withStateEq PRED)
-        = #!! (rwl-sch-set-result
-               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
-                           max-d :zero? t :pred pred)) .
-    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>! CYU withStateEq PRED)
-        = #!! (rwl-sch-set-result
-               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
-                           max-d :final? t :pred pred)) .
-    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>+ CYU withStateEq PRED)
-        = #!! (rwl-sch-set-result
-               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
-                           max-d :pred pred)) .
-    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>* CYU suchThat COND:Bool
-       withStateEq PRED) = #!! (rwl-sch-set-result
-                                (rwl-search :term cxu :pattern cyu :max-result
-                                            max-r :max-depth max-d :zero? t
-                                            :cond cond :pred pred)) .
-    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>! CYU suchThat COND:Bool
-       withStateEq PRED) = #!! (rwl-sch-set-result
-                                (rwl-search :term cxu :pattern cyu :max-result
-                                            max-r :max-depth max-d :final? t
-                                            :cond cond :pred pred)) .
-    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>+ CYU suchThat COND:Bool
-       withStateEq PRED) = #!! (rwl-sch-set-result
-                                (rwl-search :term cxu :pattern cyu :max-result
-                                            max-r :max-depth max-d :cond cond
-                                            :pred pred)) .
-    eq (S = ( MR:NzNat* , MD:NzNat ) =>+ SS if CC:Bool suchThat P:Bool { B })
-        = #!! (rwl-sch-set-result
-               (rwl-search :term s :pattern ss :max-result mr :max-depth md
-                           :zero? nil :final? nil :cond p :if cc :bind b)) .
-
-    *** Transformar reglas
-    eq (CXU => CYU) = (CXU = ( 1 , * ) =>* CYU) .
-
-)
-
   op createEqsFromImports : ImportList -> EquationSet .
   eq createEqsFromImports(nil) = none .
   eq createEqsFromImports(I IL) = createEqsFromImport(I) createEqsFromImports(IL) .
@@ -3646,15 +3694,16 @@ the \verb"maps2maps" function shown above to the body:
   op openCloseModName : -> Qid .
   eq openCloseModName = 'OPEN_CLOSE .
 
-  op procOpenCloseEnv : Term Term SortMap TheorySortMap Database -> CafeParseResult .
-  ceq procOpenCloseEnv(T, T', PSM, TSM, DB) = < DB' | QIL | QIL' >
+  op procOpenCloseEnv : Term Term SortMap TheorySortMap TheorySortMap Database
+                        -> CafeParseResult .
+  ceq procOpenCloseEnv(T, T', PSM, HSM, TSM, DB) = < DB' | QIL | QIL' >
    if T1 := 'CafeToken[openCloseModNameUp] /\
       T2 := '__['inc`(_`)[T], T'] /\
-      < DB', PSM', QIL > := procCafeMod('cmod!_`{_`}[T1, T2], PSM, TSM, DB) /\
+      < DB', PSM', HSM', QIL > := procCafeMod('cmod!_`{_`}[T1, T2], PSM, HSM, TSM, DB) /\
       M := getFlatModule(openCloseModName, DB') /\
       TL := getRedCommands(T') /\
       QIL' := processRedCommands(M, DB', TL) .
-  eq procOpenCloseEnv(T, T', PSM, TSM, DB) = < DB | nil | 'Environment 'not 'parsed. > [owise] .
+  eq procOpenCloseEnv(T, T', PSM, HSM, TSM, DB) = < DB | nil | 'Environment 'not 'parsed. > [owise] .
 
   op getRedCommands : Term -> TermList .
   eq getRedCommands('__[T, T']) = getRedCommands(T), getRedCommands(T') .
@@ -5060,6 +5109,19 @@ in the module:
 ***(%
 \end{verbatim}
 }
+
+Similarly, the attribute \verb"hsorts" keeps track of hidden sorts:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op hsorts :_ : TheorySortMap -> Attribute [ctor] .
+
+
+***(%
+\end{verbatim}
+}
 {\codesize
 \begin{comment}
 %)
@@ -5083,6 +5145,7 @@ in the module:
   vars M M' : Module .
   **** PSM: Principal Sort Map
   vars PSM PSM' : SortMap .
+  vars HSM HSM' : TheorySortMap .
   var  TSM : TheorySortMap .
 
 ***(%
@@ -5106,29 +5169,32 @@ is not modified and a message is printed:
 
   crl [load-CafeLOOSE] :
       < O : X@Database | input : ('cmod*_`{_`}[T, T']), db : DB, output : nil,
-                         default : ME, strict : B, psorts : PSM, Atts >
+                         default : ME, strict : B, psorts : PSM, hsorts : HSM, Atts >
    => if QIL == nil
       then
       < O : X@Database | input : nilTermList, db : DB',
                          output : ('Introduced 'Loose 'Cafe 'Module:
                                    '\g header2Qid(parseHeader(getHeader(T))) '\o '\n),
                          default : parseHeader(getHeader(T)), strict : B,
-                         psorts : PSM', Atts >
+                         psorts : PSM', hsorts : HSM', Atts >
       else if QIL == paramThWarn
            then if B then
                      < O : X@Database | input : nilTermList, db : DB, output : QIL,
-                                        default : ME, strict : B, psorts : PSM, Atts >
+                                        default : ME, strict : B, psorts : PSM,
+                                        hsorts : HSM, Atts >
                 else
                      < O : X@Database | input : nilTermList, db : DB', output : QIL,
                                         default : parseHeader(getHeader(T)),
-                                        strict : B, psorts : PSM', Atts >
+                                        strict : B, psorts : PSM',
+                                        hsorts : HSM', Atts >
                 fi
            else < O : X@Database | input : nilTermList, db : DB, output : QIL,
-                                   default : ME, strict : B, psorts : PSM, Atts >
+                                   default : ME, strict : B, psorts : PSM,
+                                   hsorts : HSM, Atts >
            fi
       fi
    if TSM := getTheorySort(DB) /\
-      < DB', PSM', QIL > := procCafeMod('cmod*_`{_`}[T, T'], PSM, TSM, DB) .
+      < DB', PSM', HSM', QIL > := procCafeMod('cmod*_`{_`}[T, T'], PSM, HSM, TSM, DB) .
 
 ***(%
 \end{verbatim}
@@ -5163,20 +5229,20 @@ errors are found:
 
    crl [load-CafeTIGHT] :
        < O : X@Database | input : ('cmod!_`{_`}[T, T']), db : DB, output : nil,
-                          default : ME, strict : B, psorts : PSM, Atts >
+                          default : ME, strict : B, psorts : PSM, hsorts : HSM, Atts >
     => if QIL == nil
        then
        < O : X@Database | input : nilTermList, db : DB',
                           output : ('Introduced 'Tight 'Cafe 'Module: '\g
                                 header2Qid(parseHeader(getHeader(T))) '\o '\n),
                           default : parseHeader(getHeader(T)), strict : B,
-                          psorts : PSM', Atts >
+                          psorts : PSM', hsorts : HSM', Atts >
        else
        < O : X@Database | input : nilTermList, db : DB, output : QIL,
-                          default : ME, strict : B, psorts : PSM, Atts >
+                          default : ME, strict : B, psorts : PSM, hsorts : HSM, Atts >
        fi
     if TSM := getTheorySort(DB) /\
-       < DB', PSM', QIL > := procCafeMod('cmod!_`{_`}[T, T'], PSM, TSM, DB) .
+       < DB', PSM', HSM', QIL > := procCafeMod('cmod!_`{_`}[T, T'], PSM, HSM, TSM, DB) .
 
 ***(%
 \end{verbatim}
@@ -5228,19 +5294,19 @@ found, then the database is updated:
 
   crl [load-open-close-block] :
       < O : X@Database | input : ('copen_._close[T, T']), db : DB,
-                         output : nil, psorts : PSM, Atts >
+                         output : nil, psorts : PSM, hsorts : HSM, Atts >
    => if QIL == nil
       then
       < O : X@Database | input : nilTermList, db : DB,
                          output : ('\n 'Processing 'open-close 'environment:
                                    '\n QIL' '\n),
-                         psorts : PSM, Atts >
+                         psorts : PSM, hsorts : HSM, Atts >
       else
       < O : X@Database | input : nilTermList, db : DB, output : QIL,
-                         psorts : PSM, Atts >
+                         psorts : PSM, hsorts : HSM, Atts >
       fi
    if TSM := getTheorySort(DB) /\
-      < DB' | QIL | QIL' > := procOpenCloseEnv(T, T', PSM, TSM, DB) .
+      < DB' | QIL | QIL' > := procOpenCloseEnv(T, T', PSM, HSM, TSM, DB) .
 
 ***(%
 \end{comment}
@@ -5671,7 +5737,7 @@ set to \verb"false":
                                           'can 'be 'introduced 'now 'into 'the
                                           'Full 'Maude 'database. '\n),
                                 default : 'CONVERSION, strict : false,
-                                psorts : initialPrincipalSorts >,
+                                psorts : initialPrincipalSorts, hsorts : empty >,
                                 nil] .
 
   op initialPrincipalSorts : -> SortMap .
