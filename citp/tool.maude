@@ -1,0 +1,1252 @@
+
+--- -------------------------------------------------------------------------
+--- -------------------------------------------------------------------------
+fmod #LIBRARY# is
+ inc META-LEVEL .  inc CONVERSION .
+ sort Sentence SentenceSet .
+ subsort Sentence < SentenceSet .
+---
+ var V : Variable .       var Ct : Constant .
+ vars T T' : Term .       vars ASet AtSet : AttrSet .
+ var TL : TermList .      var NTL : NeTermList .
+ var EC : EqCondition .   var Co : Condition .  vars St : Sort .
+ var ESet : EquationSet . var MSet : MembAxSet . 
+ var RSet : RuleSet .     var SSet : SentenceSet .
+ var Sen : Sentence .     var E : Equation .
+ var Mx : MembAx .        var R : Rule .
+---
+ op eq_=_[_] : Term Term AttrSet -> Sentence [ctor] .
+ op ceq_=_if_[_] : Term Term EqCondition AttrSet -> Sentence[ctor] .
+---
+ op mb_:_[_] : Term Sort AttrSet -> Sentence[ctor].
+ op cmb_:_if_[_] : Term Sort EqCondition AttrSet -> Sentence[ctor] .
+--- 
+ op rl_=>_[_] : Term Term AttrSet -> Sentence [ctor].
+ op crl_=>_if_[_] : Term Term Condition AttrSet -> Sentence [ctor].
+---
+ op none : -> SentenceSet [ctor] .
+ op __ : SentenceSet SentenceSet -> SentenceSet [ctor assoc comm id: none].
+---
+ op conv : EquationSet -> SentenceSet .
+  eq conv((none).EquationSet) = none .
+  eq conv(eq T = T' [ASet]. ESet)       = eq T = T' [ASet]       conv(ESet) .
+  eq conv(ceq T = T' if EC[ASet]. ESet) = ceq T = T' if EC[ASet] conv(ESet) .
+ op conv : MembAxSet -> SentenceSet .
+  eq conv((none).MembAxSet) = none .
+  eq conv(mb T : St [ASet]. MSet)       = mb T : St [ASet]       conv(MSet) .
+  eq conv(cmb T : St if EC[ASet]. MSet) = cmb T : St if EC[ASet] conv(MSet) .
+ op conv : RuleSet -> SentenceSet .
+  eq conv((none).RuleSet) = none .
+  eq conv(rl T => T' [ASet]. RSet)       = rl T => T' [ASet]       conv(RSet) .
+  eq conv(crl T => T' if Co[ASet]. RSet) = crl T => T' if Co[ASet] conv(RSet) .
+---
+ op convE : SentenceSet -> EquationSet .
+  eq convE(none) = none .
+  eq convE(eq T = T' [ASet] SSet) = eq T = T' [ASet]. convE(SSet) .
+  eq convE(ceq T = T' if EC[ASet] SSet) = ceq T = T' if EC[ASet]. convE(SSet) .
+  eq convE(Sen SSet) = convE(SSet) [owise].
+ ---
+ op convM : SentenceSet -> MembAxSet .
+  eq convM(none) = none .
+  eq convM(mb T : St [ASet] SSet) = mb T : St [ASet]. convM(SSet) .
+  eq convM(cmb T : St if EC[ASet] SSet) = cmb T : St if EC[ASet]. convM(SSet).
+  eq convM(Sen SSet) = convM(SSet) [owise].
+---
+ op convR : SentenceSet -> RuleSet .
+  eq convR(none) = none .
+  eq convR(rl T => T' [ASet] SSet) = rl T => T' [ASet]. convR(SSet) .
+  eq convR(crl T => T' if Co[ASet] SSet) = crl T => T' if Co[ASet]. convR(SSet) .
+  eq convR(Sen SSet) = convR(SSet) [owise].
+--- -------------------------------------------------------------------------
+--- add operations to module
+--- -------------------------------------------------------------------------
+var M : Module .         var H : Header .
+var IList : ImportList . var Q : Qid .
+var StSet : SortSet .    var SbSet : SubsortDeclSet . 
+vars Op Od : OpDecl .    vars OdSet OSet : OpDeclSet .
+var Tp : Type .          var TpL : TypeList . 
+var F : FindResult .     var Str : String .
+var N : Nat .            var Subst : Substitution .
+--- -------------------------------------------------------------------------
+op addOp :  Module OpDeclSet -> Module .
+ eq addOp((fmod H is IList sorts StSet . SbSet OdSet MSet ESet endfm),OSet) =
+    (fmod H is IList sorts StSet . SbSet 
+     overwrite(OdSet, OSet) MSet ESet endfm) .
+ eq addOp((fth H is IList sorts StSet . SbSet OdSet MSet ESet endfth),OSet) =
+    (fth H is IList sorts StSet . SbSet 
+    overwrite(OdSet, OSet) MSet ESet endfth) .
+ eq addOp((mod H is IList sorts StSet . SbSet OdSet MSet ESet RSet endm),OSet) =
+    (mod H is IList sorts StSet . SbSet 
+     overwrite(OdSet, OSet) MSet ESet RSet endm) .
+ eq addOp((th H is IList sorts StSet . SbSet OdSet MSet ESet RSet endth),OSet) =
+    (th H is IList sorts StSet . SbSet 
+    overwrite(OdSet, OSet) MSet ESet RSet endth) . 
+---
+  op overwrite : OpDeclSet OpDeclSet -> OpDeclSet . 
+   eq overwrite( (op Q : TpL -> Tp [AtSet] .)  OdSet,
+                 (op Q : TpL -> Tp [ASet] .) OSet)
+   = overwrite(OdSet,(op Q : TpL -> Tp [ASet] .) OSet) .
+   eq overwrite(OdSet,OSet) = OdSet OSet [owise] .
+--- -------------------------------------------------------------------------
+--- add sentences to a module
+--- -------------------------------------------------------------------------
+op addSen : Module SentenceSet -> Module .
+ eq addSen(M,none) = M .
+--- Equation
+ eq addSen((fmod H is IList sorts StSet . SbSet OSet MSet ESet endfm),eq T = T' [ASet] SSet) =
+    if   T == T' then addSen((fmod H is IList sorts StSet . SbSet OSet MSet ESet endfm),SSet)
+    else addSen((fmod H is IList sorts StSet . SbSet OSet MSet ((eq T = T'[ASet metadata("added")].) ESet) endfm),SSet) fi .
+ eq addSen((fth H is IList sorts StSet . SbSet OSet MSet ESet endfth),(eq T = T' [ASet]) SSet) =
+    if   T == T' then addSen((fth H is IList sorts StSet . SbSet OSet MSet ESet endfth),SSet)
+    else addSen((fth H is IList sorts StSet . SbSet OSet MSet ((eq T = T'[ASet metadata("added") ].) ESet) endfth),SSet) fi .
+ eq addSen((mod H is IList sorts StSet . SbSet OSet MSet ESet RSet endm),(eq T = T' [ASet]) SSet) =
+    if   T == T' then addSen((mod H is IList sorts StSet . SbSet OSet MSet ESet RSet endm),SSet)
+    else addSen((mod H is IList sorts StSet . SbSet OSet MSet ((eq T = T'[ASet metadata("added")].) ESet) RSet endm),SSet) fi .
+ eq addSen((th H is IList sorts StSet . SbSet OSet MSet ESet RSet endth),(eq T = T' [ASet]) SSet) =
+    if   T == T' then addSen((th H is IList sorts StSet . SbSet OSet MSet ESet RSet endth),SSet)
+    else addSen((th H is IList sorts StSet . SbSet OSet MSet ((eq T = T'[ASet metadata("added")].) ESet) RSet endth),SSet) fi .
+---
+ eq addSen((fmod H is IList sorts StSet . SbSet OSet MSet ESet endfm),(ceq T = T' if EC [ASet]) SSet) =
+    if   T == T' then addSen((fmod H is IList sorts StSet . SbSet OSet MSet ESet endfm),SSet)
+    else addSen((fmod H is IList sorts StSet . SbSet OSet MSet ((ceq T = T' if EC [ASet metadata("added")].) ESet) endfm),SSet) fi .
+ eq addSen((fth H is IList sorts StSet . SbSet OSet MSet ESet endfth),(ceq T = T' if EC [ASet]) SSet) =
+    if   T == T' then addSen((fth H is IList sorts StSet . SbSet OSet MSet ESet endfth),SSet)
+    else addSen((fth H is IList sorts StSet . SbSet OSet MSet ((ceq T = T' if EC [ASet metadata("added") ].) ESet) endfth),SSet) fi .
+  eq addSen((mod H is IList sorts StSet . SbSet OSet MSet ESet RSet endm),(ceq T = T' if EC [ASet]) SSet) =
+    if   T == T' then addSen((mod H is IList sorts StSet . SbSet OSet MSet ESet RSet endm),SSet)
+    else addSen((mod H is IList sorts StSet . SbSet OSet MSet ((ceq T = T' if EC [ASet metadata("added") ].) ESet) RSet endm),SSet) fi .
+ eq addSen((th H is IList sorts StSet . SbSet OSet MSet ESet RSet endth),(ceq T = T' if EC [ASet]) SSet) =
+    if   T == T' then addSen((th H is IList sorts StSet . SbSet OSet MSet ESet RSet endth),SSet)
+    else addSen((th H is IList sorts StSet . SbSet OSet MSet ((ceq T = T' if EC [ASet metadata("added") ].) ESet) RSet endth),SSet) fi .
+--- Mbs
+ eq addSen((fmod H is IList sorts StSet . SbSet OSet MSet ESet endfm),(mb T : St [ASet]) SSet) =
+    addSen((fmod H is IList sorts StSet . SbSet OSet ((mb T : St[ASet metadata("added")].) MSet) ESet endfm),SSet) .
+ eq addSen((fth H is IList sorts StSet . SbSet OSet MSet ESet endfth),(mb T : St [ASet]) SSet) =
+    addSen((fth H is IList sorts StSet . SbSet OSet ((mb T : St[ASet metadata("added")].) MSet) ESet endfth),SSet) .
+ eq addSen((mod H is IList sorts StSet . SbSet OSet MSet ESet RSet endm),(mb T : St [ASet]) SSet) =
+    addSen((mod H is IList sorts StSet . SbSet OSet ((mb T : St[ASet metadata("added")].) MSet) ESet RSet endm),SSet) .
+ eq addSen((th H is IList sorts StSet . SbSet OSet MSet ESet RSet endth),(mb T : St [ASet]) SSet) =
+    addSen((th H is IList sorts StSet . SbSet OSet ((mb T : St[ASet metadata("added")].) MSet) ESet RSet endth),SSet) .
+---
+ eq addSen((fmod H is IList sorts StSet . SbSet OSet MSet ESet endfm),(cmb T : St if EC[ASet]) SSet) =
+    addSen((fmod H is IList sorts StSet . SbSet OSet ((cmb T : St if EC[ASet metadata("added")].) MSet) ESet endfm),SSet) .
+ eq addSen((fth H is IList sorts StSet . SbSet OSet MSet ESet endfth),(cmb T : St if EC[ASet]) SSet) =
+    addSen((fth H is IList sorts StSet . SbSet OSet ((cmb T : St if EC[ASet metadata("added")].) MSet) ESet endfth),SSet) .
+ eq addSen((mod H is IList sorts StSet . SbSet OSet MSet ESet RSet endm),(cmb T : St if EC[ASet]) SSet) =
+    addSen((mod H is IList sorts StSet . SbSet OSet ((cmb T : St if EC[ASet metadata("added")].) MSet) ESet RSet endm),SSet) .
+ eq addSen((th H is IList sorts StSet . SbSet OSet MSet ESet RSet endth),(cmb T : St if EC[ASet]) SSet) =
+    addSen((th H is IList sorts StSet . SbSet OSet ((cmb T : St if EC[ASet metadata("added")].) MSet) ESet RSet endth),SSet) .
+--- Rls
+ eq addSen((fmod H is IList sorts StSet . SbSet OSet MSet ESet endfm),(rl T => T' [ASet]) SSet) =
+    if   T == T' then addSen((fmod H is IList sorts StSet . SbSet OSet MSet ESet endfm),SSet)
+    else addSen((mod H is IList sorts StSet . SbSet OSet MSet ESet (rl T => T'[ASet metadata("added") ].) endm),SSet) fi .
+ eq addSen((fth H is IList sorts StSet . SbSet OSet MSet ESet endfth),(rl T => T' [ASet]) SSet) =
+    if   T == T' then addSen((fth H is IList sorts StSet . SbSet OSet MSet ESet endfth),SSet)
+    else addSen((th H is IList sorts StSet . SbSet OSet MSet ESet (rl T => T'[ASet metadata("added") ].) endth),SSet) fi .
+ eq addSen((mod H is IList sorts StSet . SbSet OSet MSet ESet RSet endm),(rl T => T' [ASet]) SSet) =
+    if   T == T' then addSen((mod H is IList sorts StSet . SbSet OSet MSet ESet RSet endm),SSet)
+    else addSen((mod H is IList sorts StSet . SbSet OSet MSet ESet (rl T => T'[ASet metadata("added")].) RSet endm),SSet) fi .
+ eq addSen((th H is IList sorts StSet . SbSet OSet MSet ESet RSet endth),(rl T => T' [ASet]) SSet) =
+    if   T == T' then addSen((th H is IList sorts StSet . SbSet OSet MSet ESet RSet endth),SSet)
+    else addSen((th H is IList sorts StSet . SbSet OSet MSet ESet (rl T => T'[ASet metadata("added")].) RSet endth),SSet) fi .
+---
+eq addSen((fmod H is IList sorts StSet . SbSet OSet MSet ESet endfm),(crl T => T' if Co[ASet]) SSet) =
+    if   T == T' then addSen((fmod H is IList sorts StSet . SbSet OSet MSet ESet endfm),SSet)
+    else addSen((mod H is IList sorts StSet . SbSet OSet MSet ESet (crl T => T' if Co[ASet metadata("added")].)endm),SSet) fi .
+ eq addSen((fth H is IList sorts StSet . SbSet OSet MSet ESet endfth),(crl T => T' if Co[ASet]) SSet) =
+    if   T == T' then addSen((fth H is IList sorts StSet . SbSet OSet MSet ESet endfth),SSet)
+    else addSen((th H is IList sorts StSet . SbSet OSet MSet ESet (crl T => T' if Co[ASet metadata("added")].)endth),SSet) fi .
+ eq addSen((mod H is IList sorts StSet . SbSet OSet MSet ESet RSet endm),(crl T => T' if Co[ASet]) SSet) =
+    if   T == T' then addSen((mod H is IList sorts StSet . SbSet OSet MSet ESet RSet endm),SSet)
+    else addSen((mod H is IList sorts StSet . SbSet OSet MSet ESet (crl T => T' if Co[ASet metadata("added")].) RSet endm),SSet) fi .
+ eq addSen((th H is IList sorts StSet . SbSet OSet MSet ESet RSet endth),(crl T => T' if Co[ASet]) SSet) =
+    if   T == T' then addSen((th H is IList sorts StSet . SbSet OSet MSet ESet RSet endth),SSet)
+    else addSen((th H is IList sorts StSet . SbSet OSet MSet ESet (crl T => T' if Co[ASet metadata("added")].) RSet endth),SSet) fi .
+--- -------------------------------------------------------------------------
+--- index of a qid
+--- -------------------------------------------------------------------------
+ op index : Qid -> FindResult .
+ ceq index(Q) = if F :: Nat then
+     if   find(substr(Str, s find(Str,"#",0),length(Str)),"#",0) :: Nat then
+          index(qid(substr(Str,s find(Str,"#",0),length(Str))))  
+     else rat(substr(Str,s find(Str,"#",0),length(Str)),10) fi
+     else 0 fi
+ if Str := string(Q) /\ F := find(Str,"#",0) .
+--- -------------------------------------------------------------------------
+--- index of a module
+--- -------------------------------------------------------------------------
+ op maxIndex : Module -> Nat .
+  eq maxIndex(M) = maxIndex(getOps(M)).
+ ---
+ op maxIndex : OpDeclSet -> Nat .
+  eq maxIndex(none) = 0 .
+  eq maxIndex(op Q : TpL -> Tp [ASet]. ) = index(Q).
+  eq maxIndex(Op Od OSet) = if (maxIndex(Op) >= maxIndex(Od)) 
+     then maxIndex(Op OSet) else maxIndex(Od OSet) fi .
+--- -------------------------------------------------------------------------
+--- get variables of equation
+--- -------------------------------------------------------------------------
+ op _||_ : TermList TermList -> TermList [id: empty] .
+  eq NTL || (T,TL) = if T in NTL then NTL || TL else (NTL,T) || TL fi .
+--- -------------------------------------------------------------------------
+ op _in_ : Term TermList -> Bool .
+  eq T in empty = false .
+  eq T in (T',TL) = if T == T' then true else T in TL fi .
+--- -------------------------------------------------------------------------
+ op getVar : Term -> TermList .
+  eq getVar(V) = V .
+  eq getVar(Ct) = (empty) .
+  eq getVar(Q[TL]) = getVar(TL) .
+--- -------------------------------------------------------------------------
+ op getVar : TermList -> TermList .
+  eq getVar((empty).TermList) = (empty).TermList .
+  eq getVar((T,TL)) = getVar(T) || getVar(TL) .
+--- -------------------------------------------------------------------------
+ op getVar : SentenceSet -> TermList .
+  eq getVar((none).SentenceSet) = (empty).TermList .
+---  
+  eq getVar(eq T = T'[ASet]) = getVar(T) || getVar(T') .
+  eq getVar(ceq T = T' if EC [ASet]) = (getVar(T) || getVar(T')) || getVar(EC).
+---
+  eq getVar(mb T : St[ASet]) = getVar(T).
+  eq getVar(cmb T : St if EC [ASet]) = getVar(T)  || getVar(EC).
+---
+  eq getVar(rl T => T'[ASet]) = getVar(T) || getVar(T') .
+  eq getVar(crl T => T' if Co[ASet]) = (getVar(T) || getVar(T')) || getVar(Co).
+--- -------------------------------------------------------------------------
+ op getVar : Condition -> TermList .
+  eq getVar((nil).EqCondition) = (empty).TermList .
+  eq getVar(T = T'   /\ Co) = (getVar(T) || getVar(T')) || getVar(Co) .
+  eq getVar(T := T'  /\ Co) = (getVar(T) || getVar(T')) || getVar(Co) .
+  eq getVar(T : St   /\ Co) = getVar(T)  || getVar(Co) .
+  eq getVar(T => T'  /\ Co) = (getVar(T) || getVar(T')) || getVar(Co) .
+--- -------------------------------------------------------------------------
+--- add variables to a module
+--- -------------------------------------------------------------------------
+ op addVar : Module TermList Nat -> Module .
+  eq addVar(M,empty,N) = M .
+  eq addVar(M, (T,TL),N) = if wellFormed(M,T) and (T :: Variable) then
+       addVar(addOp(M, 
+       op qid(string(getName(T)) + "#" + string(N,10)) : nil -> getType(T) [none].)
+       ,TL,N + 1) 
+     else addVar(M,TL,N) fi .
+--- -------------------------------------------------------------------------
+--- variables to substitution
+--- -------------------------------------------------------------------------
+ op v2s : TermList Nat -> Substitution .
+  eq v2s(empty,N) = none .
+  eq v2s((V,TL),N) = 
+     (V <- qid(string(getName(V)) + "#" + string(N,10) + "." + string(getType(V)))); 
+     v2s(TL,N + 1).
+  ceq v2s((T,TL),N) = v2s(TL,N) if not(T :: Variable) .
+--- -------------------------------------------------------------------------
+--- substitute constants for variables in sentences
+--- -------------------------------------------------------------------------
+ op v2c : SentenceSet Nat -> SentenceSet .
+  eq v2c(SSet,N) = SSet << v2s(getVar(SSet),N).
+ --- condition
+ op v2c : Condition Nat -> Condition .
+  eq v2c(Co,N) = Co << v2s(getVar(Co),N).
+--- -------------------------------------------------------------------------
+--- apply Substitution
+--- -------------------------------------------------------------------------
+ op _<<_ : Term Substitution -> Term .
+  eq T << none = T .
+  eq Ct << Subst = Ct .
+  eq V << ((V <- T) ; Subst) = T .
+  eq V << Subst = V [owise] .
+  eq Q[TL] << Subst = Q[TL << Subst] .
+--- Term List
+ op _<<_ : TermList Substitution -> TermList .
+  eq empty << Subst = empty .
+  eq (T, NTL) << Subst = (T << Subst, NTL << Subst) .
+--- Sentence Set
+ op _<<_ : SentenceSet Substitution -> SentenceSet .
+  eq (none).SentenceSet << Subst = (none).SentenceSet .
+---
+  eq (eq T = T' [ASet] SSet) << Subst = 
+     (eq T << Subst = T' << Subst [ASet]) (SSet << Subst).
+  eq (ceq T = T' if EC [ASet] SSet) << Subst = 
+     (ceq T << Subst = T' << Subst if EC << Subst [ASet]) (SSet << Subst).
+---
+  eq (mb T : St [ASet] SSet) << Subst = 
+     (mb T << Subst : St [ASet]) (SSet << Subst).
+  eq (cmb T : St if EC [ASet] SSet) << Subst = 
+     (cmb T << Subst : St if EC << Subst [ASet]) (SSet << Subst). 
+---
+ eq (rl T => T' [ASet] SSet) << Subst = 
+    (rl T << Subst => T' << Subst [ASet]) (SSet << Subst).
+ eq (crl T => T' if Co [ASet] SSet) << Subst = 
+    (crl T << Subst => T' << Subst if Co << Subst [ASet]) (SSet << Subst).
+--- condition
+ op _<<_ : Condition Substitution -> EqCondition .
+  eq (nil).EqCondition << Subst = (nil).EqCondition .
+  eq (T = T'  /\ Co)   << Subst = (T << Subst = T' << Subst)  /\ (Co << Subst).
+  eq (T := T' /\ Co)   << Subst = (T << Subst := T' << Subst) /\ (Co << Subst).
+  eq (T : St  /\ Co)   << Subst = (T << Subst : St)           /\ (Co << Subst).
+  eq (T => T'  /\ Co)  << Subst = (T << Subst => T' << Subst) /\ (Co << Subst).
+--- equation
+op _<<_ : Equation Substitution -> Equation .
+ eq (eq T = T' [ASet].) << Subst = 
+    (eq T << Subst = T' << Subst [ASet] .).
+ eq (ceq T = T' if EC [ASet].) << Subst = 
+    (ceq T << Subst = T' << Subst if EC << Subst [ASet].).
+--- equation set
+ op _<<_ : EquationSet Substitution -> EquationSet .
+ eq (none).EquationSet << Subst = (none).EquationSet .
+ eq (E ESet) << Subst = (E << Subst) (ESet << Subst) .
+--- membership
+ op _<<_ : MembAx Substitution -> MembAx .
+  eq (mb T : St [ASet].) << Subst = 
+     (mb T << Subst : St [ASet] .).
+  eq (cmb T : St if EC [ASet].) << Subst = 
+     (cmb T << Subst : St if EC << Subst [ASet].). 
+--- membership set
+ op _<<_ : MembAxSet Substitution -> MembAxSet .
+  eq (none).MembAxSet << Subst = (none).MembAxSet .
+  eq (Mx MSet) << Subst = (Mx << Subst) (MSet << Subst) .
+--- rule
+op _<<_ : Rule Substitution -> Rule .
+ eq (rl T => T' [ASet].) << Subst = 
+    (rl T << Subst => T' << Subst [ASet].).
+ eq (crl T => T' if Co [ASet].) << Subst = 
+    (crl T << Subst => T' << Subst if Co << Subst [ASet].).
+--- rule set
+ op _<<_ : RuleSet Substitution -> RuleSet .
+ eq (none).RuleSet << Subst = (none).RuleSet .
+ eq (R RSet) << Subst = (R << Subst) (RSet << Subst) .
+--- -------------------------------------------------------------------------
+--- metaRed & metaGRed
+--- -------------------------------------------------------------------------
+var RP : [ResultPair] .
+---
+ op metaRed : Module Term -> Term .
+ ceq metaRed(M,T) = if RP :: ResultPair then getTerm(RP) else T fi     
+     if RP := metaReduce(M,T) .
+--- Term
+  op metaGRed : Module Term -> Term .
+  eq metaGRed(M,T) = if T :: GroundTerm then metaRed(M,T) else T fi . 
+--- Sentence Set
+ op metaGRed : Module SentenceSet -> SentenceSet .
+ eq metaGRed(M,(none).SentenceSet) = (none).SentenceSet . 
+ eq metaGRed(M,eq T = T' [ASet] SSet) = 
+    (eq metaGRed(M,T) = metaGRed(M,T') [ASet]) metaGRed(M,SSet).
+ eq metaGRed(M,ceq T = T' if EC [ASet] SSet) = 
+    (ceq metaGRed(M,T) = metaGRed(M,T') if metaGRed(M,EC) [ASet]) metaGRed(M,SSet).
+--- 
+ eq metaGRed(M,mb T : St [ASet] SSet) = 
+    (mb metaGRed(M,T) : St [ASet]) metaGRed(M,SSet).
+ eq metaGRed(M,cmb T : St if EC [ASet] SSet) = 
+    (cmb metaGRed(M,T) : St if metaGRed(M,EC) [ASet]) metaGRed(M,SSet).
+---
+ eq metaGRed(M,rl T => T' [ASet] SSet) = 
+    (rl metaGRed(M,T) => metaGRed(M,T')[ASet]) metaGRed(M,SSet).
+ eq metaGRed(M,crl T => T' if Co [ASet] SSet) = 
+    (crl metaGRed(M,T) => metaGRed(M,T') if metaGRed(M,Co)[ASet]) metaGRed(M,SSet).
+--- condition
+op metaGRed : Module Condition -> Condition .
+ eq metaGRed(M,(nil).EqCondition) = (nil).EqCondition .
+ eq metaGRed(M,T = T' /\ Co) = 
+    (metaGRed(M,T) = metaGRed(M,T') /\ metaGRed(M,Co)).
+ eq metaGRed(M,T := T' /\ Co) = 
+    (metaGRed(M,T) := metaGRed(M,T') /\ metaGRed(M,Co)).
+ eq metaGRed(M,T : St /\ Co) = 
+    (metaGRed(M,T) : St /\ metaGRed(M,Co)).
+ eq metaGRed(M,T => T' /\ Co) = 
+    (metaGRed(M,T) => metaGRed(M,T') /\ metaGRed(M,Co)).
+--- -------------------------------------------------------------------------
+--- pick the lefthand side of a sentence
+--- -------------------------------------------------------------------------
+ op firstTerm : SentenceSet -> Term .
+  eq firstTerm(none) = (empty).TermList .
+  eq firstTerm(eq T = T'[ASet] SSet) = T .
+  eq firstTerm(ceq T = T' if EC[ASet] SSet) = T .
+  eq firstTerm(mb T : St [ASet] SSet) = T .
+  eq firstTerm(cmb T : St if EC [ASet] SSet) = T .
+  eq firstTerm(rl T => T' [ASet] SSet) = T .
+  eq firstTerm(crl T => T' if Co[ASet] SSet) = T .
+--- -------------------------------------------------------------------------
+--- Goal
+--- -------------------------------------------------------------------------
+ sort Label .
+ ops TL CT : -> Label .
+ sorts Goal NeGoalSet GoalSet .
+ subsort Goal < NeGoalSet < GoalSet .
+ op <_,_,_> : Module SentenceSet Label -> Goal [ctor].
+ op emptyGoalSet : -> GoalSet [ctor] .
+ op __ : GoalSet GoalSet -> GoalSet [ctor assoc comm id: emptyGoalSet] .
+ op __ : GoalSet NeGoalSet -> NeGoalSet [ctor assoc comm id: emptyGoalSet] .
+ op __ : NeGoalSet GoalSet -> NeGoalSet [ctor assoc comm id: emptyGoalSet] .
+--- -------------------------------------------------------------------------
+--- reduction
+--- -------------------------------------------------------------------------  
+ var GSet : GoalSet .   var L : Label .
+---
+op red : GoalSet -> GoalSet .
+ eq red(emptyGoalSet) = emptyGoalSet .
+ eq red(< M,SSet, L > GSet) = < M,metaGRed(M,SSet),L > red(GSet) . 
+--- -------------------------------------------------------------------------
+endfm
+--- -------------------------------------------------------------------------
+
+--- -------------------------------------------------------------------------
+--- -------------------------------------------------------------------------
+fmod #IMPLICATION# is 
+ inc #LIBRARY# .
+---
+ var G : Goal .         var GSet : GoalSet .
+ var M : Module .       var L : Label .
+ var Sen : Sentence .   var SSet : SentenceSet .
+ var EC : EqCondition . vars T T' T1 T2 : Term .
+ var ASet : AttrSet .   vars St St' : Sort .
+ var Co : Condition .
+--- -------------------------------------------------------------------------
+ op imp : GoalSet -> GoalSet .
+--- -------------------------------------------------------------------------
+ eq imp(emptyGoalSet) = emptyGoalSet .
+---
+ ceq imp(G GSet)  = imp(G) imp(GSet) if GSet =/= emptyGoalSet .
+---
+ eq imp(< M,(none).SentenceSet,L >)  = emptyGoalSet .
+---
+ ceq imp(< M,Sen SSet,L >) = imp(< M,Sen,L >) imp(< M,SSet,L >) if SSet =/= (none).SentenceSet .
+--- Equation
+ eq  imp(< M,eq T = T'[ASet],L >) = < M,eq T = T'[ASet],L > .
+ eq  imp(< M,ceq T = T' if nil[ASet],L >) = < M,eq T = T'[ASet],L > .
+ ceq imp(< M,ceq T = T' if EC [ASet],L >) = if (getVar(EC) == empty) 
+         then implication(< M,ceq T = T' if EC [ASet],L >)
+         else < M,ceq T = T' if EC [ASet],L > fi 
+     if EC =/= nil .
+--- Mbs
+  eq  imp(< M,mb T : St [ASet],L >) = < M,mb T : St [ASet],L > .
+  eq  imp(< M,(cmb T : St if nil [ASet]),L >) = < M,mb T : St[ASet],L > .
+  ceq imp(< M,cmb T : St if EC [ASet],L >) = if (getVar(EC) == empty) 
+         then implication(< M,cmb T : St if EC [ASet],L >)
+         else < M,cmb T : St if EC [ASet],L > fi 
+      if EC =/= nil .
+--- Rls
+ eq  imp(< M,rl T => T' [ASet],L >) = < M,rl T => T' [ASet],L > .
+ eq  imp(< M,(crl T => T' if nil [ASet]),L >) = < M,rl T => T' [ASet],L > .
+ ceq imp(< M,crl T => T' if Co [ASet],L >) = if (getVar(Co) == empty) 
+        then implication(< M,crl T => T' if Co [ASet],L >)
+        else < M,crl T => T' if Co [ASet],L > fi 
+     if Co =/= nil .
+--- -------------------------------------------------------------------------
+ op implication : Goal -> GoalSet .
+--- Equation
+ eq implication(< M,ceq T1 = T2 if nil [ASet],L >) = < M,eq T1 = T2 [ASet],L > .
+ eq implication(< M,ceq T1 = T2 if T = T' /\ EC [ASet],L >) = 
+    implication(< addSen(M,eq metaGRed(M,T) = metaGRed(M,T')[none]),ceq T1 = T2 if EC [ASet],L >).
+ eq implication(< M,ceq T1 = T2 if T := T' /\ EC[ASet],L >) = 
+    implication(< addSen(M,eq metaGRed(M,T') = metaGRed(M,T)[none]),ceq T1 = T2 if EC [ASet],L >).
+ eq implication(< M,ceq T1 = T2 if T : St  /\ EC[ASet],L >) = 
+    implication(< addSen(M,mb metaGRed(M,T) : St [none]),ceq T1 = T2 if EC [ASet],L >) .
+--- Membership
+ eq implication(< M,cmb T : St if nil [ASet],L >) = < M,mb T : St [ASet],L > .
+ eq implication(< M,cmb T : St if T1 = T2 /\ EC[ASet],L >) = 
+    implication(< addSen(M,eq metaGRed(M,T1) = metaGRed(M,T2)[none]),cmb T : St if EC [ASet],L >).
+ eq implication(< M,cmb T : St if T1 := T2 /\ EC[ASet],L >) = 
+    implication(< addSen(M,eq metaGRed(M,T2) = metaGRed(M,T1)[none]),cmb T : St if EC [ASet],L >).
+ eq implication(< M,cmb T : St if T' : St'  /\ EC [ASet],L >) = 
+    implication(< addSen(M,mb metaGRed(M,T') : St' [none]),cmb T : St if EC [ASet],L >) .
+--- Rls
+ eq implication(< M,crl T1 => T2 if nil [ASet],L >) = < M,rl T1 => T2 [ASet],L > .
+ eq implication(< M,crl T1 => T2 if T = T' /\ Co [ASet],L >) = 
+    implication(< addSen(M,eq metaGRed(M,T)= metaGRed(M,T')[none]), crl T1 => T2 if Co[ASet],L >).
+ eq implication(< M,crl T1 => T2 if T := T' /\ Co [ASet],L >) = 
+    implication(< addSen(M,eq metaGRed(M,T') = metaGRed(M,T)[none]),crl T1 => T2 if Co[ASet],L >).
+ eq implication(< M,crl T1 => T2 if T : St  /\ Co [ASet],L >) = 
+    implication(< addSen(M,mb metaGRed(M,T) : St [none]), crl T1 => T2 if Co[ASet],L >) .
+ eq implication(< M,crl T1 => T2 if T => T' /\ Co [ASet],L >) = 
+    implication(< addSen(M,rl metaGRed(M,T)=> metaGRed(M,T')[none]),crl T1 => T2 if Co[ASet],L >).
+--- -------------------------------------------------------------------------
+endfm
+--- -------------------------------------------------------------------------
+
+--- -------------------------------------------------------------------------
+--- -------------------------------------------------------------------------
+fmod #THEOREM-OF-CONSTANTS# is
+ inc #LIBRARY# .
+ var ASet : AttrSet . 
+ var Sen : Sentence .  var SSet : SentenceSet .
+ var M : Module .      var L : Label .
+ var G : Goal .        var GSet : GoalSet .
+--- -------------------------------------------------------------------------
+ op tc : GoalSet -> GoalSet .
+--- -------------------------------------------------------------------------
+ eq tc(emptyGoalSet) = emptyGoalSet .
+ ceq tc(G GSet)  = tc(G) tc(GSet) if GSet =/= emptyGoalSet .
+ eq tc(< M,(none).SentenceSet,L >) = emptyGoalSet .
+ eq tc(< M,Sen, L >) = < addVar(M,getVar(Sen), maxIndex(M)+ 1),v2c(Sen,maxIndex(M)+ 1), L > .
+ ceq tc(< M,Sen SSet,L >) = tc(< M,Sen,L >) tc(< M,SSet,L >) if SSet =/= (none).SentenceSet .
+--- -------------------------------------------------------------------------
+endfm
+--- -------------------------------------------------------------------------
+
+--- -------------------------------------------------------------------------
+--- -------------------------------------------------------------------------
+fmod #CASE-ANALYSIS# is 
+ inc #LIBRARY# .
+---
+ var MP : [MatchPair] .
+ var E : Equation .       var ESet : EquationSet .
+ var Mx : MembAx .        var MxSet : MembAxSet .
+ var R : Rule .           var RSet : RuleSet .
+ var Sen : Sentence .
+ var SSet SeSet SnSet ScSet : SentenceSet .
+ var Co : Condition .     var M : Module .
+ vars T T' T1 T2 : Term . var TL : TermList .
+ var GT : GroundTerm .    var GTL : GroundTermList .
+ var V : Variable .       var EC : EqCondition .
+ var St : Sort .          var Subst : Substitution .
+ var ASet : AttrSet .     var N : Nat .
+ var G : Goal .           var GSet : GoalSet .
+ var Str : String .       vars L Lb : Label .
+--- -------------------------------------------------------------------------
+--- get equations for case analysis
+--- -------------------------------------------------------------------------
+--- Equation 
+ op  CA? : Equation -> Bool .
+  ceq CA?(eq T = T' [metadata(Str) ASet] .)= true if rfind(Str,"CA-",length(Str))=/= notFound .
+  ceq CA?(ceq T = T' if EC [metadata(Str) ASet] .)= true 
+      if rfind(Str,"CA-",length(Str)) =/= notFound .
+  eq CA?(E) = false [owise].
+---
+  op getCA : EquationSet -> SentenceSet .
+   eq getCA((none).EquationSet) = (none).SentenceSet .
+   eq getCA(E ESet) = if CA?(E) then conv(E) getCA(ESet) else getCA(ESet) fi .
+--- Membership
+ op  CA? : MembAx -> Bool .
+  ceq CA?(mb T : St [metadata(Str) ASet].)= true if rfind(Str,"CA-",length(Str)) =/= notFound .
+  ceq CA?(cmb T : St if EC [metadata(Str) ASet] .) = true
+      if rfind(Str,"CA-",length(Str)) =/= notFound .
+  eq CA?(Mx) = false [owise].
+---
+ op getCA : MembAxSet -> SentenceSet .
+   eq getCA((none).MembAxSet) = (none).SentenceSet .
+   eq getCA(Mx MxSet) = if CA?(Mx) then conv(Mx) getCA(MxSet) else getCA(MxSet) fi .
+--- Rule
+ op  CA? : Rule -> Bool .
+  ceq CA?(rl T => T' [metadata(Str) ASet].)= true if rfind(Str,"CA-",length(Str)) =/= notFound .
+  ceq CA?(crl T => T' if Co [metadata(Str) ASet].)= true
+      if rfind(Str,"CA-",length(Str)) =/= notFound .
+  eq CA?(R) = false [owise].
+---
+ op getCA : RuleSet -> SentenceSet .
+   eq getCA((none).RuleSet) = (none).SentenceSet .
+   eq getCA(R RSet) = if CA?(R) then 
+      conv(R) getCA(RSet) else getCA(RSet) fi .
+--- Module
+ op getCA : Module -> SentenceSet .
+   eq getCA(M) = getCA(getEqs(M)) getCA(getMbs(M)) getCA(getRls(M)) .
+--- -------------------------------------------------------------------------
+--- remove sentences with a given left-hand-side
+--- -------------------------------------------------------------------------
+ op rmSen : SentenceSet Term -> SentenceSet .
+ eq rmSen((none).SentenceSet,T) = (none).SentenceSet .
+--- Equation
+ eq rmSen((eq T1 = T2 [ASet]) SSet,T) = if (T1 == T) 
+    then rmSen(SSet,T) else (eq T1 = T2 [ASet]) rmSen(SSet,T) fi .  
+ eq rmSen((ceq T1 = T2 if EC[ASet]) SSet, T) = if (T1 == T)
+     then rmSen(SSet,T) else (ceq T1 = T2 if EC[ASet]) rmSen(SSet,T) fi .
+--- Membership
+ eq rmSen((mb T : St [ASet]) SSet, T') = if (T == T') 
+    then rmSen(SSet,T') else (mb T : St [ASet]) rmSen(SSet,T') fi . 
+ eq rmSen((cmb T : St if EC [ASet]) SSet, T') = if T == T' 
+     then rmSen(SSet,T') else (cmb T : St if EC [ASet]) rmSen(SSet,T') fi .
+--- Rls
+ eq rmSen((rl T1 => T2 [ASet]) SSet,T) = if (T1 == T) 
+    then rmSen(SSet,T) else (rl T1 => T2 [ASet]) rmSen(SSet,T) fi .  
+ eq rmSen((crl T1 => T2 if Co [ASet]) SSet,T) = if (T1 == T)
+    then rmSen(SSet,T) else (crl T1 => T2 if Co[ASet]) rmSen(SSet,T) fi .
+--- -------------------------------------------------------------------------
+--- keep sentences with a given left-hand-side
+--- -------------------------------------------------------------------------
+ op getSen : SentenceSet Term -> SentenceSet .
+ eq getSen((none).SentenceSet, T) = (none).SentenceSet .
+--- Equation
+ eq getSen((eq T1 = T2 [ASet]) SSet, T) = if (T1 == T) 
+    then (eq T1 = T2 [ASet]) getSen(SSet,T) else getSen(SSet,T) fi .
+ eq getSen((ceq T1 = T2 if EC [ASet]) SSet, T) = if (T1 == T) 
+    then (ceq T1 = T2 if EC [ASet]) getSen(SSet,T) else getSen(SSet,T) fi .
+--- Membership
+ eq getSen((mb T : St [ASet]) SSet, T') = if (T == T') 
+    then (mb T : St [ASet]) getSen(SSet,T') else getSen(SSet,T') fi .
+ eq getSen((cmb T : St if EC [ASet]) SSet, T') = if (T == T') 
+    then (cmb T : St if EC[ASet]) getSen(SSet,T') else getSen(SSet,T') fi .
+--- Rule
+ eq getSen((rl T1 => T2 [ASet]) SSet, T) = if (T1 == T) 
+    then (rl T1 => T2 [ASet]) getSen(SSet,T) else getSen(SSet,T) fi .
+ eq getSen((crl T1 => T2 if Co [ASet]) SSet, T) = if (T1 == T) 
+    then (crl T1 => T2 if Co [ASet]) getSen(SSet,T) else getSen(SSet,T) fi .
+--- -------------------------------------------------------------------------
+--- adding Condition to Module
+--- -------------------------------------------------------------------------
+ op addCond : Module Condition -> Module .
+  eq addCond(M,Co) = adCond(addVar(M,getVar(Co),maxIndex(M)+ 1),v2c(Co,maxIndex(M)+ 1)).
+---
+ op adCond : Module Condition -> Module .
+  eq adCond(M,nil) = M .
+  eq adCond(M,T  = T' /\ Co) = adCond(addSen(M,eq metaGRed(M,T) = metaGRed(M,T')[none]),Co).
+  eq adCond(M,T := T' /\ Co) = adCond(addSen(M,eq metaGRed(M,T') = T [none]),Co).
+  eq adCond(M,T : St  /\ Co) = adCond(addSen(M,mb metaGRed(M,T) : St [none]),Co).
+  eq adCond(M,T => T' /\ Co) = adCond(addSen(M,rl metaGRed(M,T) => metaGRed(M,T')[none]),Co).
+--- -------------------------------------------------------------------------
+--- validate substitution
+--- (second term is obtained by applying substitution under analysis to first term)
+--- -------------------------------------------------------------------------
+ op validate : Module Term Term -> Bool .
+ eq validate(M,T,T') =
+    if metaXmatch(M,T,T',nil,1,unbounded,0) :: MatchPair then false else true fi .
+--- 
+ op validate : Module SentenceSet Term -> Bool .
+ eq validate(M,(none).SentenceSet,T) = true .
+--- Equation
+ eq validate(M,(eq T1 = T2 [ASet]) SSet,T) =
+    validate(M,T1,T) and validate(M,SSet,T).
+ eq validate(M,(ceq T1 = T2 if EC [ASet]) SSet,T) =
+    validate(M,T1,T) and validate(M,SSet,T).
+--- Membership
+ eq validate(M,(mb T : St [ASet]) SSet,T') =
+    validate(M,T,T') and validate(M,SSet,T').
+ eq validate(M,(cmb T : St if EC [ASet]) SSet,T') =
+    validate(M,T,T') and validate(M,SSet,T').
+--- Rule
+ eq validate(M,(rl T1 => T2 [ASet]) SSet,T) =
+    validate(M,T1,T) and validate(M,SSet,T).
+ eq validate(M,(crl T1 => T2 if Co [ASet]) SSet,T) =
+    validate(M,T1,T) and validate(M,SSet,T).
+--- -------------------------------------------------------------------------
+--- splitting the goal (case analysis)
+--- -------------------------------------------------------------------------
+op split : Goal SentenceSet Nat GroundTerm SentenceSet -> GoalSet .
+ eq split(emptyGoalSet,SeSet,N,GT,SnSet)= emptyGoalSet .
+ eq split(G,none,N,GT,SnSet) = G .
+ ceq split(< M,SSet,L >,SeSet,N,GT,SnSet) = 
+  if MP :: MatchPair 
+  then if validate(M,SnSet,T << getSubstitution(MP)) 
+       then split-h(< M,SSet,L >,SeSet,N,GT,SnSet,getSen(SeSet,T)<< getSubstitution(MP))
+       else split(< M,SSet,L >,SeSet,N + 1,GT,SnSet) fi
+  else split(< M,SSet,L >,rmSen(SeSet,T),0,GT,SnSet) fi
+ if T := firstTerm(SeSet) /\ MP := metaXmatch(M,T,GT,nil,0,unbounded,N).
+--- -------------------------------------------------------------------------
+op split-h : Goal SentenceSet Nat GroundTerm SentenceSet SentenceSet -> GoalSet .
+ eq split-h(G,SeSet,N,GT,SnSet,none) = emptyGoalSet .
+--- Equation
+ eq split-h(< M,SSet,L >,SeSet,N,GT,SnSet,(ceq T = T' if EC [ASet]) ScSet) = 
+    split(< addCond(M,EC),SSet,L >,SeSet,N + 1,GT,SnSet) 
+    split-h(< M,SSet,L >,SeSet,N,GT,SnSet,ScSet).
+--- 
+  eq split-h(< M,SSet,L >,SeSet,N,GT,SnSet,(eq T = T'[ASet]) ScSet) = 
+     split(< M,SSet,L >,SeSet,N + 1,GT,SnSet) 
+     split-h(< M,SSet,L >,SeSet,N,GT,SnSet,ScSet).
+--- Membership
+ eq split-h(< M,SSet,L >,SeSet,N,GT,SnSet,(cmb T : St if EC [ASet]) ScSet) = 
+    split(< addCond(M,EC),SSet,L >,SeSet,N + 1,GT,SnSet) 
+    split-h(< M,SSet,L >,SeSet,N,GT,SnSet,ScSet).
+ --- 
+  eq split-h(< M,SSet,L >,SeSet,N,GT,SnSet,(mb T : St [ASet]) ScSet) = 
+     split(< M,SSet,L >,SeSet,N + 1,GT,SnSet) 
+     split-h(< M,SSet,L >,SeSet,N,GT,SnSet,ScSet).
+ --- Rule
+ eq split-h(< M,SSet,L >,SeSet,N,GT,SnSet,(crl T => T' if Co [ASet]) ScSet) = 
+    split(< addCond(M,Co),SSet,L >,SeSet,N + 1,GT,SnSet) 
+    split-h(< M,SSet,L >,SeSet,N,GT,SnSet,ScSet).
+--- 
+  eq split-h(< M,SSet,L >,SeSet,N,GT,SnSet,(rl T => T' [ASet]) ScSet) = 
+     split(< M,SSet,L >,SeSet,N + 1,GT,SnSet) 
+     split-h(< M,SSet,L >,SeSet,N,GT,SnSet,ScSet).
+--- -------------------------------------------------------------------------
+---  get GroundTerm ---
+--- -------------------------------------------------------------------------
+op _@_ : GroundTermList  TermList -> GroundTermList .
+ eq GTL @ (empty).TermList = GTL .
+ eq GTL @ (T,TL) = if T :: GroundTerm then GTL,T @ TL else GTL @ TL fi .
+---
+op getGTerm : SentenceSet -> GroundTermList .
+ eq getGTerm(none) = empty .
+ eq getGTerm(SSet eq T = T' [ASet]) = getGTerm(SSet) @ (T,T') .
+ eq getGTerm(SSet (ceq T = T' if EC[ASet])) = (getGTerm(SSet) @ (T,T')) @ getGTerm(EC).
+ eq getGTerm(SSet mb T : St [ASet]) = getGTerm(SSet) @ T .
+ eq getGTerm(SSet (cmb T : St if EC[ASet])) = (getGTerm(SSet) @ T) @ getGTerm(EC).
+ eq getGTerm(SSet rl T => T' [ASet]) = getGTerm(SSet) @ (T,T') .
+ eq getGTerm(SSet (crl T => T' if Co [ASet])) = (getGTerm(SSet) @ (T,T')) @ getGTerm(Co).
+---
+op getGTerm : Condition -> GroundTermList .
+ eq getGTerm(nil) = empty .
+ eq getGTerm(Co /\ T = T')  = getGTerm(Co) @ (T,T').
+ eq getGTerm(Co /\ T := T') = getGTerm(Co) @ (T',T).
+ eq getGTerm(Co /\ T : St) = getGTerm(Co) @ T .
+ eq getGTerm(Co /\ T => T') = getGTerm(Co) @ (T,T') .
+--- -------------------------------------------------------------------------
+--- check match ---
+--- -------------------------------------------------------------------------
+op match? : Module SentenceSet GroundTerm -> Bool .
+ eq match?(M,none,GT) = false .
+--- Equation
+ eq match?(M,eq T = T' [ASet] SSet,GT)= if metaXmatch(M,T,GT,nil,0,unbounded,0) :: MatchPair 
+    then true else match?(M,SSet,GT) fi .
+ eq match?(M,ceq T = T' if EC [ASet] SSet,GT)= if metaXmatch(M,T,GT,nil,0,unbounded,0) :: MatchPair 
+    then true else match?(M,SSet,GT) fi .
+--- Membership
+ eq match?(M,mb T : St[ASet] SSet,GT)= if metaXmatch(M,T,GT,nil,0,unbounded,0) :: MatchPair 
+    then true else match?(M,SSet,GT) fi .
+ eq match?(M,cmb T : St if EC [ASet] SSet,GT)= if metaXmatch(M,T,GT,nil,0,unbounded,0) :: MatchPair 
+    then true else match?(M,SSet,GT) fi .
+--- Rule
+ eq match?(M,rl T => T'[ASet] SSet,GT)= if metaXmatch(M,T,GT,nil,0,unbounded,0) :: MatchPair 
+    then true else match?(M,SSet,GT) fi .
+ eq match?(M,crl T => T' if Co [ASet] SSet,GT)= if metaXmatch(M,T,GT,nil,0,unbounded,0) :: MatchPair 
+    then true else match?(M,SSet,GT) fi .
+--- -------------------------------------------------------------------------
+op ca : GoalSet -> GoalSet .
+--- -------------------------------------------------------------------------
+ eq ca(emptyGoalSet) = emptyGoalSet .
+---
+ ceq ca(G GSet)  = ca(G) ca(GSet) if GSet =/= emptyGoalSet .
+---
+ eq ca(< M,(none).SentenceSet,L >) = emptyGoalSet .
+---
+ eq ca(< M,Sen SSet,L >) = ca(< M,Sen,L >,getGTerm(Sen)) ca(< M,SSet,L >).
+--- -------------------------------------------------------------------------
+op ca : Goal GroundTermList -> GoalSet .
+--- -------------------------------------------------------------------------
+ eq ca(G,empty) = G .
+ eq ca(emptyGoalSet,GTL) = emptyGoalSet . 
+ eq ca(< M,Sen,L >,(GT,GTL)) = if match?(M,getCA(M),GT) then 
+    split(< M,Sen,L >,getCA(M),0,GT,getCA(M)) else ca(< M,Sen,L >,GTL) fi .
+--- -------------------------------------------------------------------------
+--- -------------------------------------------------------------------------
+op getGTerm-1 : SentenceSet -> GroundTermList .
+ eq getGTerm-1(none) = empty .
+ eq getGTerm-1(SSet eq T = T' [ASet]) = getGTerm-1(SSet) @ (T',T) .
+ eq getGTerm-1(SSet (ceq T = T' if EC[ASet])) = (getGTerm-1(SSet) @ getGTerm(EC)) @ (T',T).
+ eq getGTerm-1(SSet mb T : St [ASet]) = getGTerm-1(SSet) @ T .
+ eq getGTerm-1(SSet (cmb T : St if EC[ASet])) = (getGTerm-1(SSet) @ getGTerm(EC)) @ T .
+ eq getGTerm-1(SSet rl T => T' [ASet]) = getGTerm-1(SSet) @ (T',T) .
+ eq getGTerm-1(SSet (crl T => T' if Co [ASet])) = (getGTerm-1(SSet) @ getGTerm(Co)) @ (T',T).
+--- -------------------------------------------------------------------------
+op ca-1 : GoalSet -> GoalSet .
+--- -------------------------------------------------------------------------
+ eq ca-1(emptyGoalSet) = emptyGoalSet .
+---
+ ceq ca-1(G GSet)  = ca-1(G) ca-1(GSet) if GSet =/= emptyGoalSet .
+---
+ eq ca-1(< M,(none).SentenceSet,L >) = emptyGoalSet .
+---
+ eq ca-1(< M,Sen SSet,L >) = ca(< M,Sen,L >,getGTerm-1(Sen)) ca-1(< M,SSet,L >).
+--- -------------------------------------------------------------------------
+endfm
+--- -------------------------------------------------------------------------
+
+
+--- -------------------------------------------------------------------------
+--- #INDUCTION# ---
+--- -------------------------------------------------------------------------
+fmod #INDUCTION# is 
+ inc #LIBRARY# .
+ var M : Module .         var ASet : AttrSet .
+ vars Tp Tp' : Type .     var TpL : TypeList .
+ var Od : OpDecl .        vars OSet OdSet : OpDeclSet .
+ var Q : Qid .            var N : Nat .
+ vars T T' : Term .       var V : Variable . 
+ var GT : GroundTerm .    vars GTL GTL' : GroundTermList .
+ var NTpL : NeTypeList .  var NGTL : NeGroundTermList .
+ var ESet : EquationSet . var EC : EqCondition .
+ vars MSet : MembAxSet .  var RSet : RuleSet .
+ var E : Equation .       var Mx : MembAx .
+ var R : Rule .           var St : Sort .
+ var Str : String .       var Co : Condition .
+ var SSet : SentenceSet . 
+--- -------------------------------------------------------------------------
+--- get constructors for a given sort
+--- -------------------------------------------------------------------------
+ op getCons : Module Type -> OpDeclSet .
+ eq getCons(M,Tp) = getCons(M,getOps(M),Tp).
+---
+ op getCons : Module OpDeclSet Type -> OpDeclSet .
+ eq getCons(M,none,Tp) = none .
+ ceq getCons(M,(op Q : TpL -> Tp [ctor ASet] .) OSet,Tp') = (op Q : TpL -> Tp [ctor ASet].) getCons(M,OSet,Tp') 
+     if sortLeq(M,Tp,Tp').
+ eq getCons(M,Od OSet,Tp') = getCons(M,OSet,Tp') [owise].
+--- -------------------------------------------------------------------------
+--- list of types ---> list of constants
+--- -------------------------------------------------------------------------
+ op Tp2C : Module Nat TypeList Type -> GroundTermList .
+ eq Tp2C(M,N,(nil).TypeList,Tp') = (empty).GroundTermList . 
+ eq Tp2C(M,N,Tp TpL,Tp') = if sortLeq(M,Tp,Tp') 
+     then qid("x#" + string(N,10) + "." + string(Tp)), Tp2C(M,N + 1,TpL,Tp')
+     else qid("z#" + string(N,10) + "." + string(Tp)), Tp2C(M,N + 1,TpL,Tp') fi .
+--- -------------------------------------------------------------------------
+--- list of types ---> list of constants of types less-equal than the type of a variable  
+--- -------------------------------------------------------------------------
+ op Tp2C-v : Module Nat TypeList Type -> GroundTermList .
+ eq Tp2C-v(M,N,(nil).TypeList,Tp') = (empty).GroundTermList . 
+ eq Tp2C-v(M,N,Tp TpL,Tp') = if sortLeq(M,Tp,Tp') 
+    then qid("x#" + string(N,10) + "." + string(Tp)), Tp2C-v(M,N + 1,TpL,Tp')
+    else Tp2C-v(M,N + 1,TpL,Tp') fi .
+--- -------------------------------------------------------------------------
+--- list of constants ---> operation declaration set
+--- -------------------------------------------------------------------------
+ op C2ODS : GroundTermList -> OpDeclSet .
+ eq C2ODS(empty) = none .
+ eq C2ODS((GT,GTL)) = if GT :: Constant 
+    then (op getName(GT) : nil -> getType(GT)[none].) C2ODS(GTL)
+    else C2ODS(GTL) fi .
+--- -------------------------------------------------------------------------
+--- operation ---> ground term
+--- -------------------------------------------------------------------------
+ op Op2GT : Module OpDecl Type -> GroundTerm .
+ eq Op2GT(M,op Q : nil  -> Tp [ASet].,Tp') = qid(string(Q) + "." + string(Tp)).
+ eq Op2GT(M,op Q : NTpL -> Tp [ASet].,Tp') = Q[Tp2C(M,maxIndex(M) + 1,NTpL,Tp')].
+--- -------------------------------------------------------------------------
+--- subst constants for ind vars in the modules (ind for sets of vars) 
+--- -------------------------------------------------------------------------
+--- EquationSet
+op substitute : EquationSet Variable GroundTermList -> EquationSet .
+ eq  substitute(ESet,V,empty) = ESet .
+ eq substitute((none).EquationSet,V,GTL) = (none).EquationSet .
+ ceq substitute(eq T = T' [metadata(Str) ASet]. ESet,V,NGTL) =  
+     subst(eq T = T' [ASet].,V,NGTL) substitute(ESet,V,NGTL) 
+     if qid(substr(Str,length("induction-on-"),length(Str))) = V . 
+ ceq substitute(ceq T = T' if EC[metadata(Str) ASet]. ESet,V,NGTL) =  
+     subst(ceq T = T' if EC[ASet].,V,NGTL) substitute(ESet,V,NGTL) 
+     if qid(substr(Str,length("induction-on-"),length(Str))) = V .
+ eq substitute(E ESet,V,NGTL) = E substitute(ESet,V,NGTL) [owise].
+--- MembAxSet
+op substitute : MembAxSet Variable GroundTermList -> MembAxSet .
+ eq  substitute(MSet,V,empty) = MSet .
+ ceq substitute(mb T : St [metadata(Str) ASet]. MSet,V,NGTL) =  
+     subst(mb T : St [ASet].,V,NGTL) substitute(MSet,V,NGTL) 
+     if qid(substr(Str,length("induction-on-"),length(Str))) = V . 
+ ceq substitute(cmb T : St if EC[metadata(Str) ASet]. MSet,V,NGTL) =  
+     subst(cmb T : St if EC[ASet].,V,NGTL) substitute(MSet,V,NGTL) 
+     if qid(substr(Str,length("induction-on-"),length(Str))) = V .
+ eq substitute((none).MembAxSet,V,GTL) = (none).MembAxSet .
+ eq substitute(Mx MSet,V,NGTL) = Mx substitute(MSet,V,NGTL) [owise].
+--- RuleSet
+op substitute : RuleSet Variable GroundTermList -> RuleSet .
+ eq  substitute(RSet,V,empty) = RSet .
+ ceq substitute(rl T => T' [metadata(Str) ASet]. RSet,V,NGTL) =  
+     subst(rl T => T' [ASet].,V,NGTL) substitute(RSet,V,NGTL) 
+     if qid(substr(Str,length("induction-on-"),length(Str))) = V . 
+ ceq substitute(crl T => T' if Co[metadata(Str) ASet]. RSet,V,NGTL) =  
+     subst(crl T => T' if Co[ASet].,V,NGTL) substitute(RSet,V,NGTL) 
+     if qid(substr(Str,length("induction-on-"),length(Str))) = V .
+ eq substitute((none).RuleSet,V,GTL) = (none).RuleSet .
+ eq substitute(R RSet,V,NGTL) = R substitute(RSet,V,NGTL) [owise].
+--- -------------------------------------------------------------------------
+--- subst constants for ind vars ---> ind hypothesis
+--- -------------------------------------------------------------------------
+--- Equation
+op subst : EquationSet Variable GroundTermList -> EquationSet .
+ eq  subst((none).EquationSet,V,GTL) = (none).EquationSet .
+ eq  subst(ESet,V,empty) = (none).EquationSet .
+ eq  subst(eq T = T' [ASet]. ESet,V,(GT,GTL)) = if T << (V <- GT) == T' << (V <- GT) 
+     then subst(eq T = T'[ASet].,V,GTL) subst(ESet,V,(GT,GTL))
+     else (eq T << (V <- GT) = T' << (V <- GT)[ASet].) subst(eq T = T' [ASet].,V,GTL) subst(ESet,V,(GT,GTL)) fi .
+ eq  subst(ceq T = T' if EC [ASet]. ESet,V,(GT,GTL)) = if T << (V <- GT) == T' << (V <- GT)
+     then subst(ceq T = T' if EC[ASet].,V,GTL) subst(ESet,V,(GT,GTL))
+     else (ceq T << (V <- GT) = T' << (V <- GT) if EC << (V <- GT)[ASet].) 
+          subst(ceq T = T' if EC[ASet].,V,GTL) subst(ESet,V,(GT,GTL)) fi .
+--- Membership
+op subst : MembAxSet Variable GroundTermList -> MembAxSet .
+ eq  subst((none).MembAxSet,V,GTL) = (none).MembAxSet .
+ eq  subst(MSet,V,empty) = (none).MembAxSet .
+ eq  subst(mb T : St [ASet]. MSet,V,(GT,GTL)) =  
+     (mb T << (V <- GT) : St [ASet].) subst(mb T : St [ASet].,V,GTL) subst(MSet,V,(GT,GTL)) .
+ eq  subst(cmb T : St if EC [ASet]. MSet,V,(GT,GTL)) =
+     (cmb T << (V <- GT) : St if EC << (V <- GT)[ASet].) 
+     subst(cmb T : St if EC [ASet].,V,GTL) subst(MSet,V,(GT,GTL)) .
+--- Rule 
+ op subst : RuleSet Variable GroundTermList -> RuleSet .
+ eq  subst((none).RuleSet,V,GTL) = (none).RuleSet .
+ eq  subst(RSet,V,empty) = (none).RuleSet .
+ eq  subst(rl T => T' [ASet]. RSet,V,(GT,GTL)) = if T << (V <- GT) == T' << (V <- GT) 
+     then subst(rl T => T'[ASet].,V,GTL) subst(RSet,V,(GT,GTL))
+     else (rl T << (V <- GT) => T' << (V <- GT)[ASet].) subst(rl T => T' [ASet].,V,GTL) subst(RSet,V,(GT,GTL)) fi .
+ eq  subst(crl T => T' if Co [ASet]. RSet,V,(GT,GTL)) = if T << (V <- GT) == T' << (V <- GT)
+     then subst(crl T => T' if Co [ASet].,V,GTL) subst(RSet,V,(GT,GTL))
+     else (crl T << (V <- GT) => T' << (V <- GT) if Co << (V <- GT)[ASet].) 
+          subst(crl T => T' if Co [ASet].,V,GTL) subst(RSet,V,(GT,GTL)) fi .
+--- -------------------------------------------------------------------------
+ var H : Header .             var IList : ImportList .
+ vars StSet SrSet : SortSet . var SbSet : SubsortDeclSet .
+ var L : Label .              var TL : TermList .
+ var G : Goal .               var GSet : GoalSet . 
+--- -------------------------------------------------------------------------
+--- induction case ---
+--- -------------------------------------------------------------------------
+op indCase : Goal Variable OpDeclSet -> GoalSet .
+ eq  indCase(G,V,none) = emptyGoalSet .
+---
+ ceq indCase(< M,SSet,L >,V,op Q : TpL -> Tp [ASet]. OSet) = if convR(SSet) == none
+   then
+        ind(<(fmod H is IList sorts StSet . SbSet 
+               OdSet C2ODS(GTL)  
+               substitute(MSet,V,(GTL',GT)) subst(convM(SSet),V,GTL')
+               substitute(ESet,V,(GTL',GT)) subst(convE(SSet),V,GTL')
+              endfm),
+        SSet << (V <- GT),L >) indCase(< M,SSet,L >,V,OSet)
+   else
+        ind(<(mod H is IList sorts StSet . SbSet 
+               OdSet C2ODS(GTL)  
+               substitute(MSet,V,(GTL',GT)) subst(convM(SSet),V,GTL')
+               substitute(ESet,V,(GTL',GT)) subst(convE(SSet),V,GTL')
+                                            subst(convR(SSet),V,GTL')
+              endm),
+        SSet << (V <- GT),L >) indCase(< M,SSet,L >,V,OSet) fi
+ if (fmod H is IList sorts StSet . SbSet OdSet MSet ESet endfm) := M /\
+    GTL  := Tp2C(M,maxIndex(M)+ 1,TpL,getType(V))   /\ 
+    GTL' := Tp2C-v(M,maxIndex(M)+ 1,TpL,getType(V)) /\ 
+    GT   := Op2GT(M,op Q : TpL -> Tp [ASet].,getType(V)).
+---
+ ceq indCase(< M,SSet,L >,V,op Q : TpL -> Tp [ASet]. OSet) = if convR(SSet) == none
+   then  
+        ind(<(fth H is IList sorts StSet . SbSet 
+               OdSet C2ODS(GTL)  
+               substitute(MSet,V,(GTL',GT)) subst(convM(SSet),V,GTL')
+               substitute(ESet,V,(GTL',GT)) subst(convE(SSet),V,GTL')
+              endfth),
+        SSet << (V <- GT),L >) indCase(< M,SSet,L >,V,OSet)
+    else
+        ind(<(th H is IList sorts StSet . SbSet 
+               OdSet C2ODS(GTL)  
+               substitute(MSet,V,(GTL',GT)) subst(convM(SSet),V,GTL')
+               substitute(ESet,V,(GTL',GT)) subst(convE(SSet),V,GTL')
+                                            subst(convR(SSet),V,GTL')
+              endth),
+        SSet << (V <- GT),L >) indCase(< M,SSet,L >,V,OSet) fi
+ if (fth H is IList sorts StSet . SbSet OdSet MSet ESet endfth) := M /\
+    GTL  := Tp2C(M,maxIndex(M)+ 1,TpL,getType(V))   /\ 
+    GTL' := Tp2C-v(M,maxIndex(M)+ 1,TpL,getType(V)) /\ 
+    GT   := Op2GT(M,op Q : TpL -> Tp [ASet].,getType(V)).
+---
+ ceq indCase(< M,SSet,L >,V,op Q : TpL -> Tp [ASet]. OSet) = 
+    ind(<(mod H is IList sorts StSet . SbSet 
+           OdSet C2ODS(GTL)  
+           substitute(MSet,V,(GTL',GT)) subst(convM(SSet),V,GTL')
+           substitute(ESet,V,(GTL',GT)) subst(convE(SSet),V,GTL')
+           substitute(RSet,V,(GTL',GT)) subst(convR(SSet),V,GTL')
+          endm),
+        SSet << (V <- GT),L >) indCase(< M,SSet,L >,V,OSet)
+ if (mod H is IList sorts StSet . SbSet OdSet MSet ESet RSet endm) := M /\
+    GTL  := Tp2C(M,maxIndex(M)+ 1,TpL,getType(V))   /\ 
+    GTL' := Tp2C-v(M,maxIndex(M)+ 1,TpL,getType(V)) /\ 
+    GT   := Op2GT(M,op Q : TpL -> Tp [ASet].,getType(V)).
+---
+ ceq indCase(< M,SSet,L >,V,op Q : TpL -> Tp [ASet]. OSet) = 
+    ind(<(th H is IList sorts StSet . SbSet 
+           OdSet C2ODS(GTL)  
+           substitute(MSet,V,(GTL',GT)) subst(convM(SSet),V,GTL')
+           substitute(ESet,V,(GTL',GT)) subst(convE(SSet),V,GTL')
+           substitute(RSet,V,(GTL',GT)) subst(convR(SSet),V,GTL')
+          endth),
+        SSet << (V <- GT),L >) indCase(< M,SSet,L >,V,OSet)
+ if (th H is IList sorts StSet . SbSet OdSet MSet ESet RSet endth) := M /\
+    GTL  := Tp2C(M,maxIndex(M)+ 1,TpL,getType(V))   /\ 
+    GTL' := Tp2C-v(M,maxIndex(M)+ 1,TpL,getType(V)) /\ 
+    GT   := Op2GT(M,op Q : TpL -> Tp [ASet].,getType(V)).
+--- -------------------------------------------------------------------------
+--- induction ---
+--- -------------------------------------------------------------------------
+ op ind : GoalSet -> GoalSet .
+---
+ eq ind(emptyGoalSet) = emptyGoalSet .
+---
+ ceq ind(G GSet)  = ind(G)  ind(GSet) if GSet =/= emptyGoalSet .
+---
+ ceq ind(< M,SSet,L >)  = if (TL :: Variable) and (getCons(M,getType(TL)) =/= none)
+      then indCase(< M,rmIV(SSet,TL),L >, TL, getCons(M,getType(TL)))
+      else < M,SSet,L > fi 
+     if TL := getIV(SSet) .
+--- ------------------------------------------------------------------------
+--- get induction variables
+--- ------------------------------------------------------------------------
+op getIV : SentenceSet -> Variable .
+ ceq getIV((eq T = T' [metadata(Str) ASet]) SSet) = V 
+     if V := qid(substr(Str,length("induction-on-"),length(Str))) /\ 
+        V in getVar(eq T = T' [metadata(Str) ASet]) /\ checkIV(SSet,V).
+ ceq getIV((ceq T = T' if EC [metadata(Str) ASet]) SSet) = V 
+     if V := qid(substr(Str,length("induction-on-"),length(Str)))/\
+        V in getVar(ceq T = T' if EC [metadata(Str) ASet]) /\ checkIV(SSet,V).
+ ceq getIV((mb T : St [metadata(Str) ASet]) SSet) = V 
+     if V := qid(substr(Str,length("induction-on-"),length(Str))) /\ 
+        V in getVar(mb T : St [metadata(Str) ASet]) /\ checkIV(SSet,V).
+ ceq getIV((cmb T : St if EC [metadata(Str) ASet]) SSet) = V 
+     if V := qid(substr(Str,length("induction-on-"),length(Str)))/\
+        V in getVar(cmb T : St if EC [metadata(Str) ASet]) /\ checkIV(SSet,V).
+ ceq getIV((rl T => T' [metadata(Str) ASet]) SSet) = V 
+     if V := qid(substr(Str,length("induction-on-"),length(Str))) /\ 
+        V in getVar(rl T => T' [metadata(Str) ASet]) /\ checkIV(SSet,V).
+ ceq getIV((crl T => T' if Co[metadata(Str) ASet]) SSet) = V 
+     if V := qid(substr(Str,length("induction-on-"),length(Str)))/\
+        V in getVar(crl T => T' if Co [metadata(Str) ASet]) /\ checkIV(SSet,V).
+ eq  getIV(SSet) = (empty).TermList [owise].
+--- -------------------------------------------------------------------------
+--- check induction variables
+--- -------------------------------------------------------------------------
+op checkIV : SentenceSet Variable -> Bool . 
+ eq checkIV(none,V) = true .
+ ceq checkIV((eq T = T' [metadata(Str) ASet]) SSet,V) = checkIV(SSet,V) 
+     if V = qid(substr(Str,length("induction-on-"),length(Str)))/\
+        V in getVar(eq T = T' [metadata(Str) ASet]).
+ ceq checkIV((ceq T = T' if EC [metadata(Str) ASet]) SSet,V) = checkIV(SSet,V)
+     if V = qid(substr(Str,length("induction-on-"),length(Str))) /\
+        V in getVar(ceq T = T' if EC [metadata(Str) ASet]).
+ ceq checkIV((mb T : St [metadata(Str) ASet]) SSet,V) = checkIV(SSet,V) 
+     if V = qid(substr(Str,length("induction-on-"),length(Str)))/\
+        V in getVar(mb T : St [metadata(Str) ASet]).
+ ceq checkIV((cmb T : St if EC [metadata(Str) ASet]) SSet,V) = checkIV(SSet,V)
+     if V = qid(substr(Str,length("induction-on-"),length(Str))) /\
+        V in getVar(cmb T : St if EC [metadata(Str) ASet]).
+ ceq checkIV((rl T => T' [metadata(Str) ASet]) SSet,V) = checkIV(SSet,V) 
+     if V = qid(substr(Str,length("induction-on-"),length(Str)))/\
+        V in getVar(rl T => T' [metadata(Str) ASet]).
+ ceq checkIV((crl T => T' if Co [metadata(Str) ASet]) SSet,V) = checkIV(SSet,V)
+     if V = qid(substr(Str,length("induction-on-"),length(Str))) /\
+        V in getVar(crl T => T' if Co [metadata(Str) ASet]).
+ eq checkIV(SSet,V) = false [owise].
+--- -------------------------------------------------------------------------
+--- remove induction variables
+--- -------------------------------------------------------------------------
+op rmIV : SentenceSet Variable -> SentenceSet .
+--- Equation
+ ceq rmIV((eq T = T' [metadata(Str) ASet]) SSet,V) = 
+     (eq T = T' [metadata("added") ASet]) rmIV(SSet,V) 
+     if V = qid(substr(Str,length("induction-on-"),length(Str))).
+ ceq rmIV((ceq T = T' if EC [metadata(Str) ASet]) SSet,V) = 
+     (ceq T = T' if EC [metadata("added") ASet]) rmIV(SSet,V) 
+     if V = qid(substr(Str,length("induction-on-"),length(Str))) .
+--- Membership
+ ceq rmIV((mb T : St [metadata(Str) ASet]) SSet,V) = 
+     (mb T : St [metadata("added") ASet]) rmIV(SSet,V) 
+     if V = qid(substr(Str,length("induction-on-"),length(Str))).
+ ceq rmIV((cmb T : St if EC [metadata(Str) ASet]) SSet,V) = 
+     (cmb T : St if EC [metadata("added") ASet]) rmIV(SSet,V) 
+     if V = qid(substr(Str,length("induction-on-"),length(Str))) .
+--- Rule
+ ceq rmIV((rl T => T' [metadata(Str) ASet]) SSet,V) = 
+     (rl T => T' [metadata("added") ASet]) rmIV(SSet,V) 
+     if V = qid(substr(Str,length("induction-on-"),length(Str))).
+ ceq rmIV((crl T => T' if Co [metadata(Str) ASet]) SSet,V) = 
+     (crl T => T' if Co [metadata("added") ASet]) rmIV(SSet,V) 
+     if V = qid(substr(Str,length("induction-on-"),length(Str))) .
+--- owise
+ eq rmIV(SSet,V) = SSet [owise].
+--- -------------------------------------------------------------------------
+endfm
+--- -------------------------------------------------------------------------
+
+--- -------------------------------------------------------------------------
+--- -------------------------------------------------------------------------
+mod #SEQUENCE# is 
+ inc #LIBRARY# .
+ var G : Goal .                   var GSet : GoalSet .
+ vars T T' : Term .               var St : Sort .
+ vars ECo ECd : EqCondition .     vars Co Cd : Condition . 
+ var ASet : AttrSet .             var M : Module .
+ vars Bx By : Term .              vars Sq Sr Bq Br B : GroundTerm .
+ vars Sx Sy Sz Sa Sb : Variable . var L : Label .
+--- -------------------------------------------------------------------------
+--- pair equiv ---
+--- -------------------------------------------------------------------------
+--- Equation 
+eq < M, ceq T = T' if ECo /\ '<_`,_>[Bx,By] = '<_`,_>[Bq,Br] /\ ECd[ASet],L > = 
+   < M, ceq T = T' if ECo /\ Bx = Bq /\ By = Br /\ ECd[ASet],L > . 
+--- MembAx
+eq < M, cmb T : St if ECo /\ '<_`,_>[Bx,By] = '<_`,_>[Bq,Br] /\ ECd[ASet],L > = 
+   < M, cmb T : St if ECo /\ Bx = Bq /\ By = Br /\ ECd[ASet],L > . 
+--- Rule
+eq < M, crl T => T' if Co /\ '<_`,_>[Bx,By] = '<_`,_>[Bq,Br] /\ Cd[ASet],L > = 
+   < M, crl T => T' if Co /\ Bx = Bq /\ By = Br /\ Cd[ASet],L > .
+--- -------------------------------------------------------------------------
+--- Sequence Case Analysis ---
+--- -------------------------------------------------------------------------
+ op cs : GoalSet -> GoalSet .
+---
+ eq cs(emptyGoalSet) = emptyGoalSet .
+---
+ ceq cs(G GSet) = cs(G) cs(GSet) if GSet =/= emptyGoalSet .
+--- -------------------------------------------------------------------------
+--- 1) Sx,Bx,Sy := Sq,B ---
+ ceq cs(< M,(crl T => T' if Co /\ '_`,_[Sx,Bx,Sy] := '_`,_[Sq,B] /\ Cd [ASet]),L >) = 
+     < M,(crl T <<(Sy <- '_`,_[Sy,B]) => T' << (Sy <- '_`,_[Sy,B]) if Co << (Sy <- '_`,_[Sy,B]) /\ '_`,_[Sx,Bx,Sy] := Sq /\ Cd << (Sy <- '_`,_[Sy,B]) [ASet]),L >
+     < M,(crl T <<(Sx <- Sq ; Sy <- 'empty.Sequence) => T' <<(Sx <- Sq ; Sy <- 'empty.Sequence) if Co <<(Sx <- Sq ; Sy <- 'empty.Sequence) /\ Bx = B /\ Cd <<(Sx <- Sq ; Sy <- 'empty.Sequence)[ASet]),L > 
+     if leastSort(M,Sx) = leastSort(M,Sq) /\ leastSort(M,Sy)= leastSort(M,Sq) /\ leastSort(M,Bx) = leastSort(M,B) /\ sortLeq(M,leastSort(M,B),leastSort(M,Sq)) /\ leastSort(M,B) =/= leastSort(M,Sq) .
+--- 2) Sx,Bx,Sy := Sq,Sr ---
+ ceq cs(< M,(crl T => T' if Co /\ '_`,_[Sx,Bx,Sy] := '_`,_[Sq,Sr] /\ Cd[ASet]),L >) = 
+     < M,(crl T <<(Sy <- '_`,_[Sy,Sr]) => T' << (Sy <- '_`,_[Sy,Sr]) if Co << (Sy <- '_`,_[Sy,Sr]) /\ '_`,_[Sx,Bx,Sy] := Sq /\ Cd << (Sy <- '_`,_[Sy,Sr]) [ASet]),L >
+     < M,(crl T <<(Sx <- '_`,_[Sq,Sx]) => T' <<(Sx <- '_`,_[Sq,Sx]) if Co <<(Sx <- '_`,_[Sq,Sx]) /\ '_`,_[Sx,Bx,Sy] := Sr /\ Cd <<(Sx <- '_`,_[Sq,Sx])[ASet]),L > 
+     if leastSort(M,Sx) = leastSort(M,Sq) /\ leastSort(M,Sy)= leastSort(M,Sq) /\ leastSort(M,Sq) = leastSort(M,Sr) /\ leastSort(M,Bx) =/= leastSort(M,Sq) /\ sortLeq(M,leastSort(M,Bx),leastSort(M,Sq)).
+--- 3) Sx,Bx,Sy,By,Sz := Sq,B ---
+ ceq cs(< M,(crl T => T' if Co /\ '_`,_[Sx,Bx,Sy,By,Sz] := '_`,_[Sq,B] /\ Cd [ASet]),L >) = 
+     < M,(crl T <<(Sz <- '_`,_[Sz,B]) => T' << (Sz <- '_`,_[Sz,B]) if Co << (Sz <- '_`,_[Sz,B]) /\ '_`,_[Sx,Bx,Sy,By,Sz] := Sq /\ Cd << (Sz <- '_`,_[Sz,B]) [ASet]),L >
+     < M,(crl T <<(Sz <- 'empty.Sequence) => T' <<(Sz <- 'empty.Sequence) if Co <<(Sz <- 'empty.Sequence) /\ '_`,_[Sx,Bx,Sy] := Sq /\ By = B /\ Cd <<(Sz <- 'empty.Sequence)[ASet]),L > 
+     if leastSort(M,Sx) = leastSort(M,Sq) /\ leastSort(M,Sy)= leastSort(M,Sq) /\ leastSort(M,Sz)= leastSort(M,Sq) /\ leastSort(M,Bx) = leastSort(M,B) /\ leastSort(M,By) = leastSort(M,B) /\ sortLeq(M,leastSort(M,B),leastSort(M,Sq)) /\ leastSort(M,B) =/= leastSort(M,Sq) .
+--- 4) Sx,Bx,Sy,By,Sz := Sq,Sr ---
+  ceq cs(< M,(crl T => T' if Co /\ '_`,_[Sx,Bx,Sy,By,Sz] := '_`,_[Sq,Sr] /\ Cd [ASet]),L >) = 
+     < M,(crl T <<(Sz <- '_`,_[Sz,Sr]) => T' << (Sz <- '_`,_[Sz,Sr]) if Co << (Sz <- '_`,_[Sz,Sr]) /\ '_`,_[Sx,Bx,Sy,By,Sz] := Sq /\ Cd << (Sz <- '_`,_[Sz,Sr]) [ASet]),L >
+     < M,(crl T <<(Sy <- '_`,_[Sa,Sb]) => T' << (Sy <- '_`,_[Sa,Sb]) if Co << (Sy <- '_`,_[Sa,Sb]) /\ '_`,_[Sx,Bx,Sa] := Sq /\ '_`,_[Sb,By,Sz] := Sr  /\ Cd << (Sy <- '_`,_[Sa,Sb]) [ASet]),L >
+     < M,(crl T <<(Sx <- '_`,_[Sq,Sx]) => T' <<(Sx <- '_`,_[Sq,Sx]) if Co <<(Sx <- '_`,_[Sq,Sx]) /\ '_`,_[Sx,Bx,Sy,By,Sz] := Sr /\ Cd <<(Sx <- '_`,_[Sq,Sx])[ASet]),L > 
+     if leastSort(M,Sx) = leastSort(M,Sq) /\ leastSort(M,Sy)= leastSort(M,Sq) /\ leastSort(M,Sz)= leastSort(M,Sq) /\ leastSort(M,Bx) = leastSort(M,By) /\ sortLeq(M,leastSort(M,Bx),leastSort(M,Sq)) /\ leastSort(M,Bx) =/= leastSort(M,Sq) /\
+     Sa := qid(string(getName(Sy)) + "#1:" + string(getType(Sy))) /\
+     Sb := qid(string(getName(Sy)) + "#2:" + string(getType(Sy))).
+--- -------------------------------------------------------------------------
+--- 1) Sx,Bx,Sy := Sq,B ---
+ ceq cs(< M,(ceq T = T' if Co /\ '_`,_[Sx,Bx,Sy] := '_`,_[Sq,B] /\ Cd [ASet]),L >) = 
+     < M,(ceq T <<(Sy <- '_`,_[Sy,B]) = T' << (Sy <- '_`,_[Sy,B]) if Co << (Sy <- '_`,_[Sy,B]) /\ '_`,_[Sx,Bx,Sy] := Sq /\ Cd << (Sy <- '_`,_[Sy,B]) [ASet]),L >
+     < M,(ceq T <<(Sx <- Sq ; Sy <- 'empty.Sequence) = T' <<(Sx <- Sq ; Sy <- 'empty.Sequence) if Co <<(Sx <- Sq ; Sy <- 'empty.Sequence) /\ Bx = B /\ Cd <<(Sx <- Sq ; Sy <- 'empty.Sequence)[ASet]),L > 
+     if leastSort(M,Sx) = leastSort(M,Sq) /\ leastSort(M,Sy)= leastSort(M,Sq) /\ leastSort(M,Bx) = leastSort(M,B) /\ sortLeq(M,leastSort(M,B),leastSort(M,Sq)) /\ leastSort(M,B) =/= leastSort(M,Sq) .
+--- 2) Sx,Bx,Sy := Sq,Sr ---
+ ceq cs(< M,(ceq T = T' if Co /\ '_`,_[Sx,Bx,Sy] := '_`,_[Sq,Sr] /\ Cd[ASet]),L >) = 
+     < M,(ceq T <<(Sy <- '_`,_[Sy,Sr]) = T' << (Sy <- '_`,_[Sy,Sr]) if Co << (Sy <- '_`,_[Sy,Sr]) /\ '_`,_[Sx,Bx,Sy] := Sq /\ Cd << (Sy <- '_`,_[Sy,Sr]) [ASet]),L >
+     < M,(ceq T <<(Sx <- '_`,_[Sq,Sx]) = T' <<(Sx <- '_`,_[Sq,Sx]) if Co <<(Sx <- '_`,_[Sq,Sx]) /\ '_`,_[Sx,Bx,Sy] := Sr /\ Cd <<(Sx <- '_`,_[Sq,Sx])[ASet]),L > 
+     if leastSort(M,Sx) = leastSort(M,Sq) /\ leastSort(M,Sy)= leastSort(M,Sq) /\ leastSort(M,Sq) = leastSort(M,Sr) /\ leastSort(M,Bx) =/= leastSort(M,Sq) /\ sortLeq(M,leastSort(M,Bx),leastSort(M,Sq)).
+--- 3) Sx,Bx,Sy,By,Sz := Sq,B ---
+ ceq cs(< M,(ceq T = T' if Co /\ '_`,_[Sx,Bx,Sy,By,Sz] := '_`,_[Sq,B] /\ Cd [ASet]),L >) = 
+     < M,(ceq T <<(Sz <- '_`,_[Sz,B]) = T' << (Sz <- '_`,_[Sz,B]) if Co << (Sz <- '_`,_[Sz,B]) /\ '_`,_[Sx,Bx,Sy,By,Sz] := Sq /\ Cd << (Sz <- '_`,_[Sz,B]) [ASet]),L >
+     < M,(ceq T <<(Sz <- 'empty.Sequence) = T' <<(Sz <- 'empty.Sequence) if Co <<(Sz <- 'empty.Sequence) /\ '_`,_[Sx,Bx,Sy] := Sq /\ By = B /\ Cd <<(Sz <- 'empty.Sequence)[ASet]),L > 
+     if leastSort(M,Sx) = leastSort(M,Sq) /\ leastSort(M,Sy)= leastSort(M,Sq) /\ leastSort(M,Sz)= leastSort(M,Sq) /\ leastSort(M,Bx) = leastSort(M,B) /\ leastSort(M,By) = leastSort(M,B) /\ sortLeq(M,leastSort(M,B),leastSort(M,Sq)) /\ leastSort(M,B) =/= leastSort(M,Sq) .
+--- 4) Sx,Bx,Sy,By,Sz := Sq,Sr ---
+  ceq cs(< M,(ceq T = T' if Co /\ '_`,_[Sx,Bx,Sy,By,Sz] := '_`,_[Sq,Sr] /\ Cd [ASet]),L >) = 
+     < M,(ceq T <<(Sz <- '_`,_[Sz,Sr]) = T' << (Sz <- '_`,_[Sz,Sr]) if Co << (Sz <- '_`,_[Sz,Sr]) /\ '_`,_[Sx,Bx,Sy,By,Sz] := Sq /\ Cd << (Sz <- '_`,_[Sz,Sr]) [ASet]),L >
+     < M,(ceq T <<(Sy <- '_`,_[Sa,Sb]) = T' << (Sy <- '_`,_[Sa,Sb]) if Co << (Sy <- '_`,_[Sa,Sb]) /\ '_`,_[Sx,Bx,Sa] := Sq /\ '_`,_[Sb,By,Sz] := Sr  /\ Cd << (Sy <- '_`,_[Sa,Sb]) [ASet]),L >
+     < M,(ceq T <<(Sx <- '_`,_[Sq,Sx]) = T' <<(Sx <- '_`,_[Sq,Sx]) if Co <<(Sx <- '_`,_[Sq,Sx]) /\ '_`,_[Sx,Bx,Sy,By,Sz] := Sr /\ Cd <<(Sx <- '_`,_[Sq,Sx])[ASet]),L > 
+     if leastSort(M,Sx) = leastSort(M,Sq) /\ leastSort(M,Sy)= leastSort(M,Sq) /\ leastSort(M,Sz)= leastSort(M,Sq) /\ leastSort(M,Bx) = leastSort(M,By) /\ sortLeq(M,leastSort(M,Bx),leastSort(M,Sq)) /\ leastSort(M,Bx) =/= leastSort(M,Sq) /\
+     Sa := qid(string(getName(Sy)) + "#1:" + string(getType(Sy))) /\
+     Sb := qid(string(getName(Sy)) + "#2:" + string(getType(Sy)))  .
+--- -------------------------------------------------------------------------
+ eq cs(G) = G [owise].
+--- -------------------------------------------------------------------------
+endm
+--- -------------------------------------------------------------------------
+
+--- -------------------------------------------------------------------------
+--- -------------------------------------------------------------------------
+fmod #BOOL# is 
+ inc #LIBRARY# .
+ var M : Module . vars ASet AS : AttrSet . var St : Sort .
+ vars T T1 T2 : Term . vars GT GT1 GT2 GT3 : GroundTerm . 
+ vars ECo ECd : EqCondition . var Co Cd : Condition . var L : Label .
+ var SSet : SentenceSet . var ESet : EquationSet .
+--- -------------------------------------------------------------------------
+--- NOT ---
+--- -------------------------------------------------------------------------
+--- Equation
+  eq < M, ceq T1 = T2 if ECo /\ GT = 'not_[GT] /\ ECd[ASet],L > = emptyGoalSet .
+  eq < M, ceq T1 = T2 if ECo /\ 'not_[GT] = GT /\ ECd[ASet],L > = emptyGoalSet .
+--- Membership
+  eq < M, cmb T : St if ECo /\ GT = 'not_[GT] /\ ECd[ASet],L > = emptyGoalSet .
+  eq < M, cmb T : St if ECo /\ 'not_[GT] = GT /\ ECd[ASet],L > = emptyGoalSet .
+--- Rule
+  eq < M, crl T1 => T2 if Co /\ GT = 'not_[GT] /\ Cd[ASet],L >  = emptyGoalSet  .
+  eq < M, crl T1 => T2 if Co /\ 'not_[GT] = GT  /\ Cd[ASet],L > = emptyGoalSet .
+--- -------------------------------------------------------------------------
+--- BOOL-NOT ---
+--- -------------------------------------------------------------------------
+--- Equation
+  eq < M, ceq T1 = T2 if ECo /\ GT = '_xor_['true.Bool,GT] /\ ECd[ASet],L > = emptyGoalSet .
+  eq < M, ceq T1 = T2 if ECo /\ '_xor_['true.Bool,GT] = GT /\ ECd[ASet],L > = emptyGoalSet .
+--- Membership
+  eq < M, cmb T : St if ECo /\ GT = '_xor_['true.Bool,GT] /\ ECd[ASet],L > = emptyGoalSet .
+  eq < M, cmb T : St if ECo /\ '_xor_['true.Bool,GT] = GT /\ ECd[ASet],L > = emptyGoalSet .
+--- Rule
+  eq < M, crl T1 => T2 if Co /\ GT = '_xor_['true.Bool,GT] /\ Cd[ASet],L > = emptyGoalSet  .
+  eq < M, crl T1 => T2 if Co /\ '_xor_['true.Bool,GT] = GT  /\ Cd[ASet],L > = emptyGoalSet .
+--- -------------------------------------------------------------------------
+--- equality predicate _~_ Sort Sort -> Bool
+--- -------------------------------------------------------------------------
+ceq < M,ceq T1 = T2 if ECo /\ '_~_[GT1,GT2] = 'false.Bool /\ ECd[ASet], L > = emptyGoalSet if 
+    metaRed(M,GT1) = metaRed(M,GT2).
+ceq < M,cmb T : St if ECo /\ '_~_[GT1,GT2] = 'false.Bool /\ ECd[ASet], L > = emptyGoalSet if 
+    metaRed(M,GT1) = metaRed(M,GT2).
+ceq < M,crl T1 => T2 if Co /\ '_~_[GT1,GT2] = 'false.Bool /\ Cd[ASet], L > = emptyGoalSet if 
+    metaRed(M,GT1) = metaRed(M,GT2).
+--- -------------------------------------------------------------------------
+endfm
+--- -------------------------------------------------------------------------
+
+
+--- -------------------------------------------------------------------------
+--- -------------------------------------------------------------------------
+fmod #NAT# is 
+ inc #LIBRARY# .
+ var M : Module . vars ASet AS : AttrSet . var St : Sort .
+ vars T T1 T2 : Term . vars GT GT1 GT2 GT3 : GroundTerm .
+ var SSet : SentenceSet . var ESet : EquationSet . var L : Label .
+--- -------------------------------------------------------------------------
+---  1. GT1 <= GT2 <= GT3 ---
+--- -------------------------------------------------------------------------
+ceq < M,SSet,L > = emptyGoalSet if 
+   (eq '_<=_[GT1,GT2] = 'true.Bool [AS].)
+   (eq '_<=_[GT2,GT3] = 'true.Bool [ASet].)
+   ESet := getEqs(M) /\ metaRed(M,'_<_[GT3,GT1]) = 'true.Bool .
+--- -------------------------------------------------------------------------
+---  2. GT1 <= GT2 < GT3 ---
+--- -------------------------------------------------------------------------
+ceq < M,SSet,L > = emptyGoalSet if 
+   (eq '_<=_[GT1,GT2] = 'true.Bool [AS].)
+   (eq '_<_[GT2,GT3] = 'true.Bool [ASet] .)
+   ESet := getEqs(M) /\ metaRed(M,'_<=_[GT3,GT1]) = 'true.Bool .
+--- -------------------------------------------------------------------------
+---  3. GT1 < GT2 <= GT3 ---
+--- ------------------------------------------------------------------------- 
+ceq < M,SSet,L > = emptyGoalSet if 
+   (eq '_<_[GT1,GT2] = 'true.Bool [AS] .)
+   (eq '_<=_[GT2,GT3] = 'true.Bool [ASet] .)
+   ESet := getEqs(M) /\ metaRed(M,'_<=_[GT3,GT1]) = 'true.Bool .
+--- -------------------------------------------------------------------------
+---  4. GT1 < GT2 < GT3 ---
+--- -------------------------------------------------------------------------
+ceq < M,SSet,L > = emptyGoalSet if
+   (eq '_<_[GT1,GT2] = 'true.Bool [AS] .)
+   (eq '_<_[GT2,GT3] = 'true.Bool [ASet] .)
+   ESet := getEqs(M) /\ metaRed(M,'_<=_[GT3,'s_[GT1]]) = 'true.Bool .
+--- -------------------------------------------------------------------------
+endfm
+--- -------------------------------------------------------------------------
+
+--- -------------------------------------------------------------------------
+--- -------------------------------------------------------------------------
+mod #TOOL# is 
+ inc #IMPLICATION# . inc #THEOREM-OF-CONSTANTS# . inc #CASE-ANALYSIS# . inc #INDUCTION# .
+ inc #SEQUENCE# . inc #BOOL# . inc #NAT# .
+---
+ var M : Module .
+ vars T T' : Term .
+ var GT : GroundTerm .
+ var St : Sort .
+ var ASet : AttrSet .
+ var L : Label .
+--- enhanced equality ---
+ ceq [EN1]: < M,eq T = T' [metadata("enhanced") ASet],TL > = emptyGoalSet 
+     if metaSearch(M,T,T',nil,'*,unbounded,0) :: ResultTriple .
+ ceq [EN2]: < M,eq T = T' [metadata("enhanced") ASet],TL > = emptyGoalSet 
+     if metaSearch(M,T',T,nil,'*,unbounded,0) :: ResultTriple .
+--- contradiction ----
+ ceq [CTe]: < M,eq T = T' [ASet],TL >  = emptyGoalSet 
+     if metaSearch(M,'true.Bool,'false.Bool,nil,'*,unbounded,0) :: ResultTriple .
+
+ ceq [CTe]: < M,eq T = T' [ASet],TL >  = emptyGoalSet 
+     if metaSearch(M,'false.Bool,'true.Bool,nil,'*,unbounded,0) :: ResultTriple .
+
+ ceq [CTm]: < M,mb T : St [ASet],TL > = emptyGoalSet 
+     if metaSearch(M,'true.Bool,'false.Bool,nil,'*,unbounded,0) :: ResultTriple .
+
+ ceq [CTm]: < M,mb T : St [ASet],TL > = emptyGoalSet 
+     if metaSearch(M,'false.Bool,'true.Bool,nil,'*,unbounded,0) :: ResultTriple .
+
+ ceq [CTr]: < M,rl T => T' [ASet],TL >  = emptyGoalSet 
+     if metaSearch(M,'true.Bool,'false.Bool,nil,'*,unbounded,0) :: ResultTriple .
+
+ ceq [CTr]: < M,rl T => T' [ASet],TL >  = emptyGoalSet 
+     if metaSearch(M,'false.Bool,'true.Bool,nil,'*,unbounded,0) :: ResultTriple .
+
+--- tautology ---
+ eq  [TLe]: < M,eq T = T [ASet],L > = emptyGoalSet .
+ ceq [TLm]: < M,mb T : St [ASet],L > = emptyGoalSet if sortLeq(M,getType(T),St).
+ ceq [TLr]: < M,rl T => T'[ASet],L > = emptyGoalSet if metaSearch(M,T,T',nil,'*,unbounded,0) :: ResultTriple .
+--- -------------------------------------------------------------------------
+endm
+--- -------------------------------------------------------------------------

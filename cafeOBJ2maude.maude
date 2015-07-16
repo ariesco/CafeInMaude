@@ -1,3 +1,4 @@
+load predefined_core.maude
 
 ***(%
 
@@ -2831,8 +2832,7 @@ a list of quoted identifiers reporting the errors found during the parsing proce
   vars N N' : Nat .
   **** PSM: Principal Sort Map
   vars PSM PSM' SM SM' : SortMap .
-  vars TSM TSM' : TheorySortMap .
-  vars HSM HSM' : TheorySortMap .
+  vars TSM TSM' HSM HSM' : TheorySortMap .
   vars QS QS' : QidSet .
 
 ***(%
@@ -5118,6 +5118,12 @@ Similarly, the attribute \verb"hsorts" keeps track of hidden sorts:
 
   op hsorts :_ : TheorySortMap -> Attribute [ctor] .
 
+  op initialPrincipalSorts : -> SortMap .
+  eq initialPrincipalSorts = ('NAT |-> 'Nat) .
+
+  op initCafeAttS : -> AttributeSet .
+  eq initCafeAttS = strict : false, psorts : initialPrincipalSorts, hsorts : empty .
+
 
 ***(%
 \end{verbatim}
@@ -5736,12 +5742,8 @@ set to \verb"false":
                                           'started. '\n 'CafeOBJ 'specifications
                                           'can 'be 'introduced 'now 'into 'the
                                           'Full 'Maude 'database. '\n),
-                                default : 'CONVERSION, strict : false,
-                                psorts : initialPrincipalSorts, hsorts : empty >,
+                                default : 'CONVERSION, initCafeAttS >,
                                 nil] .
-
-  op initialPrincipalSorts : -> SortMap .
-  eq initialPrincipalSorts = ('NAT |-> 'Nat) .
 
 ***(%
 \end{verbatim}

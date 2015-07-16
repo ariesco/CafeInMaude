@@ -83,3 +83,27 @@ mod* ABP {
  = Protocol(S,get(front(enq(D,L1)),front(enq(B,L2)),R), deq(enq(D,L1)),deq(enq(B,L2)),enq(not bit(R),L))
  if bit(R) =/= front(enq(B,L2)) .
 }
+
+mod* BUF {
+ [Nat]
+ *[Buf]*
+ op init : -> Buf
+ bop in : Nat Buf -> Buf
+ bop val : Buf -> Nat
+ bop out : Buf -> Buf
+ bop empty? : Buf -> Bool
+
+ var N : Nat
+ var B : Buf
+
+ eq empty?(init) = true .
+ ceq empty?(out(B)) = true
+  if not empty?(B) .
+ eq empty?(in(N,B)) = false .
+ ceq val(out(in(N,B))) = N
+  if empty?(B) .
+ bceq in(N,B) = B
+   if not empty?(B) .
+ bceq out(B) = B
+   if empty?(B) .
+}
