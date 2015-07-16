@@ -19,6 +19,11 @@
 /mfe/MTT/*
 /mfe/SCC/*
 
+##################
+# Temporal files #
+##################
+all-temp-mod.cafe
+trans-temp-mod
 
 #####################
 # Auxiliary folders #

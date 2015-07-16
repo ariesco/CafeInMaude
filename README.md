@@ -42,3 +42,17 @@ examples folder by typing:
     $ ./cafe4maude examples/abp.cafe
 
 Once a module has been loaded, Maude commands can be used in the usual way.
+
+Using the CITP
+--------------
+
+The code here includes the last version of the translation integrated with the
+Constructor-based Inductive Theorem Prover. The latest version of the CITP is
+available [here](http://www.jaist.ac.jp/~danielmg/citp.html).
+
+Using the MFE
+-------------
+
+The code here includes the last version of the translation integrated with the
+Maude Formal Environment. The latest version of the MFE is available
+[here](http://maude.lcc.uma.es/MFE/).
