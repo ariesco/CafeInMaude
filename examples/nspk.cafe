@@ -28,12 +28,12 @@ mod! SET(X :: TRIV) {
 }
 
 
-mod! PNAT principal-sort PNat {          -- this is not supported by the current translator 
+mod! PNAT principal-sort PNat {
   [PZero PNzNat < PNat]
   op z : -> PZero {constr}
   op s : PNat -> PNzNat {constr}
   eq (z = s(N:PNat)) = false .
-  eq (s(N:PNat) = s(M:PNat)) = (N = M) .  -- this equation causes problems 
+  eq (s(N:PNat) = s(M:PNat)) = (N = M) .
 }
 
 mod* RANDOM-NUMBER {
@@ -42,7 +42,7 @@ mod* RANDOM-NUMBER {
   op next : PNat -> PNat
   vars R R' : PNat
   eq (next(R) = seed) = false .
-  eq (next(R) = next(R')) = (R = R') .  -- this equation causes problems 
+  eq (next(R) = next(R')) = (R = R') .
 }
 
 mod! INTRUDER {
@@ -57,16 +57,14 @@ mod* PRINCIPAL {
 
 mod! PRIN&INTRDR {
   pr(INTRUDER)
-  pr(PRINCIPAL)                         -- this causes an error 
+  pr(PRINCIPAL)
   [Intruder Prin < Prin&Intrdr]
   var I : Intruder
   var P : Prin
   var PI : Prin&Intrdr
   eq (I = P) = false .
-  eq (I = PI) and (PI = P) = false .   
+  eq (I = PI) and (PI = P) = false .
 }
-
--- I just tested here 
 
 
 mod! PRIN-SET {
@@ -211,7 +209,7 @@ mod! NETWORK {
   op _\in_ : Cipher1 Network -> Bool
   op _\in_ : Cipher2 Network -> Bool
   vars N N' N'' : Nonce
-  vars C S D S' D' : Prin&Intrdr  
+  vars C S D S' D' : Prin&Intrdr
   vars CIPH1 CIPH1' : Cipher1
   vars CIPH2 CIPH2' : Cipher2
   var M1 : Msg1
@@ -865,5 +863,16 @@ mod! INV {
      = N \in nonces(C)
        implies
        (gen(N) = intrdr or forWhom(N) = intrdr) .
+
 }
+
+open NSPK + INV .
+  ops p q : -> Prin .
+  eq (p = q) = false .
+  var N : Nonce
+  var NS : NonceSet
+  --
+  red init(p q) =(1,5)=>* ((nonces: (N NS)) C:Config)
+    suchThat (not nonSec((nonces: (N NS)) C, N)) .
+close
 
