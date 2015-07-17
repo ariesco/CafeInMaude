@@ -29,12 +29,12 @@ fmod RWL is
                                          [poly(1 4) strat(0) prec 51] .
   op _=`(_`,_`)=>!_suchThat_ : Universal NzNat* NzNat* Universal Bool -> Bool
                                          [poly(1 4) strat(0) prec 51] .
-  op _=`(_`,_`)=>*_suchThat`{_`} : Universal NzNat* NzNat* Universal Bool -> Bool
-                                         [poly(1 4) strat(0) prec 51] .
-  op _=`(_`,_`)=>+_suchThat`{_`} : Universal NzNat* NzNat* Universal Bool -> Bool
-                                         [poly(1 4) strat(0) prec 51] .
-  op _=`(_`,_`)=>!_suchThat`{_`} : Universal NzNat* NzNat* Universal Bool -> Bool
-                                         [poly(1 4) strat(0) prec 51] .
+  op _=`(_`,_`)=>*_suchThat_`{_`} : Universal NzNat* NzNat* Universal Bool Universal -> Bool
+                                         [poly(1 4 6) strat(0) prec 51] .
+  op _=`(_`,_`)=>+_suchThat_`{_`} : Universal NzNat* NzNat* Universal Bool Universal -> Bool
+                                         [poly(1 4 6) strat(0) prec 51] .
+  op _=`(_`,_`)=>!_suchThat_`{_`} : Universal NzNat* NzNat* Universal Bool Universal -> Bool
+                                         [poly(1 4 6) strat(0) prec 51] .
   op _=`(_`,_`)=>*_withStateEq_ : Universal NzNat* NzNat* Universal Universal -> Bool
                                          [poly(1 4 5) strat(0) prec 51] .
   op _=`(_`,_`)=>+_withStateEq_ : Universal NzNat* NzNat* Universal Universal -> Bool

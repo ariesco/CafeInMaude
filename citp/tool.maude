@@ -243,78 +243,78 @@ eq addSen((fmod H is IList sorts StSet . SbSet OSet MSet ESet endfm),(crl T => T
 --- substitute constants for variables in sentences
 --- -------------------------------------------------------------------------
  op v2c : SentenceSet Nat -> SentenceSet .
-  eq v2c(SSet,N) = SSet << v2s(getVar(SSet),N).
+  eq v2c(SSet,N) = SSet <<< v2s(getVar(SSet),N).
  --- condition
  op v2c : Condition Nat -> Condition .
-  eq v2c(Co,N) = Co << v2s(getVar(Co),N).
+  eq v2c(Co,N) = Co <<< v2s(getVar(Co),N).
 --- -------------------------------------------------------------------------
 --- apply Substitution
 --- -------------------------------------------------------------------------
- op _<<_ : Term Substitution -> Term .
-  eq T << none = T .
-  eq Ct << Subst = Ct .
-  eq V << ((V <- T) ; Subst) = T .
-  eq V << Subst = V [owise] .
-  eq Q[TL] << Subst = Q[TL << Subst] .
+ op _<<<_ : Term Substitution -> Term .
+  eq T <<< none = T .
+  eq Ct <<< Subst = Ct .
+  eq V <<< ((V <- T) ; Subst) = T .
+  eq V <<< Subst = V [owise] .
+  eq Q[TL] <<< Subst = Q[TL <<< Subst] .
 --- Term List
- op _<<_ : TermList Substitution -> TermList .
-  eq empty << Subst = empty .
-  eq (T, NTL) << Subst = (T << Subst, NTL << Subst) .
+ op _<<<_ : TermList Substitution -> TermList .
+  eq empty <<< Subst = empty .
+  eq (T, NTL) <<< Subst = (T <<< Subst, NTL <<< Subst) .
 --- Sentence Set
- op _<<_ : SentenceSet Substitution -> SentenceSet .
-  eq (none).SentenceSet << Subst = (none).SentenceSet .
+ op _<<<_ : SentenceSet Substitution -> SentenceSet .
+  eq (none).SentenceSet <<< Subst = (none).SentenceSet .
 ---
-  eq (eq T = T' [ASet] SSet) << Subst = 
-     (eq T << Subst = T' << Subst [ASet]) (SSet << Subst).
-  eq (ceq T = T' if EC [ASet] SSet) << Subst = 
-     (ceq T << Subst = T' << Subst if EC << Subst [ASet]) (SSet << Subst).
+  eq (eq T = T' [ASet] SSet) <<< Subst = 
+     (eq T <<< Subst = T' <<< Subst [ASet]) (SSet <<< Subst).
+  eq (ceq T = T' if EC [ASet] SSet) <<< Subst = 
+     (ceq T <<< Subst = T' <<< Subst if EC <<< Subst [ASet]) (SSet <<< Subst).
 ---
-  eq (mb T : St [ASet] SSet) << Subst = 
-     (mb T << Subst : St [ASet]) (SSet << Subst).
-  eq (cmb T : St if EC [ASet] SSet) << Subst = 
-     (cmb T << Subst : St if EC << Subst [ASet]) (SSet << Subst). 
+  eq (mb T : St [ASet] SSet) <<< Subst = 
+     (mb T <<< Subst : St [ASet]) (SSet <<< Subst).
+  eq (cmb T : St if EC [ASet] SSet) <<< Subst = 
+     (cmb T <<< Subst : St if EC <<< Subst [ASet]) (SSet <<< Subst). 
 ---
- eq (rl T => T' [ASet] SSet) << Subst = 
-    (rl T << Subst => T' << Subst [ASet]) (SSet << Subst).
- eq (crl T => T' if Co [ASet] SSet) << Subst = 
-    (crl T << Subst => T' << Subst if Co << Subst [ASet]) (SSet << Subst).
+ eq (rl T => T' [ASet] SSet) <<< Subst = 
+    (rl T <<< Subst => T' <<< Subst [ASet]) (SSet <<< Subst).
+ eq (crl T => T' if Co [ASet] SSet) <<< Subst = 
+    (crl T <<< Subst => T' <<< Subst if Co <<< Subst [ASet]) (SSet <<< Subst).
 --- condition
- op _<<_ : Condition Substitution -> EqCondition .
-  eq (nil).EqCondition << Subst = (nil).EqCondition .
-  eq (T = T'  /\ Co)   << Subst = (T << Subst = T' << Subst)  /\ (Co << Subst).
-  eq (T := T' /\ Co)   << Subst = (T << Subst := T' << Subst) /\ (Co << Subst).
-  eq (T : St  /\ Co)   << Subst = (T << Subst : St)           /\ (Co << Subst).
-  eq (T => T'  /\ Co)  << Subst = (T << Subst => T' << Subst) /\ (Co << Subst).
+ op _<<<_ : Condition Substitution -> EqCondition .
+  eq (nil).EqCondition <<< Subst = (nil).EqCondition .
+  eq (T = T'  /\ Co)   <<< Subst = (T <<< Subst = T' <<< Subst)  /\ (Co <<< Subst).
+  eq (T := T' /\ Co)   <<< Subst = (T <<< Subst := T' <<< Subst) /\ (Co <<< Subst).
+  eq (T : St  /\ Co)   <<< Subst = (T <<< Subst : St)           /\ (Co <<< Subst).
+  eq (T => T'  /\ Co)  <<< Subst = (T <<< Subst => T' <<< Subst) /\ (Co <<< Subst).
 --- equation
-op _<<_ : Equation Substitution -> Equation .
- eq (eq T = T' [ASet].) << Subst = 
-    (eq T << Subst = T' << Subst [ASet] .).
- eq (ceq T = T' if EC [ASet].) << Subst = 
-    (ceq T << Subst = T' << Subst if EC << Subst [ASet].).
+op _<<<_ : Equation Substitution -> Equation .
+ eq (eq T = T' [ASet].) <<< Subst = 
+    (eq T <<< Subst = T' <<< Subst [ASet] .).
+ eq (ceq T = T' if EC [ASet].) <<< Subst = 
+    (ceq T <<< Subst = T' <<< Subst if EC <<< Subst [ASet].).
 --- equation set
- op _<<_ : EquationSet Substitution -> EquationSet .
- eq (none).EquationSet << Subst = (none).EquationSet .
- eq (E ESet) << Subst = (E << Subst) (ESet << Subst) .
+ op _<<<_ : EquationSet Substitution -> EquationSet .
+ eq (none).EquationSet <<< Subst = (none).EquationSet .
+ eq (E ESet) <<< Subst = (E <<< Subst) (ESet <<< Subst) .
 --- membership
- op _<<_ : MembAx Substitution -> MembAx .
-  eq (mb T : St [ASet].) << Subst = 
-     (mb T << Subst : St [ASet] .).
-  eq (cmb T : St if EC [ASet].) << Subst = 
-     (cmb T << Subst : St if EC << Subst [ASet].). 
+ op _<<<_ : MembAx Substitution -> MembAx .
+  eq (mb T : St [ASet].) <<< Subst = 
+     (mb T <<< Subst : St [ASet] .).
+  eq (cmb T : St if EC [ASet].) <<< Subst = 
+     (cmb T <<< Subst : St if EC <<< Subst [ASet].). 
 --- membership set
- op _<<_ : MembAxSet Substitution -> MembAxSet .
-  eq (none).MembAxSet << Subst = (none).MembAxSet .
-  eq (Mx MSet) << Subst = (Mx << Subst) (MSet << Subst) .
+ op _<<<_ : MembAxSet Substitution -> MembAxSet .
+  eq (none).MembAxSet <<< Subst = (none).MembAxSet .
+  eq (Mx MSet) <<< Subst = (Mx <<< Subst) (MSet <<< Subst) .
 --- rule
-op _<<_ : Rule Substitution -> Rule .
- eq (rl T => T' [ASet].) << Subst = 
-    (rl T << Subst => T' << Subst [ASet].).
- eq (crl T => T' if Co [ASet].) << Subst = 
-    (crl T << Subst => T' << Subst if Co << Subst [ASet].).
+op _<<<_ : Rule Substitution -> Rule .
+ eq (rl T => T' [ASet].) <<< Subst = 
+    (rl T <<< Subst => T' <<< Subst [ASet].).
+ eq (crl T => T' if Co [ASet].) <<< Subst = 
+    (crl T <<< Subst => T' <<< Subst if Co <<< Subst [ASet].).
 --- rule set
- op _<<_ : RuleSet Substitution -> RuleSet .
- eq (none).RuleSet << Subst = (none).RuleSet .
- eq (R RSet) << Subst = (R << Subst) (RSet << Subst) .
+ op _<<<_ : RuleSet Substitution -> RuleSet .
+ eq (none).RuleSet <<< Subst = (none).RuleSet .
+ eq (R RSet) <<< Subst = (R <<< Subst) (RSet <<< Subst) .
 --- -------------------------------------------------------------------------
 --- metaRed & metaGRed
 --- -------------------------------------------------------------------------
@@ -624,8 +624,8 @@ op split : Goal SentenceSet Nat GroundTerm SentenceSet -> GoalSet .
  eq split(G,none,N,GT,SnSet) = G .
  ceq split(< M,SSet,L >,SeSet,N,GT,SnSet) = 
   if MP :: MatchPair 
-  then if validate(M,SnSet,T << getSubstitution(MP)) 
-       then split-h(< M,SSet,L >,SeSet,N,GT,SnSet,getSen(SeSet,T)<< getSubstitution(MP))
+  then if validate(M,SnSet,T <<< getSubstitution(MP)) 
+       then split-h(< M,SSet,L >,SeSet,N,GT,SnSet,getSen(SeSet,T)<<< getSubstitution(MP))
        else split(< M,SSet,L >,SeSet,N + 1,GT,SnSet) fi
   else split(< M,SSet,L >,rmSen(SeSet,T),0,GT,SnSet) fi
  if T := firstTerm(SeSet) /\ MP := metaXmatch(M,T,GT,nil,0,unbounded,N).
@@ -842,32 +842,32 @@ op substitute : RuleSet Variable GroundTermList -> RuleSet .
 op subst : EquationSet Variable GroundTermList -> EquationSet .
  eq  subst((none).EquationSet,V,GTL) = (none).EquationSet .
  eq  subst(ESet,V,empty) = (none).EquationSet .
- eq  subst(eq T = T' [ASet]. ESet,V,(GT,GTL)) = if T << (V <- GT) == T' << (V <- GT) 
+ eq  subst(eq T = T' [ASet]. ESet,V,(GT,GTL)) = if T <<< (V <- GT) == T' <<< (V <- GT) 
      then subst(eq T = T'[ASet].,V,GTL) subst(ESet,V,(GT,GTL))
-     else (eq T << (V <- GT) = T' << (V <- GT)[ASet].) subst(eq T = T' [ASet].,V,GTL) subst(ESet,V,(GT,GTL)) fi .
- eq  subst(ceq T = T' if EC [ASet]. ESet,V,(GT,GTL)) = if T << (V <- GT) == T' << (V <- GT)
+     else (eq T <<< (V <- GT) = T' <<< (V <- GT)[ASet].) subst(eq T = T' [ASet].,V,GTL) subst(ESet,V,(GT,GTL)) fi .
+ eq  subst(ceq T = T' if EC [ASet]. ESet,V,(GT,GTL)) = if T <<< (V <- GT) == T' <<< (V <- GT)
      then subst(ceq T = T' if EC[ASet].,V,GTL) subst(ESet,V,(GT,GTL))
-     else (ceq T << (V <- GT) = T' << (V <- GT) if EC << (V <- GT)[ASet].) 
+     else (ceq T <<< (V <- GT) = T' <<< (V <- GT) if EC <<< (V <- GT)[ASet].) 
           subst(ceq T = T' if EC[ASet].,V,GTL) subst(ESet,V,(GT,GTL)) fi .
 --- Membership
 op subst : MembAxSet Variable GroundTermList -> MembAxSet .
  eq  subst((none).MembAxSet,V,GTL) = (none).MembAxSet .
  eq  subst(MSet,V,empty) = (none).MembAxSet .
  eq  subst(mb T : St [ASet]. MSet,V,(GT,GTL)) =  
-     (mb T << (V <- GT) : St [ASet].) subst(mb T : St [ASet].,V,GTL) subst(MSet,V,(GT,GTL)) .
+     (mb T <<< (V <- GT) : St [ASet].) subst(mb T : St [ASet].,V,GTL) subst(MSet,V,(GT,GTL)) .
  eq  subst(cmb T : St if EC [ASet]. MSet,V,(GT,GTL)) =
-     (cmb T << (V <- GT) : St if EC << (V <- GT)[ASet].) 
+     (cmb T <<< (V <- GT) : St if EC <<< (V <- GT)[ASet].) 
      subst(cmb T : St if EC [ASet].,V,GTL) subst(MSet,V,(GT,GTL)) .
 --- Rule 
  op subst : RuleSet Variable GroundTermList -> RuleSet .
  eq  subst((none).RuleSet,V,GTL) = (none).RuleSet .
  eq  subst(RSet,V,empty) = (none).RuleSet .
- eq  subst(rl T => T' [ASet]. RSet,V,(GT,GTL)) = if T << (V <- GT) == T' << (V <- GT) 
+ eq  subst(rl T => T' [ASet]. RSet,V,(GT,GTL)) = if T <<< (V <- GT) == T' <<< (V <- GT) 
      then subst(rl T => T'[ASet].,V,GTL) subst(RSet,V,(GT,GTL))
-     else (rl T << (V <- GT) => T' << (V <- GT)[ASet].) subst(rl T => T' [ASet].,V,GTL) subst(RSet,V,(GT,GTL)) fi .
- eq  subst(crl T => T' if Co [ASet]. RSet,V,(GT,GTL)) = if T << (V <- GT) == T' << (V <- GT)
+     else (rl T <<< (V <- GT) => T' <<< (V <- GT)[ASet].) subst(rl T => T' [ASet].,V,GTL) subst(RSet,V,(GT,GTL)) fi .
+ eq  subst(crl T => T' if Co [ASet]. RSet,V,(GT,GTL)) = if T <<< (V <- GT) == T' <<< (V <- GT)
      then subst(crl T => T' if Co [ASet].,V,GTL) subst(RSet,V,(GT,GTL))
-     else (crl T << (V <- GT) => T' << (V <- GT) if Co << (V <- GT)[ASet].) 
+     else (crl T <<< (V <- GT) => T' <<< (V <- GT) if Co <<< (V <- GT)[ASet].) 
           subst(crl T => T' if Co [ASet].,V,GTL) subst(RSet,V,(GT,GTL)) fi .
 --- -------------------------------------------------------------------------
  var H : Header .             var IList : ImportList .
@@ -887,7 +887,7 @@ op indCase : Goal Variable OpDeclSet -> GoalSet .
                substitute(MSet,V,(GTL',GT)) subst(convM(SSet),V,GTL')
                substitute(ESet,V,(GTL',GT)) subst(convE(SSet),V,GTL')
               endfm),
-        SSet << (V <- GT),L >) indCase(< M,SSet,L >,V,OSet)
+        SSet <<< (V <- GT),L >) indCase(< M,SSet,L >,V,OSet)
    else
         ind(<(mod H is IList sorts StSet . SbSet 
                OdSet C2ODS(GTL)  
@@ -895,7 +895,7 @@ op indCase : Goal Variable OpDeclSet -> GoalSet .
                substitute(ESet,V,(GTL',GT)) subst(convE(SSet),V,GTL')
                                             subst(convR(SSet),V,GTL')
               endm),
-        SSet << (V <- GT),L >) indCase(< M,SSet,L >,V,OSet) fi
+        SSet <<< (V <- GT),L >) indCase(< M,SSet,L >,V,OSet) fi
  if (fmod H is IList sorts StSet . SbSet OdSet MSet ESet endfm) := M /\
     GTL  := Tp2C(M,maxIndex(M)+ 1,TpL,getType(V))   /\ 
     GTL' := Tp2C-v(M,maxIndex(M)+ 1,TpL,getType(V)) /\ 
@@ -908,7 +908,7 @@ op indCase : Goal Variable OpDeclSet -> GoalSet .
                substitute(MSet,V,(GTL',GT)) subst(convM(SSet),V,GTL')
                substitute(ESet,V,(GTL',GT)) subst(convE(SSet),V,GTL')
               endfth),
-        SSet << (V <- GT),L >) indCase(< M,SSet,L >,V,OSet)
+        SSet <<< (V <- GT),L >) indCase(< M,SSet,L >,V,OSet)
     else
         ind(<(th H is IList sorts StSet . SbSet 
                OdSet C2ODS(GTL)  
@@ -916,7 +916,7 @@ op indCase : Goal Variable OpDeclSet -> GoalSet .
                substitute(ESet,V,(GTL',GT)) subst(convE(SSet),V,GTL')
                                             subst(convR(SSet),V,GTL')
               endth),
-        SSet << (V <- GT),L >) indCase(< M,SSet,L >,V,OSet) fi
+        SSet <<< (V <- GT),L >) indCase(< M,SSet,L >,V,OSet) fi
  if (fth H is IList sorts StSet . SbSet OdSet MSet ESet endfth) := M /\
     GTL  := Tp2C(M,maxIndex(M)+ 1,TpL,getType(V))   /\ 
     GTL' := Tp2C-v(M,maxIndex(M)+ 1,TpL,getType(V)) /\ 
@@ -929,7 +929,7 @@ op indCase : Goal Variable OpDeclSet -> GoalSet .
            substitute(ESet,V,(GTL',GT)) subst(convE(SSet),V,GTL')
            substitute(RSet,V,(GTL',GT)) subst(convR(SSet),V,GTL')
           endm),
-        SSet << (V <- GT),L >) indCase(< M,SSet,L >,V,OSet)
+        SSet <<< (V <- GT),L >) indCase(< M,SSet,L >,V,OSet)
  if (mod H is IList sorts StSet . SbSet OdSet MSet ESet RSet endm) := M /\
     GTL  := Tp2C(M,maxIndex(M)+ 1,TpL,getType(V))   /\ 
     GTL' := Tp2C-v(M,maxIndex(M)+ 1,TpL,getType(V)) /\ 
@@ -942,7 +942,7 @@ op indCase : Goal Variable OpDeclSet -> GoalSet .
            substitute(ESet,V,(GTL',GT)) subst(convE(SSet),V,GTL')
            substitute(RSet,V,(GTL',GT)) subst(convR(SSet),V,GTL')
           endth),
-        SSet << (V <- GT),L >) indCase(< M,SSet,L >,V,OSet)
+        SSet <<< (V <- GT),L >) indCase(< M,SSet,L >,V,OSet)
  if (th H is IList sorts StSet . SbSet OdSet MSet ESet RSet endth) := M /\
     GTL  := Tp2C(M,maxIndex(M)+ 1,TpL,getType(V))   /\ 
     GTL' := Tp2C-v(M,maxIndex(M)+ 1,TpL,getType(V)) /\ 
@@ -1071,48 +1071,48 @@ eq < M, crl T => T' if Co /\ '<_`,_>[Bx,By] = '<_`,_>[Bq,Br] /\ Cd[ASet],L > =
 --- -------------------------------------------------------------------------
 --- 1) Sx,Bx,Sy := Sq,B ---
  ceq cs(< M,(crl T => T' if Co /\ '_`,_[Sx,Bx,Sy] := '_`,_[Sq,B] /\ Cd [ASet]),L >) = 
-     < M,(crl T <<(Sy <- '_`,_[Sy,B]) => T' << (Sy <- '_`,_[Sy,B]) if Co << (Sy <- '_`,_[Sy,B]) /\ '_`,_[Sx,Bx,Sy] := Sq /\ Cd << (Sy <- '_`,_[Sy,B]) [ASet]),L >
-     < M,(crl T <<(Sx <- Sq ; Sy <- 'empty.Sequence) => T' <<(Sx <- Sq ; Sy <- 'empty.Sequence) if Co <<(Sx <- Sq ; Sy <- 'empty.Sequence) /\ Bx = B /\ Cd <<(Sx <- Sq ; Sy <- 'empty.Sequence)[ASet]),L > 
+     < M,(crl T <<<(Sy <- '_`,_[Sy,B]) => T' <<< (Sy <- '_`,_[Sy,B]) if Co <<< (Sy <- '_`,_[Sy,B]) /\ '_`,_[Sx,Bx,Sy] := Sq /\ Cd <<< (Sy <- '_`,_[Sy,B]) [ASet]),L >
+     < M,(crl T <<<(Sx <- Sq ; Sy <- 'empty.Sequence) => T' <<<(Sx <- Sq ; Sy <- 'empty.Sequence) if Co <<<(Sx <- Sq ; Sy <- 'empty.Sequence) /\ Bx = B /\ Cd <<<(Sx <- Sq ; Sy <- 'empty.Sequence)[ASet]),L > 
      if leastSort(M,Sx) = leastSort(M,Sq) /\ leastSort(M,Sy)= leastSort(M,Sq) /\ leastSort(M,Bx) = leastSort(M,B) /\ sortLeq(M,leastSort(M,B),leastSort(M,Sq)) /\ leastSort(M,B) =/= leastSort(M,Sq) .
 --- 2) Sx,Bx,Sy := Sq,Sr ---
  ceq cs(< M,(crl T => T' if Co /\ '_`,_[Sx,Bx,Sy] := '_`,_[Sq,Sr] /\ Cd[ASet]),L >) = 
-     < M,(crl T <<(Sy <- '_`,_[Sy,Sr]) => T' << (Sy <- '_`,_[Sy,Sr]) if Co << (Sy <- '_`,_[Sy,Sr]) /\ '_`,_[Sx,Bx,Sy] := Sq /\ Cd << (Sy <- '_`,_[Sy,Sr]) [ASet]),L >
-     < M,(crl T <<(Sx <- '_`,_[Sq,Sx]) => T' <<(Sx <- '_`,_[Sq,Sx]) if Co <<(Sx <- '_`,_[Sq,Sx]) /\ '_`,_[Sx,Bx,Sy] := Sr /\ Cd <<(Sx <- '_`,_[Sq,Sx])[ASet]),L > 
+     < M,(crl T <<<(Sy <- '_`,_[Sy,Sr]) => T' <<< (Sy <- '_`,_[Sy,Sr]) if Co <<< (Sy <- '_`,_[Sy,Sr]) /\ '_`,_[Sx,Bx,Sy] := Sq /\ Cd <<< (Sy <- '_`,_[Sy,Sr]) [ASet]),L >
+     < M,(crl T <<<(Sx <- '_`,_[Sq,Sx]) => T' <<<(Sx <- '_`,_[Sq,Sx]) if Co <<<(Sx <- '_`,_[Sq,Sx]) /\ '_`,_[Sx,Bx,Sy] := Sr /\ Cd <<<(Sx <- '_`,_[Sq,Sx])[ASet]),L > 
      if leastSort(M,Sx) = leastSort(M,Sq) /\ leastSort(M,Sy)= leastSort(M,Sq) /\ leastSort(M,Sq) = leastSort(M,Sr) /\ leastSort(M,Bx) =/= leastSort(M,Sq) /\ sortLeq(M,leastSort(M,Bx),leastSort(M,Sq)).
 --- 3) Sx,Bx,Sy,By,Sz := Sq,B ---
  ceq cs(< M,(crl T => T' if Co /\ '_`,_[Sx,Bx,Sy,By,Sz] := '_`,_[Sq,B] /\ Cd [ASet]),L >) = 
-     < M,(crl T <<(Sz <- '_`,_[Sz,B]) => T' << (Sz <- '_`,_[Sz,B]) if Co << (Sz <- '_`,_[Sz,B]) /\ '_`,_[Sx,Bx,Sy,By,Sz] := Sq /\ Cd << (Sz <- '_`,_[Sz,B]) [ASet]),L >
-     < M,(crl T <<(Sz <- 'empty.Sequence) => T' <<(Sz <- 'empty.Sequence) if Co <<(Sz <- 'empty.Sequence) /\ '_`,_[Sx,Bx,Sy] := Sq /\ By = B /\ Cd <<(Sz <- 'empty.Sequence)[ASet]),L > 
+     < M,(crl T <<<(Sz <- '_`,_[Sz,B]) => T' <<< (Sz <- '_`,_[Sz,B]) if Co <<< (Sz <- '_`,_[Sz,B]) /\ '_`,_[Sx,Bx,Sy,By,Sz] := Sq /\ Cd <<< (Sz <- '_`,_[Sz,B]) [ASet]),L >
+     < M,(crl T <<<(Sz <- 'empty.Sequence) => T' <<<(Sz <- 'empty.Sequence) if Co <<<(Sz <- 'empty.Sequence) /\ '_`,_[Sx,Bx,Sy] := Sq /\ By = B /\ Cd <<<(Sz <- 'empty.Sequence)[ASet]),L > 
      if leastSort(M,Sx) = leastSort(M,Sq) /\ leastSort(M,Sy)= leastSort(M,Sq) /\ leastSort(M,Sz)= leastSort(M,Sq) /\ leastSort(M,Bx) = leastSort(M,B) /\ leastSort(M,By) = leastSort(M,B) /\ sortLeq(M,leastSort(M,B),leastSort(M,Sq)) /\ leastSort(M,B) =/= leastSort(M,Sq) .
 --- 4) Sx,Bx,Sy,By,Sz := Sq,Sr ---
   ceq cs(< M,(crl T => T' if Co /\ '_`,_[Sx,Bx,Sy,By,Sz] := '_`,_[Sq,Sr] /\ Cd [ASet]),L >) = 
-     < M,(crl T <<(Sz <- '_`,_[Sz,Sr]) => T' << (Sz <- '_`,_[Sz,Sr]) if Co << (Sz <- '_`,_[Sz,Sr]) /\ '_`,_[Sx,Bx,Sy,By,Sz] := Sq /\ Cd << (Sz <- '_`,_[Sz,Sr]) [ASet]),L >
-     < M,(crl T <<(Sy <- '_`,_[Sa,Sb]) => T' << (Sy <- '_`,_[Sa,Sb]) if Co << (Sy <- '_`,_[Sa,Sb]) /\ '_`,_[Sx,Bx,Sa] := Sq /\ '_`,_[Sb,By,Sz] := Sr  /\ Cd << (Sy <- '_`,_[Sa,Sb]) [ASet]),L >
-     < M,(crl T <<(Sx <- '_`,_[Sq,Sx]) => T' <<(Sx <- '_`,_[Sq,Sx]) if Co <<(Sx <- '_`,_[Sq,Sx]) /\ '_`,_[Sx,Bx,Sy,By,Sz] := Sr /\ Cd <<(Sx <- '_`,_[Sq,Sx])[ASet]),L > 
+     < M,(crl T <<<(Sz <- '_`,_[Sz,Sr]) => T' <<< (Sz <- '_`,_[Sz,Sr]) if Co <<< (Sz <- '_`,_[Sz,Sr]) /\ '_`,_[Sx,Bx,Sy,By,Sz] := Sq /\ Cd <<< (Sz <- '_`,_[Sz,Sr]) [ASet]),L >
+     < M,(crl T <<<(Sy <- '_`,_[Sa,Sb]) => T' <<< (Sy <- '_`,_[Sa,Sb]) if Co <<< (Sy <- '_`,_[Sa,Sb]) /\ '_`,_[Sx,Bx,Sa] := Sq /\ '_`,_[Sb,By,Sz] := Sr  /\ Cd <<< (Sy <- '_`,_[Sa,Sb]) [ASet]),L >
+     < M,(crl T <<<(Sx <- '_`,_[Sq,Sx]) => T' <<<(Sx <- '_`,_[Sq,Sx]) if Co <<<(Sx <- '_`,_[Sq,Sx]) /\ '_`,_[Sx,Bx,Sy,By,Sz] := Sr /\ Cd <<<(Sx <- '_`,_[Sq,Sx])[ASet]),L > 
      if leastSort(M,Sx) = leastSort(M,Sq) /\ leastSort(M,Sy)= leastSort(M,Sq) /\ leastSort(M,Sz)= leastSort(M,Sq) /\ leastSort(M,Bx) = leastSort(M,By) /\ sortLeq(M,leastSort(M,Bx),leastSort(M,Sq)) /\ leastSort(M,Bx) =/= leastSort(M,Sq) /\
      Sa := qid(string(getName(Sy)) + "#1:" + string(getType(Sy))) /\
      Sb := qid(string(getName(Sy)) + "#2:" + string(getType(Sy))).
 --- -------------------------------------------------------------------------
 --- 1) Sx,Bx,Sy := Sq,B ---
  ceq cs(< M,(ceq T = T' if Co /\ '_`,_[Sx,Bx,Sy] := '_`,_[Sq,B] /\ Cd [ASet]),L >) = 
-     < M,(ceq T <<(Sy <- '_`,_[Sy,B]) = T' << (Sy <- '_`,_[Sy,B]) if Co << (Sy <- '_`,_[Sy,B]) /\ '_`,_[Sx,Bx,Sy] := Sq /\ Cd << (Sy <- '_`,_[Sy,B]) [ASet]),L >
-     < M,(ceq T <<(Sx <- Sq ; Sy <- 'empty.Sequence) = T' <<(Sx <- Sq ; Sy <- 'empty.Sequence) if Co <<(Sx <- Sq ; Sy <- 'empty.Sequence) /\ Bx = B /\ Cd <<(Sx <- Sq ; Sy <- 'empty.Sequence)[ASet]),L > 
+     < M,(ceq T <<<(Sy <- '_`,_[Sy,B]) = T' <<< (Sy <- '_`,_[Sy,B]) if Co <<< (Sy <- '_`,_[Sy,B]) /\ '_`,_[Sx,Bx,Sy] := Sq /\ Cd <<< (Sy <- '_`,_[Sy,B]) [ASet]),L >
+     < M,(ceq T <<<(Sx <- Sq ; Sy <- 'empty.Sequence) = T' <<<(Sx <- Sq ; Sy <- 'empty.Sequence) if Co <<<(Sx <- Sq ; Sy <- 'empty.Sequence) /\ Bx = B /\ Cd <<<(Sx <- Sq ; Sy <- 'empty.Sequence)[ASet]),L > 
      if leastSort(M,Sx) = leastSort(M,Sq) /\ leastSort(M,Sy)= leastSort(M,Sq) /\ leastSort(M,Bx) = leastSort(M,B) /\ sortLeq(M,leastSort(M,B),leastSort(M,Sq)) /\ leastSort(M,B) =/= leastSort(M,Sq) .
 --- 2) Sx,Bx,Sy := Sq,Sr ---
  ceq cs(< M,(ceq T = T' if Co /\ '_`,_[Sx,Bx,Sy] := '_`,_[Sq,Sr] /\ Cd[ASet]),L >) = 
-     < M,(ceq T <<(Sy <- '_`,_[Sy,Sr]) = T' << (Sy <- '_`,_[Sy,Sr]) if Co << (Sy <- '_`,_[Sy,Sr]) /\ '_`,_[Sx,Bx,Sy] := Sq /\ Cd << (Sy <- '_`,_[Sy,Sr]) [ASet]),L >
-     < M,(ceq T <<(Sx <- '_`,_[Sq,Sx]) = T' <<(Sx <- '_`,_[Sq,Sx]) if Co <<(Sx <- '_`,_[Sq,Sx]) /\ '_`,_[Sx,Bx,Sy] := Sr /\ Cd <<(Sx <- '_`,_[Sq,Sx])[ASet]),L > 
+     < M,(ceq T <<<(Sy <- '_`,_[Sy,Sr]) = T' <<< (Sy <- '_`,_[Sy,Sr]) if Co <<< (Sy <- '_`,_[Sy,Sr]) /\ '_`,_[Sx,Bx,Sy] := Sq /\ Cd <<< (Sy <- '_`,_[Sy,Sr]) [ASet]),L >
+     < M,(ceq T <<<(Sx <- '_`,_[Sq,Sx]) = T' <<<(Sx <- '_`,_[Sq,Sx]) if Co <<<(Sx <- '_`,_[Sq,Sx]) /\ '_`,_[Sx,Bx,Sy] := Sr /\ Cd <<<(Sx <- '_`,_[Sq,Sx])[ASet]),L > 
      if leastSort(M,Sx) = leastSort(M,Sq) /\ leastSort(M,Sy)= leastSort(M,Sq) /\ leastSort(M,Sq) = leastSort(M,Sr) /\ leastSort(M,Bx) =/= leastSort(M,Sq) /\ sortLeq(M,leastSort(M,Bx),leastSort(M,Sq)).
 --- 3) Sx,Bx,Sy,By,Sz := Sq,B ---
  ceq cs(< M,(ceq T = T' if Co /\ '_`,_[Sx,Bx,Sy,By,Sz] := '_`,_[Sq,B] /\ Cd [ASet]),L >) = 
-     < M,(ceq T <<(Sz <- '_`,_[Sz,B]) = T' << (Sz <- '_`,_[Sz,B]) if Co << (Sz <- '_`,_[Sz,B]) /\ '_`,_[Sx,Bx,Sy,By,Sz] := Sq /\ Cd << (Sz <- '_`,_[Sz,B]) [ASet]),L >
-     < M,(ceq T <<(Sz <- 'empty.Sequence) = T' <<(Sz <- 'empty.Sequence) if Co <<(Sz <- 'empty.Sequence) /\ '_`,_[Sx,Bx,Sy] := Sq /\ By = B /\ Cd <<(Sz <- 'empty.Sequence)[ASet]),L > 
+     < M,(ceq T <<<(Sz <- '_`,_[Sz,B]) = T' <<< (Sz <- '_`,_[Sz,B]) if Co <<< (Sz <- '_`,_[Sz,B]) /\ '_`,_[Sx,Bx,Sy,By,Sz] := Sq /\ Cd <<< (Sz <- '_`,_[Sz,B]) [ASet]),L >
+     < M,(ceq T <<<(Sz <- 'empty.Sequence) = T' <<<(Sz <- 'empty.Sequence) if Co <<<(Sz <- 'empty.Sequence) /\ '_`,_[Sx,Bx,Sy] := Sq /\ By = B /\ Cd <<<(Sz <- 'empty.Sequence)[ASet]),L > 
      if leastSort(M,Sx) = leastSort(M,Sq) /\ leastSort(M,Sy)= leastSort(M,Sq) /\ leastSort(M,Sz)= leastSort(M,Sq) /\ leastSort(M,Bx) = leastSort(M,B) /\ leastSort(M,By) = leastSort(M,B) /\ sortLeq(M,leastSort(M,B),leastSort(M,Sq)) /\ leastSort(M,B) =/= leastSort(M,Sq) .
 --- 4) Sx,Bx,Sy,By,Sz := Sq,Sr ---
   ceq cs(< M,(ceq T = T' if Co /\ '_`,_[Sx,Bx,Sy,By,Sz] := '_`,_[Sq,Sr] /\ Cd [ASet]),L >) = 
-     < M,(ceq T <<(Sz <- '_`,_[Sz,Sr]) = T' << (Sz <- '_`,_[Sz,Sr]) if Co << (Sz <- '_`,_[Sz,Sr]) /\ '_`,_[Sx,Bx,Sy,By,Sz] := Sq /\ Cd << (Sz <- '_`,_[Sz,Sr]) [ASet]),L >
-     < M,(ceq T <<(Sy <- '_`,_[Sa,Sb]) = T' << (Sy <- '_`,_[Sa,Sb]) if Co << (Sy <- '_`,_[Sa,Sb]) /\ '_`,_[Sx,Bx,Sa] := Sq /\ '_`,_[Sb,By,Sz] := Sr  /\ Cd << (Sy <- '_`,_[Sa,Sb]) [ASet]),L >
-     < M,(ceq T <<(Sx <- '_`,_[Sq,Sx]) = T' <<(Sx <- '_`,_[Sq,Sx]) if Co <<(Sx <- '_`,_[Sq,Sx]) /\ '_`,_[Sx,Bx,Sy,By,Sz] := Sr /\ Cd <<(Sx <- '_`,_[Sq,Sx])[ASet]),L > 
+     < M,(ceq T <<<(Sz <- '_`,_[Sz,Sr]) = T' <<< (Sz <- '_`,_[Sz,Sr]) if Co <<< (Sz <- '_`,_[Sz,Sr]) /\ '_`,_[Sx,Bx,Sy,By,Sz] := Sq /\ Cd <<< (Sz <- '_`,_[Sz,Sr]) [ASet]),L >
+     < M,(ceq T <<<(Sy <- '_`,_[Sa,Sb]) = T' <<< (Sy <- '_`,_[Sa,Sb]) if Co <<< (Sy <- '_`,_[Sa,Sb]) /\ '_`,_[Sx,Bx,Sa] := Sq /\ '_`,_[Sb,By,Sz] := Sr  /\ Cd <<< (Sy <- '_`,_[Sa,Sb]) [ASet]),L >
+     < M,(ceq T <<<(Sx <- '_`,_[Sq,Sx]) = T' <<<(Sx <- '_`,_[Sq,Sx]) if Co <<<(Sx <- '_`,_[Sq,Sx]) /\ '_`,_[Sx,Bx,Sy,By,Sz] := Sr /\ Cd <<<(Sx <- '_`,_[Sq,Sx])[ASet]),L > 
      if leastSort(M,Sx) = leastSort(M,Sq) /\ leastSort(M,Sy)= leastSort(M,Sq) /\ leastSort(M,Sz)= leastSort(M,Sq) /\ leastSort(M,Bx) = leastSort(M,By) /\ sortLeq(M,leastSort(M,Bx),leastSort(M,Sq)) /\ leastSort(M,Bx) =/= leastSort(M,Sq) /\
      Sa := qid(string(getName(Sy)) + "#1:" + string(getType(Sy))) /\
      Sb := qid(string(getName(Sy)) + "#2:" + string(getType(Sy)))  .

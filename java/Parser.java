@@ -24,8 +24,12 @@ public class Parser {
 	// This attribute indicates whether the first block has been found.
 	private boolean started;
 
+	// This attribute indicates whether a open-close environment has started.
+	private boolean OpenEnvStarted;
+
 	public Parser(){
 		started = false;
+		OpenEnvStarted = false;
 	}
 
 	/**
@@ -273,12 +277,23 @@ public class Parser {
 				startsWithIgnoreBlanks(line, "make") ||
 				startsWithIgnoreBlanks(line, "view") ||
 				startsWithIgnoreBlanks(line, "open")){
+			OpenEnvStarted = startsWithIgnoreBlanks(line, "open");
 			if (started){
 				res = ")\n\n(" + line;
 			}
 			else{
 				res = "(" + line;
 				started = true;
+			}
+		}
+		if (startsWithIgnoreBlanks(line, "red")){
+			if (started && !OpenEnvStarted){
+				res = ")\n\n(" + line;
+			}
+		}
+		if (startsWithIgnoreBlanks(line, "eof")){
+			if (started){
+				res = ")\n\n" + line;
 			}
 		}
 		return res;

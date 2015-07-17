@@ -1,7 +1,7 @@
 #!/bin/sh
 declare -r TEMP=trans-temp-mod
 declare -r ALL=all-temp-mod.cafe
-declare -r CITP=/Users/adrian/Documents/cafe4maude/citp/ui.maude
+declare -r CITP=/Users/adrian/Documents/cafe4maude/citp/citp.maude
 declare -r MAUDE=/Applications/maude26/maude.intelDarwin
 declare -r PARSER=/Users/adrian/Documents/cafe4maude/parser.jar
 rm -f $ALL

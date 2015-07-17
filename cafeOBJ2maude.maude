@@ -2813,7 +2813,7 @@ a list of quoted identifiers reporting the errors found during the parsing proce
 \begin{comment}
 %)
 
-  vars T T' T'' T1 T2 T3 T4 TP : Term .
+  vars T T' T'' T1 T2 T3 T4 T5 T6 TP : Term .
   vars TL PL PL' : TermList .
   var  V : Variable .
   var  C : Constant .
@@ -3322,72 +3322,12 @@ of the \verb"evalPreModule" function:
   )
   eq updateDatabaseWithMetaSearch(ME, DB) = DB [owise] .
 
-  op addMetaSearchModule : Module Module -> Module .
-  ceq addMetaSearchModule(M, M) =
-            mod H is IL sorts SS . SSDS ODS MAS EqS' RS endm
-   if mod H is IL sorts SS . SSDS ODS MAS EqS RS endm := M /\
-      EqS' := filterPredefEqs(EqS) .
-  eq addMetaSearchModule(M, M) = M [owise] .
-
-  op modifySearchConditions : Module EquationSet -> EquationSet .
-  eq modifySearchConditions(M, ceq T = T' if CND [AtS] . EqS) =
-                ceq T = T' if modifySearchConditionsCond(M, CND) [AtS] .
-                modifySearchConditions(M, EqS) .
-  eq modifySearchConditions(M, EqS) = EqS [owise] .
-
-  op modifySearchConditionsCond : Module Condition -> Condition .
-  eq modifySearchConditionsCond(M, nil) = nil .
-  eq modifySearchConditionsCond(M, T => T' /\ CND) = T => T' /\
-                                                     modifySearchConditionsCond(M, CND) .
-  eq modifySearchConditionsCond(M, T := T' /\ CND) = T := T' /\
-                                                     modifySearchConditionsCond(M, CND) .
-  eq modifySearchConditionsCond(M, T : Srt /\ CND) = T : Srt /\
-                                                     modifySearchConditionsCond(M, CND) .
-  ceq modifySearchConditionsCond(M, T = T' /\ CND) = T3 = T4 /\
-                                                     modifySearchConditionsCond(M, CND)
-   if T1 := getTerm(metaReduce(M, T)) /\
-      T2 := getTerm(metaReduce(M, T')) /\
-      T3 := modifySearchConditions(M, T1) /\
-      T4 := modifySearchConditions(M, T2) .
-
-  op modifySearchConditions : Module Term -> Term .
-  eq modifySearchConditions(M, C) = C .
-  eq modifySearchConditions(M, V) = V .
-  ceq modifySearchConditions(M, Q[TL]) = Q[modifySearchConditions*(M, TL)]
-   if not isSearchCommand(Q) .
-  ceq modifySearchConditions(M, Q[TL]) = transformSearch(M, Q[TL])
-   if isSearchCommand(Q) .
-
-  op transformSearch : Module Term -> Term .
-  eq transformSearch(M, '_=`(_`,_`)=>*_[T1, T2, T3, T4]) =
-      'maudeSearch[upTerm(T1), upTerm(T2), upTerm(T3), upTerm(T4), upTerm('*.Qid),  'nil.Cond] .
-  eq transformSearch(M, T) = T .
-
-  op modifySearchConditions* : Module TermList -> TermList .
-  eq modifySearchConditions*(M, empty) = empty .
-  eq modifySearchConditions*(M, (T, TL)) = modifySearchConditions(M, T),
-                                           modifySearchConditions*(M, TL) .
-
   op filterPredefEqs : EquationSet -> EquationSet .
   eq filterPredefEqs(eq T = T' [AtS metadata("built-in in CafeOBJ")] . EqS) =
                                         filterPredefEqs(EqS) .
   eq filterPredefEqs(ceq T = T' if CND [AtS metadata("built-in in CafeOBJ")] . EqS) =
                                         filterPredefEqs(EqS) .
   eq filterPredefEqs(EqS) = EqS [owise] .
-
-  op isSearchCommand : Qid -> Bool .
-  eq isSearchCommand(Q) = Q == '_=`(_`,_`)=>*_ or
-                          Q == '_=`(_`,_`)=>!_ or
-                          Q == '_=`(_`,_`)=>+_ or
-                          Q == '_==>*_suchThat_withStateEq_ or
-                          Q == '_==>!_suchThat_withStateEq_ or
-                          Q == '_==>+_suchThat_withStateEq_ or
-                          Q == '_==>*_withStateEq_ or
-                          Q == '_==>!_withStateEq_ or
-                          Q == '_==>+_withStateEq_ or
-                          Q == '_==>*_suchThat_ or
-                          Q == '_==>!_suchThat_ or
-                          Q == '_==>+_suchThat_ .
 
   op isSystem : Module -> Bool .
   eq isSystem(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm) = true .
@@ -3396,13 +3336,12 @@ of the \verb"evalPreModule" function:
 
   op updateDatabase4cafeAux : ModuleExpression Database -> Database .
   ceq updateDatabase4cafeAux(ME, DB) =
-             db(< ME ; T ; addEqual&SearchEqs(U', SS) ; addEqual&SearchEqs(U'', SS) ; U3 ;
+             db(< ME ; T ; addEqual&SearchEqs(U') ; addEqual&SearchEqs(U'') ; U3 ;
                   VDS ; MNS ; VES > MIS, MNS', VIS, VES', MNS'', MNS3, MNS4, QIL)
    if db(< ME ; T ; U' ; U'' ; U3 ; VDS ; MNS ; VES > MIS, MNS', VIS, VES', MNS'',
            MNS3, MNS4, QIL) := DB /\
       U5 := getFlatModule(modExp(evalModExp(ME, DB)),
-                 database(evalModExp(ME, DB))) /\
-      SS := getRulesSorts(U5, getRls(U'')) .
+                 database(evalModExp(ME, DB))) .
   eq updateDatabase4cafeAux(ME, DB) = DB [owise] .
 
   var  H : Header .
@@ -3421,19 +3360,19 @@ of the \verb"evalPreModule" function:
   var  AtS : AttrSet .
   var  CND : Condition .
 
-  op addEqual&SearchEqs : Module SortSet ~> Module .
-  ceq addEqual&SearchEqs(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, SS') =
+  op addEqual&SearchEqs : Module -> Module .
+  ceq addEqual&SearchEqs(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm) =
                          fmod H is IL sorts SS . SSDS ODS MAS (EqS EqS') endfm
    if EqS' := createEqsFromSorts(SS) createEqsFromImports(IL) .
-  ceq addEqual&SearchEqs(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, SS') =
+  ceq addEqual&SearchEqs(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm) =
                          mod H is IL sorts SS . SSDS ODS MAS (EqS EqS') RS endm
-   if EqS' := createEqsFromSorts(SS) createSearchEqsFromSorts(SS') createEqsFromImports(IL) .
-  ceq addEqual&SearchEqs(fth H is IL sorts SS . SSDS ODS MAS EqS endfth, SS') =
+   if EqS' := createEqsFromSorts(SS) createEqsFromImports(IL) .
+  ceq addEqual&SearchEqs(fth H is IL sorts SS . SSDS ODS MAS EqS endfth) =
                          fth H is IL sorts SS . SSDS ODS MAS (EqS EqS') endfth
    if EqS' := createEqsFromSorts(SS) createEqsFromImports(IL) .
-  ceq addEqual&SearchEqs(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, SS') =
+  ceq addEqual&SearchEqs(th H is IL sorts SS . SSDS ODS MAS EqS RS endth) =
                          th H is IL sorts SS . SSDS ODS MAS (EqS EqS') RS endth
-   if EqS' := createEqsFromSorts(SS) createSearchEqsFromSorts(SS') createEqsFromImports(IL) .
+   if EqS' := createEqsFromSorts(SS) createEqsFromImports(IL) .
 
   op predefinedCafeEqual : Module -> Module .
   ceq predefinedCafeEqual(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm) =
@@ -3455,141 +3394,6 @@ of the \verb"evalPreModule" function:
   ceq createEqsFromSorts(Srt ; SS) = eq '_=_[V, V] = 'true.Bool [metadata("built-in in CafeOBJ")] .
                                      createEqsFromSorts(SS)
    if V := qid("V:" + string(Srt)) .
-
-  op getRulesSorts : Module RuleSet -> SortSet .
-  eq getRulesSorts(M, none) = none .
-  eq getRulesSorts(M, rl T => T' [AtS] . RS) = getType(metaReduce(M, T)) ;
-                                               getRulesSorts(M, RS) .
-  eq getRulesSorts(M, crl T => T' if CND [AtS] . RS) = getType(metaReduce(M, T)) ;
-                                                       getRulesSorts(M, RS) .
-
-  op createSearchEqsFromSorts : SortSet -> EquationSet .
-  eq createSearchEqsFromSorts(none) = none .
-  ceq createSearchEqsFromSorts(Srt ; SS) =
-               createSearchEqsFromSorts(SS)
-               eq '_==>_[CXU, CYU] = '_=`(_`,_`)=>*_[CXU, 's_['0.Zero], '*.NzNat*, CYU]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_==>1_[CXU, CYU] = '_=`(_`,_`)=>+_[CXU, 's_['0.Zero], '*.NzNat*, CYU]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_==>*_[CXU, CYU] = '_=`(_`,_`)=>*_[CXU, '*.NzNat*, '*.NzNat*, CYU]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_==>!_[CXU, CYU] = '_=`(_`,_`)=>!_[CXU, '*.NzNat*, '*.NzNat*, CYU]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_==>+_[CXU, CYU] = '_=`(_`,_`)=>+_[CXU, '*.NzNat*, '*.NzNat*, CYU]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_==>1_suchThat_[CXU, CYU, COND] =
-                        '_=`(_`,_`)=>+_suchThat_[CXU, 's_['0.Zero], '*.NzNat*, CYU, COND]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_==>*_suchThat_[CXU, CYU, COND] =
-                        '_=`(_`,_`)=>*_suchThat_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_==>!_suchThat_[CXU, CYU, COND] =
-                        '_=`(_`,_`)=>!_suchThat_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_==>+_suchThat_[CXU, CYU, COND] =
-                        '_=`(_`,_`)=>+_suchThat_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_==>1_withStateEq_[CXU, CYU, PRED] =
-                        '_=`(_`,_`)=>+_withStateEq_[CXU, 's_['0.Zero], '*.NzNat*, CYU, PRED]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_==>*_withStateEq_[CXU, CYU, PRED] =
-                        '_=`(_`,_`)=>*_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, PRED]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_==>!_withStateEq_[CXU, CYU, PRED] =
-                        '_=`(_`,_`)=>!_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, PRED]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_==>+_withStateEq_[CXU, CYU, PRED] =
-                        '_=`(_`,_`)=>+_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, PRED]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_==>1_suchThat_withStateEq_[CXU, CYU, COND, PRED]  =
-                        '_=`(_`,_`)=>+_suchThat_withStateEq_[CXU, 's_['0.Zero], '*.NzNat*, CYU, COND, PRED]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_==>*_suchThat_withStateEq_[CXU, CYU, COND, PRED]  =
-                        '_=`(_`,_`)=>*_suchThat_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND, PRED]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_==>!_suchThat_withStateEq_[CXU, CYU, COND, PRED]  =
-                        '_=`(_`,_`)=>!_suchThat_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND, PRED]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_==>+_suchThat_withStateEq_[CXU, CYU, COND, PRED]  =
-                        '_=`(_`,_`)=>+_suchThat_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND, PRED]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(_`)=>*_[CXU, MAX-R, CYU] = '_=`(_`,_`)=>*_[CXU, MAX-R, '*.NzNat*, CYU]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(_`)=>!_[CXU, MAX-R, CYU] = '_=`(_`,_`)=>!_[CXU, MAX-R, '*.NzNat*, CYU]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(_`)=>+_[CXU, MAX-R, CYU] = '_=`(_`,_`)=>+_[CXU, MAX-R, '*.NzNat*, CYU]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(_`)=>*_suchThat_[CXU, MAX-R, CYU, COND] =
-                        '_=`(_`,_`)=>*_suchThat_[CXU, MAX-R, '*.NzNat*, CYU, COND]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(_`)=>!_suchThat_[CXU, MAX-R, CYU, COND] =
-                        '_=`(_`,_`)=>!_suchThat_[CXU, MAX-R, '*.NzNat*, CYU, COND]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(_`)=>+_suchThat_[CXU, MAX-R, CYU, COND] =
-                        '_=`(_`,_`)=>+_suchThat_[CXU, MAX-R, '*.NzNat*, CYU, COND]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(_`)=>*_withStateEq_[CXU, MAX-R, CYU, PRED] =
-                        '_=`(_`,_`)=>*_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, PRED]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(_`)=>!_withStateEq_[CXU, MAX-R, CYU, PRED] =
-                        '_=`(_`,_`)=>!_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, PRED]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(_`)=>+_withStateEq_[CXU, MAX-R, CYU, PRED] =
-                        '_=`(_`,_`)=>+_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, PRED]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(_`)=>*_suchThat_withStateEq_[CXU, MAX-R, CYU, COND, PRED] =
-                        '_=`(_`,_`)=>*_suchThat_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, COND, PRED]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(_`)=>!_suchThat_withStateEq_[CXU, MAX-R, CYU, COND, PRED] =
-                        '_=`(_`,_`)=>!_suchThat_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, COND, PRED]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(_`)=>+_suchThat_withStateEq_[CXU, MAX-R, CYU, COND, PRED] =
-                        '_=`(_`,_`)=>+_suchThat_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, COND, PRED]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(`,_`)=>*_[CXU, MAX-D, CYU] = '_=`(_`,_`)=>*_[CXU, '*.NzNat*, MAX-D, CYU]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(`,_`)=>!_[CXU, MAX-D, CYU] = '_=`(_`,_`)=>!_[CXU, '*.NzNat*, MAX-D, CYU]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(`,_`)=>+_[CXU, MAX-D, CYU] = '_=`(_`,_`)=>+_[CXU, '*.NzNat*, MAX-D, CYU]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(`,_`)=>*_suchThat_[CXU, MAX-D, CYU, COND] =
-                        '_=`(_`,_`)=>*_suchThat_[CXU, '*.NzNat*, MAX-D, CYU, COND]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(`,_`)=>!_suchThat_[CXU, MAX-D, CYU, COND] =
-                        '_=`(_`,_`)=>!_suchThat_[CXU, '*.NzNat*, MAX-D, CYU, COND]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(`,_`)=>+_suchThat_[CXU, MAX-D, CYU, COND] =
-                        '_=`(_`,_`)=>+_suchThat_[CXU, '*.NzNat*, MAX-D, CYU, COND]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(`,_`)=>*_withStateEq_[CXU, MAX-D, CYU, PRED] =
-                        '_=`(_`,_`)=>*_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, PRED]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(`,_`)=>!_withStateEq_[CXU, MAX-D, CYU, PRED] =
-                        '_=`(_`,_`)=>!_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, PRED]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(`,_`)=>+_withStateEq_[CXU, MAX-D, CYU, PRED] =
-                        '_=`(_`,_`)=>+_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, PRED]
-                                                 [metadata("built-in in CafeOBJ")] .
-
-               eq '_=`(`,_`)=>*_suchThat_withStateEq_[CXU, MAX-D, CYU, COND, PRED] =
-                        '_=`(_`,_`)=>*_suchThat_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, COND, PRED]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(`,_`)=>!_suchThat_withStateEq_[CXU, MAX-D, CYU, COND, PRED] =
-                        '_=`(_`,_`)=>!_suchThat_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, COND, PRED]
-                                                 [metadata("built-in in CafeOBJ")] .
-               eq '_=`(`,_`)=>+_suchThat_withStateEq_[CXU, MAX-D, CYU, COND, PRED] =
-                        '_=`(_`,_`)=>+_suchThat_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, COND, PRED]
-                                                 [metadata("built-in in CafeOBJ")] .
-
-   if CXU := qid("CXU:" + string(Srt)) /\
-      CYU := qid("CYU:" + string(Srt)) /\
-      COND := qid("COND:Bool") /\
-      MAX-R := qid("MAX-R:NzNat*") /\
-      MAX-D := qid("MAX-D:NzNat*") /\
-      PRED := qid("PRED:" + string(Srt)) /\
-      BIND := qid("BIND:" + string(Srt)) .
-
-  vars CXU CYU COND MAX-R MAX-D PRED BIND : Variable .
 
   op createEqsFromImports : ImportList -> EquationSet .
   eq createEqsFromImports(nil) = none .
@@ -3702,7 +3506,7 @@ the \verb"maps2maps" function shown above to the body:
       < DB', PSM', HSM', QIL > := procCafeMod('cmod!_`{_`}[T1, T2], PSM, HSM, TSM, DB) /\
       M := getFlatModule(openCloseModName, DB') /\
       TL := getRedCommands(T') /\
-      QIL' := processRedCommands(M, DB', TL) .
+      QIL' := processRedCommands(M, DB', TL, T2) .
   eq procOpenCloseEnv(T, T', PSM, HSM, TSM, DB) = < DB | nil | 'Environment 'not 'parsed. > [owise] .
 
   op getRedCommands : Term -> TermList .
@@ -3714,14 +3518,331 @@ the \verb"maps2maps" function shown above to the body:
   eq getRedCommand('red_.['CafeBubble[T]]) = 'red_.['bubble[T]] .
   eq getRedCommand(T) = empty [owise] .
 
-  op processRedCommands : Module Database TermList -> QidList .
-  eq processRedCommands(M, DB, empty) = nil .
-  ceq processRedCommands(M, DB, ('red_.['bubble[T]], TL)) = QIL
-                                                   processRedCommands(M, DB, TL)
-   if *** T' := solveBubbles(T, M, false, none, DB) /\
-      T' := getTerm(metaParse(M, downQidList(T), anyType)) /\
+  op processRedCommands : Module Database TermList Term -> QidList .
+  eq processRedCommands(M, DB, empty, T) = nil .
+  ceq processRedCommands(M, DB, ('red_.['bubble[T]], TL), T1) = QIL
+                                                   processRedCommands(M, DB, TL, T1)
+   if QIL := evalRedCommand(M, T, T1) .
+
+  *** Module.
+  *** Term to be reduced.
+  *** Module in term representation, including vars
+  op evalRedCommand : Module Term Term -> QidList .
+  ceq evalRedCommand(M, T, T') = evalRedCommand(M, T'')
+   if ODS := parseModule4Vars(T') /\
+      QIL := downQidList(T) /\
+      ODS' := opDeclSetFromQidList(QIL) /\
+      T'' := renameOnTheFly(T, ODS ODS') .
+
+  op evalRedCommand : Module Term -> QidList .
+  ceq evalRedCommand(M, T) = QIL
+   if T' := getTerm(metaParse(M, downQidList(T), anyType)) /\
+      QIL := evalRedCommandFinal(M, T') .
+
+  op evalRedCommandFinal : Module Term -> QidList .
+  ceq evalRedCommandFinal(M, T) = QIL
+   if T' := changeSearch(M, T) /\
       {T'', Ty} := metaReduce(M, T') /\
-      QIL := printRedRes(M, T', T'', Ty) .
+      QIL := printRedRes(M, T, T'', Ty) .
+
+  op changeSearch : Module Term -> Term .
+  eq changeSearch(M, C) = C .
+  eq changeSearch(M, V) = V .
+  ceq changeSearch(M, Q[TL]) = Q[changeSearch*(M, TL)]
+   if not isSearchOp(Q) .
+  ceq changeSearch(M, Q[TL]) = solveSearch(M, Q[TL])
+   if isSearchOp(Q) .
+
+  op changeSearch* : Module TermList -> TermList .
+  eq changeSearch*(M, empty) = empty .
+  eq changeSearch*(M, (T, TL)) = changeSearch(M, T),
+                                 changeSearch*(M, TL) .
+
+  op isSearchOp : Qid -> Bool .
+  eq isSearchOp('_==>_) = true .
+  eq isSearchOp('_==>1_) = true .
+  eq isSearchOp('_==>*_) = true .
+  eq isSearchOp('_==>!_) = true .
+  eq isSearchOp('_==>+_) = true .
+  eq isSearchOp('_==>1_suchThat_) = true .
+  eq isSearchOp('_==>*_suchThat_) = true .
+  eq isSearchOp('_==>!_suchThat_) = true .
+  eq isSearchOp('_==>+_suchThat_) = true .
+  eq isSearchOp('_==>1_withStateEq_) = true .
+  eq isSearchOp('_==>*_withStateEq_) = true .
+  eq isSearchOp('_==>!_withStateEq_) = true .
+  eq isSearchOp('_==>+_withStateEq_) = true .
+  eq isSearchOp('_==>1_suchThat_withStateEq_) = true .
+  eq isSearchOp('_==>*_suchThat_withStateEq_) = true .
+  eq isSearchOp('_==>!_suchThat_withStateEq_) = true .
+  eq isSearchOp('_==>+_suchThat_withStateEq_) = true .
+  eq isSearchOp('_=`(_`)=>*_) = true .
+  eq isSearchOp('_=`(_`)=>!_) = true .
+  eq isSearchOp('_=`(_`)=>+_) = true .
+  eq isSearchOp('_=`(_`)=>*_suchThat_) = true .
+  eq isSearchOp('_=`(_`)=>!_suchThat_) = true .
+  eq isSearchOp('_=`(_`)=>+_suchThat_) = true .
+  eq isSearchOp('_=`(_`)=>*_withStateEq_) = true .
+  eq isSearchOp('_=`(_`)=>!_withStateEq_) = true .
+  eq isSearchOp('_=`(_`)=>+_withStateEq_) = true .
+  eq isSearchOp('_=`(_`)=>*_suchThat_withStateEq_) = true .
+  eq isSearchOp('_=`(_`)=>!_suchThat_withStateEq_) = true .
+  eq isSearchOp('_=`(_`)=>+_suchThat_withStateEq_) = true .
+  eq isSearchOp('_=`(`,_`)=>*_) = true .
+  eq isSearchOp('_=`(`,_`)=>!_) = true .
+  eq isSearchOp('_=`(`,_`)=>+_) = true .
+  eq isSearchOp('_=`(`,_`)=>*_suchThat_) = true .
+  eq isSearchOp('_=`(`,_`)=>!_suchThat_) = true .
+  eq isSearchOp('_=`(`,_`)=>+_suchThat_) = true .
+  eq isSearchOp('_=`(`,_`)=>*_withStateEq_) = true .
+  eq isSearchOp('_=`(`,_`)=>!_withStateEq_) = true .
+  eq isSearchOp('_=`(`,_`)=>+_withStateEq_) = true .
+  eq isSearchOp('_=`(`,_`)=>*_suchThat_withStateEq_) = true .
+  eq isSearchOp('_=`(`,_`)=>!_suchThat_withStateEq_) = true .
+  eq isSearchOp('_=`(`,_`)=>+_suchThat_withStateEq_) = true .
+
+  eq isSearchOp('_=`(_`,_`)=>*_) = true .
+  eq isSearchOp('_=`(_`,_`)=>*_suchThat_) = true .
+  eq isSearchOp('_=`(_`,_`)=>*_withStateEq_) = true .
+  eq isSearchOp('_=`(_`,_`)=>*_suchThat_withStateEq_) = true .
+  eq isSearchOp('_=`(_`,_`)=>!_) = true .
+  eq isSearchOp('_=`(_`,_`)=>!_suchThat_) = true .
+  eq isSearchOp('_=`(_`,_`)=>!_withStateEq_) = true .
+  eq isSearchOp('_=`(_`,_`)=>!_suchThat_withStateEq_) = true .
+  eq isSearchOp('_=`(_`,_`)=>+_) = true .
+  eq isSearchOp('_=`(_`,_`)=>+_suchThat_) = true .
+  eq isSearchOp('_=`(_`,_`)=>+_withStateEq_) = true .
+  eq isSearchOp('_=`(_`,_`)=>+_suchThat_withStateEq_) = true .
+  eq isSearchOp(Q) = false [owise] .
+
+  var  BND : Bound .
+  var  RT : ResultTriple .
+
+  vars CXU CYU COND_CAF MAX-R MAX-D PRED : Term .
+
+  op solveSearch : Module Term -> Term .
+  *** Operator '_==>_
+  eq solveSearch(M, '_==>_[CXU, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_[CXU, 's_['0.Zero], '*.NzNat*, CYU]) .
+  *** Operator '_==>1_
+  eq solveSearch(M, '_==>1_[CXU, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_[CXU, 's_['0.Zero], '*.NzNat*, CYU]) .
+  *** Operator '_==>*_
+  eq solveSearch(M, '_==>*_[CXU, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_[CXU, '*.NzNat*, '*.NzNat*, CYU]) .
+  *** Operator '_==>!_
+  eq solveSearch(M, '_==>!_[CXU, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_[CXU, '*.NzNat*, '*.NzNat*, CYU]) .
+  *** Operator '_==>+_
+  eq solveSearch(M, '_==>+_[CXU, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_[CXU, '*.NzNat*, '*.NzNat*, CYU]) .
+  *** Operator '_==>1_suchThat_
+  eq solveSearch(M, '_==>1_suchThat_[CXU, CYU, COND_CAF]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_[CXU, 's_['0.Zero], '*.NzNat*, CYU, COND_CAF]) .
+  *** Operator '_==>*_suchThat_
+  eq solveSearch(M, '_==>*_suchThat_[CXU, CYU, COND_CAF]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_suchThat_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND_CAF]) .
+  *** Operator '_==>!_suchThat_
+  eq solveSearch(M, '_==>!_suchThat_[CXU, CYU, COND_CAF]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_suchThat_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND_CAF]) .
+  *** Operator '_==>+_suchThat_
+  eq solveSearch(M, '_==>+_suchThat_[CXU, CYU, COND_CAF]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND_CAF]) .
+  *** Operator '_==>1_withStateEq_
+  eq solveSearch(M, '_==>1_withStateEq_[CXU, CYU, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_withStateEq_[CXU, 's_['0.Zero], '*.NzNat*, CYU, PRED]) .
+  *** Operator '_==>*_withStateEq_
+  eq solveSearch(M, '_==>*_withStateEq_[CXU, CYU, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, PRED]) .
+  *** Operator '_==>!_withStateEq_
+  eq solveSearch(M, '_==>!_withStateEq_[CXU, CYU, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, PRED]) .
+  *** Operator '_==>+_withStateEq_
+  eq solveSearch(M, '_==>+_withStateEq_[CXU, CYU, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, PRED]) .
+  *** Operator '_==>1_suchThat_withStateEq_
+  eq solveSearch(M, '_==>1_suchThat_withStateEq_[CXU, CYU, COND_CAF, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_withStateEq_[CXU, 's_['0.Zero], '*.NzNat*, CYU, COND_CAF, PRED]) .
+  *** Operator '_==>*_suchThat_withStateEq_
+  eq solveSearch(M, '_==>*_suchThat_withStateEq_[CXU, CYU, COND_CAF, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_suchThat_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND_CAF, PRED]) .
+  *** Operator '_==>!_suchThat_withStateEq_
+  eq solveSearch(M, '_==>!_suchThat_withStateEq_[CXU, CYU, COND_CAF, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_suchThat_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND_CAF, PRED]) .
+  *** Operator '_==>+_suchThat_withStateEq_
+  eq solveSearch(M, '_==>+_suchThat_withStateEq_[CXU, CYU, COND_CAF, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND_CAF, PRED]) .
+  *** Operator '_=`(_`)=>*_
+  eq solveSearch(M, '_=`(_`)=>*_[CXU, MAX-R, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_[CXU, MAX-R, '*.NzNat*, CYU]) .
+  *** Operator '_=`(_`)=>!_
+  eq solveSearch(M, '_=`(_`)=>!_[CXU, MAX-R, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_[CXU, MAX-R, '*.NzNat*, CYU]) .
+  *** Operator '_=`(_`)=>+_
+  eq solveSearch(M, '_=`(_`)=>+_[CXU, MAX-R, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_[CXU, MAX-R, '*.NzNat*, CYU]) .
+  *** Operator '_=`(_`)=>*_suchThat_
+  eq solveSearch(M, '_=`(_`)=>*_suchThat_[CXU, MAX-R, CYU, COND_CAF]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_suchThat_[CXU, MAX-R, '*.NzNat*, CYU, COND_CAF]) .
+  *** Operator '_=`(_`)=>!_suchThat_
+  eq solveSearch(M, '_=`(_`)=>!_suchThat_[CXU, MAX-R, CYU, COND_CAF]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_suchThat_[CXU, MAX-R, '*.NzNat*, CYU, COND_CAF]) .
+  *** Operator '_=`(_`)=>+_suchThat_
+  eq solveSearch(M, '_=`(_`)=>+_suchThat_[CXU, MAX-R, CYU, COND_CAF]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_[CXU, MAX-R, '*.NzNat*, CYU, COND_CAF]) .
+  *** Operator '_=`(_`)=>*_withStateEq_
+  eq solveSearch(M, '_=`(_`)=>*_withStateEq_[CXU, MAX-R, CYU, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, PRED]) .
+  *** Operator '_=`(_`)=>!_withStateEq_
+  eq solveSearch(M, '_=`(_`)=>!_withStateEq_[CXU, MAX-R, CYU, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, PRED]) .
+  *** Operator '_=`(_`)=>+_withStateEq_
+  eq solveSearch(M, '_=`(_`)=>+_withStateEq_[CXU, MAX-R, CYU, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, PRED]) .
+  *** Operator '_=`(_`)=>*_suchThat_withStateEq_
+  eq solveSearch(M, '_=`(_`)=>*_suchThat_withStateEq_[CXU, MAX-R, CYU, COND_CAF, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_suchThat_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, COND_CAF, PRED]) .
+  *** Operator '_=`(_`)=>!_suchThat_withStateEq_
+  eq solveSearch(M, '_=`(_`)=>!_suchThat_withStateEq_[CXU, MAX-R, CYU, COND_CAF, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_suchThat_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, COND_CAF, PRED]) .
+  *** Operator '_=`(_`)=>+_suchThat_withStateEq_
+  eq solveSearch(M, '_=`(_`)=>+_suchThat_withStateEq_[CXU, MAX-R, CYU, COND_CAF, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, COND_CAF, PRED]) .
+  *** Operator '_=`(`,_`)=>*_
+  eq solveSearch(M, '_=`(`,_`)=>*_[CXU, MAX-D, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_[CXU, '*.NzNat*, MAX-D, CYU]) .
+  *** Operator '_=`(`,_`)=>!_
+  eq solveSearch(M, '_=`(`,_`)=>!_[CXU, MAX-D, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_[CXU, '*.NzNat*, MAX-D, CYU]) .
+  *** Operator '_=`(`,_`)=>+_
+  eq solveSearch(M, '_=`(`,_`)=>+_[CXU, MAX-D, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_[CXU, '*.NzNat*, MAX-D, CYU]) .
+  *** Operator '_=`(`,_`)=>*_suchThat_
+  eq solveSearch(M, '_=`(`,_`)=>*_suchThat_[CXU, MAX-D, CYU, COND_CAF]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_suchThat_[CXU, '*.NzNat*, MAX-D, CYU, COND_CAF]) .
+  *** Operator '_=`(`,_`)=>!_suchThat_
+  eq solveSearch(M, '_=`(`,_`)=>!_suchThat_[CXU, MAX-D, CYU, COND_CAF]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_suchThat_[CXU, '*.NzNat*, MAX-D, CYU, COND_CAF]) .
+  *** Operator '_=`(`,_`)=>+_suchThat_
+  eq solveSearch(M, '_=`(`,_`)=>+_suchThat_[CXU, MAX-D, CYU, COND_CAF]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_[CXU, '*.NzNat*, MAX-D, CYU, COND_CAF]) .
+  *** Operator '_=`(`,_`)=>*_withStateEq_
+  eq solveSearch(M, '_=`(`,_`)=>*_withStateEq_[CXU, MAX-D, CYU, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, PRED]) .
+  *** Operator '_=`(`,_`)=>!_withStateEq_
+  eq solveSearch(M, '_=`(`,_`)=>!_withStateEq_[CXU, MAX-D, CYU, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, PRED]) .
+  *** Operator '_=`(`,_`)=>+_withStateEq_
+  eq solveSearch(M, '_=`(`,_`)=>+_withStateEq_[CXU, MAX-D, CYU, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, PRED]) .
+  *** Operator '_=`(`,_`)=>*_suchThat_withStateEq_
+  eq solveSearch(M, '_=`(`,_`)=>*_suchThat_withStateEq_[CXU, MAX-D, CYU, COND_CAF, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_suchThat_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, COND_CAF, PRED]) .
+  *** Operator '_=`(`,_`)=>!_suchThat_withStateEq_
+  eq solveSearch(M, '_=`(`,_`)=>!_suchThat_withStateEq_[CXU, MAX-D, CYU, COND_CAF, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_suchThat_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, COND_CAF, PRED]) .
+  *** Operator '_=`(`,_`)=>+_suchThat_withStateEq_
+  eq solveSearch(M, '_=`(`,_`)=>+_suchThat_withStateEq_[CXU, MAX-D, CYU, COND_CAF, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, COND_CAF, PRED]) .
+  ********************************************************************************
+  ************************** NORMALIZED SEARCH COMMANDS **************************
+  ********************************************************************************
+  ********************************************************************************
+  *************************** Operator '_=`(_`,_`)=>*_ ***************************
+  ********************************************************************************
+  ceq solveSearch(M, '_=`(_`,_`)=>*_[T1, T2, T3, T4]) = 'false.Bool
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      metaSearch(M, T1, T4, nil, '*, BND, N) == failure .
+  ceq solveSearch(M, '_=`(_`,_`)=>*_[T1, T2, T3, T4]) = 'true.Bool
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      RT := metaSearch(M, T1, T4, nil, '*, BND, N) .
+  ********************************************************************************
+  *********************** Operator '_=`(_`,_`)=>*_suchThat_ **********************
+  ********************************************************************************
+  ceq solveSearch(M, '_=`(_`,_`)=>*_suchThat_[T1, T2, T3, T4, T5]) = 'false.Bool
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      metaSearch(M, T1, T4, T5 = 'true.Bool, '*, BND, N) == failure .
+  ceq solveSearch(M, '_=`(_`,_`)=>*_suchThat_[T1, T2, T3, T4, T5]) = 'true.Bool
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      RT := metaSearch(M, T1, T4, T5 = 'true.Bool, '*, BND, N) .
+  ********************************************************************************
+  *************************** Operator '_=`(_`,_`)=>!_ ***************************
+  ********************************************************************************
+  ceq solveSearch(M, '_=`(_`,_`)=>!_[T1, T2, T3, T4]) = 'false.Bool
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      metaSearch(M, T1, T4, nil, '!, BND, N) == failure .
+  ceq solveSearch(M, '_=`(_`,_`)=>!_[T1, T2, T3, T4]) = 'true.Bool
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      RT := metaSearch(M, T1, T4, nil, '!, BND, N) .
+  ********************************************************************************
+  *********************** Operator '_=`(_`,_`)=>!_suchThat_ **********************
+  ********************************************************************************
+  ceq solveSearch(M, '_=`(_`,_`)=>!_suchThat_[T1, T2, T3, T4, T5]) = 'false.Bool
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      metaSearch(M, T1, T4, T5 = 'true.Bool, '!, BND, N) == failure .
+  ceq solveSearch(M, '_=`(_`,_`)=>!_suchThat_[T1, T2, T3, T4, T5]) = 'true.Bool
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      RT := metaSearch(M, T1, T4, T5 = 'true.Bool, '!, BND, N) .
+  ********************************************************************************
+  *************************** Operator '_=`(_`,_`)=>+_ ***************************
+  ********************************************************************************
+  ceq solveSearch(M, '_=`(_`,_`)=>+_[T1, T2, T3, T4]) = 'false.Bool
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      metaSearch(M, T1, T4, nil, '+, BND, N) == failure .
+  ceq solveSearch(M, '_=`(_`,_`)=>+_[T1, T2, T3, T4]) = 'true.Bool
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      RT := metaSearch(M, T1, T4, nil, '+, BND, N) .
+  ********************************************************************************
+  *********************** Operator '_=`(_`,_`)=>+_suchThat_ **********************
+  ********************************************************************************
+  ceq solveSearch(M, '_=`(_`,_`)=>+_suchThat_[T1, T2, T3, T4, T5]) = 'false.Bool
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      metaSearch(M, T1, T4, T5 = 'true.Bool, '+, BND, N) == failure .
+  ceq solveSearch(M, '_=`(_`,_`)=>+_suchThat_[T1, T2, T3, T4, T5]) = 'true.Bool
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      RT := metaSearch(M, T1, T4, T5 = 'true.Bool, '+, BND, N) .
+
+  op parseModule4Vars : TermList -> OpDeclSet .
+  eq parseModule4Vars(empty) = none .
+  eq parseModule4Vars('__[TL]) = parseModule4Vars(TL) .
+  eq parseModule4Vars(('var_:_.[T , T'], TL)) = parseVars('var_:_.[T , T'])
+                                                parseModule4Vars(TL) .
+  eq parseModule4Vars(('vars_:_.[T , T'], TL)) = parseVars('vars_:_.[T , T'])
+                                                 parseModule4Vars(TL) .
+  eq parseModule4Vars((T, TL)) = parseModule4Vars(TL) [owise] .
+
+  op parseVars : Term -> OpDeclSet .
+  ceq parseVars('var_:_.['neCafeTokenList['__[TL]], 'CafeToken[T]]) =
+                                                           parseVars(TL, Srt)
+   if Srt := downQid(T) .
+  ceq parseVars('vars_:_.['neCafeTokenList['__[TL]], 'CafeToken[T]]) =
+                                                           parseVars(TL, Srt)
+   if Srt := downQid(T) .
+  ceq parseVars('var_:_.['neCafeTokenList[T], 'CafeToken[T']]) =
+                                                           op Q : nil -> Srt [none] .
+   if Q := downQid(T) /\
+      Srt := downQid(T') .
+  ceq parseVars('var_:_.['neCafeTokenList[T], 'CafeToken[T']]) =
+                                                           op Q : nil -> Srt [none] .
+   if Q := downQid(T) /\
+      Srt := downQid(T') .
+
+  op parseVars* : TermList Sort -> OpDeclSet .
+  eq parseVars*(empty, Srt) = none .
+  eq parseVars*((T, TL), Srt) = op downQid(T) : nil -> Srt [none] .
+                                parseVars*(TL, Srt) .
 
   op po : -> PrintOptionSet .
   eq po = mixfix number rat format .
