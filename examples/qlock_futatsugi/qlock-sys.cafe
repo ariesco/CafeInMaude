@@ -1,0 +1,124 @@
+-- ===============================================================
+-- ============= QLOCK System Specification ======================
+-- ===============================================================
+
+-- ===============================================================
+-- a convention for commenting
+-- "-- comment" is used before the CafeOBJ code
+-- "** comment" is used after the CafeOBJ code
+-- ===============================================================
+
+-- ===============================================================
+-- three labels for indicating status of each agent
+mod! LABEL {
+-- label literals and labels
+[LabelLt < Label]
+-- rs: remainder section
+-- ws: waiting section
+-- cs: critical section
+ops rs ws cs : -> LabelLt {constr} .
+-- an equation to declare that
+-- the elements of LabelLt are literals
+eq (L1:LabelLt = L2:LabelLt) = (L1 == L2) .
+}
+
+-- agent identifiers
+mod* AID {[Aid]}
+** Aid is declared to be just a set of agent identifiers
+
+-- ===============================================================
+-- queue (first in first out storage)
+mod! QUEUE (X :: TRIV) {
+-- elements and their queues, Elt comes from (X :: TRIV)
+[Elt.X < Qu]
+** an element in Elt is an element in Qu
+-- empty queue
+op empQ : -> Qu {constr}
+-- assoicative queue constructors with id: empQ
+op (_&_) : Qu Qu -> Qu {constr assoc id: empQ}
+-- equality _=_ over the sort Qu
+-- _=_ is defined for each sort in the built-in module EQL
+-- and EQL is imported to each module automatically
+eq (empQ = (E:Elt & Q:Qu)) = false .
+ceq ((E1:Elt & Q1:Qu) = (E2:Elt & Q2:Qu))
+    = ((E1 = E2) and (Q1 = Q2))
+    if not((Q1 = empQ) and (Q2 = empQ)) .
+}
+** Note that head and tail operations on queues are not defined
+** here, they are defined in module AID-QUEUE-a
+** in file qlock-prop.cafe.
+** Parameterized module QUEUE just defines
+** generic associative lists (i.e. generic sequences).
+
+-- ===============================================================
+-- agent observer
+mod! AOB {pr(LABEL) pr(AID) [Aob]
+-- a constructor for agent observer (Aob)
+op (lb[_]:_) : Aid Label -> Aob {constr} .
+** (lb[A:Aid]: L:Label) is a term of the sort Aob
+** that indicates agent A is with label L.
+}
+-- generic sets
+mod! SET(X :: TRIV) {
+[Elt.X < Set]
+-- empty set
+op empty : -> Set {constr} .
+-- assicative and commutative set constructor with identity
+op (_ _) : Set Set -> Set {constr assoc comm id: empty} .
+-- (_ _) is idempotent with respect to the sort Elt
+eq E:Elt E S:Set = E S .
+}
+-- Queues of Aid (agent identifiers)
+mod! AID-QUEUE {pr(QUEUE(AID{sort Elt -> Aid}))}
+** AID-QUEUE is defined by instantiating formal parameter TRIV
+** with module AID by viewing sort Elt as sort Aid
+
+-- ===============================================================
+-- the sort State and transition rules (rewrite rules)
+-- must be designed so that a rule is applicable only
+-- to the terms of sort State and a term of sort State
+-- must not contain a term of sort State as a proper sub-term
+-- ===============================================================
+
+-- a state is defined as a pair of queue of Aid and a set of Aob
+mod! STATE{
+pr(AID-QUEUE)
+pr(SET(AOB{sort Elt -> Aob})*{sort Set -> Aobs})
+-- a state is a pair of Qu and Aobs
+[State]
+op _$_ : Qu Aobs -> State {constr} .
+}
+
+-- wt: want transition
+mod! WT {pr(STATE)
+trans[wt]:
+           (Q:Qu    $ ((lb[A:Aid]: rs) AS:Aobs))
+       => ((Q & A)  $ ((lb[A    ]: ws) AS)) .
+}
+-- ty: try transition
+mod! TY {pr(STATE)
+trans[ty]:
+         ((A:Aid & Q:Qu) $ ((lb[A]: ws) AS:Aobs))
+      => ((A     & Q)    $ ((lb[A]: cs) AS)) .
+}
+-- ex: exit transition
+-- this transition can be defined by 'trans' rule
+-- with two (A:Aid)s in the left hand side like [ty]
+-- 'ctrans' is used here to show an example of
+-- conditional transition rule
+mod! EX {pr(STATE)
+ctrans[ex]:
+          ((A1:Aid & Q:Qu) $ ((lb[A2:Aid]: cs) AS:Aobs))
+       => (          Q     $ ((lb[A2    ]: rs) AS))
+          if (A1 = A2) .
+}
+
+-- ===============================================================
+-- system specification of QLOCK
+mod! QLOCKsys{pr(WT + TY + EX)}
+
+-- ===============================================================
+-- this file provides modules STATE and QLOCKsys
+provide STATE
+provide QLOCKsys
+-- ===============================================================

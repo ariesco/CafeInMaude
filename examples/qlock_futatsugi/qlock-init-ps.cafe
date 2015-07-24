@@ -1,0 +1,77 @@
+require QLOCKsys qlock-sys.cafe
+require QLOCKprop qlock-prop.cafe
+require CONSTandLITL constAndLitl.cafe
+
+--> ==============================================================
+--> Verification of the Initial State Condition (1):
+-->  using Generate&Check-S
+-->   without combinatorial generation of cases
+-->  (for-all S:State)(init(S) implies inv(S))
+--> ==============================================================
+--
+-- require CONSTandLITL constAndLitl.cafe
+-- let op q : -> Qu . op as : -> Aobs . ops a1 a2 : -> Aid .
+-- be fresh constants for representing variables
+-- then the following state patterns s1-s7 are covering
+-- the most general state pattern (Q:Qu $ AS:Aobs)
+-- and subsumes all the ground state terms of sort State
+mod STATEpatternInit{inc(CONSTandLITL)
+-- State constants for state patterns
+ops s1 s2 s3 s4 s5 s6 s7 : -> State .
+
+--> case[1]: S:State = (Q:Qu $ empty)
+eq s1  = (q $ empty) .
+
+--> case[2]: S:State = (Q:Qu $ ((lb[A:Aid]: L:Label) AS:Aobs))
+eq s2  = (empQ $ ((lb[a1]: rs) as)) .      -- wt
+eq s3  = (empQ $ ((lb[a1]: ws) as)) .
+eq s4  = (empQ $ ((lb[a1]: cs) as)) .
+
+eq s5  = ((a1 & q) $ ((lb[a2]: rs) as)) .  -- wt
+eq s6  = ((a1 & q) $ ((lb[a2]: ws) as)) .  -- ty
+eq s7  = ((a1 & q) $ ((lb[a2]: cs) as)) .  -- ex
+}
+
+-- QLOCK initial state condition
+mod INITcond {pr(QLOCKprop)
+pred init-c : State .
+eq init-c(S:State) = init(S) implies inv(S) .
+}
+
+-- checking init-c for all possible cases
+open (STATEpatternInit + INITcond) .
+red init-c(s1) .
+red init-c(s2) .
+red init-c(s3) .
+red init-c(s4) .
+red init-c(s5) .
+red init-c(s6) .
+red init-c(s7) .
+close
+
+--> ==============================================================
+--> Verification of the Initial State Condition (2):
+-->  using Generate&Check-S
+-->  with combinatorial generation of cases
+-->  (for-all S:State)(init(S) implies inv(S))
+--> ==============================================================
+-- generate & check for init-c
+mod GEN&CHECKinit {inc(INITcond + GENcasesNp)
+-- declaring sub-sorts of Val for combinatorial generation
+[Qu Aid Label Aobs State < Val]
+-- predicate v_ used in GENcasesNp for checking validity
+-- is defined to be init-c
+eq v(S:State) = init-c(S) .
+}
+
+-- running GEN&CHECKinit
+open (GEN&CHECKinit + CONSTandLITL) .
+red check-for-all(
+   [(tg(2)[q,empty])]
+          ||
+   [(tg(2)[(empQ),(tg(1)[(a1),(rs;ws;cs),(as)])])]
+          ||
+   [(tg(2)[(a1 & q),(tg(1)[(a2),(rs;ws;cs),(as)])])]) .
+close
+
+

@@ -9,9 +9,9 @@ rm -f $TEMP
 for (( i=1; i<=$#; i++ ))
 do
    eval arg=\$$i
-   cat $arg >> $ALL
+   java -jar $PARSER $arg $TEMP
+   cat $TEMP >> $ALL
 done
-java -jar $PARSER $ALL $TEMP
-$MAUDE full-maude.maude $CAFE2MAUDE $TEMP
+$MAUDE full-maude.maude $CAFE2MAUDE $ALL
 rm -f $ALL
 rm -f $TEMP

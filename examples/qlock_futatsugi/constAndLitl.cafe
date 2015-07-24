@@ -1,0 +1,27 @@
+require STATE qlock-sys.cafe
+require GENcasesNp genCasesNp.cafe
+
+-- arbitrary constants and constant literals
+-- and state term constructors
+mod CONSTandLITL {inc(STATE + GENcasesNp)
+-- arbitray constants; fresh constants
+op q : -> Qu . 
+op as : -> Aobs .
+-- Aid literals 
+[AidLt < Aid]
+ops a1 a2 a3 : -> Aid .
+-- an equation for literals of sort AidLt
+eq (B1:AidLt = B2:AidLt) = (B1 == B2) .
+-- arbitrary Aid constant literals
+ops b1 b2 b3 : -> AidLt .
+
+-- state term constructors
+[Qu Aid Label Aobs State < Val]
+-- defining t(1) t(2) for composing state terms 
+-- in combinatorial generation script
+-- t__ and tg__ are defined in the module GENcasesNp
+eq t(1)(A:Aid,L:Label,AS:Aobs) = ((lb[A]: L) AS) .
+eq t(2)(Q:Qu,AS:Aobs) = (Q $ AS) .
+}
+
+provide CONSTandLITL

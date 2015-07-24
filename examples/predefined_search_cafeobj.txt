@@ -1,0 +1,74 @@
+***(
+
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>* CYU)
+        = #!! (rwl-sch-set-result
+               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
+                           max-d :zero? t)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>! CYU)
+        = #!! (rwl-sch-set-result
+               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
+                           max-d :final? t)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>+ CYU)
+        = #!! (rwl-sch-set-result
+               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
+                           max-d)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>* CYU suchThat COND:Bool)
+        = #!! (rwl-sch-set-result
+               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
+                           max-d :zero? t :cond cond)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>* CYU suchThat COND:Bool { BIND
+       }) = #!! (rwl-sch-set-result
+                 (rwl-search :term cxu :pattern cyu :max-result max-r
+                             :max-depth max-d :zero? t :cond cond :bind bind)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>! CYU suchThat COND:Bool)
+        = #!! (rwl-sch-set-result
+               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
+                           max-d :final? t :cond cond)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>! CYU suchThat COND:Bool { BIND
+       }) = #!! (rwl-sch-set-result
+                 (rwl-search :term cxu :pattern cyu :max-result max-r
+                             :max-depth max-d :final? t :cond cond :bind bind)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>+ CYU suchThat COND:Bool)
+        = #!! (rwl-sch-set-result
+               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
+                           max-d :cond cond)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>+ CYU suchThat COND:Bool { BIND
+       }) = #!! (rwl-sch-set-result
+                 (rwl-search :term cxu :pattern cyu :max-result max-r
+                             :max-depth max-d :cond cond :bind bind)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>* CYU withStateEq PRED)
+        = #!! (rwl-sch-set-result
+               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
+                           max-d :zero? t :pred pred)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>! CYU withStateEq PRED)
+        = #!! (rwl-sch-set-result
+               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
+                           max-d :final? t :pred pred)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>+ CYU withStateEq PRED)
+        = #!! (rwl-sch-set-result
+               (rwl-search :term cxu :pattern cyu :max-result max-r :max-depth
+                           max-d :pred pred)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>* CYU suchThat COND:Bool
+       withStateEq PRED) = #!! (rwl-sch-set-result
+                                (rwl-search :term cxu :pattern cyu :max-result
+                                            max-r :max-depth max-d :zero? t
+                                            :cond cond :pred pred)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>! CYU suchThat COND:Bool
+       withStateEq PRED) = #!! (rwl-sch-set-result
+                                (rwl-search :term cxu :pattern cyu :max-result
+                                            max-r :max-depth max-d :final? t
+                                            :cond cond :pred pred)) .
+    eq (CXU = ( MAX-R:NzNat* , MAX-D:NzNat* ) =>+ CYU suchThat COND:Bool
+       withStateEq PRED) = #!! (rwl-sch-set-result
+                                (rwl-search :term cxu :pattern cyu :max-result
+                                            max-r :max-depth max-d :cond cond
+                                            :pred pred)) .
+    eq (S = ( MR:NzNat* , MD:NzNat ) =>+ SS if CC:Bool suchThat P:Bool { B })
+        = #!! (rwl-sch-set-result
+               (rwl-search :term s :pattern ss :max-result mr :max-depth md
+                           :zero? nil :final? nil :cond p :if cc :bind b)) .
+
+    *** Transformar reglas
+    eq (CXU => CYU) = (CXU = ( 1 , * ) =>* CYU) .
+
+)

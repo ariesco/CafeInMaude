@@ -1,0 +1,787 @@
+fmod SEARCH_PREDICATE is
+  pr META-LEVEL .
+  pr MOVE-DOWN .
+
+
+
+  sort NzNat* .
+  subsort Nat < NzNat* .
+
+  op * : -> NzNat* [ctor] .
+
+  sort SearchInfoPair .
+  op |_,_| : TermList QidList -> SearchInfoPair [ctor] .
+
+  vars CXU CYU COND_CAF MAX-R MAX-D PRED INFO INFO' T T' T1 T2 T3 T4 T5 T6 T7
+       INI FIN PAT RES TCOND TCOND' TCONDR L R R' TCC : Term .
+  vars NZ* NUMSOLS NUMSOLS' STEPS : NzNat* .
+  vars SB SB' SB'' : Substitution .
+  vars QIL QIL' QIL'' : QidList .
+  vars QUEUE QUEUE' : Queue .
+  var  CTX CTX' : Context .
+  var  RT : ResultTriple .
+  var  COND : Condition .
+  vars TS TS' : TermSet .
+  var  GTL : GTermList .
+  vars V CC : Variable .
+  vars TL : TermList .
+  var  AtS : AttrSet .
+  var  RS : RuleSet .
+  var  C : Constant .
+  var  E : Element .
+  var  BND : Bound .
+  vars N N' : Nat .
+  var  M : Module .
+  var  Rl : Rule .
+  var  Ty : Type .
+  var  B : Bool .
+  var  Q : Qid .
+
+  ****************************************************************************
+  ******************************** isSearchOP ********************************
+  ****************************************************************************
+  op isSearchOp : Qid -> Bool .
+  eq isSearchOp('_==>_) = true .
+  eq isSearchOp('_==>1_) = true .
+  eq isSearchOp('_==>*_) = true .
+  eq isSearchOp('_==>!_) = true .
+  eq isSearchOp('_==>+_) = true .
+  eq isSearchOp('_==>1_suchThat_) = true .
+  eq isSearchOp('_==>*_suchThat_) = true .
+  eq isSearchOp('_==>!_suchThat_) = true .
+  eq isSearchOp('_==>+_suchThat_) = true .
+  eq isSearchOp('_==>1_withStateEq_) = true .
+  eq isSearchOp('_==>*_withStateEq_) = true .
+  eq isSearchOp('_==>!_withStateEq_) = true .
+  eq isSearchOp('_==>+_withStateEq_) = true .
+  eq isSearchOp('_==>1_suchThat_withStateEq_) = true .
+  eq isSearchOp('_==>*_suchThat_withStateEq_) = true .
+  eq isSearchOp('_==>!_suchThat_withStateEq_) = true .
+  eq isSearchOp('_==>+_suchThat_withStateEq_) = true .
+  eq isSearchOp('_=`(_`)=>*_) = true .
+  eq isSearchOp('_=`(_`)=>!_) = true .
+  eq isSearchOp('_=`(_`)=>+_) = true .
+  eq isSearchOp('_=`(_`)=>*_suchThat_) = true .
+  eq isSearchOp('_=`(_`)=>!_suchThat_) = true .
+  eq isSearchOp('_=`(_`)=>+_suchThat_) = true .
+  eq isSearchOp('_=`(_`)=>*_withStateEq_) = true .
+  eq isSearchOp('_=`(_`)=>!_withStateEq_) = true .
+  eq isSearchOp('_=`(_`)=>+_withStateEq_) = true .
+  eq isSearchOp('_=`(_`)=>*_suchThat_withStateEq_) = true .
+  eq isSearchOp('_=`(_`)=>!_suchThat_withStateEq_) = true .
+  eq isSearchOp('_=`(_`)=>+_suchThat_withStateEq_) = true .
+  eq isSearchOp('_=`(`,_`)=>*_) = true .
+  eq isSearchOp('_=`(`,_`)=>!_) = true .
+  eq isSearchOp('_=`(`,_`)=>+_) = true .
+  eq isSearchOp('_=`(`,_`)=>*_suchThat_) = true .
+  eq isSearchOp('_=`(`,_`)=>!_suchThat_) = true .
+  eq isSearchOp('_=`(`,_`)=>+_suchThat_) = true .
+  eq isSearchOp('_=`(`,_`)=>*_withStateEq_) = true .
+  eq isSearchOp('_=`(`,_`)=>!_withStateEq_) = true .
+  eq isSearchOp('_=`(`,_`)=>+_withStateEq_) = true .
+  eq isSearchOp('_=`(`,_`)=>*_suchThat_withStateEq_) = true .
+  eq isSearchOp('_=`(`,_`)=>!_suchThat_withStateEq_) = true .
+  eq isSearchOp('_=`(`,_`)=>+_suchThat_withStateEq_) = true .
+
+  *** Operators with info
+  eq isSearchOp('_==>_`{_`}) = true .
+  eq isSearchOp('_==>1_`{_`}) = true .
+  eq isSearchOp('_==>*_`{_`}) = true .
+  eq isSearchOp('_==>!_`{_`}) = true .
+  eq isSearchOp('_==>+_`{_`}) = true .
+  eq isSearchOp('_==>1_suchThat_`{_`}) = true .
+  eq isSearchOp('_==>*_suchThat_`{_`}) = true .
+  eq isSearchOp('_==>!_suchThat_`{_`}) = true .
+  eq isSearchOp('_==>+_suchThat_`{_`}) = true .
+  eq isSearchOp('_==>1_withStateEq_`{_`}) = true .
+  eq isSearchOp('_==>*_withStateEq_`{_`}) = true .
+  eq isSearchOp('_==>!_withStateEq_`{_`}) = true .
+  eq isSearchOp('_==>+_withStateEq_`{_`}) = true .
+  eq isSearchOp('_==>1_suchThat_withStateEq_`{_`}) = true .
+  eq isSearchOp('_==>*_suchThat_withStateEq_`{_`}) = true .
+  eq isSearchOp('_==>!_suchThat_withStateEq_`{_`}) = true .
+  eq isSearchOp('_==>+_suchThat_withStateEq_`{_`}) = true .
+  eq isSearchOp('_=`(_`)=>*_`{_`}) = true .
+  eq isSearchOp('_=`(_`)=>!_`{_`}) = true .
+  eq isSearchOp('_=`(_`)=>+_`{_`}) = true .
+  eq isSearchOp('_=`(_`)=>*_suchThat_`{_`}) = true .
+  eq isSearchOp('_=`(_`)=>!_suchThat_`{_`}) = true .
+  eq isSearchOp('_=`(_`)=>+_suchThat_`{_`}) = true .
+  eq isSearchOp('_=`(_`)=>*_withStateEq_`{_`}) = true .
+  eq isSearchOp('_=`(_`)=>!_withStateEq_`{_`}) = true .
+  eq isSearchOp('_=`(_`)=>+_withStateEq_`{_`}) = true .
+  eq isSearchOp('_=`(_`)=>*_suchThat_withStateEq_`{_`}) = true .
+  eq isSearchOp('_=`(_`)=>!_suchThat_withStateEq_`{_`}) = true .
+  eq isSearchOp('_=`(_`)=>+_suchThat_withStateEq_`{_`}) = true .
+  eq isSearchOp('_=`(`,_`)=>*_`{_`}) = true .
+  eq isSearchOp('_=`(`,_`)=>!_`{_`}) = true .
+  eq isSearchOp('_=`(`,_`)=>+_`{_`}) = true .
+  eq isSearchOp('_=`(`,_`)=>*_suchThat_`{_`}) = true .
+  eq isSearchOp('_=`(`,_`)=>!_suchThat_`{_`}) = true .
+  eq isSearchOp('_=`(`,_`)=>+_suchThat_`{_`}) = true .
+  eq isSearchOp('_=`(`,_`)=>*_withStateEq_`{_`}) = true .
+  eq isSearchOp('_=`(`,_`)=>!_withStateEq_`{_`}) = true .
+  eq isSearchOp('_=`(`,_`)=>+_withStateEq_`{_`}) = true .
+  eq isSearchOp('_=`(`,_`)=>*_suchThat_withStateEq_`{_`}) = true .
+  eq isSearchOp('_=`(`,_`)=>!_suchThat_withStateEq_`{_`}) = true .
+  eq isSearchOp('_=`(`,_`)=>+_suchThat_withStateEq_`{_`}) = true .
+
+
+  *** Normalized commands
+  eq isSearchOp('_=`(_`,_`)=>*_) = true .
+  eq isSearchOp('_=`(_`,_`)=>*_suchThat_) = true .
+  eq isSearchOp('_=`(_`,_`)=>*_withStateEq_) = true .
+  eq isSearchOp('_=`(_`,_`)=>*_suchThat_withStateEq_) = true .
+  eq isSearchOp('_=`(_`,_`)=>!_) = true .
+  eq isSearchOp('_=`(_`,_`)=>!_suchThat_) = true .
+  eq isSearchOp('_=`(_`,_`)=>!_withStateEq_) = true .
+  eq isSearchOp('_=`(_`,_`)=>!_suchThat_withStateEq_) = true .
+  eq isSearchOp('_=`(_`,_`)=>+_) = true .
+  eq isSearchOp('_=`(_`,_`)=>+_suchThat_) = true .
+  eq isSearchOp('_=`(_`,_`)=>+_withStateEq_) = true .
+  eq isSearchOp('_=`(_`,_`)=>+_suchThat_withStateEq_) = true .
+
+
+  *** Normalized commands with info
+  eq isSearchOp('_=`(_`,_`)=>*_`{_`}) = true .
+  eq isSearchOp('_=`(_`,_`)=>*_suchThat_`{_`}) = true .
+  eq isSearchOp('_=`(_`,_`)=>*_withStateEq_`{_`}) = true .
+  eq isSearchOp('_=`(_`,_`)=>*_suchThat_withStateEq_`{_`}) = true .
+  eq isSearchOp('_=`(_`,_`)=>!_`{_`}) = true .
+  eq isSearchOp('_=`(_`,_`)=>!_suchThat_`{_`}) = true .
+  eq isSearchOp('_=`(_`,_`)=>!_withStateEq_`{_`}) = true .
+  eq isSearchOp('_=`(_`,_`)=>!_suchThat_withStateEq_`{_`}) = true .
+  eq isSearchOp('_=`(_`,_`)=>+_`{_`}) = true .
+  eq isSearchOp('_=`(_`,_`)=>+_suchThat_`{_`}) = true .
+  eq isSearchOp('_=`(_`,_`)=>+_withStateEq_`{_`}) = true .
+  eq isSearchOp('_=`(_`,_`)=>+_suchThat_withStateEq_`{_`}) = true .
+
+  *** Special search command
+  eq isSearchOp('_=`(_`,_`)=>+_if_suchThat_) = true .
+  eq isSearchOp('_=`(_`,_`)=>+_if_suchThat_`{_`}) = true .
+
+  eq isSearchOp(Q) = false [owise] .
+
+  *****************************************************************************
+  ******************************** solveSearch ********************************
+  *****************************************************************************
+  op solveSearch : Module Term -> SearchInfoPair .
+  *** Operator '_==>_
+  eq solveSearch(M, '_==>_[CXU, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_[CXU, 's_['0.Zero], '*.NzNat*, CYU]) .
+  *** Operator '_==>_{_}
+  eq solveSearch(M, '_==>_`{_`}[CXU, CYU, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_`{_`}[CXU, 's_['0.Zero], '*.NzNat*, CYU, INFO]) .
+  *** Operator '_==>1_
+  eq solveSearch(M, '_==>1_[CXU, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_[CXU, 's_['0.Zero], '*.NzNat*, CYU]) .
+  *** Operator '_==>1_`{_`}
+  eq solveSearch(M, '_==>1_`{_`}[CXU, CYU, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_`{_`}[CXU, 's_['0.Zero], '*.NzNat*, CYU, INFO]) .
+  *** Operator '_==>*_
+  eq solveSearch(M, '_==>*_[CXU, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_[CXU, '*.NzNat*, '*.NzNat*, CYU]) .
+  *** Operator '_==>*_`{_`}
+  eq solveSearch(M, '_==>*_[CXU, CYU, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_`{_`}[CXU, '*.NzNat*, '*.NzNat*, CYU, INFO]) .
+  *** Operator '_==>!_
+  eq solveSearch(M, '_==>!_[CXU, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_[CXU, '*.NzNat*, '*.NzNat*, CYU]) .
+  *** Operator '_==>!_`{_`}
+  eq solveSearch(M, '_==>!_`{_`}[CXU, CYU, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_`{_`}[CXU, '*.NzNat*, '*.NzNat*, CYU, INFO]) .
+  *** Operator '_==>+_
+  eq solveSearch(M, '_==>+_[CXU, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_[CXU, '*.NzNat*, '*.NzNat*, CYU]) .
+  *** Operator '_==>+_`{_`}
+  eq solveSearch(M, '_==>+_`{_`}[CXU, CYU, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_`{_`}[CXU, '*.NzNat*, '*.NzNat*, CYU, INFO]) .
+  *** Operator '_==>1_suchThat_
+  eq solveSearch(M, '_==>1_suchThat_[CXU, CYU, COND_CAF]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_[CXU, 's_['0.Zero], '*.NzNat*, CYU, COND_CAF]) .
+  *** Operator '_==>1_suchThat_`{_`}
+  eq solveSearch(M, '_==>1_suchThat_`{_`}[CXU, CYU, COND_CAF, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_`{_`}[CXU, 's_['0.Zero], '*.NzNat*, CYU, COND_CAF, INFO]) .
+  *** Operator '_==>*_suchThat_
+  eq solveSearch(M, '_==>*_suchThat_[CXU, CYU, COND_CAF]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_suchThat_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND_CAF]) .
+  *** Operator '_==>*_suchThat_`{_`}
+  eq solveSearch(M, '_==>*_suchThat_`{_`}[CXU, CYU, COND_CAF, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_suchThat_`{_`}[CXU, '*.NzNat*, '*.NzNat*, CYU, COND_CAF, INFO]) .
+  *** Operator '_==>!_suchThat_
+  eq solveSearch(M, '_==>!_suchThat_[CXU, CYU, COND_CAF]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_suchThat_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND_CAF]) .
+  *** Operator '_==>!_suchThat_`{_`}
+  eq solveSearch(M, '_==>!_suchThat_`{_`}[CXU, CYU, COND_CAF, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_suchThat_`{_`}[CXU, '*.NzNat*, '*.NzNat*, CYU, COND_CAF, INFO]) .
+  *** Operator '_==>+_suchThat_
+  eq solveSearch(M, '_==>+_suchThat_[CXU, CYU, COND_CAF]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND_CAF]) .
+  *** Operator '_==>+_suchThat_`{_`}
+  eq solveSearch(M, '_==>+_suchThat_`{_`}[CXU, CYU, COND_CAF, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_`{_`}[CXU, '*.NzNat*, '*.NzNat*, CYU, COND_CAF, INFO]) .
+  *** Operator '_==>1_withStateEq_
+  eq solveSearch(M, '_==>1_withStateEq_[CXU, CYU, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_withStateEq_[CXU, 's_['0.Zero], '*.NzNat*, CYU, PRED]) .
+  *** Operator '_==>1_withStateEq_`{_`}
+  eq solveSearch(M, '_==>1_withStateEq_`{_`}[CXU, CYU, PRED, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_withStateEq_`{_`}[CXU, 's_['0.Zero], '*.NzNat*, CYU, PRED, INFO]) .
+  *** Operator '_==>*_withStateEq_
+  eq solveSearch(M, '_==>*_withStateEq_[CXU, CYU, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, PRED]) .
+  *** Operator '_==>*_withStateEq_`{_`}
+  eq solveSearch(M, '_==>*_withStateEq_`{_`}[CXU, CYU, PRED, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_withStateEq_`{_`}[CXU, '*.NzNat*, '*.NzNat*, CYU, PRED, INFO]) .
+  *** Operator '_==>!_withStateEq_
+  eq solveSearch(M, '_==>!_withStateEq_[CXU, CYU, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, PRED]) .
+  *** Operator '_==>!_withStateEq_`{_`}
+  eq solveSearch(M, '_==>!_withStateEq_`{_`}[CXU, CYU, PRED, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_withStateEq_`{_`}[CXU, '*.NzNat*, '*.NzNat*, CYU, PRED, INFO]) .
+  *** Operator '_==>+_withStateEq_
+  eq solveSearch(M, '_==>+_withStateEq_[CXU, CYU, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, PRED]) .
+  *** Operator '_==>+_withStateEq_`{_`}
+  eq solveSearch(M, '_==>+_withStateEq_`{_`}[CXU, CYU, PRED, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_withStateEq_`{_`}[CXU, '*.NzNat*, '*.NzNat*, CYU, PRED, INFO]) .
+  *** Operator '_==>1_suchThat_withStateEq_
+  eq solveSearch(M, '_==>1_suchThat_withStateEq_[CXU, CYU, COND_CAF, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_withStateEq_[CXU, 's_['0.Zero], '*.NzNat*, CYU, COND_CAF, PRED]) .
+  *** Operator '_==>1_suchThat_withStateEq_`{_`}
+  eq solveSearch(M, '_==>1_suchThat_withStateEq_`{_`}[CXU, CYU, COND_CAF, PRED, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_withStateEq_[CXU, 's_['0.Zero], '*.NzNat*, CYU, COND_CAF, PRED, INFO]) .
+  *** Operator '_==>*_suchThat_withStateEq_
+  eq solveSearch(M, '_==>*_suchThat_withStateEq_[CXU, CYU, COND_CAF, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_suchThat_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND_CAF, PRED]) .
+  *** Operator '_==>*_suchThat_withStateEq_`{_`}
+  eq solveSearch(M, '_==>*_suchThat_withStateEq_`{_`}[CXU, CYU, COND_CAF, PRED, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_suchThat_withStateEq_`{_`}[CXU, '*.NzNat*, '*.NzNat*, CYU, COND_CAF, PRED, INFO]) .
+  *** Operator '_==>!_suchThat_withStateEq_
+  eq solveSearch(M, '_==>!_suchThat_withStateEq_[CXU, CYU, COND_CAF, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_suchThat_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND_CAF, PRED]) .
+  *** Operator '_==>!_suchThat_withStateEq_`{_`}
+  eq solveSearch(M, '_==>!_suchThat_withStateEq_`{_`}[CXU, CYU, COND_CAF, PRED, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_suchThat_withStateEq_`{_`}[CXU, '*.NzNat*, '*.NzNat*, CYU, COND_CAF, PRED, INFO]) .
+  *** Operator '_==>+_suchThat_withStateEq_
+  eq solveSearch(M, '_==>+_suchThat_withStateEq_[CXU, CYU, COND_CAF, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_withStateEq_[CXU, '*.NzNat*, '*.NzNat*, CYU, COND_CAF, PRED]) .
+  *** Operator '_==>+_suchThat_withStateEq_`{_`}
+  eq solveSearch(M, '_==>+_suchThat_withStateEq_`{_`}[CXU, CYU, COND_CAF, PRED, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_withStateEq_`{_`}[CXU, '*.NzNat*, '*.NzNat*, CYU, COND_CAF, PRED, INFO]) .
+  *** Operator '_=`(_`)=>*_
+  eq solveSearch(M, '_=`(_`)=>*_[CXU, MAX-R, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_[CXU, MAX-R, '*.NzNat*, CYU]) .
+  *** Operator '_=`(_`)=>*_`{_`}
+  eq solveSearch(M, '_=`(_`)=>*_`{_`}[CXU, MAX-R, CYU, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_`{_`}[CXU, MAX-R, '*.NzNat*, CYU, INFO]) .
+  *** Operator '_=`(_`)=>!_
+  eq solveSearch(M, '_=`(_`)=>!_[CXU, MAX-R, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_[CXU, MAX-R, '*.NzNat*, CYU]) .
+  *** Operator '_=`(_`)=>!_`{_`}
+  eq solveSearch(M, '_=`(_`)=>!_`{_`}[CXU, MAX-R, CYU, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_`{_`}[CXU, MAX-R, '*.NzNat*, CYU, INFO]) .
+  *** Operator '_=`(_`)=>+_
+  eq solveSearch(M, '_=`(_`)=>+_[CXU, MAX-R, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_[CXU, MAX-R, '*.NzNat*, CYU]) .
+  *** Operator '_=`(_`)=>+_`{_`}
+  eq solveSearch(M, '_=`(_`)=>+_`{_`}[CXU, MAX-R, CYU, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_`{_`}[CXU, MAX-R, '*.NzNat*, CYU, INFO]) .
+  *** Operator '_=`(_`)=>*_suchThat_
+  eq solveSearch(M, '_=`(_`)=>*_suchThat_[CXU, MAX-R, CYU, COND_CAF]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_suchThat_[CXU, MAX-R, '*.NzNat*, CYU, COND_CAF]) .
+  *** Operator '_=`(_`)=>*_suchThat_`{_`}
+  eq solveSearch(M, '_=`(_`)=>*_suchThat_`{_`}[CXU, MAX-R, CYU, COND_CAF, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_suchThat_`{_`}[CXU, MAX-R, '*.NzNat*, CYU, COND_CAF, INFO]) .
+  *** Operator '_=`(_`)=>!_suchThat_
+  eq solveSearch(M, '_=`(_`)=>!_suchThat_[CXU, MAX-R, CYU, COND_CAF]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_suchThat_[CXU, MAX-R, '*.NzNat*, CYU, COND_CAF]) .
+  *** Operator '_=`(_`)=>!_suchThat_`{_`}
+  eq solveSearch(M, '_=`(_`)=>!_suchThat_`{_`}[CXU, MAX-R, CYU, COND_CAF, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_suchThat_`{_`}[CXU, MAX-R, '*.NzNat*, CYU, COND_CAF, INFO]) .
+  *** Operator '_=`(_`)=>+_suchThat_
+  eq solveSearch(M, '_=`(_`)=>+_suchThat_[CXU, MAX-R, CYU, COND_CAF]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_[CXU, MAX-R, '*.NzNat*, CYU, COND_CAF]) .
+  *** Operator '_=`(_`)=>+_suchThat_`{_`}
+  eq solveSearch(M, '_=`(_`)=>+_suchThat_`{_`}[CXU, MAX-R, CYU, COND_CAF, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_`{_`}[CXU, MAX-R, '*.NzNat*, CYU, COND_CAF, INFO]) .
+  *** Operator '_=`(_`)=>*_withStateEq_
+  eq solveSearch(M, '_=`(_`)=>*_withStateEq_[CXU, MAX-R, CYU, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, PRED]) .
+  *** Operator '_=`(_`)=>*_withStateEq_`{_`}
+  eq solveSearch(M, '_=`(_`)=>*_withStateEq_`{_`}[CXU, MAX-R, CYU, PRED, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_withStateEq_`{_`}[CXU, MAX-R, '*.NzNat*, CYU, PRED, INFO]) .
+  *** Operator '_=`(_`)=>!_withStateEq_
+  eq solveSearch(M, '_=`(_`)=>!_withStateEq_[CXU, MAX-R, CYU, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, PRED]) .
+  *** Operator '_=`(_`)=>!_withStateEq_`{_`}
+  eq solveSearch(M, '_=`(_`)=>!_withStateEq_`{_`}[CXU, MAX-R, CYU, PRED, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_withStateEq_`{_`}[CXU, MAX-R, '*.NzNat*, CYU, PRED, INFO]) .
+  *** Operator '_=`(_`)=>+_withStateEq_
+  eq solveSearch(M, '_=`(_`)=>+_withStateEq_[CXU, MAX-R, CYU, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, PRED]) .
+  *** Operator '_=`(_`)=>+_withStateEq_`{_`}
+  eq solveSearch(M, '_=`(_`)=>+_withStateEq_`{_`}[CXU, MAX-R, CYU, PRED, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_withStateEq_`{_`}[CXU, MAX-R, '*.NzNat*, CYU, PRED, INFO]) .
+  *** Operator '_=`(_`)=>*_suchThat_withStateEq_
+  eq solveSearch(M, '_=`(_`)=>*_suchThat_withStateEq_[CXU, MAX-R, CYU, COND_CAF, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_suchThat_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, COND_CAF, PRED]) .
+  *** Operator '_=`(_`)=>*_suchThat_withStateEq_`{_`}
+  eq solveSearch(M, '_=`(_`)=>*_suchThat_withStateEq_`{_`}[CXU, MAX-R, CYU, COND_CAF, PRED, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_suchThat_withStateEq_`{_`}[CXU, MAX-R, '*.NzNat*, CYU, COND_CAF, PRED, INFO]) .
+  *** Operator '_=`(_`)=>!_suchThat_withStateEq_
+  eq solveSearch(M, '_=`(_`)=>!_suchThat_withStateEq_[CXU, MAX-R, CYU, COND_CAF, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_suchThat_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, COND_CAF, PRED]) .
+  *** Operator '_=`(_`)=>!_suchThat_withStateEq_`{_`}
+  eq solveSearch(M, '_=`(_`)=>!_suchThat_withStateEq_`{_`}[CXU, MAX-R, CYU, COND_CAF, PRED, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_suchThat_withStateEq_`{_`}[CXU, MAX-R, '*.NzNat*, CYU, COND_CAF, PRED, INFO]) .
+  *** Operator '_=`(_`)=>+_suchThat_withStateEq_
+  eq solveSearch(M, '_=`(_`)=>+_suchThat_withStateEq_[CXU, MAX-R, CYU, COND_CAF, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_withStateEq_[CXU, MAX-R, '*.NzNat*, CYU, COND_CAF, PRED]) .
+  *** Operator '_=`(_`)=>+_suchThat_withStateEq_`{_`}
+  eq solveSearch(M, '_=`(_`)=>+_suchThat_withStateEq_`{_`}[CXU, MAX-R, CYU, COND_CAF, PRED, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_withStateEq_`{_`}[CXU, MAX-R, '*.NzNat*, CYU, COND_CAF, PRED, INFO]) .
+  *** Operator '_=`(`,_`)=>*_
+  eq solveSearch(M, '_=`(`,_`)=>*_[CXU, MAX-D, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_[CXU, '*.NzNat*, MAX-D, CYU]) .
+  *** Operator '_=`(`,_`)=>*_`{_`}
+  eq solveSearch(M, '_=`(`,_`)=>*_`{_`} [CXU, MAX-D, CYU, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_`{_`} [CXU, '*.NzNat*, MAX-D, CYU, INFO]) .
+  *** Operator '_=`(`,_`)=>!_
+  eq solveSearch(M, '_=`(`,_`)=>!_[CXU, MAX-D, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_[CXU, '*.NzNat*, MAX-D, CYU]) .
+  *** Operator '_=`(`,_`)=>!_`{_`}
+  eq solveSearch(M, '_=`(`,_`)=>!_`{_`}[CXU, MAX-D, CYU, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_`{_`}[CXU, '*.NzNat*, MAX-D, CYU, INFO]) .
+  *** Operator '_=`(`,_`)=>+_
+  eq solveSearch(M, '_=`(`,_`)=>+_[CXU, MAX-D, CYU]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_[CXU, '*.NzNat*, MAX-D, CYU]) .
+  *** Operator '_=`(`,_`)=>+_`{_`}
+  eq solveSearch(M, '_=`(`,_`)=>+_`{_`}[CXU, MAX-D, CYU, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_`{_`}[CXU, '*.NzNat*, MAX-D, CYU, INFO]) .
+  *** Operator '_=`(`,_`)=>*_suchThat_
+  eq solveSearch(M, '_=`(`,_`)=>*_suchThat_[CXU, MAX-D, CYU, COND_CAF]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_suchThat_[CXU, '*.NzNat*, MAX-D, CYU, COND_CAF]) .
+  *** Operator '_=`(`,_`)=>*_suchThat_`{_`}
+  eq solveSearch(M, '_=`(`,_`)=>*_suchThat_`{_`}[CXU, MAX-D, CYU, COND_CAF, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_suchThat_`{_`}[CXU, '*.NzNat*, MAX-D, CYU, COND_CAF, INFO]) .
+  *** Operator '_=`(`,_`)=>!_suchThat_
+  eq solveSearch(M, '_=`(`,_`)=>!_suchThat_[CXU, MAX-D, CYU, COND_CAF]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_suchThat_[CXU, '*.NzNat*, MAX-D, CYU, COND_CAF]) .
+  *** Operator '_=`(`,_`)=>!_suchThat_`{_`}
+  eq solveSearch(M, '_=`(`,_`)=>!_suchThat_`{_`}[CXU, MAX-D, CYU, COND_CAF, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_suchThat_`{_`}[CXU, '*.NzNat*, MAX-D, CYU, COND_CAF, INFO]) .
+  *** Operator '_=`(`,_`)=>+_suchThat_
+  eq solveSearch(M, '_=`(`,_`)=>+_suchThat_[CXU, MAX-D, CYU, COND_CAF]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_[CXU, '*.NzNat*, MAX-D, CYU, COND_CAF]) .
+  *** Operator '_=`(`,_`)=>+_suchThat_`{_`}
+  eq solveSearch(M, '_=`(`,_`)=>+_suchThat_`{_`}[CXU, MAX-D, CYU, COND_CAF, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_`{_`}[CXU, '*.NzNat*, MAX-D, CYU, COND_CAF, INFO]) .
+  *** Operator '_=`(`,_`)=>*_withStateEq_
+  eq solveSearch(M, '_=`(`,_`)=>*_withStateEq_[CXU, MAX-D, CYU, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, PRED]) .
+  *** Operator '_=`(`,_`)=>*_withStateEq_`{_`}
+  eq solveSearch(M, '_=`(`,_`)=>*_withStateEq_`{_`}[CXU, MAX-D, CYU, PRED, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_withStateEq_`{_`}[CXU, '*.NzNat*, MAX-D, CYU, PRED, INFO]) .
+  *** Operator '_=`(`,_`)=>!_withStateEq_
+  eq solveSearch(M, '_=`(`,_`)=>!_withStateEq_[CXU, MAX-D, CYU, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, PRED]) .
+  *** Operator '_=`(`,_`)=>!_withStateEq_`{_`}
+  eq solveSearch(M, '_=`(`,_`)=>!_withStateEq_`{_`}[CXU, MAX-D, CYU, PRED, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_withStateEq_`{_`}[CXU, '*.NzNat*, MAX-D, CYU, PRED, INFO]) .
+  *** Operator '_=`(`,_`)=>+_withStateEq_
+  eq solveSearch(M, '_=`(`,_`)=>+_withStateEq_[CXU, MAX-D, CYU, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, PRED]) .
+  *** Operator '_=`(`,_`)=>+_withStateEq_`{_`}
+  eq solveSearch(M, '_=`(`,_`)=>+_withStateEq_`{_`}[CXU, MAX-D, CYU, PRED, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_withStateEq_`{_`}[CXU, '*.NzNat*, MAX-D, CYU, PRED, INFO]) .
+  *** Operator '_=`(`,_`)=>*_suchThat_withStateEq_
+  eq solveSearch(M, '_=`(`,_`)=>*_suchThat_withStateEq_[CXU, MAX-D, CYU, COND_CAF, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_suchThat_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, COND_CAF, PRED]) .
+  *** Operator '_=`(`,_`)=>*_suchThat_withStateEq_`{_`}
+  eq solveSearch(M, '_=`(`,_`)=>*_suchThat_withStateEq_`{_`}[CXU, MAX-D, CYU, COND_CAF, PRED, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>*_suchThat_withStateEq_`{_`}[CXU, '*.NzNat*, MAX-D, CYU, COND_CAF, PRED, INFO]) .
+  *** Operator '_=`(`,_`)=>!_suchThat_withStateEq_
+  eq solveSearch(M, '_=`(`,_`)=>!_suchThat_withStateEq_[CXU, MAX-D, CYU, COND_CAF, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_suchThat_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, COND_CAF, PRED]) .
+  *** Operator '_=`(`,_`)=>!_suchThat_withStateEq_`{_`}
+  eq solveSearch(M, '_=`(`,_`)=>!_suchThat_withStateEq_`{_`}[CXU, MAX-D, CYU, COND_CAF, PRED, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>!_suchThat_withStateEq_`{_`}[CXU, '*.NzNat*, MAX-D, CYU, COND_CAF, PRED, INFO]) .
+  *** Operator '_=`(`,_`)=>+_suchThat_withStateEq_
+  eq solveSearch(M, '_=`(`,_`)=>+_suchThat_withStateEq_[CXU, MAX-D, CYU, COND_CAF, PRED]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_withStateEq_[CXU, '*.NzNat*, MAX-D, CYU, COND_CAF, PRED]) .
+  *** Operator '_=`(`,_`)=>+_suchThat_withStateEq_`{_`}
+  eq solveSearch(M, '_=`(`,_`)=>+_suchThat_withStateEq_`{_`}[CXU, MAX-D, CYU, COND_CAF, PRED, INFO]) =
+                  solveSearch(M, '_=`(_`,_`)=>+_suchThat_withStateEq_`{_`}[CXU, '*.NzNat*, MAX-D, CYU, COND_CAF, PRED, INFO]) .
+  --------------------------------------------------------------------------------
+  -------------------------- NORMALIZED SEARCH COMMANDS --------------------------
+  --------------------------------------------------------------------------------
+  --------------------------------------------------------------------------------
+  --------------------------- Operator '_=`(_`,_`)=>*_ ---------------------------
+  --------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>*_[T1, T2, T3, T4]) = | 'false.Bool, nil |
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      metaSearch(M, T1, T4, nil, '*, BND, sd(N, 1)) == failure .
+  ceq solveSearch(M, '_=`(_`,_`)=>*_[T1, T2, T3, T4]) = | 'true.Bool, nil |
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      RT := metaSearch(M, T1, T4, nil, '*, BND, sd(N, 1)) .
+  ----------------------------------------------------------------------------
+  ----------------------- Operator '_=`(_`,_`)=>*_`{_`} ----------------------
+  ----------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>*_`{_`}[T1, T2, T3, T4, T6]) = | 'false.Bool, QIL |
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      NZ* := if T2 == '*.NzNat* then * else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      metaSearch(M, T1, T4, nil, '*, BND, sd(N, 1)) == failure /\
+      QIL := printAllSolutions(M, T1, T4, nil, '*, BND, NZ*, T6) .
+  ceq solveSearch(M, '_=`(_`,_`)=>*_suchThat_`{_`}[T1, T2, T3, T4, T5, T6]) = | 'true.Bool, QIL |
+   if N := if T2 == '*.NzNat* then 0 else sd(downTerm(T2, 0), 1) fi /\
+      NZ* := if T2 == '*.NzNat* then * else sd(downTerm(T2, 0), 1) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      RT := metaSearch(M, T1, T4, nil, '*, BND, N) /\
+      QIL := printAllSolutions(M, T1, T4, nil, '*, BND, NZ*, T6) .
+  --------------------------------------------------------------------------------
+  ----------------------- Operator '_=`(_`,_`)=>*_suchThat_ ----------------------
+  --------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>*_suchThat_[T1, T2, T3, T4, T5]) = | 'false.Bool, nil |
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      metaSearch(M, T1, T4, T5 = 'true.Bool, '*, BND, sd(N, 1)) == failure .
+  ceq solveSearch(M, '_=`(_`,_`)=>*_suchThat_[T1, T2, T3, T4, T5]) = | 'true.Bool, nil |
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      RT := metaSearch(M, T1, T4, T5 = 'true.Bool, '*, BND, sd(N, 1)) .
+  -------------------------------------------------------------------------------------
+  ----------------------- Operator '_=`(_`,_`)=>*_suchThat_`{_`} ----------------------
+  -------------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>*_suchThat_`{_`}[T1, T2, T3, T4, T5, T6]) = | 'false.Bool, QIL |
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      NZ* := if T2 == '*.NzNat* then * else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      metaSearch(M, T1, T4, T5 = 'true.Bool, '*, BND, sd(N, 1)) == failure /\
+      QIL := printAllSolutions(M, T1, T4, T5 = 'true.Bool, '*, BND, NZ*, T6) .
+  ceq solveSearch(M, '_=`(_`,_`)=>*_suchThat_`{_`}[T1, T2, T3, T4, T5, T6]) = | 'true.Bool, QIL |
+   if N := if T2 == '*.NzNat* then 0 else sd(downTerm(T2, 0), 1) fi /\
+      NZ* := if T2 == '*.NzNat* then * else sd(downTerm(T2, 0), 1) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      RT := metaSearch(M, T1, T4, T5 = 'true.Bool, '*, BND, N) /\
+      QIL := printAllSolutions(M, T1, T4, T5 = 'true.Bool, '*, BND, NZ*, T6) .
+  --------------------------------------------------------------------------------
+  --------------------------- Operator '_=`(_`,_`)=>!_ ---------------------------
+  --------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>!_[T1, T2, T3, T4]) = | 'false.Bool, nil |
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      metaSearch(M, T1, T4, nil, '!, BND, sd(N, 1)) == failure .
+  ceq solveSearch(M, '_=`(_`,_`)=>!_[T1, T2, T3, T4]) = | 'true.Bool, nil |
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      RT := metaSearch(M, T1, T4, nil, '!, BND, sd(N, 1)) .
+  ----------------------------------------------------------------------------
+  ----------------------- Operator '_=`(_`,_`)=>!_`{_`} ----------------------
+  ----------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>!_`{_`}[T1, T2, T3, T4, T6]) = | 'false.Bool, QIL |
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      NZ* := if T2 == '*.NzNat* then * else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      metaSearch(M, T1, T4, nil, '!, BND, sd(N, 1)) == failure /\
+      QIL := printAllSolutions(M, T1, T4, nil, '*, BND, NZ*, T6) .
+  ceq solveSearch(M, '_=`(_`,_`)=>!_suchThat_`{_`}[T1, T2, T3, T4, T5, T6]) = | 'true.Bool, QIL |
+   if N := if T2 == '*.NzNat* then 0 else sd(downTerm(T2, 0), 1) fi /\
+      NZ* := if T2 == '*.NzNat* then * else sd(downTerm(T2, 0), 1) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      RT := metaSearch(M, T1, T4, nil, '!, BND, N) /\
+      QIL := printAllSolutions(M, T1, T4, nil, '*, BND, NZ*, T6) .
+  --------------------------------------------------------------------------------
+  ----------------------- Operator '_=`(_`,_`)=>!_suchThat_ ----------------------
+  --------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>!_suchThat_[T1, T2, T3, T4, T5]) = | 'false.Bool, nil |
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      metaSearch(M, T1, T4, T5 = 'true.Bool, '!, BND, sd(N, 1)) == failure .
+  ceq solveSearch(M, '_=`(_`,_`)=>!_suchThat_[T1, T2, T3, T4, T5]) = | 'true.Bool, nil |
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      RT := metaSearch(M, T1, T4, T5 = 'true.Bool, '!, BND, sd(N, 1)) .
+  -------------------------------------------------------------------------------------
+  ----------------------- Operator '_=`(_`,_`)=>!_suchThat_`{_`} ----------------------
+  -------------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>!_suchThat_`{_`}[T1, T2, T3, T4, T5, T6]) = | 'false.Bool, QIL |
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      NZ* := if T2 == '*.NzNat* then * else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      metaSearch(M, T1, T4, T5 = 'true.Bool, '!, BND, sd(N, 1)) == failure /\
+      QIL := printAllSolutions(M, T1, T4, T5 = 'true.Bool, '*, BND, NZ*, T6) .
+  ceq solveSearch(M, '_=`(_`,_`)=>!_suchThat_`{_`}[T1, T2, T3, T4, T5, T6]) = | 'true.Bool, QIL |
+   if N := if T2 == '*.NzNat* then 0 else sd(downTerm(T2, 0), 1) fi /\
+      NZ* := if T2 == '*.NzNat* then * else sd(downTerm(T2, 0), 1) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      RT := metaSearch(M, T1, T4, T5 = 'true.Bool, '!, BND, N) /\
+      QIL := printAllSolutions(M, T1, T4, T5 = 'true.Bool, '!, BND, NZ*, T6) .
+  --------------------------------------------------------------------------------
+  --------------------------- Operator '_=`(_`,_`)=>+_ ---------------------------
+  --------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>+_[T1, T2, T3, T4]) = | 'false.Bool, nil |
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      metaSearch(M, T1, T4, nil, '+, BND, sd(N, 1)) == failure .
+  ceq solveSearch(M, '_=`(_`,_`)=>+_[T1, T2, T3, T4]) = | 'true.Bool, nil |
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      RT := metaSearch(M, T1, T4, nil, '+, BND, sd(N, 1)) .
+  --------------------------------------------------------------------------------
+  ----------------------- Operator '_=`(_`,_`)=>+_suchThat_ ----------------------
+  --------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>+_suchThat_[T1, T2, T3, T4, T5]) = | 'false.Bool, nil |
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      metaSearch(M, T1, T4, T5 = 'true.Bool, '+, BND, sd(N, 1)) == failure .
+  ceq solveSearch(M, '_=`(_`,_`)=>+_suchThat_[T1, T2, T3, T4, T5]) = | 'true.Bool, nil |
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      RT := metaSearch(M, T1, T4, T5 = 'true.Bool, '+, BND, sd(N, 1)) .
+  --------------------------------------------------------------------------------
+  ------------------- Operator '_=`(_`,_`)=>+_if_suchThat_`{_`} ------------------
+  --------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>+_if_suchThat_`{_`}[T1, T2, T3, T4, T5, T6, T7]) =
+             | T', QIL |
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      NUMSOLS := if T2 == '*.NzNat* then * else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      STEPS := if T3 == '*.NzNat* then * else downTerm(T3, 0) fi /\
+      RT := metaSearch(M, T1, T4, T6 = 'true.Bool, '+, BND, sd(N, 1)) /\
+      T := getTerm(metaReduce(M, T1)) /\
+      QIL := mySearch(M, NUMSOLS, STEPS, T, T4, T6, T5, T7) /\
+      T' := if QIL == '\n '\n '** 'No 'more 'possible 'transitions. '\n
+            then 'false.Bool
+            else 'true.Bool
+            fi .
+
+  ********************************************************************************
+  ******************************* printAllSolutions ******************************
+  ********************************************************************************
+  op printAllSolutions : Module Term Term Condition Qid Bound NzNat* Term -> QidList .
+  eq printAllSolutions(M, T1, T2, COND, Q, BND, *, T3) =
+                       printAllSolutions*(M, T1, T2, COND, Q, BND, 0, T3, nil) .
+  eq printAllSolutions(M, T1, T2, COND, Q, BND, N, T3) =
+                       printAllSolutionsN(M, T1, T2, COND, Q, BND, N, T3, nil) .
+  eq printAllSolutions(M, T1, T2, COND, Q, BND, NZ*, T3) = 'Error [owise] .
+
+  **********************************************************************************
+  ******************************** printAllSolutionsN ******************************
+  **********************************************************************************
+  op printAllSolutionsN : Module Term Term Condition Qid Bound Nat Term QidList -> QidList .
+  ceq printAllSolutionsN(M, T1, T2, COND, Q, BND, 0, T3, QIL) = 'No 'solution.
+   if metaSearch(M, T1, T2, COND, Q, BND, 0) == failure .
+  ceq printAllSolutionsN(M, T1, T2, COND, Q, BND, 0, T3, QIL) = QIL' QIL
+   if {FIN, Ty, SB} := metaSearch(M, T1, T2, COND, Q, BND, 0) /\
+      QIL' := printTerm(M, T1, FIN, T3, 0, SB) .
+  ceq printAllSolutionsN(M, T1, T2, COND, Q, BND, s(N), T3, QIL) = QIL'
+   if metaSearch(M, T1, T2, COND, Q, BND, s(N)) == failure /\
+      QIL' := printAllSolutionsN(M, T1, T2, COND, Q, BND, N, T3, QIL) .
+  ceq printAllSolutionsN(M, T1, T2, COND, Q, BND, s(N), T3, QIL) = QIL''
+   if {FIN, Ty, SB} := metaSearch(M, T1, T2, COND, Q, BND, s(N)) /\
+      QIL' := printTerm(M, T1, FIN, T3, s(s(N)), SB) /\
+      QIL'' := printAllSolutionsN(M, T1, T2, COND, Q, BND, N, T3, QIL' QIL) .
+
+  **********************************************************************************
+  ******************************** printAllSolutions* ******************************
+  **********************************************************************************
+  op printAllSolutions* : Module Term Term Condition Qid Bound Nat Term QidList -> QidList .
+  ceq printAllSolutions*(M, T1, T2, COND, Q, BND, N, T3, QIL) = QIL
+   if metaSearch(M, T1, T2, COND, Q, BND, N) == failure .
+  ceq printAllSolutions*(M, T1, T2, COND, Q, BND, N, T3, QIL) = QIL''
+   if {FIN, Ty, SB} := metaSearch(M, T1, T2, COND, Q, BND, N) /\
+      QIL' := printTerm(M, T1, FIN, T3, N, SB) /\
+      QIL'' := printAllSolutions*(M, T1, T2, COND, Q, BND, s(N), T3, QIL QIL') .
+
+  op po : -> PrintOptionSet .
+  eq po = mixfix number rat format .
+
+  op printTerm : Module Term Term Term Nat Substitution -> QidList .
+  ceq printTerm(M, INI, FIN, INFO, N, SB) =
+      '\n 'Solution qid(string(s(N), 10)) ':
+      '\b '\! 'Initial 'term: '\o metaPrettyPrint(M, INI, po)
+      '\n '\! 'Final 'term: '\o metaPrettyPrint(M, FIN, po)
+      '\n '\! 'Info 'term: '\o metaPrettyPrint(M, T, po)
+      '\n '\! 'Substitution: '\o printSubstitution(M, SB)
+   if T := applySubstitution(INFO, SB) .
+
+  op printSubstitution : Module Substitution -> QidList .
+  eq printSubstitution(M, none) = nil .
+  eq printSubstitution(M, (V <- T) ; SB) = '\n metaPrettyPrint(M, V, po) '<-
+                                           metaPrettyPrint(M, T, po)
+                                           printSubstitution(M, SB) .
+
+  op applySubstitution : Term Substitution -> Term .
+  eq applySubstitution(Q[TL], SB) = Q[applySubstitution*(TL, SB)] .
+  eq applySubstitution(C, SB) = C .
+  eq applySubstitution(V, (V <- T) ; SB) = T .
+  eq applySubstitution(V, (V <- T) ; SB) = V [owise] .
+
+  op applySubstitution* : TermList Substitution -> TermList .
+  eq applySubstitution*(empty, SB) = empty .
+  eq applySubstitution*((T, TL), SB) = applySubstitution(T, SB),
+                                       applySubstitution*(TL, SB) .
+
+
+  ********************************************************************************
+  *********************************** mySearch ***********************************
+  ********************************************************************************
+  op mySearch : Module NzNat* NzNat* Term Term Term Variable Term -> QidList .
+  eq mySearch(M, NUMSOLS, STEPS, INI, PAT, TCOND, CC, INFO) =
+        mySearch(M, NUMSOLS, PAT, TCOND, CC, INFO, | INI, STEPS |, INI, 1, nil)
+        '\n '\n '** 'No 'more 'possible 'transitions. '\n .
+
+  op mySearch : Module NzNat* Term Term Variable Term Queue TermSet Nat QidList -> QidList .
+  eq mySearch(M, 0, PAT, TCOND, CC, INFO, QUEUE, TS, N, QIL) = QIL .
+  eq mySearch(M, NUMSOLS, PAT, TCOND, CC, INFO, mt, TS, N, QIL) = QIL .
+  ceq mySearch(M, NUMSOLS, PAT, TCOND, CC, INFO, E QUEUE, TS, N, QIL) =
+       mySearch(M, NUMSOLS', PAT, TCOND, CC, INFO, QUEUE QUEUE', TS', N', QIL QIL')
+   if NUMSOLS =/= 0 /\
+     [ NUMSOLS', TS', QUEUE', N', QIL' ] :=
+            applyAllRules(M, getRls(M), NUMSOLS, PAT, TCOND, CC, INFO, TS, E, mt, N, nil) .
+
+  op applyAllRules : Module RuleSet NzNat* Term Term Variable Term TermSet Element Queue Nat
+                     QidList -> SearchResult .
+  eq applyAllRules(M, RS, 0, PAT, TCOND, CC, INFO, TS, E, QUEUE, N, QIL) =
+                                     [ 0, TS, QUEUE, N, QIL] .
+  eq applyAllRules(M, none, NUMSOLS, PAT, TCOND, CC, INFO, TS, E, QUEUE, N, QIL) =
+                                     [ NUMSOLS, TS, QUEUE, N, QIL] .
+  ceq applyAllRules(M, Rl RS, NUMSOLS, PAT, TCOND, CC, INFO, TS, | T, STEPS |, QUEUE, N, QIL) =
+         applyAllRules(M, RS, NUMSOLS', PAT, TCOND, CC, INFO, TS', | T, STEPS |,
+                       QUEUE QUEUE', N', QIL QIL' QIL'')
+   if | L, R, TCONDR | := getParts(Rl) /\
+      {SB, CTX} := metaXmatch(M, L, T, nil, 0, unbounded, 0) /\
+      R' := getTerm(metaReduce(M, applySubstitution(insertInContext(CTX, R), SB))) /\
+      TCC := getTerm(metaReduce(M, applySubstitution(TCONDR, SB))) /\
+      SB' := (CC <- TCC) ; SB /\
+      {SB'', CTX'} := metaXmatch(M, PAT, R', nil, 0, unbounded, 0) /\
+      INFO' := getTerm(metaReduce(M, applySubstitution(INFO, SB' ; SB''))) /\
+      QIL' := printStep(M, L, R, TCONDR, (CC <- TCC), SB'', SB, INFO') /\
+      TCOND' := getTerm(metaReduce(M, applySubstitution(TCOND, SB'))) /\
+      TCOND' == 'true.Bool /\
+      { NUMSOLS', TS', QUEUE', N', QIL'' } :=
+           processNewState(M, R', TS, NUMSOLS, STEPS, N, TCC == 'true.Bool,
+                          (CC <- TCC), SB'', SB, INFO') .
+  eq applyAllRules(M, Rl RS, NUMSOLS, PAT, TCOND, CC, INFO, TS, | T, STEPS |, QUEUE, N, QIL) =
+         applyAllRules(M, RS, NUMSOLS, PAT, TCOND, CC, INFO, TS, | T, STEPS |, QUEUE, N, QIL) [owise] .
+
+  sort RuleParts .
+  op |_,_,_| : Term Term Term -> RuleParts [ctor] .
+
+  *** We assume CafeOBJ conditions only consists of this type of Condition
+  op getParts : Rule ~> RuleParts .
+  eq getParts(rl L => R [AtS] .) = | L, R, 'true.Bool | .
+  eq getParts(crl L => R if TCOND = 'true.Bool [AtS] .) = | L, R, TCOND | .
+
+  sort SearchResult .
+  op [_,_,_,_,_] : NzNat* TermSet Queue Nat QidList -> SearchResult [ctor] .
+
+  sorts Element Queue .
+  subsort Element < Queue .
+
+  op |_,_| : Term NzNat* -> Element .
+
+  op mt : -> Queue [ctor] .
+  op __ : Queue Queue -> Queue [ctor assoc id: mt] .
+
+  op _inTermSet_ : Term TermSet -> Bool .
+  eq T inTermSet T | TS = true .
+  eq T inTermSet TS = false [owise] .
+
+  op insertInContext : Context Term -> Term .
+  eq insertInContext(C, T) = C .
+  eq insertInContext(V, T) = V .
+  eq insertInContext([], T) = T .
+  eq insertInContext(Q[GTL], T) = Q[insertInContext*(GTL, T)] .
+
+  op insertInContext* : GTermList Term -> TermList .
+  eq insertInContext*(empty, T) = empty .
+  eq insertInContext*((CTX, GTL), T) = insertInContext(CTX, T),
+                                       insertInContext*(GTL, T) .
+
+  sort ProcessNewResult .
+  op {_,_,_,_,_} : NzNat* TermSet Queue Nat QidList -> ProcessNewResult [ctor] .
+
+  op processNewState : Module Term TermSet NzNat* NzNat* Nat Bool Substitution
+                       Substitution Substitution Term -> ProcessNewResult .
+  eq processNewState(M, T, TS, NUMSOLS, STEPS, N, false, SB, SB', SB'', INFO) =
+                           { NUMSOLS, TS, mt, N , nil } .
+  ceq processNewState(M, T, TS, NUMSOLS, STEPS, N, true, SB, SB', SB'', INFO) =
+                           { NUMSOLS, TS, mt, N , nil }
+   if T inTermSet TS .
+  ceq processNewState(M, T, TS, NUMSOLS, STEPS, N, true, SB, SB', SB'', INFO) =
+                           { decrease(NUMSOLS), T | TS, QUEUE, s(N) , QIL }
+   if not (T inTermSet TS) /\
+      QUEUE := if decrease(STEPS) == 0
+               then mt
+               else | T, decrease(STEPS) |
+               fi /\
+      QIL := printNewTerm(M, T, N, SB, SB', SB'', INFO) .
+
+  op printStep : Module Term Term Term Substitution Substitution Substitution Term
+                 -> QidList .
+  eq printStep(M, L, R, TCOND, SB, SB', SB'', INFO) =
+           '\n printRule(M, L, R, TCOND)
+           '\n ' ' ' ' '`{ ' printSubs(M, SB) '`, ' printSubs(M, SB') '`, '
+                         printSubs(M, SB'') '`}
+           '\n ' ' ' '--> metaPrettyPrint(M, INFO, po)
+           '\n .
+
+  op printRule : Module Term Term Term -> QidList .
+  eq printRule(M, L, R, 'true.Bool) =
+           '=> 'trans metaPrettyPrint(M, L, po) '=> metaPrettyPrint(M, R, po) .
+  eq printRule(M, L, R, TCOND) =
+           '=> 'ctrans metaPrettyPrint(M, L, po) '=> metaPrettyPrint(M, R, po)
+           '\n ' ' ' 'if metaPrettyPrint(M, TCOND, po) [owise] .
+
+  op printSubs : Module Substitution -> QidList .
+  eq printSubs(M, none) = 'NIL '|-> 'NIL .
+  eq printSubs(M, SB) = printSubsAux(M, SB) [owise] .
+
+  op printSubsAux : Module Substitution -> QidList .
+  eq printSubsAux(M, (V <- T) ; SB) = metaPrettyPrint(M, V, po) '|->
+                                      metaPrettyPrint(M, T, po)
+                                      if SB =/= none
+                                      then '; printSubsAux(M, SB)
+                                      else nil
+                                      fi .
+
+  op printNewTerm : Module Term Nat Substitution Substitution Substitution Term -> QidList .
+  eq printNewTerm(M, T, N, SB, SB', SB'', INFO) =
+        '\n '** 'Found ' '`[ 'state qid(string(N, 10)) '`] ' metaPrettyPrint(M, T, po)
+        '\n ' ' ' ' '`{ ' printSubs(M, SB) '`, ' printSubs(M, SB') '`, '
+                      printSubs(M, SB'') '`}
+        '\n ' ' ' '--> metaPrettyPrint(M, INFO, po) '\n  .
+
+  ********************************************************************************
+  ******************************** transformModule *******************************
+  ********************************************************************************
+  op transformModule : Module -> Module .
+  --- TODO
+
+  ********************************************************************************
+  ********************************** addComments *********************************
+  ********************************************************************************
+  op addComments : Term -> Term .
+  eq addComments(C) = C .
+  eq addComments(V) = V .
+  ceq addComments('_`{_`}[Q[TL], T]) = qid(string(Q) + string('`{_`}))[TL, T]
+   if isSearchOp(Q) .
+  eq addComments(Q[TL]) = Q[addComments*(TL)] .
+
+
+  *********************************************************************************
+  ********************************** addComments* *********************************
+  *********************************************************************************
+  op addComments* : TermList -> TermList .
+  eq addComments*(empty) = empty .
+  eq addComments*((T, TL)) = addComments(T), addComments*(TL) .
+
+  op decrease : NzNat* -> NzNat* .
+  eq decrease(*) = * .
+  eq decrease(s(N)) = N .
+  eq decrease(0) = 0 .
+endfm

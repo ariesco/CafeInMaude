@@ -59,6 +59,7 @@ public class Parser {
 		    }
 		    reader.close();
 		    text = balance(text);
+		    text = removeAfterEOF(text);
 		    PrintWriter writer = new PrintWriter(result);
 		    writer.print(text);
 		    writer.close();
@@ -276,7 +277,10 @@ public class Parser {
 				startsWithIgnoreBlanks(line, "mod*") ||
 				startsWithIgnoreBlanks(line, "make") ||
 				startsWithIgnoreBlanks(line, "view") ||
-				startsWithIgnoreBlanks(line, "open")){
+				startsWithIgnoreBlanks(line, "open") ||
+				startsWithIgnoreBlanks(line, "require") ||
+				startsWithIgnoreBlanks(line, "provide") ||
+				startsWithIgnoreBlanks(line, "select")){
 			OpenEnvStarted = startsWithIgnoreBlanks(line, "open");
 			if (started){
 				res = ")\n\n(" + line;
@@ -318,6 +322,13 @@ public class Parser {
 			// res = addScapeChars(res, "(");
 			// res = addScapeChars(res, ")");
 			res = dealWithParensInOp(res);
+			res = addScapeChars(res, "{");
+			res = addScapeChars(res, "}");
+			res = addScapeChars(res, "[");
+			res = addScapeChars(res, "]");
+		}
+		if (startsWithIgnoreBlanks(res, "pred")){
+			res = dealWithParensInPred(res);
 			res = addScapeChars(res, "{");
 			res = addScapeChars(res, "}");
 			res = addScapeChars(res, "[");
@@ -375,6 +386,37 @@ public class Parser {
 		return res;
 	}
 
+	private String dealWithParensInPred(String line){
+		String res = line;
+		// Double parentheses are enforced, so we keep them.
+		int pos = res.indexOf("((");
+		while (pos != -1){
+			res = res.substring(0, pos) + "@#$" + res.substring(pos + 4, res.length());
+			pos = res.indexOf("((");
+		}
+		pos = res.indexOf("))");
+		while (pos != -1){
+			res = res.substring(0, pos) + "$#@" + res.substring(pos + 4, res.length());
+			pos = res.indexOf("))");
+		}
+
+		// We remove the no required ones.
+		pos = res.indexOf("(");
+		while (pos != -1){
+			res = res.substring(0, pos) + res.substring(pos + 1, res.length());
+			pos = res.indexOf("(");
+		}
+		pos = res.indexOf(")");
+		while (pos != -1){
+			res = res.substring(0, pos) + res.substring(pos + 1, res.length());
+			pos = res.indexOf(")");
+		}
+		// And place again the double ones.
+		res = res.replace("@#$", "`(");
+		res = res.replace("$#@", "`)");
+		return res;
+	}
+
 	/**
 	 * This function adds the character "`" to the scape character indicated
 	 * by the argument ch.
@@ -419,6 +461,22 @@ public class Parser {
 			}
 		}
 		return ok;
+	}
+
+	/**
+	 * This function removes all the String after eof, so it does not interfers with
+	 * the rest of the modules
+	 * @param text Text to be cleaned.
+	 * @return The text with all the elements after "eof" removed.
+	 * @author Adrian Riesco.
+	 */
+	private String removeAfterEOF(String text){
+		int indice = text.indexOf("eof");
+		String res = text;
+		if (indice != -1){
+			res = res.substring(0, indice);
+		}
+		return res;
 	}
 
 	public static void main(String[] args) {
