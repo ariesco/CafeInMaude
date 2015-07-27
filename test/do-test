@@ -1,0 +1,26 @@
+#!/bin/bash
+files=(examples/hidden_abp.cafe examples/nspk.cafe examples/qlock.cafe)
+declare -r TEMP=trans-temp-mod
+declare -r ALL=all-temp-mod.cafe
+declare -r CAFE2MAUDE=../cafeOBJ2maude.maude
+declare -r MAUDE=/Applications/maude-darwin/maude.darwin64
+declare -r PARSER=../parser.jar
+declare -r RES=resultado_generado
+rm -f $ALL
+rm -f $TEMP
+
+for (( i=0; i<${#files[@]}; i++ ))
+do
+   java -jar $PARSER ${files[$i]} $TEMP
+   cat $TEMP >> $ALL
+done
+
+printf "\n\nq" >> $ALL
+
+$MAUDE full-maude.maude $CAFE2MAUDE $ALL > $RES
+
+diff -a result.txt $RES
+
+rm -f $ALL
+rm -f $TEMP
+rm -f $RES

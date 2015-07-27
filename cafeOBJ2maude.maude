@@ -3405,6 +3405,7 @@ of the \verb"evalPreModule" function:
   vars DB'' DB3 : Database .
   var  AtS : AttrSet .
   var  CND : Condition .
+  vars ST ST' ST'' : SharingTable .
 
   op addEqual&SearchEqs : Module -> Module .
   ceq addEqual&SearchEqs(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm) =
@@ -3553,7 +3554,7 @@ the \verb"maps2maps" function shown above to the body:
       M := getFlatModule(openCloseModName, DB') /\
       TL := getRedCommands(T') /\
       QIL' := processRedCommands(M, DB', TL, T2) .
-  eq procOpenCloseEnv(T, T', PSM, HSM, TSM, DB) = < DB | nil | 'Environment 'not 'parsed. > [owise print T T'] .
+  eq procOpenCloseEnv(T, T', PSM, HSM, TSM, DB) = < DB | nil | 'Environment 'not 'parsed. > [owise] .
 
   op cleanOpenCloseName : Term -> Term .
   eq cleanOpenCloseName('`(_`)[T]) = T .
@@ -3593,7 +3594,7 @@ the \verb"maps2maps" function shown above to the body:
 
   op evalRedCommandFinal : Module Term Term -> QidList .
   ceq evalRedCommandFinal(M, T, T1) = QIL '\n QIL'
-   if | T', QIL | := changeSearch(M, T) /\
+   if | T', QIL, ST | := changeSearch(M, T, mtST) /\
       {T'', Ty} := metaReduce(M, T') /\
       QIL' := printRedRes(M, T1, T'', Ty) .
 
@@ -3606,23 +3607,24 @@ the \verb"maps2maps" function shown above to the body:
   op __ : SharingTable SharingTable -> SharingTable [ctor assoc comm id: mtST] .
 
   sort SearchInfoWithSharing .
-  op |_,_,_| : TermList QidList SharingTable -> SearchInfoPair [ctor] .
+  op |_,_,_| : TermList QidList SharingTable -> SearchInfoWithSharing [ctor] .
 
-  op changeSearch : Module Term -> SearchInfoPair .
-  eq changeSearch(M, C) = | C, nil | .
-  eq changeSearch(M, V) = | V, nil | .
-  ceq changeSearch(M, Q[TL]) = | Q[TL'], QIL |
+  op changeSearch : Module Term SharingTable -> SearchInfoWithSharing .
+  eq changeSearch(M, C, ST) = | C, nil, ST | .
+  eq changeSearch(M, V, ST) = | V, nil, ST | .
+  ceq changeSearch(M, Q[TL], ST) = | Q[TL'], QIL, ST' |
    if not isSearchOp(Q) /\
-      | TL', QIL | := changeSearch*(M, TL) .
-  ceq changeSearch(M, Q[TL]) = | T, QIL |
+      | TL', QIL, ST' | := changeSearch*(M, TL, ST) .
+  eq changeSearch(M, Q[TL], (Q[TL] is T') ST) = | T', nil, (Q[TL] is T') ST | .
+  ceq changeSearch(M, Q[TL], ST) = | T, QIL, ST (Q[TL] is T) |
    if isSearchOp(Q) /\
-      | T, QIL | := solveSearch(M, Q[TL]) .
+      | T, QIL | := solveSearch(M, Q[TL]) [owise] .
 
-  op changeSearch* : Module TermList -> SearchInfoPair .
-  eq changeSearch*(M, empty) = | empty, nil | .
-  ceq changeSearch*(M, (T, TL)) = | (T', TL'), QIL QIL' |
-   if | T', QIL | := changeSearch(M, T) /\
-      | TL', QIL' | := changeSearch*(M, TL) .
+  op changeSearch* : Module TermList SharingTable -> SearchInfoWithSharing .
+  eq changeSearch*(M, empty, ST) = | empty, nil, ST | .
+  ceq changeSearch*(M, (T, TL), ST) = | (T', TL'), QIL QIL', ST'' |
+   if | T', QIL, ST' | := changeSearch(M, T, ST) /\
+      | TL', QIL', ST'' | := changeSearch*(M, TL, ST') .
 
   op parseModule4Vars : TermList -> OpDeclSet .
   eq parseModule4Vars(empty) = none .
@@ -5233,8 +5235,8 @@ found, then the database is updated:
    => if QIL == nil
       then
       < O : X@Database | input : nilTermList, db : DB,
-                         output : ('\n '\! 'Processing 'open-close 'environment: '\o '\n
-                                   QIL' '\n),
+                         output : ('\n '\! 'Opening 'module '\o
+                                   getOpenName(T) ': '\n QIL' '\n),
                          psorts : PSM, hsorts : HSM, Atts >
       else
       < O : X@Database | input : nilTermList, db : DB, output : QIL,
@@ -5242,6 +5244,12 @@ found, then the database is updated:
       fi
    if TSM := getTheorySort(DB) /\
       < DB' | QIL | QIL' > := procOpenCloseEnv(T, T', PSM, HSM, TSM, DB) .
+
+  op getOpenName : Term -> QidList .
+  eq getOpenName('CafeToken[T]) = downQid(T) .
+  eq getOpenName('token[T]) = downQid(T) .
+  eq getOpenName('_+_[T, T']) = getOpenName(T) '+ getOpenName(T') .
+  eq getOpenName('`(_`)[T]) = getOpenName(T) .
 
 ***(%
 \end{comment}
@@ -5764,7 +5772,7 @@ endm
 set print conceal on .
 
 print conceal mod_is_sorts_._____endm .
-*** print conceal fmod_is_sorts_.____endfm .
+print conceal fmod_is_sorts_.____endfm .
 print conceal db .
 
 

@@ -1,0 +1,166 @@
+		     \||||||||||||||||||/
+		   --- Welcome to Maude ---
+		     /||||||||||||||||||\
+	    Maude 2.7 built: Mar  3 2014 18:07:27
+	    Copyright 1997-2014 SRI International
+		   Mon Jul 27 14:51:11 2015
+
+	    Full Maude 2.7 March 10th 2015
+
+
+	Cafe4Maude 1.2 started.
+CafeOBJ specifications can be introduced now into the Full Maude database.
+
+Introduced module 3TUPLE
+
+Introduced Tight Cafe Module: DATA
+
+Introduced Tight Cafe Module: QUEUE
+
+Introduced Loose Cafe Module: SENDER
+
+Introduced Loose Cafe Module: RECEIVER
+
+Introduced Loose Cafe Module: ABP
+
+Introduced Loose Cafe Module: BUF
+
+Introduced Tight Cafe Module: SET
+
+Introduced Tight Cafe Module: PNAT
+
+Introduced Loose Cafe Module: RANDOM-NUMBER
+
+Introduced Tight Cafe Module: INTRUDER
+
+Introduced Loose Cafe Module: PRINCIPAL
+
+Introduced Tight Cafe Module: PRIN&INTRDR
+
+Introduced Tight Cafe Module: PRIN-SET
+
+Introduced Tight Cafe Module: NONCE
+
+Introduced Tight Cafe Module: NONCE-SET
+
+Introduced Tight Cafe Module: CIPHER1
+
+Introduced Tight Cafe Module: CIPHER2
+
+Introduced Tight Cafe Module: CIPHER3
+
+Introduced Tight Cafe Module: MESSAGE1
+
+Introduced Tight Cafe Module: MESSAGE2
+
+Introduced Tight Cafe Module: MESSAGE3
+
+Introduced Tight Cafe Module: MESSAGE
+
+Introduced Tight Cafe Module: NETWORK
+
+Introduced Tight Cafe Module: OBSERVABLE-VALUE
+
+Introduced Tight Cafe Module: CONFIG
+
+Introduced Tight Cafe Module: NSPK-INIT
+
+Introduced Tight Cafe Module: NSPK-CHALLENGE1
+
+Introduced Tight Cafe Module: NSPK-CHALLENGE2
+
+Introduced Tight Cafe Module: NSPK-CHALLENGE3
+
+Introduced Tight Cafe Module: NSPK-RESPONSE
+
+Introduced Tight Cafe Module: NSPK-CONFIRMATION
+
+Introduced Tight Cafe Module: NSPK-FAKE11
+
+Introduced Tight Cafe Module: NSPK-FAKE11a
+
+Introduced Tight Cafe Module: NSPK-FAKE11b
+
+Introduced Tight Cafe Module: NSPK-FAKE12
+
+Introduced Tight Cafe Module: NSPK-FAKE12a
+
+Introduced Tight Cafe Module: NSPK-FAKE12b
+
+Introduced Tight Cafe Module: NSPK-FAKE21
+
+Introduced Tight Cafe Module: NSPK-FAKE21a
+
+Introduced Tight Cafe Module: NSPK-FAKE21b
+
+Introduced Tight Cafe Module: NSPK-FAKE22
+
+Introduced Tight Cafe Module: NSPK-FAKE22a
+
+Introduced Tight Cafe Module: NSPK-FAKE22b
+
+Introduced Tight Cafe Module: NSPK-FAKE31
+
+Introduced Tight Cafe Module: NSPK-FAKE31a
+
+Introduced Tight Cafe Module: NSPK-FAKE31b
+
+Introduced Tight Cafe Module: NSPK-FAKE32
+
+Introduced Tight Cafe Module: NSPK-FAKE32a
+
+Introduced Tight Cafe Module: NSPK-FAKE32b
+
+Introduced Tight Cafe Module: NSPK
+
+Introduced Tight Cafe Module: INV
+
+
+Opening module NSPK + INV :
+
+Solution 1 : Initial term: init(p q)
+Final term: nonces: n(p,intrdr,seed)nw: m1(p,p,intrdr,c1(intrdr,n(p,intrdr,
+    seed),p))prins:(p q)rand: next(seed)
+Info term: i(n(p,intrdr,seed),noNonce)
+Substitution:
+C:Config <- nw: m1(p,p,intrdr,c1(intrdr,n(p,intrdr,seed),p))prins:(p q)rand:
+    next(seed)
+N:Nonce <- n(p,intrdr,seed)
+NS:NonceSet <- noNonce
+
+reduce init(p q)=(1,5)=>* nonces:(N:Nonce NS:NonceSet)C:Config suchThat not
+    nonSec(nonces:(N:Nonce NS:NonceSet)C:Config,N:Nonce){i(N:Nonce,
+    NS:NonceSet)}.
+Result: true : Bool
+
+
+Introduced Tight Cafe Module: LABEL
+
+Introduced Loose Cafe Module: PID
+
+Advisory: Module QUEUE redefined.
+Introduced Tight Cafe Module: QUEUE
+
+Introduced Tight Cafe Module: OBS
+
+Introduced Tight Cafe Module: MY-SET
+
+Introduced Tight Cafe Module: STATE
+
+Introduced Tight Cafe Module: QLOCK
+
+Introduced Tight Cafe Module: QLOCKprop
+
+Introduced Loose Cafe Module: PREDtbC
+
+Introduced Tight Cafe Module: GENcases
+
+Introduced Loose Cafe Module: QLOCKmex
+
+Introduced Loose Cafe Module: FACTtbu
+
+Introduced Cafe View: VQLOCKmex
+
+Introduced Loose Cafe Module: CKallCases
+
+Bye.

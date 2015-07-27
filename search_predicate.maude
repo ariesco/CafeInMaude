@@ -17,21 +17,28 @@ fmod SEARCH_PREDICATE is
   vars NZ* NUMSOLS NUMSOLS' STEPS : NzNat* .
   vars SB SB' SB'' : Substitution .
   vars QIL QIL' QIL'' : QidList .
+  var  SSDS : SubsortDeclSet .
   vars QUEUE QUEUE' : Queue .
   var  CTX CTX' : Context .
   var  RT : ResultTriple .
+  var  EqS : EquationSet .
   var  COND : Condition .
   vars TS TS' : TermSet .
+  var  MAS : MembAxSet .
+  var  ODS : OpDeclSet .
   var  GTL : GTermList .
   vars V CC : Variable .
+  var  IL : ImportList .
   vars TL : TermList .
   var  AtS : AttrSet .
+  var  SS : SortSet .
   var  RS : RuleSet .
   var  C : Constant .
   var  E : Element .
   var  BND : Bound .
   vars N N' : Nat .
   var  M : Module .
+  var  H : Header .
   var  Rl : Rule .
   var  Ty : Type .
   var  B : Bool .
@@ -544,19 +551,20 @@ fmod SEARCH_PREDICATE is
   --------------------------------------------------------------------------------
   ------------------- Operator '_=`(_`,_`)=>+_if_suchThat_`{_`} ------------------
   --------------------------------------------------------------------------------
-  ceq solveSearch(M, '_=`(_`,_`)=>+_if_suchThat_`{_`}[T1, T2, T3, T4, T5, T6, T7]) =
+  ceq solveSearch(M, T) =
              | T', QIL |
-   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+   if '_=`(_`,_`)=>+_if_suchThat_`{_`}[T1, T2, T3, T4, T5, T6, T7] := T /\
       NUMSOLS := if T2 == '*.NzNat* then * else downTerm(T2, 0) fi /\
-      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
       STEPS := if T3 == '*.NzNat* then * else downTerm(T3, 0) fi /\
-      RT := metaSearch(M, T1, T4, T6 = 'true.Bool, '+, BND, sd(N, 1)) /\
-      T := getTerm(metaReduce(M, T1)) /\
-      QIL := mySearch(M, NUMSOLS, STEPS, T, T4, T6, T5, T7) /\
+      QIL := mySearch(M, NUMSOLS, STEPS, T1, T4, T6, T5, T7) /\
+      RT? := metaXapply(M, T1, 'wt, none, 0, unbounded, 0) /\
+      RTT:ResultTriple? := metaSearch(M, T1, T4, 'CC:Bool := 'true.Bool /\ T5 = 'true.Bool, '+, 1, 0) /\
       T' := if QIL == '\n '\n '** 'No 'more 'possible 'transitions. '\n
             then 'false.Bool
             else 'true.Bool
-            fi .
+            fi . *** [print "Busqueda " T "\nmetaxapply " RT? "\nMas " RTT:ResultTriple?] .
+
+  var RT? : Result4Tuple? .
 
   ********************************************************************************
   ******************************* printAllSolutions ******************************
@@ -660,11 +668,11 @@ fmod SEARCH_PREDICATE is
       {SB'', CTX'} := metaXmatch(M, PAT, R', nil, 0, unbounded, 0) /\
       INFO' := getTerm(metaReduce(M, applySubstitution(INFO, SB' ; SB''))) /\
       QIL' := printStep(M, L, R, TCONDR, (CC <- TCC), SB'', SB, INFO') /\
-      TCOND' := getTerm(metaReduce(M, applySubstitution(TCOND, SB'))) /\
+      TCOND' := getTerm(metaReduce(M, applySubstitution(TCOND, SB' ; SB''))) /\
       TCOND' == 'true.Bool /\
       { NUMSOLS', TS', QUEUE', N', QIL'' } :=
            processNewState(M, R', TS, NUMSOLS, STEPS, N, TCC == 'true.Bool,
-                          (CC <- TCC), SB'', SB, INFO') .
+                          (CC <- TCC), SB'', SB, INFO') . *** [print "condicion " T " - " Rl " - " TCOND] .
   eq applyAllRules(M, Rl RS, NUMSOLS, PAT, TCOND, CC, INFO, TS, | T, STEPS |, QUEUE, N, QIL) =
          applyAllRules(M, RS, NUMSOLS, PAT, TCOND, CC, INFO, TS, | T, STEPS |, QUEUE, N, QIL) [owise] .
 
@@ -760,6 +768,8 @@ fmod SEARCH_PREDICATE is
   ******************************** transformModule *******************************
   ********************************************************************************
   op transformModule : Module -> Module .
+  eq transformModule(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm) =
+                fmod H is IL sorts SS . SSDS ODS MAS EqS endfm .
   --- TODO
 
   ********************************************************************************
