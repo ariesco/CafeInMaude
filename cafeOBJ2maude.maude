@@ -104,7 +104,7 @@ argument, while the precedence attribute takes a token:
 
   op __ : @CafeAttrList@ @CafeAttrList@ -> @CafeAttrList@ [ctor assoc] .
   ops assoc associative l-assoc r-assoc comm commutative constr nonexec
-      idem idempotent : -> @CafeAttr@ [ctor] .
+      idem idempotent owise : -> @CafeAttr@ [ctor] .
 ***  TODO: Remove if not required
 ***  op id:`(_`) : @CafeBubble@ -> @CafeAttr@ [ctor] .
   op id:_ : @CafeBubble@ -> @CafeAttr@ [ctor] .
@@ -222,7 +222,7 @@ It first defines all the required sorts, and the subsort relations between them:
         @BehaviorEquationDecl@ @CafeDeclList@ @CafeEqDecl@ @CafeVarDecl@
         @CafeSubSortRel@ @CafeLDeclList@ @CafeModExp@ @CafeParameter@ @CafeParameters@
         @CafeInterface@ @CafeViewDecl@ @CafeViewDeclList@ @CafeTransDecl@ @CafeViewId@
-        @CafeViewIdList@ @ReductionDecl@ @ReqProvDecl@ .
+        @CafeViewIdList@ @ReductionDecl@ @ProveDecl@ @ReqProvDecl@ .
 
   subsort @CafeToken@ < @CafeSort@ < @CafeType@ .
 
@@ -238,7 +238,7 @@ It first defines all the required sorts, and the subsort relations between them:
   subsort @CafeSort@ < @CafeSortList@ .
   subsort @CafeType@ < @CafeTypeList@ .
   subsorts @CafeImportDecl@ @CafeVarDecl@ @CafeEqDecl@ @VisibleSortDecl@ @CafeOpDecl@
-           @CafeTransDecl@ @ReductionDecl@ < @CafeLDeclList@ .
+           @CafeTransDecl@ @ReductionDecl@ @ProveDecl@ < @CafeLDeclList@ .
   subsorts @HiddenSortDecl@ @BehaviorEquationDecl@ @CafeLDeclList@
            < @CafeDeclList@ .
   subsort @ModExp@ < @CafeModExp@ . *** !!!!
@@ -528,6 +528,9 @@ declared or not:
   *** Reduction declarations
   op reduce_. : @CafeBubble@ -> @ReductionDecl@ [ctor] .
   op red_. : @CafeBubble@ -> @ReductionDecl@ [ctor] .
+
+  *** Proof declarations
+  op prove_. : @CafeBubble@ -> @ProveDecl@ [ctor] .
 
   *** Requires and provides
   op require_ : @NeCafeTokenList@ -> @ReqProvDecl@ [ctor] .
@@ -2369,6 +2372,7 @@ of the list, until the empty list is reached:
   eq map2MaudeAttr(('idempotent.@CafeAttr@, TL)) = 'idem.@Attr@, map2MaudeAttr(TL) .
   eq map2MaudeAttr(('idem.@CafeAttr@, TL)) = 'idem.@Attr@, map2MaudeAttr(TL) .
   eq map2MaudeAttr(('nonexec.@CafeAttr@, TL)) = 'nonexec.@Attr@, map2MaudeAttr(TL) .
+  eq map2MaudeAttr(('owise.@CafeAttr@, TL)) = 'owise.@Attr@, map2MaudeAttr(TL) .
   eq map2MaudeAttr(('id:`(_`)['CafeBubble[T]], TL)) = 'id:_['bubble[T]], map2MaudeAttr(TL) .
   eq map2MaudeAttr(('id:_['CafeBubble[T]], TL)) = 'id:_['bubble[T]], map2MaudeAttr(TL) .
   eq map2MaudeAttr(('idr:`(_`)['CafeBubble[T]], TL)) = 'id:_['bubble[T]], map2MaudeAttr(TL) .
@@ -2684,6 +2688,8 @@ the possible attributes appearing in equations and transitions:
 %)
 
   op cafeEqAtS2maudeEqAts* : TermList -> TermList .
+  eq cafeEqAtS2maudeEqAts*((TL, ''`{.Qid, ''owise.Qid, TL'', ''`}.Qid)) =
+                      TL, ''`[.Qid, ''owise.Qid, TL'', ''`].Qid .
   eq cafeEqAtS2maudeEqAts*((TL, ''`{.Qid, ''nonexec.Qid, TL'', ''`}.Qid)) =
                       TL, ''`[.Qid, ''nonexec.Qid, TL'', ''`].Qid .
   eq cafeEqAtS2maudeEqAts*((TL, ''`{.Qid, ''metadata.Qid, TL'', ''`}.Qid)) =
@@ -2868,7 +2874,7 @@ a list of quoted identifiers reporting the errors found during the parsing proce
   vars F Q Q' Q'' QI QI' TN : Qid .
   *** TS: TheorySort
   var  TS : Sort .
-  vars QIL QIL' : QidList .
+  vars QIL QIL' QIL'' : QidList .
   vars S S' S'' S''' St St' St'' St''' : String .
   vars CafeM CafeM' : CafeModule .
   var  VDS : OpDeclSet .
@@ -3553,7 +3559,9 @@ the \verb"maps2maps" function shown above to the body:
       < DB', PSM', HSM', QIL > := procCafeMod('cmod!_`{_`}[T1, T2], PSM, HSM, TSM, DB) /\
       M := getFlatModule(openCloseModName, DB') /\
       TL := getRedCommands(T') /\
-      QIL' := processRedCommands(M, DB', TL, T2) .
+      TL' := getProveCommands(T') /\
+      QIL' := processRedCommands(M, DB', TL, T2) /\
+      QIL'' := processRedCommands(M, DB', TL, T2) .
   eq procOpenCloseEnv(T, T', PSM, HSM, TSM, DB) = < DB | nil | 'Environment 'not 'parsed. > [owise] .
 
   op cleanOpenCloseName : Term -> Term .
@@ -3568,6 +3576,14 @@ the \verb"maps2maps" function shown above to the body:
   eq getRedCommand('reduce_.['CafeBubble[T]]) = 'red_.['bubble[T]] .
   eq getRedCommand('red_.['CafeBubble[T]]) = 'red_.['bubble[T]] .
   eq getRedCommand(T) = empty [owise] .
+
+  op getProveCommands : Term -> TermList .
+  eq getProveCommands('__[T, T']) = getRedCommands(T), getRedCommands(T') .
+  eq getProveCommands(T) = getRedCommand(T) [owise] .
+
+  op getProveCommand : Term -> TermList .
+  eq getProveCommand('prove_.['CafeBubble[T]]) = 'prove_.['bubble[T]] .
+  eq getProveCommand(T) = empty [owise] .
 
   op processRedCommands : Module Database TermList Term -> QidList .
   eq processRedCommands(M, DB, empty, T) = nil .
@@ -3591,40 +3607,44 @@ the \verb"maps2maps" function shown above to the body:
       T' := getTerm(metaReduce(M, T1)) /\
       T'' := addComments(T') /\
       QIL := evalRedCommandFinal(M, T'', T1) .
+***(
+  ceq evalRedCommand(M, T) = QIL
+   if T1 := getTerm(metaParse(M, downQidList(T), anyType)) /\
+      T'' := addComments(T1) /\
+      QIL := evalRedCommandFinal(M, T'', T1) .
+      *** TODO: Simplificar si mismo argumento
+)
 
   op evalRedCommandFinal : Module Term Term -> QidList .
   ceq evalRedCommandFinal(M, T, T1) = QIL '\n QIL'
    if | T', QIL, ST | := changeSearch(M, T, mtST) /\
       {T'', Ty} := metaReduce(M, T') /\
       QIL' := printRedRes(M, T1, T'', Ty) .
+***(
+  ceq evalRedCommandFinal(M, T, T1) = QIL '\n QIL'
+   if | T', QIL | := myRed(M, T) /\
+      QIL' := printRedRes(M, T1, T', type(M, T')) .
+)
 
-  sorts Entry SharingTable .
-  subsort Entry < SharingTable .
+  op processProveCommands : Module Database Term Term -> QidList .
+  eq processProveCommands(M, DB, empty, T) = nil .
+  ceq processProveCommands(M, DB, ('prove_.['bubble[T]], TL), T1) = QIL
+                                                   processProveCommands(M, DB, TL, T1)
+   if QIL := evalProveCommand(M, T, T1) .
 
-  op _is_ : Term Term -> Entry [ctor] .
+  *** Module.
+  *** Term to be proved.
+  *** Module in term representation, including vars
+  op evalProveCommand : Module Term Term -> QidList .
+  ceq evalProveCommand(M, T, T') = evalRedCommand(M, T'')
+   if ODS := parseModule4Vars(T') /\
+      QIL := downQidList(T) /\
+      ODS' := opDeclSetFromQidList(QIL) /\
+      T'' := renameOnTheFly(T, ODS ODS') .
 
-  op mtST : -> SharingTable [ctor] .
-  op __ : SharingTable SharingTable -> SharingTable [ctor assoc comm id: mtST] .
-
-  sort SearchInfoWithSharing .
-  op |_,_,_| : TermList QidList SharingTable -> SearchInfoWithSharing [ctor] .
-
-  op changeSearch : Module Term SharingTable -> SearchInfoWithSharing .
-  eq changeSearch(M, C, ST) = | C, nil, ST | .
-  eq changeSearch(M, V, ST) = | V, nil, ST | .
-  ceq changeSearch(M, Q[TL], ST) = | Q[TL'], QIL, ST' |
-   if not isSearchOp(Q) /\
-      | TL', QIL, ST' | := changeSearch*(M, TL, ST) .
-  eq changeSearch(M, Q[TL], (Q[TL] is T') ST) = | T', nil, (Q[TL] is T') ST | .
-  ceq changeSearch(M, Q[TL], ST) = | T, QIL, ST (Q[TL] is T) |
-   if isSearchOp(Q) /\
-      | T, QIL | := solveSearch(M, Q[TL]) [owise] .
-
-  op changeSearch* : Module TermList SharingTable -> SearchInfoWithSharing .
-  eq changeSearch*(M, empty, ST) = | empty, nil, ST | .
-  ceq changeSearch*(M, (T, TL), ST) = | (T', TL'), QIL QIL', ST'' |
-   if | T', QIL, ST' | := changeSearch(M, T, ST) /\
-      | TL', QIL', ST'' | := changeSearch*(M, TL, ST') .
+  *** Module.
+  *** Term to be proved.
+  op evalProveCommand : Module Term -> QidList .
 
   op parseModule4Vars : TermList -> OpDeclSet .
   eq parseModule4Vars(empty) = none .

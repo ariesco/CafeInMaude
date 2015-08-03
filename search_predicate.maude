@@ -12,24 +12,27 @@ fmod SEARCH_PREDICATE is
   sort SearchInfoPair .
   op |_,_| : TermList QidList -> SearchInfoPair [ctor] .
 
-  vars CXU CYU COND_CAF MAX-R MAX-D PRED INFO INFO' T T' T1 T2 T3 T4 T5 T6 T7
+  vars CXU CYU COND_CAF MAX-R MAX-D PRED INFO INFO' T T' T'' T1 T2 T3 T4 T5 T6 T7
        INI FIN PAT RES TCOND TCOND' TCONDR L R R' TCC : Term .
   vars NZ* NUMSOLS NUMSOLS' STEPS : NzNat* .
+  vars QIL QIL' QIL'' QIL1 : QidList .
   vars SB SB' SB'' : Substitution .
-  vars QIL QIL' QIL'' : QidList .
+  var  SIP? : [SearchInfoPair] .
+  vars EqS EqS' : EquationSet .
   var  SSDS : SubsortDeclSet .
+  var  SIP : SearchInfoPair .
   vars QUEUE QUEUE' : Queue .
+  vars IL IL' : ImportList .
   var  CTX CTX' : Context .
   var  RT : ResultTriple .
-  var  EqS : EquationSet .
+  vars TL TL' : TermList .
   var  COND : Condition .
   vars TS TS' : TermSet .
   var  MAS : MembAxSet .
   var  ODS : OpDeclSet .
   var  GTL : GTermList .
   vars V CC : Variable .
-  var  IL : ImportList .
-  vars TL : TermList .
+  var  Eq : Equation .
   var  AtS : AttrSet .
   var  SS : SortSet .
   var  RS : RuleSet .
@@ -39,10 +42,10 @@ fmod SEARCH_PREDICATE is
   vars N N' : Nat .
   var  M : Module .
   var  H : Header .
+  vars Q Q' : Qid .
   var  Rl : Rule .
   var  Ty : Type .
   var  B : Bool .
-  var  Q : Qid .
 
   ****************************************************************************
   ******************************** isSearchOP ********************************
@@ -425,14 +428,18 @@ fmod SEARCH_PREDICATE is
   --------------------------------------------------------------------------------
   --------------------------- Operator '_=`(_`,_`)=>*_ ---------------------------
   --------------------------------------------------------------------------------
-  ceq solveSearch(M, '_=`(_`,_`)=>*_[T1, T2, T3, T4]) = | 'false.Bool, nil |
+  ceq solveSearch(M, '_=`(_`,_`)=>*_[T1, T2, T3, T4]) = | 'false.Bool, QIL |
    if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      NZ* := if T2 == '*.NzNat* then * else downTerm(T2, 0) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
-      metaSearch(M, T1, T4, nil, '*, BND, sd(N, 1)) == failure .
-  ceq solveSearch(M, '_=`(_`,_`)=>*_[T1, T2, T3, T4]) = | 'true.Bool, nil |
+      metaSearch(M, T1, T4, nil, '*, BND, sd(N, 1)) == failure /\
+      QIL := printAllSolutions(M, T1, T4, nil, '*, BND, NZ*, noInfo) .
+  ceq solveSearch(M, '_=`(_`,_`)=>*_[T1, T2, T3, T4]) = | 'true.Bool, QIL |
    if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      NZ* := if T2 == '*.NzNat* then * else sd(downTerm(T2, 0), 1) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
-      RT := metaSearch(M, T1, T4, nil, '*, BND, sd(N, 1)) .
+      RT := metaSearch(M, T1, T4, nil, '*, BND, sd(N, 1)) /\
+      QIL := printAllSolutions(M, T1, T4, nil, '*, BND, NZ*, noInfo) .
   ----------------------------------------------------------------------------
   ----------------------- Operator '_=`(_`,_`)=>*_`{_`} ----------------------
   ----------------------------------------------------------------------------
@@ -442,23 +449,27 @@ fmod SEARCH_PREDICATE is
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
       metaSearch(M, T1, T4, nil, '*, BND, sd(N, 1)) == failure /\
       QIL := printAllSolutions(M, T1, T4, nil, '*, BND, NZ*, T6) .
-  ceq solveSearch(M, '_=`(_`,_`)=>*_suchThat_`{_`}[T1, T2, T3, T4, T5, T6]) = | 'true.Bool, QIL |
+  ceq solveSearch(M, '_=`(_`,_`)=>*_`{_`}[T1, T2, T3, T4, T5]) = | 'true.Bool, QIL |
    if N := if T2 == '*.NzNat* then 0 else sd(downTerm(T2, 0), 1) fi /\
       NZ* := if T2 == '*.NzNat* then * else sd(downTerm(T2, 0), 1) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
       RT := metaSearch(M, T1, T4, nil, '*, BND, N) /\
-      QIL := printAllSolutions(M, T1, T4, nil, '*, BND, NZ*, T6) .
+      QIL := printAllSolutions(M, T1, T4, nil, '*, BND, NZ*, T5) .
   --------------------------------------------------------------------------------
   ----------------------- Operator '_=`(_`,_`)=>*_suchThat_ ----------------------
   --------------------------------------------------------------------------------
-  ceq solveSearch(M, '_=`(_`,_`)=>*_suchThat_[T1, T2, T3, T4, T5]) = | 'false.Bool, nil |
+  ceq solveSearch(M, '_=`(_`,_`)=>*_suchThat_[T1, T2, T3, T4, T5]) = | 'false.Bool, QIL |
    if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      NZ* := if T2 == '*.NzNat* then * else downTerm(T2, 0) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
-      metaSearch(M, T1, T4, T5 = 'true.Bool, '*, BND, sd(N, 1)) == failure .
-  ceq solveSearch(M, '_=`(_`,_`)=>*_suchThat_[T1, T2, T3, T4, T5]) = | 'true.Bool, nil |
+      metaSearch(M, T1, T4, T5 = 'true.Bool, '*, BND, sd(N, 1)) == failure /\
+      QIL := printAllSolutions(M, T1, T4, T5 = 'true.Bool, '*, BND, NZ*, noInfo) .
+  ceq solveSearch(M, '_=`(_`,_`)=>*_suchThat_[T1, T2, T3, T4, T5]) = | 'true.Bool, QIL |
    if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      NZ* := if T2 == '*.NzNat* then * else sd(downTerm(T2, 0), 1) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
-      RT := metaSearch(M, T1, T4, T5 = 'true.Bool, '*, BND, sd(N, 1)) .
+      RT := metaSearch(M, T1, T4, T5 = 'true.Bool, '*, BND, sd(N, 1)) /\
+      QIL := printAllSolutions(M, T1, T4, T5 = 'true.Bool, '*, BND, NZ*, noInfo) .
   -------------------------------------------------------------------------------------
   ----------------------- Operator '_=`(_`,_`)=>*_suchThat_`{_`} ----------------------
   -------------------------------------------------------------------------------------
@@ -467,24 +478,58 @@ fmod SEARCH_PREDICATE is
       NZ* := if T2 == '*.NzNat* then * else downTerm(T2, 0) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
       metaSearch(M, T1, T4, T5 = 'true.Bool, '*, BND, sd(N, 1)) == failure /\
-      QIL := printAllSolutions(M, T1, T4, T5 = 'true.Bool, '*, BND, NZ*, T6) .
+      QIL := printAllSolutions(M, T1, T4, T5 = 'true.Bool, '*, BND, NZ*, T6) [print "hola"] .
   ceq solveSearch(M, '_=`(_`,_`)=>*_suchThat_`{_`}[T1, T2, T3, T4, T5, T6]) = | 'true.Bool, QIL |
    if N := if T2 == '*.NzNat* then 0 else sd(downTerm(T2, 0), 1) fi /\
       NZ* := if T2 == '*.NzNat* then * else sd(downTerm(T2, 0), 1) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
       RT := metaSearch(M, T1, T4, T5 = 'true.Bool, '*, BND, N) /\
       QIL := printAllSolutions(M, T1, T4, T5 = 'true.Bool, '*, BND, NZ*, T6) .
+  -----------------------------------------------------------------------------------
+  ----------------------- Operator '_=`(_`,_`)=>*_withStateEq_ ----------------------
+  -----------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>*_withStateEq_[T1, T2, T3, T4, Q[TL]]) = SIP
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      SIP := searchWithStateEqPrint(M, T1, T4, nil, '*, BND, 0, N, T1, Q, 0, noInfo, nil) .
+  --------------------------------------------------------------------------------------
+  ---------------------- Operator '_=`(_`,_`)=>*_withStateEq_`{_`} ---------------------
+  --------------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>*_withStateEq_`{_`}[T1, T2, T3, T4, Q[TL], T5]) = SIP
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      SIP := searchWithStateEqPrint(M, T1, T4, nil, '*, BND, 0, N, T1, Q, 0, T5, nil) .
+  -------------------------------------------------------------------------------------
+  -------------------- Operator '_=`(_`,_`)=>*_suchThat_withStateEq_ ------------------
+  -------------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>*_suchThat_withStateEq_[T1, T2, T3, T4, T5, Q[TL]]) =
+                                                                           SIP
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      SIP := searchWithStateEqPrint(M, T1, T4, T5 = 'true.Bool, '*, BND, 0, N, T1, Q, 0, noInfo, nil) .
+  -------------------------------------------------------------------------------------
+  ------------------ Operator '_=`(_`,_`)=>*_suchThat_withStateEq_`{_`} ---------------
+  -------------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>*_suchThat_withStateEq_`{_`}[T1, T2, T3, T4,
+                                                               T5, Q[TL], T6]) = SIP
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      SIP := searchWithStateEqPrint(M, T1, T4, T5 = 'true.Bool, '*, BND, 0, N, T1, Q, 0, T6, nil) .
   --------------------------------------------------------------------------------
   --------------------------- Operator '_=`(_`,_`)=>!_ ---------------------------
   --------------------------------------------------------------------------------
   ceq solveSearch(M, '_=`(_`,_`)=>!_[T1, T2, T3, T4]) = | 'false.Bool, nil |
    if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      NZ* := if T2 == '*.NzNat* then * else downTerm(T2, 0) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
-      metaSearch(M, T1, T4, nil, '!, BND, sd(N, 1)) == failure .
+      metaSearch(M, T1, T4, nil, '!, BND, sd(N, 1)) == failure /\
+      QIL := printAllSolutions(M, T1, T4, nil, '!, BND, NZ*, noInfo) .
   ceq solveSearch(M, '_=`(_`,_`)=>!_[T1, T2, T3, T4]) = | 'true.Bool, nil |
    if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      NZ* := if T2 == '*.NzNat* then * else sd(downTerm(T2, 0), 1) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
-      RT := metaSearch(M, T1, T4, nil, '!, BND, sd(N, 1)) .
+      RT := metaSearch(M, T1, T4, nil, '!, BND, sd(N, 1)) /\
+      QIL := printAllSolutions(M, T1, T4, nil, '!, BND, NZ*, noInfo) .
   ----------------------------------------------------------------------------
   ----------------------- Operator '_=`(_`,_`)=>!_`{_`} ----------------------
   ----------------------------------------------------------------------------
@@ -493,24 +538,28 @@ fmod SEARCH_PREDICATE is
       NZ* := if T2 == '*.NzNat* then * else downTerm(T2, 0) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
       metaSearch(M, T1, T4, nil, '!, BND, sd(N, 1)) == failure /\
-      QIL := printAllSolutions(M, T1, T4, nil, '*, BND, NZ*, T6) .
+      QIL := printAllSolutions(M, T1, T4, nil, '!, BND, NZ*, T6) .
   ceq solveSearch(M, '_=`(_`,_`)=>!_suchThat_`{_`}[T1, T2, T3, T4, T5, T6]) = | 'true.Bool, QIL |
    if N := if T2 == '*.NzNat* then 0 else sd(downTerm(T2, 0), 1) fi /\
       NZ* := if T2 == '*.NzNat* then * else sd(downTerm(T2, 0), 1) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
       RT := metaSearch(M, T1, T4, nil, '!, BND, N) /\
-      QIL := printAllSolutions(M, T1, T4, nil, '*, BND, NZ*, T6) .
+      QIL := printAllSolutions(M, T1, T4, nil, '!, BND, NZ*, T6) .
   --------------------------------------------------------------------------------
   ----------------------- Operator '_=`(_`,_`)=>!_suchThat_ ----------------------
   --------------------------------------------------------------------------------
-  ceq solveSearch(M, '_=`(_`,_`)=>!_suchThat_[T1, T2, T3, T4, T5]) = | 'false.Bool, nil |
+  ceq solveSearch(M, '_=`(_`,_`)=>!_suchThat_[T1, T2, T3, T4, T5]) = | 'false.Bool, QIL |
    if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      NZ* := if T2 == '*.NzNat* then * else downTerm(T2, 0) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
-      metaSearch(M, T1, T4, T5 = 'true.Bool, '!, BND, sd(N, 1)) == failure .
-  ceq solveSearch(M, '_=`(_`,_`)=>!_suchThat_[T1, T2, T3, T4, T5]) = | 'true.Bool, nil |
+      metaSearch(M, T1, T4, T5 = 'true.Bool, '!, BND, sd(N, 1)) == failure /\
+      QIL := printAllSolutions(M, T1, T4, T5 = 'true.Bool, '!, BND, NZ*, noInfo) .
+  ceq solveSearch(M, '_=`(_`,_`)=>!_suchThat_[T1, T2, T3, T4, T5]) = | 'true.Bool, QIL |
    if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      NZ* := if T2 == '*.NzNat* then * else sd(downTerm(T2, 0), 1) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
-      RT := metaSearch(M, T1, T4, T5 = 'true.Bool, '!, BND, sd(N, 1)) .
+      RT := metaSearch(M, T1, T4, T5 = 'true.Bool, '!, BND, sd(N, 1)) /\
+      QIL := printAllSolutions(M, T1, T4, T5 = 'true.Bool, '!, BND, NZ*, noInfo) .
   -------------------------------------------------------------------------------------
   ----------------------- Operator '_=`(_`,_`)=>!_suchThat_`{_`} ----------------------
   -------------------------------------------------------------------------------------
@@ -519,52 +568,151 @@ fmod SEARCH_PREDICATE is
       NZ* := if T2 == '*.NzNat* then * else downTerm(T2, 0) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
       metaSearch(M, T1, T4, T5 = 'true.Bool, '!, BND, sd(N, 1)) == failure /\
-      QIL := printAllSolutions(M, T1, T4, T5 = 'true.Bool, '*, BND, NZ*, T6) .
+      QIL := printAllSolutions(M, T1, T4, T5 = 'true.Bool, '!, BND, NZ*, T6) .
   ceq solveSearch(M, '_=`(_`,_`)=>!_suchThat_`{_`}[T1, T2, T3, T4, T5, T6]) = | 'true.Bool, QIL |
    if N := if T2 == '*.NzNat* then 0 else sd(downTerm(T2, 0), 1) fi /\
       NZ* := if T2 == '*.NzNat* then * else sd(downTerm(T2, 0), 1) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
       RT := metaSearch(M, T1, T4, T5 = 'true.Bool, '!, BND, N) /\
       QIL := printAllSolutions(M, T1, T4, T5 = 'true.Bool, '!, BND, NZ*, T6) .
+  -----------------------------------------------------------------------------------
+  ----------------------- Operator '_=`(_`,_`)=>!_withStateEq_ ----------------------
+  -----------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>!_withStateEq_[T1, T2, T3, T4, Q[TL]]) = SIP
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      SIP := searchWithStateEqPrint(M, T1, T4, nil, '!, BND, 0, N, T1, Q, 0, noInfo, nil) .
+  --------------------------------------------------------------------------------------
+  ---------------------- Operator '_=`(_`,_`)=>!_withStateEq_`{_`} ---------------------
+  --------------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>!_withStateEq_`{_`}[T1, T2, T3, T4, Q[TL], T5]) = SIP
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      SIP := searchWithStateEqPrint(M, T1, T4, nil, '!, BND, 0, N, T1, Q, 0, T5, nil) .
+  -------------------------------------------------------------------------------------
+  -------------------- Operator '_=`(_`,_`)=>!_suchThat_withStateEq_ ------------------
+  -------------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>!_suchThat_withStateEq_[T1, T2, T3, T4, T5, Q[TL]]) =
+                                                                           SIP
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      SIP := searchWithStateEqPrint(M, T1, T4, T5 = 'true.Bool, '!, BND, 0, N, T1, Q, 0, noInfo, nil) .
+  -------------------------------------------------------------------------------------
+  ------------------ Operator '_=`(_`,_`)=>!_suchThat_withStateEq_`{_`} ---------------
+  -------------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>!_suchThat_withStateEq_`{_`}[T1, T2, T3, T4,
+                                                               T5, Q[TL], T6]) = SIP
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      SIP := searchWithStateEqPrint(M, T1, T4, T5 = 'true.Bool, '!, BND, 0, N, T1, Q, 0, T6, nil) .
   --------------------------------------------------------------------------------
   --------------------------- Operator '_=`(_`,_`)=>+_ ---------------------------
   --------------------------------------------------------------------------------
-  ceq solveSearch(M, '_=`(_`,_`)=>+_[T1, T2, T3, T4]) = | 'false.Bool, nil |
+  ceq solveSearch(M, '_=`(_`,_`)=>+_[T1, T2, T3, T4]) = | 'false.Bool, QIL |
    if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      NZ* := if T2 == '*.NzNat* then * else downTerm(T2, 0) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
-      metaSearch(M, T1, T4, nil, '+, BND, sd(N, 1)) == failure .
-  ceq solveSearch(M, '_=`(_`,_`)=>+_[T1, T2, T3, T4]) = | 'true.Bool, nil |
+      metaSearch(M, T1, T4, nil, '+, BND, sd(N, 1)) == failure /\
+      QIL := printAllSolutions(M, T1, T4, nil, '+, BND, NZ*, noInfo) .
+  ceq solveSearch(M, '_=`(_`,_`)=>+_[T1, T2, T3, T4]) = | 'true.Bool, QIL |
    if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      NZ* := if T2 == '*.NzNat* then * else sd(downTerm(T2, 0), 1) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
-      RT := metaSearch(M, T1, T4, nil, '+, BND, sd(N, 1)) .
+      RT := metaSearch(M, T1, T4, nil, '+, BND, sd(N, 1)) /\
+      QIL := printAllSolutions(M, T1, T4, nil, '+, BND, NZ*, noInfo) .
+  ----------------------------------------------------------------------------
+  ----------------------- Operator '_=`(_`,_`)=>+_`{_`} ----------------------
+  ----------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>+_`{_`}[T1, T2, T3, T4, T6]) = | 'false.Bool, QIL |
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      NZ* := if T2 == '*.NzNat* then * else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      metaSearch(M, T1, T4, nil, '+, BND, sd(N, 1)) == failure /\
+      QIL := printAllSolutions(M, T1, T4, nil, '+, BND, NZ*, T6) .
+  ceq solveSearch(M, '_=`(_`,_`)=>+_suchThat_`{_`}[T1, T2, T3, T4, T5, T6]) = | 'true.Bool, QIL |
+   if N := if T2 == '*.NzNat* then 0 else sd(downTerm(T2, 0), 1) fi /\
+      NZ* := if T2 == '*.NzNat* then * else sd(downTerm(T2, 0), 1) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      RT := metaSearch(M, T1, T4, nil, '+, BND, N) /\
+      QIL := printAllSolutions(M, T1, T4, nil, '+, BND, NZ*, T6) .
   --------------------------------------------------------------------------------
   ----------------------- Operator '_=`(_`,_`)=>+_suchThat_ ----------------------
   --------------------------------------------------------------------------------
-  ceq solveSearch(M, '_=`(_`,_`)=>+_suchThat_[T1, T2, T3, T4, T5]) = | 'false.Bool, nil |
+  ceq solveSearch(M, '_=`(_`,_`)=>+_suchThat_[T1, T2, T3, T4, T5]) = | 'false.Bool, QIL |
    if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      NZ* := if T2 == '*.NzNat* then * else downTerm(T2, 0) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
-      metaSearch(M, T1, T4, T5 = 'true.Bool, '+, BND, sd(N, 1)) == failure .
+      metaSearch(M, T1, T4, T5 = 'true.Bool, '+, BND, sd(N, 1)) == failure /\
+      QIL := printAllSolutions(M, T1, T4, T5 = 'true.Bool, '+, BND, NZ*, noInfo) .
   ceq solveSearch(M, '_=`(_`,_`)=>+_suchThat_[T1, T2, T3, T4, T5]) = | 'true.Bool, nil |
    if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      NZ* := if T2 == '*.NzNat* then * else sd(downTerm(T2, 0), 1) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
-      RT := metaSearch(M, T1, T4, T5 = 'true.Bool, '+, BND, sd(N, 1)) .
+      RT := metaSearch(M, T1, T4, T5 = 'true.Bool, '+, BND, sd(N, 1)) /\
+      QIL := printAllSolutions(M, T1, T4, T5 = 'true.Bool, '+, BND, NZ*, noInfo) .
+  -------------------------------------------------------------------------------------
+  ----------------------- Operator '_=`(_`,_`)=>+_suchThat_`{_`} ----------------------
+  -------------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>+_suchThat_`{_`}[T1, T2, T3, T4, T5, T6]) = | 'false.Bool, QIL |
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      NZ* := if T2 == '*.NzNat* then * else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      metaSearch(M, T1, T4, T5 = 'true.Bool, '+, BND, sd(N, 1)) == failure /\
+      QIL := printAllSolutions(M, T1, T4, T5 = 'true.Bool, '+, BND, NZ*, T6) .
+  ceq solveSearch(M, '_=`(_`,_`)=>+_suchThat_`{_`}[T1, T2, T3, T4, T5, T6]) = | 'true.Bool, QIL |
+   if N := if T2 == '*.NzNat* then 0 else sd(downTerm(T2, 0), 1) fi /\
+      NZ* := if T2 == '*.NzNat* then * else sd(downTerm(T2, 0), 1) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      RT := metaSearch(M, T1, T4, T5 = 'true.Bool, '+, BND, N) /\
+      QIL := printAllSolutions(M, T1, T4, T5 = 'true.Bool, '+, BND, NZ*, T6) .
+  -----------------------------------------------------------------------------------
+  ----------------------- Operator '_=`(_`,_`)=>+_withStateEq_ ----------------------
+  -----------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>+_withStateEq_[T1, T2, T3, T4, Q[TL]]) = SIP
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      SIP := searchWithStateEqPrint(M, T1, T4, nil, '+, BND, 0, N, T1, Q, 0, noInfo, nil) .
+  --------------------------------------------------------------------------------------
+  ---------------------- Operator '_=`(_`,_`)=>+_withStateEq_`{_`} ---------------------
+  --------------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>+_withStateEq_`{_`}[T1, T2, T3, T4, Q[TL], T5]) = SIP
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      SIP := searchWithStateEqPrint(M, T1, T4, nil, '+, BND, 0, N, T1, Q, 0, T5, nil) .
+  -------------------------------------------------------------------------------------
+  -------------------- Operator '_=`(_`,_`)=>+_suchThat_withStateEq_ ------------------
+  -------------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>+_suchThat_withStateEq_[T1, T2, T3, T4, T5, Q[TL]]) =
+                                                                           SIP
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      SIP := searchWithStateEqPrint(M, T1, T4, T5 = 'true.Bool, '+, BND, 0, N, T1, Q, 0, noInfo, nil) .
+  -------------------------------------------------------------------------------------
+  ------------------ Operator '_=`(_`,_`)=>+_suchThat_withStateEq_`{_`} ---------------
+  -------------------------------------------------------------------------------------
+  ceq solveSearch(M, '_=`(_`,_`)=>+_suchThat_withStateEq_`{_`}[T1, T2, T3, T4,
+                                                               T5, Q[TL], T6]) = SIP
+   if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
+      BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
+      SIP := searchWithStateEqPrint(M, T1, T4, T5 = 'true.Bool, '+, BND, 0, N, T1, Q, 0, T6, nil) .
   --------------------------------------------------------------------------------
   ------------------- Operator '_=`(_`,_`)=>+_if_suchThat_`{_`} ------------------
   --------------------------------------------------------------------------------
-  ceq solveSearch(M, T) =
-             | T', QIL |
+  ceq solveSearch(M, T) = | T', QIL |
    if '_=`(_`,_`)=>+_if_suchThat_`{_`}[T1, T2, T3, T4, T5, T6, T7] := T /\
       NUMSOLS := if T2 == '*.NzNat* then * else downTerm(T2, 0) fi /\
       STEPS := if T3 == '*.NzNat* then * else downTerm(T3, 0) fi /\
       QIL := mySearch(M, NUMSOLS, STEPS, T1, T4, T6, T5, T7) /\
-      RT? := metaXapply(M, T1, 'wt, none, 0, unbounded, 0) /\
-      RTT:ResultTriple? := metaSearch(M, T1, T4, 'CC:Bool := 'true.Bool /\ T5 = 'true.Bool, '+, 1, 0) /\
+***      RT? := metaXapply(M, T1, 'wt, none, 0, unbounded, 0) /\
+***      RTT:ResultTriple? := metaSearch(M, T1, T4, 'CC:Bool := 'true.Bool /\ T5 = 'true.Bool, '+, 1, 0) /\
       T' := if QIL == '\n '\n '** 'No 'more 'possible 'transitions. '\n
             then 'false.Bool
             else 'true.Bool
             fi . *** [print "Busqueda " T "\nmetaxapply " RT? "\nMas " RTT:ResultTriple?] .
 
-  var RT? : Result4Tuple? .
+***  var RT? : Result4Tuple? .
+
+  op noInfo : -> Term [ctor] .
 
   ********************************************************************************
   ******************************* printAllSolutions ******************************
@@ -609,12 +757,18 @@ fmod SEARCH_PREDICATE is
 
   op printTerm : Module Term Term Term Nat Substitution -> QidList .
   ceq printTerm(M, INI, FIN, INFO, N, SB) =
-      '\n 'Solution qid(string(s(N), 10)) ':
-      '\b '\! 'Initial 'term: '\o metaPrettyPrint(M, INI, po)
+      '\n '\b 'Solution qid(string(s(N), 10)) ': '\o
+      '\n '\! 'Initial 'term: '\o metaPrettyPrint(M, INI, po)
       '\n '\! 'Final 'term: '\o metaPrettyPrint(M, FIN, po)
       '\n '\! 'Info 'term: '\o metaPrettyPrint(M, T, po)
       '\n '\! 'Substitution: '\o printSubstitution(M, SB)
-   if T := applySubstitution(INFO, SB) .
+   if INFO =/= noInfo /\
+      T := applySubstitution(INFO, SB) .
+  eq printTerm(M, INI, FIN, noInfo, N, SB) =
+     '\n '\b 'Solution qid(string(s(N), 10)) ': '\o
+     '\n '\! 'Initial 'term: '\o metaPrettyPrint(M, INI, po)
+     '\n '\! 'Final 'term: '\o metaPrettyPrint(M, FIN, po)
+     '\n '\! 'Substitution: '\o printSubstitution(M, SB) .
 
   op printSubstitution : Module Substitution -> QidList .
   eq printSubstitution(M, none) = nil .
@@ -633,6 +787,66 @@ fmod SEARCH_PREDICATE is
   eq applySubstitution*((T, TL), SB) = applySubstitution(T, SB),
                                        applySubstitution*(TL, SB) .
 
+  op applySubstitutionCond : Condition Substitution -> Condition .
+  eq applySubstitutionCond(nil, SB) = nil .
+  eq applySubstitutionCond(T = T' /\ COND, SB) =
+                applySubstitution(T, SB) = applySubstitution(T', SB) /\
+                applySubstitutionCond(COND, SB) .
+  eq applySubstitutionCond(T : Ty /\ COND, SB) =
+                applySubstitution(T, SB) : Ty /\
+                applySubstitutionCond(COND, SB) .
+  eq applySubstitutionCond(T := T' /\ COND, SB) =
+                applySubstitution(T, SB) := applySubstitution(T', SB) /\
+                applySubstitutionCond(COND, SB) .
+  eq applySubstitutionCond(T => T' /\ COND, SB) =
+                applySubstitution(T, SB) => applySubstitution(T', SB) /\
+                applySubstitutionCond(COND, SB) .
+
+
+  *** We assume the predicate for equality is a binary predicate, and hence I only ask
+  *** for the Qid in order to create the term later.
+  *****************************************************************************************
+  *********************************** searchWithStateEq ***********************************
+  *****************************************************************************************
+  op searchWithStateEq : Module Term Term Condition Qid Bound Nat Nat TermSet Qid
+                         -> Term .
+  eq searchWithStateEq(M, T, T', COND, Q, BND, N, 0, TS, Q') = 'true.Bool .
+  ceq searchWithStateEq(M, T, T', COND, Q, BND, N, s(NUMSOLS), TS, Q') =
+            searchWithStateEq(M, T, T', COND, Q, BND, s(N), NUMSOLS, TS | RES, Q')
+   if { RES, Ty, SB } := metaSearch(M, T, T', COND, Q, BND, N) /\
+      differentToAll(M, RES, TS, Q') .
+  ceq searchWithStateEq(M, T, T', COND, Q, BND, N, s(NUMSOLS), TS, Q') =
+            searchWithStateEq(M, T, T', COND, Q, BND, s(N), s(NUMSOLS), TS, Q')
+   if { RES, Ty, SB } := metaSearch(M, T, T', COND, Q, BND, N) /\
+      not differentToAll(M, RES, TS, Q') .
+  ceq searchWithStateEq(M, T, T', COND, Q, BND, N, s(NUMSOLS), TS, Q') = 'false.Bool
+   if failure := metaSearch(M, T, T', COND, Q, BND, N) .
+
+  op searchWithStateEqPrint : Module Term Term Condition Qid Bound Nat Nat TermSet Qid
+                              Nat Term QidList -> SearchInfoPair .
+  eq searchWithStateEqPrint(M, T, T', COND, Q, BND, N, 0, TS, Q', N', INFO, QIL) =
+                                                                   | 'true.Bool, QIL | .
+  ceq searchWithStateEqPrint(M, T, T', COND, Q, BND, N, s(NUMSOLS), TS, Q', N', INFO, QIL) =
+             searchWithStateEqPrint(M, T, T', COND, Q, BND, s(N), NUMSOLS, TS | RES,
+                                    Q', s(N'), INFO, QIL QIL')
+   if { RES, Ty, SB } := metaSearch(M, T, T', COND, Q, BND, N) /\
+      differentToAll(M, RES, TS, Q') /\
+      QIL' := printTerm(M, T, RES, INFO, N', SB) .
+  ceq searchWithStateEqPrint(M, T, T', COND, Q, BND, N, s(NUMSOLS), TS, Q', N', INFO, QIL) =
+            searchWithStateEqPrint(M, T, T', COND, Q, BND, s(N), s(NUMSOLS), TS,
+                                   Q', N', INFO, QIL)
+   if { RES, Ty, SB } := metaSearch(M, T, T', COND, Q, BND, N) /\
+      not differentToAll(M, RES, TS, Q') .
+  ceq searchWithStateEqPrint(M, T, T', COND, Q, BND, N, s(NUMSOLS), TS, Q', N', INFO, QIL) =
+                                                                   | 'false.Bool, QIL |
+   if failure := metaSearch(M, T, T', COND, Q, BND, N) .
+
+  op differentToAll : Module Term TermSet Qid -> Bool .
+  eq differentToAll(M, T, emptyTermSet, Q) = true .
+  ceq differentToAll(M, T, T' | TS, Q) = false
+   if getTerm(metaReduce(M, Q[T, T'])) == 'true.Bool .
+  ceq differentToAll(M, T, T' | TS, Q) = differentToAll(M, T, TS, Q)
+   if getTerm(metaReduce(M, Q[T, T'])) == 'false.Bool .
 
   ********************************************************************************
   *********************************** mySearch ***********************************
@@ -765,12 +979,158 @@ fmod SEARCH_PREDICATE is
         '\n ' ' ' '--> metaPrettyPrint(M, INFO, po) '\n  .
 
   ********************************************************************************
-  ******************************** transformModule *******************************
+  ************************************* myRed ************************************
   ********************************************************************************
-  op transformModule : Module -> Module .
-  eq transformModule(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm) =
-                fmod H is IL sorts SS . SSDS ODS MAS EqS endfm .
-  --- TODO
+  op myRed : Module Term -> SearchInfoPair .
+  ceq myRed(M, Q[TL]) = | T', QIL1 QIL' |
+   if *** | TL', QIL | := myRed*(M, TL) /\
+      | T1, QIL1, ST | := changeSearch(M, reduce(M, Q[TL]), mtST) /\
+      Q[TL] =/= T1 /\
+      | T', QIL' | := myRed(M, T1) .
+  ceq myRed(M, Q[TL]) = | reduce(M, T1), QIL1 |
+   if *** | TL', QIL | := myRed*(M, TL) /\
+      | T1, QIL1, ST | := changeSearch(M, reduce(M, Q[TL]), mtST) /\
+      Q[TL] == T1 .
+  ceq myRed(M, C) = if C == T'
+                    then | C, nil |
+                    else myRed(M, T')
+                    fi
+   if T' := reduce(M, C) .
+  eq myRed(M, T) = | reduce(M, T), nil | [owise] .
+  ***(
+  ceq myRed(M, Q[T, TL]) = | T'', QIL QIL' |
+   if isSearchOp(Q) /\
+      | T', QIL | := myRed(M, T) /\
+      | T'', QIL' | := solveSearch(M, Q[T, TL]) .
+  ceq myRed(M, Q[TL]) = | T'', QIL QIL1 QIL' QIL'' |
+   if not isSearchOp(Q) /\
+      | TL', QIL | := myRed*(M, TL) /\
+      | T1, QIL1, ST | := changeSearch(M, Q[TL'], mtST) /\
+      | T', QIL' | := myRedTop(M, getEqs(M), T1) /\
+      T' =/= T1 /\
+      | T'', QIL'' | := myRed(M, T') .
+  ceq myRed(M, Q[TL]) = | reduce(M, Q[TL']), QIL QIL' |
+   if not isSearchOp(Q) /\
+      | TL', QIL | := myRed*(M, TL) /\
+      | T1, QIL1, ST | := changeSearch(M, reduce(M, Q[TL']), mtST) . *** /\
+***      | T', QIL' | := myRedTop(M, getEqs(M), T1) /\
+***      T' == T1 . *** [print "subterms " TL " -- " TL' ] .
+  eq myRed(M, T) = | reduce(M, T), nil | [owise] .
+  )
+
+  **********************************************************************************
+  ************************************ myRedTop ************************************
+  **********************************************************************************
+  op myRedTop : Module EquationSet Term ~> SearchInfoPair .
+  ceq myRedTop(M, Eq EqS, T) = | reduce(M, addComments(R')), QIL |
+   if {L, R, COND} := getEqParts(Eq) /\
+      sameKind(M, type(M, L), type(M, T)) /\
+      SB := metaMatch(M, L, T, nil, 0) /\
+      not owise?(Eq) /\
+      | true, QIL, SB' | := evalCond(M, applySubstitutionCond(COND, SB)) /\
+      R' := applySubstitution(R, SB ; SB') . *** [print "top " Eq "\nAntes " T " despues " R'] .
+  *** Hacer con false y sumar QID
+  eq myRedTop(M, EqS, T) = myRedTopWithOwise(M, EqS, T) [owise] .
+
+  op myRedTopWithOwise : Module EquationSet Term ~> SearchInfoPair .
+  ceq myRedTopWithOwise(M, Eq EqS, T) = | addComments(R'), QIL |
+   if owise?(Eq) /\
+      {L, R, COND} := getEqParts(Eq) /\
+      sameKind(M, type(M, L), type(M, T)) /\
+      SB := metaMatch(M, L, T, nil, 0) /\
+      | true, QIL, SB' | := evalCond(M, applySubstitutionCond(COND, SB)) /\
+      R' := applySubstitution(R, SB ; SB') .
+  eq myRedTopWithOwise(M, EqS, T) = | T, nil | [owise] .
+
+  ********************************************************************************
+  ************************************ myRed* ************************************
+  ********************************************************************************
+  op myRed* : Module TermList -> SearchInfoPair .
+  eq myRed*(M, empty) = | empty, nil | .
+  ceq myRed*(M, (T, TL)) = | (T', TL'), QIL QIL' |
+   if | T', QIL | := myRed(M, T) /\
+      | TL', QIL' | := myRed*(M, TL) .
+
+  sorts Entry SharingTable .
+  subsort Entry < SharingTable .
+
+  op _is_ : Term Term -> Entry [ctor] .
+
+  op mtST : -> SharingTable [ctor] .
+  op __ : SharingTable SharingTable -> SharingTable [ctor assoc comm id: mtST] .
+
+  sort SearchInfoWithSharing .
+  op |_,_,_| : TermList QidList SharingTable -> SearchInfoWithSharing [ctor] .
+
+  vars ST ST' ST'' : SharingTable .
+
+  op changeSearch : Module Term SharingTable -> SearchInfoWithSharing .
+  eq changeSearch(M, C, ST) = | C, nil, ST | .
+  eq changeSearch(M, V, ST) = | V, nil, ST | .
+  ceq changeSearch(M, Q[TL], ST) = | Q[TL'], QIL, ST' |
+   if not isSearchOp(Q) /\
+      | TL', QIL, ST' | := changeSearch*(M, TL, ST) .
+  eq changeSearch(M, Q[TL], (Q[TL] is T') ST) = | T', nil, (Q[TL] is T') ST | .
+  ceq changeSearch(M, Q[TL], ST) = | T, QIL, ST (Q[TL] is T) |
+   if isSearchOp(Q) /\
+      | T, QIL | := solveSearch(M, Q[TL]) [owise] .
+
+  op changeSearch* : Module TermList SharingTable -> SearchInfoWithSharing .
+  eq changeSearch*(M, empty, ST) = | empty, nil, ST | .
+  ceq changeSearch*(M, (T, TL), ST) = | (T', TL'), QIL QIL', ST'' |
+   if | T', QIL, ST' | := changeSearch(M, T, ST) /\
+      | TL', QIL', ST'' | := changeSearch*(M, TL, ST') .
+
+  ********************************************************************************
+  *********************************** evalCond ***********************************
+  ********************************************************************************
+  sort EvalCondResult .
+  op |_,_,_| : Bool QidList Substitution -> EvalCondResult [ctor] .
+
+  op evalCond : Module Condition -> EvalCondResult .
+  eq evalCond(M, nil) = | true, nil, none | .
+  ceq evalCond(M, T = T' /\ COND) = | B, QIL QIL' QIL'', SB |
+   if | T1, QIL | := myRed(M, T) /\
+      | T2, QIL' | := myRed(M, T') /\
+      T1 == T2 /\
+      | B, QIL'', SB | := evalCond(M, COND) .
+  ceq evalCond(M, T = T' /\ COND) = | false, QIL QIL', none |
+   if | T1, QIL | := myRed(M, T) /\
+      | T2, QIL' | := myRed(M, T') /\
+      T1 =/= T2 .
+  ceq evalCond(M, T := T' /\ COND) = | B, QIL QIL', SB ; SB' |
+   if | T1, QIL | := myRed(M, T') /\
+      SB := metaMatch(M, T, T1, nil, 0) /\
+      | B, QIL', SB' | := evalCond(M, applySubstitutionCond(COND, SB)) .
+  ceq evalCond(M, T := T' /\ COND) = | false, QIL, none |
+   if | T1, QIL | := myRed(M, T') /\
+      noMatch := metaMatch(M, T, T1, nil, 0) .
+  ceq evalCond(M, T => T' /\ COND) = | B, QIL QIL', SB ; SB' |
+   if | T1, QIL | := myRed(M, T) /\
+      SB := metaMatch(M, T', T1, nil, 0) /\
+      | B, QIL', SB' | := evalCond(M, applySubstitutionCond(COND, SB)) .
+  ceq evalCond(M, T => T' /\ COND) = | false, QIL, none |
+   if | T1, QIL | := myRed(M, T) /\
+      noMatch := metaMatch(M, T', T1, nil, 0) .
+  ceq evalCond(M, T : Ty /\ COND) = | B, QIL QIL', SB |
+   if | T1, QIL | := myRed(M, T) /\
+      sortLeq(M, type(M, T1), Ty) /\
+      | B, QIL', SB | := evalCond(M, COND) .
+
+  ********************************************************************************
+  *********************************** getParts ***********************************
+  ********************************************************************************
+  sort StmntParts .
+  op {_,_,_} : Term Term Condition -> StmntParts [ctor] .
+
+  op getEqParts : Equation -> StmntParts .
+  eq getEqParts(eq T = T' [AtS] .) = {T, T', nil} .
+  eq getEqParts(ceq T = T' if COND [AtS] .) = {T, T', COND} .
+
+  op getRlParts : Rule -> StmntParts .
+  eq getRlParts(rl T => T' [AtS] .) = {T, T', nil} .
+  eq getRlParts(crl T => T' if COND [AtS] .) = {T, T', COND} .
+
 
   ********************************************************************************
   ********************************** addComments *********************************
@@ -782,7 +1142,6 @@ fmod SEARCH_PREDICATE is
    if isSearchOp(Q) .
   eq addComments(Q[TL]) = Q[addComments*(TL)] .
 
-
   *********************************************************************************
   ********************************** addComments* *********************************
   *********************************************************************************
@@ -790,8 +1149,37 @@ fmod SEARCH_PREDICATE is
   eq addComments*(empty) = empty .
   eq addComments*((T, TL)) = addComments(T), addComments*(TL) .
 
+  *********************************************************************************
+  ************************************ decrease ***********************************
+  *********************************************************************************
   op decrease : NzNat* -> NzNat* .
   eq decrease(*) = * .
   eq decrease(s(N)) = N .
   eq decrease(0) = 0 .
+
+  *********************************************************************************
+  ************************************* normal ************************************
+  *********************************************************************************
+  op normal : Module Term ~> Term .
+  eq normal(M, T) = getTerm(metaNormalize(M, T)) .
+
+  *********************************************************************************
+  ************************************* reduce ************************************
+  *********************************************************************************
+  op reduce : Module Term ~> Term .
+  eq reduce(M, T) = getTerm(metaReduce(M, T)) .
+
+  *********************************************************************************
+  ************************************** type *************************************
+  *********************************************************************************
+  op type : Module Term ~> Type .
+  eq type(M, T) = getType(metaReduce(M, T)) .
+
+  *********************************************************************************
+  ************************************** type *************************************
+  *********************************************************************************
+  op owise? : Equation -> Bool .
+  eq owise?(eq T = T' [owise AtS] .) = true .
+  eq owise?(ceq T = T' if COND [owise AtS] .) = true .
+  eq owise?(Eq) = false [owise] .
 endfm
