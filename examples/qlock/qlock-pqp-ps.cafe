@@ -343,6 +343,26 @@ eq (#lss((as),cs) > 0) = true .
 red ck .
 close
 
+
+
+
+
+eof
+--- Adrian
+
+open GEN&CHECK1+2 + CONSTandLITL + FACTtbu + WT .
+
+red empQ $ as lb[b1]: rs
+=( *, 1)=>+ SS:State if CC:Bool suchThat
+not ((CC:Bool then
+q( (empQ $ as lb[b1]: rs) $$ b2, SS:State $$ b2)) == true) { CC:Bool } .
+
+red q( (empQ $ as lb[b1]: rs) $$ b2, b1 $ as lb[b1]: ws $$ b2) .
+
+close
+
+*** qlock-pqp 102
+
 eof
 ** end of file
 ** the text after this is comment and not read by the system

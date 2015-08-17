@@ -22,6 +22,5 @@ eq valid-q(S:Ste,SS:Ste,CC:Bool) =
 provide VALIDq
 
 
-eof
 
 

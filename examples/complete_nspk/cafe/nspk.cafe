@@ -24,9 +24,10 @@ mod! SET(X :: TRIV) {
   eq emp =< S' = true .
   eq (E S =< S') = (E \in S') and (S =< S') .
   ceq (S = S') = (S =< S') and (S' =< S)
-      if not((S :is Elt.X) and (S' :is Elt.X)) .
+      if not((S :is Elt) and (S' :is Elt)) .
+  -- Adrian
+  eq (S = S') = false {owise} .
 }
-
 
 mod! PNAT principal-sort PNat {
   [PZero PNzNat < PNat]
@@ -34,6 +35,8 @@ mod! PNAT principal-sort PNat {
   op s : PNat -> PNzNat {constr}
   eq (z = s(N:PNat)) = false .
   eq (s(N:PNat) = s(M:PNat)) = (N = M) .
+  -- Adrian
+  eq (N:PNat = M:PNat) = false {owise} .
 }
 
 mod* RANDOM-NUMBER {
@@ -50,22 +53,22 @@ mod! INTRUDER {
   op intrdr : -> Intruder {constr}
 }
 
-mod* PRINCIPAL {
+mod* PRINCIPAL principal-sort Prin {
   [Prin]
 }
-
 
 mod! PRIN&INTRDR {
   pr(INTRUDER)
   pr(PRINCIPAL)
   [Intruder Prin < Prin&Intrdr]
-  var I : Intruder
-  var P : Prin
-  var PI : Prin&Intrdr
+  vars PI PI' : Prin&Intrdr
+  var  I : Intruder
+  var  P : Prin
   eq (I = P) = false .
-  eq (I = PI) and (PI = P) = false .
+  eq (PI = I) and (PI = P) = false .
+  -- Adrian
+  eq (PI = PI') = false {owise} .
 }
-
 
 mod! PRIN-SET {
   pr(SET(PRINCIPAL)
@@ -82,12 +85,16 @@ mod! NONCE principal-sort Nonce {
   op n : Prin&Intrdr Prin&Intrdr PNat -> Nonce {constr}
   op gen : Nonce -> Prin&Intrdr
   op forWhom : Nonce -> Prin&Intrdr
+  op rand : Nonce -> PNat
   vars PI1 PI2 PI1' PI2' : Prin&Intrdr
   vars R R' : PNat
   eq (n(PI1,PI2,R) = n(PI1',PI2',R'))
      = (PI1 = PI1') and (PI2 = PI2') and (R = R') .
+  -- Adrian
+  eq (N1:Nonce = N2:Nonce) = false {owise} .
   eq gen(n(PI1,PI2,R)) = PI1 .
   eq forWhom(n(PI1,PI2,R)) = PI2 .
+  eq rand(n(PI1,PI2,R)) = R .
 }
 
 mod! NONCE-SET {
@@ -107,6 +114,8 @@ mod! CIPHER1 {
   vars N N' : Nonce
   eq (c1(QI,N,PI) = c1(QI',N',PI'))
      = (QI = QI') and (N = N') and (PI = PI') .
+  -- Adrian
+  eq (C:Cipher1 = C':Cipher1) = false {owise} .
   eq non(c1(QI,N,PI)) = N .
   eq gen(c1(QI,N,PI)) = PI .
 }
@@ -122,6 +131,8 @@ mod! CIPHER2 {
   vars N1 N2 N1' N2' : Nonce
   eq (c2(PI,N1,N2) = c2(PI',N1',N2'))
      = (PI = PI') and (N1 = N1') and (N2 = N2') .
+  -- Adrian
+  eq (C:Cipher2 = C':Cipher2) = false {owise} .
   eq non1(c2(PI,N1,N2)) = N1 .
   eq non(c2(PI,N1,N2)) = N2 .
 }
@@ -135,6 +146,8 @@ mod! CIPHER3 {
   vars N N' : Nonce
   eq (c3(QI,N) = c3(QI',N'))
      = (QI = QI') and (N = N') .
+  -- Adrian
+  eq (C:Cipher3 = C':Cipher3) = false {owise} .
 }
 
 mod! MESSAGE1 {
@@ -152,6 +165,8 @@ mod! MESSAGE1 {
   vars CIPH1 CIPH1' : Cipher1
   eq (m1(C,S,D,CIPH1) = m1(C',S',D',CIPH1'))
      = (C = C') and (S = S') and (D = D') and (CIPH1 = CIPH1') .
+  -- Adrian
+  eq (M:Msg1 = M':Msg1) = false {owise} .
 }
 
 mod! MESSAGE2 {
@@ -171,6 +186,8 @@ mod! MESSAGE2 {
   vars CIPH2 CIPH2' : Cipher2
   eq (m2(C,S,D,CIPH2) = m2(C',S',D',CIPH2'))
      = (C = C') and (S = S') and (D = D') and (CIPH2 = CIPH2') .
+  -- Adrian
+  eq (M:Msg2 = M':Msg2) = false {owise} .
   eq src(m2(C,S,D,CIPH2)) = S .
   eq ciph2(m2(C,S,D,CIPH2)) = CIPH2 .
 }
@@ -190,6 +207,8 @@ mod! MESSAGE3 {
   vars CIPH3 CIPH3' : Cipher3
   eq (m3(C,S,D,CIPH3) = m3(C',S',D',CIPH3'))
      = (C = C') and (S = S') and (D = D') and (CIPH3 = CIPH3') .
+  -- Adrian
+  eq (M:Msg3 = M':Msg3) = false {owise} .
 }
 
 mod! MESSAGE principal-sort Msg {
@@ -208,10 +227,12 @@ mod! NETWORK {
         op emp -> noMsg } )
   op _\in_ : Cipher1 Network -> Bool
   op _\in_ : Cipher2 Network -> Bool
+  op _\in_ : Cipher3 Network -> Bool
   vars N N' N'' : Nonce
   vars C S D S' D' : Prin&Intrdr
   vars CIPH1 CIPH1' : Cipher1
   vars CIPH2 CIPH2' : Cipher2
+  vars CIPH3 CIPH3' : Cipher3
   var M1 : Msg1
   var M2 : Msg2
   var M3 : Msg3
@@ -230,6 +251,13 @@ mod! NETWORK {
        then true else CIPH2 \in NW fi .
   eq CIPH2 \in M1 NW = CIPH2 \in NW .
   eq CIPH2 \in M3 NW = CIPH2 \in NW .
+  --
+  eq CIPH3 \in noMsg = false .
+  eq CIPH3 \in M1 NW = CIPH3 \in NW .
+  eq CIPH3 \in M2 NW = CIPH3 \in NW .
+  eq CIPH3 \in m3(C,S,D,CIPH3') NW
+     = if CIPH3 = CIPH3'
+       then true else CIPH3 \in NW fi .
 }
 
 mod! OBSERVABLE-VALUE principal-sort OVal {
@@ -256,6 +284,8 @@ mod! OBSERVABLE-VALUE principal-sort OVal {
   eq ((rand: R) = (nonces: NS)) = false .
   eq ((rand: R) = (prins: PS)) = false .
   eq ((nonces: NS) = (prins: PS)) = false .
+  -- Adrian (some above can be removed)
+  eq (O:OVal = O':OVal) = false {owise} .
 }
 
 mod! CONFIG {
@@ -269,6 +299,7 @@ mod! CONFIG {
   op #prins : Config -> PNat
   op nonces : Config -> NonceSet
   op msgs : Config -> Network
+  op rand : Config -> PNat
   var NW : Network
   var R : PNat
   var NS : NonceSet
@@ -300,6 +331,9 @@ mod! CONFIG {
   ceq msgs((nw: NW) C) = NW if #nw(C) = z .
   ceq msgs((nw: NW) C) = noMsg if not(#nw(C) = z) .
   ceq msgs(C) = noMsg if #nw(C) = z .
+  ceq rand((rand: R) C) = R if #rand(C) = z .
+  ceq rand((rand: R) C) = z if not(#rand(C) = z) .
+  ceq rand(C) = z if #rand(C) = z .
 }
 
 mod! NSPK-INIT {
@@ -852,30 +886,13 @@ mod! NSPK {
   inc(NSPK-FAKE32a)
 }
 
-mod! INV {
-  inc(CONFIG)
-  op nonSec : Config Nonce -> Bool
-  --
-  var C : Config
-  var N : Nonce
-  -- nonSec
-  eq nonSec(C,N)
-     = N \in nonces(C)
-       implies
-       (gen(N) = intrdr or forWhom(N) = intrdr) .
+eof
 
-}
-
-open NSPK + INV .
-  [Info]
+open NSPK .
   ops p q : -> Prin .
+  var C : Config .
   eq (p = q) = false .
-  var N : Nonce
-  var NS : NonceSet
-
-  op i : Nonce NonceSet -> Info .
-  --
-  red init(p q) =(1,5)=>* ((nonces: (N NS)) C:Config)
-   suchThat (not nonSec((nonces: (N NS)) C, N)) .
+  red init(p q) =(1,3)=>* C suchThat false . -- feasible
+  red init(p q) =(1,4)=>* C suchThat false . -- infeasible due to out of memory
 close
 

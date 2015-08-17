@@ -1,0 +1,923 @@
+***
+*** p --> q : {n_p,p}_{pubk(q)}
+*** p <-- q : {n_p,n_q}_{pubk(p)}
+*** p --> q : {n_q}_{pubk(q)}
+***
+*** p, q : principals
+*** n_x : a nonce made by a principal x
+*** pubk(x) : a public key owned by a pricipal x
+*** {...}_{k} : a cipher encrypted with a key k
+***
+
+fth TRIV-EQ is
+  pr BOOL .
+  sort Elt .
+  op _=_ : Elt Elt -> Bool [comm] .
+  var E : Elt .
+  eq (E = E) = true .
+endfth
+
+fmod SET {X :: TRIV-EQ} is
+  sort Set{X} .
+  subsort X$Elt < Set{X} .
+  op emp : -> Set{X} [ctor] .
+  op _ _ : Set{X} Set{X} -> Set{X} [ctor assoc comm id: emp] .
+  op _\in_ : X$Elt Set{X} -> Bool .
+  op _=<_ : Set{X} Set{X} -> Bool .
+  op _~_ : Set{X} Set{X} -> Bool [comm] .
+  vars E E' : X$Elt .
+  vars B B' : Set{X} .
+  eq E E = E .
+  eq E \in emp = false .
+  eq E \in E B' = true .
+  ceq E \in E' B' = E \in B' if not(E = E') .
+  eq emp =< B' = true .
+  eq E B =< B' = E \in B' and B =< B' .
+  eq B ~ B' = B =< B' and B' =< B .
+endfm
+
+fmod PNAT is
+  sorts PZero PNzNat PNat .
+  subsorts PZero PNzNat < PNat .
+  op z : -> PZero [ctor] .
+  op s : PNat -> PNzNat [ctor] .
+  op _=_ : PNat PNat -> Bool [comm] .
+  vars M N : PNat .
+  eq (N = N) = true .
+  eq (z = s(N)) = false .
+  eq (s(N) = s(M)) = (N = M) .
+endfm
+
+***
+*** Maude does not allow to import fth by fmod.
+*** This is why fmod is used instead of fth.
+*** But, my intention is fth.
+***
+fmod RANDOM-NUMBER is ---> fth RANDOM-NUMBER is
+  pr PNAT .
+  op seed : -> PNat .
+  op next : PNat -> PNat .
+  vars R R' : PNat .
+  eq (next(R) = seed) = false .
+  eq (next(R) = next(R')) = (R = R') .
+endfm ---> endfth
+
+fmod INTRUDER is
+  sort Intruder .
+  op intrdr : -> Intruder [ctor] .
+  op _=_ : Intruder Intruder -> Bool [comm] .
+  var I : Intruder .
+  eq (I = I) = true .
+endfm
+
+fmod PRINCIPAL is
+  sort Prin .
+  op _=_ : Prin Prin -> Bool [comm] .
+  var P : Prin .
+  eq (P = P) = true .
+endfm
+
+fmod PRIN&INTRDR is
+  pr INTRUDER .
+  pr PRINCIPAL .
+  sort Prin&Intrdr .
+  subsorts Intruder Prin < Prin&Intrdr .
+  op _=_ : Prin&Intrdr Prin&Intrdr -> Bool [comm] .
+  var I : Intruder .
+  var P : Prin .
+  var PI : Prin&Intrdr .
+  eq (I = P) = false .
+  *** lemma or axiom ?
+  *** eq (PI = I) and (PI = P) = false .
+endfm
+
+view Prin from TRIV-EQ to PRINCIPAL is
+  sort Elt to Prin .
+endv
+
+fmod PRIN-SET is
+  pr SET{Prin} .
+endfm
+
+fmod NONCE is
+  pr RANDOM-NUMBER .
+  pr PRIN&INTRDR .
+  sort Nonce .
+  op n : Prin&Intrdr Prin&Intrdr PNat -> Nonce [ctor] .
+  op _=_ : Nonce Nonce -> Bool [comm] .
+  op gen : Nonce -> Prin&Intrdr .
+  op forWhom : Nonce -> Prin&Intrdr .
+  op rand : Nonce -> PNat .
+  vars PI1 PI2 PI1' PI2' : Prin&Intrdr .
+  vars R R' : PNat .
+  var N : Nonce .
+  eq (N = N) = true .
+  eq (n(PI1,PI2,R) = n(PI1',PI2',R'))
+     = (PI1 = PI1') and (PI2 = PI2') and (R = R') .
+  eq gen(n(PI1,PI2,R)) = PI1 .
+  eq forWhom(n(PI1,PI2,R)) = PI2 .
+  eq rand(n(PI1,PI2,R)) = R .
+endfm
+
+view Nonce from TRIV-EQ to NONCE is
+  sort Elt to Nonce .
+endv
+
+fmod NONCE-SET is
+  pr SET{Nonce} .
+endfm
+
+fmod CIPHER1 is 
+  pr NONCE .
+  sort Cipher1 .
+  op c1 : Prin&Intrdr Nonce Prin&Intrdr -> Cipher1 [ctor] .
+  op _=_ : Cipher1 Cipher1 -> Bool [comm] .
+  op non : Cipher1 -> Nonce .
+  op gen : Cipher1 -> Prin&Intrdr .
+  vars PI QI PI' QI' : Prin&Intrdr .
+  vars N N' : Nonce .
+  var C1 : Cipher1 .
+  eq (C1 = C1) = true .
+  eq (c1(QI,N,PI) = c1(QI',N',PI'))
+     = (QI = QI') and (N = N') and (PI = PI') .
+  eq non(c1(QI,N,PI)) = N .
+  eq gen(c1(QI,N,PI)) = PI .
+endfm
+
+fmod CIPHER2 is
+  pr NONCE .
+  sort Cipher2 .
+  op c2 : Prin&Intrdr Nonce Nonce -> Cipher2 [ctor] .
+  op _=_ : Cipher2 Cipher2 -> Bool [comm] .
+  op non1 : Cipher2 -> Nonce .
+  op non : Cipher2 -> Nonce .
+  vars PI PI' : Prin&Intrdr .
+  vars N1 N2 N1' N2' : Nonce .
+  var C2 : Cipher2 .
+  eq (C2 = C2) = true .
+  eq (c2(PI,N1,N2) = c2(PI',N1',N2'))
+     = (PI = PI') and (N1 = N1') and (N2 = N2') .
+  eq non1(c2(PI,N1,N2)) = N1 .
+  eq non(c2(PI,N1,N2)) = N2 .
+endfm
+
+fmod CIPHER3 is
+  pr NONCE .
+  sort Cipher3 .
+  op c3 : Prin&Intrdr Nonce -> Cipher3 [ctor] .
+  op _=_ : Cipher3 Cipher3 -> Bool [comm] .
+  vars QI QI' : Prin&Intrdr .
+  vars N N' : Nonce .
+  var C3 : Cipher3 .
+  eq (C3 = C3) = true .
+  eq (c3(QI,N) = c3(QI',N'))
+     = (QI = QI') and (N = N') .
+endfm
+
+fmod MESSAGE1 is
+  pr CIPHER1 .
+  sort Msg1 .
+  op m1 : Prin&Intrdr Prin&Intrdr Prin&Intrdr Cipher1 -> Msg1 [ctor] .
+  op _=_ : Msg1 Msg1 -> Bool [comm] .
+  vars C S D C' S' D' : Prin&Intrdr .
+  vars CIPH1 CIPH1' : Cipher1 .
+  var M1 : Msg1 .
+  eq (M1 = M1) = true .
+  eq (m1(C,S,D,CIPH1) = m1(C',S',D',CIPH1'))
+     = (C = C') and (S = S') and (D = D') and (CIPH1 = CIPH1') .
+endfm
+
+fmod MESSAGE2 is
+  pr CIPHER2 .
+  sort Msg2 .
+  op m2 : Prin&Intrdr Prin&Intrdr Prin&Intrdr Cipher2 -> Msg2 [ctor] .
+  op _=_ : Msg2 Msg2 -> Bool [comm] .
+  op src : Msg2 -> Prin&Intrdr .
+  op ciph2 : Msg2 -> Cipher2 .
+  vars C S D C' S' D' : Prin&Intrdr .
+  vars CIPH2 CIPH2' : Cipher2 .
+  var M2 : Msg2 .
+  eq (M2 = M2) = true .
+  eq (m2(C,S,D,CIPH2) = m2(C',S',D',CIPH2'))
+     = (C = C') and (S = S') and (D = D') and (CIPH2 = CIPH2') .
+  eq src(m2(C,S,D,CIPH2)) = S .
+  eq ciph2(m2(C,S,D,CIPH2)) = CIPH2 .
+endfm
+
+fmod MESSAGE3 is
+  pr CIPHER3 .
+  sort Msg3 .
+  op m3 : Prin&Intrdr Prin&Intrdr Prin&Intrdr Cipher3 -> Msg3 [ctor] .
+  op _=_ : Msg3 Msg3 -> Bool [comm] .
+  vars C S D C' S' D' : Prin&Intrdr .
+  vars CIPH3 CIPH3' : Cipher3 .
+  var M3 : Msg3 .
+  eq (M3 = M3) = true .
+  eq (m3(C,S,D,CIPH3) = m3(C',S',D',CIPH3'))
+     = (C = C') and (S = S') and (D = D') and (CIPH3 = CIPH3') .
+endfm
+
+fmod MESSAGE is
+  pr MESSAGE1 .
+  pr MESSAGE2 .
+  pr MESSAGE3 .
+  sort Msg .
+  subsorts Msg1 Msg2 Msg3 < Msg .
+  op _=_ : Msg Msg -> Bool [comm] .
+  var M : Msg .
+  var M1 : Msg1 .
+  var M2 : Msg2 .
+  var M3 : Msg3 .
+  eq (M = M) = true .
+  eq (M1 = M2) = false .
+  eq (M1 = M3) = false .
+  eq (M2 = M3) = false .
+endfm
+
+view Msg from TRIV-EQ to MESSAGE is
+  sort Elt to Msg .
+endv
+
+fmod NETWORK is
+  pr SET{Msg} .
+  op _\in_ : Cipher1 Set{Msg} -> Bool .
+  op _\in_ : Cipher2 Set{Msg} -> Bool .
+  op _\in_ : Cipher3 Set{Msg} -> Bool .
+  vars N N' N'' : Nonce .
+  vars C S D S' D' : Prin&Intrdr .
+  vars CIPH1 CIPH1' : Cipher1 .
+  vars CIPH2 CIPH2' : Cipher2 .
+  vars CIPH3 CIPH3' : Cipher3 .
+  var M1 : Msg1 .
+  var M2 : Msg2 .
+  var M3 : Msg3 .
+  var NW : Set{Msg} .
+  ***
+  eq CIPH1 \in emp = false .
+  eq CIPH1 \in m1(C,S,D,CIPH1') NW
+     = if CIPH1 = CIPH1'
+       then true else CIPH1 \in NW fi .
+  eq CIPH1 \in M2 NW = CIPH1 \in NW .
+  eq CIPH1 \in M3 NW = CIPH1 \in NW .
+  ***
+  eq CIPH2 \in emp = false .
+  eq CIPH2 \in m2(C,S,D,CIPH2') NW
+     = if CIPH2 = CIPH2'
+       then true else CIPH2 \in NW fi .
+  eq CIPH2 \in M1 NW = CIPH2 \in NW .
+  eq CIPH2 \in M3 NW = CIPH2 \in NW .
+  ***
+  eq CIPH3 \in noMsg = false .
+  eq CIPH3 \in M1 NW = CIPH3 \in NW .
+  eq CIPH3 \in M2 NW = CIPH3 \in NW .
+  eq CIPH3 \in m3(C,S,D,CIPH3') NW
+     = if CIPH3 = CIPH3'
+       then true else CIPH3 \in NW fi .
+endfm
+
+fmod OBSERVABLE-VALUE is
+  pr NETWORK .
+  pr RANDOM-NUMBER .
+  pr NONCE-SET .
+  pr PRIN-SET .
+  sort OVal .
+  op nw:_ : Set{Msg} -> OVal [ctor] .
+  op rand:_ : PNat -> OVal [ctor] .
+  op nonces:_ : Set{Nonce} -> OVal [ctor] .
+  op prins:_ : Set{Prin} -> OVal [ctor] .
+  op _=_ : OVal OVal -> Bool [comm] .
+  vars NW NW' : Set{Msg} .
+  vars R R' : PNat .
+  vars NS NS' : Set{Nonce} .
+  vars PS PS' : Set{Prin} .
+  var OV : OVal .
+  eq (OV = OV) = true .
+  eq ((nw: NW) = (nw: NW')) = (NW ~ NW') .
+  eq ((rand: R) = (rand: R')) = (R = R') .
+  eq ((nonces: NS) = (nonces: NS')) = (NS ~ NS') .
+  eq ((prins: PS) = (prins: PS')) = (PS ~ PS') .
+  eq ((nw: NW) = (rand: R)) = false .
+  eq ((nw: NW) = (nonces: NS)) = false .
+  eq ((nw: NW) = (prins: PS)) = false .
+  eq ((rand: R) = (nonces: NS)) = false .
+  eq ((rand: R) = (prins: PS)) = false .
+  eq ((nonces: NS) = (prins: PS)) = false .
+endfm
+
+view OVal from TRIV-EQ to OBSERVABLE-VALUE is
+  sort Elt to OVal .
+endv
+
+fmod CONFIG is
+  pr PNAT .
+  pr SET{OVal} .
+  op #nw : Set{OVal} -> PNat .
+  op #rand : Set{OVal} -> PNat .
+  op #nonces : Set{OVal} -> PNat .
+  op #prins : Set{OVal} -> PNat .
+  op nonces : Set{OVal} -> Set{Nonce} .
+  op msgs : Set{OVal} -> Set{Msg} .
+  op rand : Set{OVal} -> PNat .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  var PS : Set{Prin} .
+  var C : Set{OVal} .
+  eq #nw(emp) = z .
+  eq #nw((nw: NW) C) = s(#nw(C)) .
+  eq #nw((rand: R) C) = #nw(C) .
+  eq #nw((nonces: NS) C) = #nw(C) .
+  eq #nw((prins: PS) C) = #nw(C) .
+  eq #rand(emp) = z .
+  eq #rand((nw: NW) C) = #rand(C) .
+  eq #rand((rand: R) C) = s(#rand(C)) .
+  eq #rand((nonces: NS) C) = #rand(C) .
+  eq #rand((prins: PS) C) = #rand(C) .
+  eq #nonces(emp) = z .
+  eq #nonces((nw: NW) C) = #nonces(C) .
+  eq #nonces((rand: R) C) = #nonces(C) .
+  eq #nonces((nonces: NS) C) = s(#nonces(C)) .
+  eq #nonces((prins: PS) C) = #nonces(C) .
+  eq #prins(emp) = z .
+  eq #prins((nw: NW) C) = #prins(C) .
+  eq #prins((rand: R) C) = #prins(C) .
+  eq #prins((nonces: NS) C) = #prins(C) .
+  eq #prins((prins: PS) C) = s(#prins(C)) .
+  ceq nonces((nonces: NS) C) = NS if (#nonces(C) = z) = true .
+  ceq nonces((nonces: NS) C) = emp if not(#nonces(C) = z) .
+  ceq nonces(C) = emp if (#nonces(C) = z) = true .
+  ceq msgs((nw: NW) C) = NW if (#nw(C) = z) = true .
+  ceq msgs((nw: NW) C) = emp if not(#nw(C) = z) .
+  ceq msgs(C) = emp if (#nw(C) = z) = true .
+  ceq rand((rand: R) C) = R if #rand(C) = z .
+  ceq rand((rand: R) C) = z if not(#rand(C) = z) .
+  ceq rand(C) = z if #rand(C) = z .
+endfm
+
+fmod NSPK-INIT is
+  inc CONFIG .
+  op init : Set{Prin} -> Set{OVal} .
+  var PS : Set{Prin} .
+  eq init(PS)
+     = (nw: emp)
+       (rand: seed)
+       (nonces: emp)
+       (prins: PS) .
+endfm
+
+mod NSPK-CHALLENGE1 is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  vars P Q : Prin .
+  vars PS : Set{Prin} .
+  ***
+  crl [challenge1] :
+    (nw: NW)
+    (rand: R)
+    (nonces: NS)
+    (prins: (P Q PS))
+    =>
+    (nw: (m1(P,P,Q,c1(Q,n(P,Q,R),P)) NW))
+    (rand: next(R))
+    (nonces: NS)
+    (prins: (P Q PS))
+   if not(P = Q) .
+endm
+
+mod NSPK-CHALLENGE2 is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  var P : Prin .
+  vars PS : Set{Prin} .
+  ***
+  rl [challenge2] :
+    (nw: NW)
+    (rand: R)
+    (nonces: NS)
+    (prins: (P PS))
+    =>
+    (nw: (m1(P,P,intrdr,c1(intrdr,n(P,intrdr,R),P)) NW))
+    (rand: next(R))
+    (nonces: (n(P,intrdr,R) NS))
+    (prins: (P PS)) .
+endm
+
+mod NSPK-CHALLENGE3 is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  var Q : Prin .
+  vars PS : Set{Prin} .
+  ***
+  rl [challenge3] :
+    (nw: NW)
+    (rand: R)
+    (nonces: NS)
+    (prins: (Q PS))
+    =>
+    (nw: (m1(intrdr,intrdr,Q,c1(Q,n(intrdr,Q,R),intrdr)) NW))
+    (rand: next(R))
+    (nonces: NS)
+    (prins: (Q PS)) .
+endm
+
+mod NSPK-RESPONSE is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  vars PI QI PI' : Prin&Intrdr .
+  vars PS : Set{Prin} .
+  var N : Nonce .
+  ***
+  rl [Response] :
+    (nw: (m1(PI',PI,QI,c1(QI,N,PI)) NW))
+    (rand: R)
+    (nonces: NS)
+    (prins: PS)
+    =>
+    (nw: (m2(QI,QI,PI,c2(PI,N,n(QI,PI,R)))
+          m1(PI',PI,QI,c1(QI,N,PI)) NW))
+    (rand: next(R))
+    (nonces: (if PI = intrdr
+              then n(QI,PI,R) N NS else NS fi))
+    (prins: PS) .
+endm
+
+mod NSPK-CONFIRMATION is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  vars PI QI QI' : Prin&Intrdr .
+  vars PS : Set{Prin} .
+  vars N N' : Nonce .
+  ***
+  rl [Confirmation] :
+    (nw: (m2(QI',QI,PI,c2(PI,N,N'))
+          m1(PI,PI,QI,c1(QI,N,PI)) NW))
+    (rand: R)
+    (nonces: NS)
+    (prins: PS)
+    =>
+    (nw: (m3(PI,PI,QI,c3(QI,N'))
+          m2(QI',QI,PI,c2(PI,N,N'))
+          m1(PI,PI,QI,c1(QI,N,PI)) NW))
+    (rand: R)
+    (nonces: (if QI = intrdr
+              then N' NS else NS fi))
+    (prins: PS) .
+endm
+
+mod NSPK-FAKE11 is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  vars P Q : Prin .
+  vars PS : Set{Prin} .
+  var N : Nonce .
+  ***
+  crl [fake11] :
+    (nw: NW)
+    (rand: R)
+    (nonces: (N NS))
+    (prins: (P Q PS))
+    =>
+    (nw: (m1(intrdr,P,Q,c1(Q,N,P)) NW))
+    (rand: R)
+    (nonces: (N NS))
+    (prins: (P Q PS))
+   if not(P = Q) .
+endm
+
+mod NSPK-FAKE11a is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  var P : Prin .
+  vars PS : Set{Prin} .
+  var N : Nonce .
+  ***
+  rl [fake11a] :
+    (nw: NW)
+    (rand: R)
+    (nonces: (N NS))
+    (prins: (P PS))
+    =>
+    (nw: (m1(intrdr,P,intrdr,c1(intrdr,N,P)) NW))
+    (rand: R)
+    (nonces: (N NS))
+    (prins: (P PS)) .
+endm
+
+mod NSPK-FAKE11b is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  var Q : Prin .
+  vars PS : Set{Prin} .
+  var N : Nonce .
+  ***
+  rl [fake11b] :
+    (nw: NW)
+    (rand: R)
+    (nonces: (N NS))
+    (prins: (Q PS))
+    =>
+    (nw: (m1(intrdr,intrdr,Q,c1(Q,N,intrdr)) NW))
+    (rand: R)
+    (nonces: (N NS))
+    (prins: (Q PS)) .
+endm
+
+mod NSPK-FAKE12 is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  vars P Q : Prin .
+  vars PI QI PI' : Prin&Intrdr .
+  vars PS : Set{Prin} .
+  var C1 : Cipher1 .
+  ***
+  crl [fake12] :
+    (nw: (m1(PI',PI,QI,C1) NW))
+    (rand: R)
+    (nonces: NS)
+    (prins: (P Q PS))
+    =>
+    (nw: (m1(intrdr,P,Q,C1)
+          m1(PI',PI,QI,C1) NW))
+    (rand: R)
+    (nonces: NS)
+    (prins: (P Q PS))
+   if not(P = Q) .
+endm
+
+mod NSPK-FAKE12a is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  var P : Prin .
+  vars PI QI PI' : Prin&Intrdr .
+  vars PS : Set{Prin} .
+  var C1 : Cipher1 .
+  ***
+  rl [fake12a] :
+    (nw: (m1(PI',PI,QI,C1) NW))
+    (rand: R)
+    (nonces: NS)
+    (prins: (P PS))
+    =>
+    (nw: (m1(intrdr,P,intrdr,C1)
+          m1(PI',PI,QI,C1) NW))
+    (rand: R)
+    (nonces: NS)
+    (prins: (P PS)) .
+endm
+
+mod NSPK-FAKE12b is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  var Q : Prin .
+  vars PI QI PI' : Prin&Intrdr .
+  vars PS : Set{Prin} .
+  var C1 : Cipher1 .
+  ***
+  rl [fake12b] :
+    (nw: (m1(PI',PI,QI,C1) NW))
+    (rand: R)
+    (nonces: NS)
+    (prins: (Q PS))
+    =>
+    (nw: (m1(intrdr,intrdr,Q,C1)
+          m1(PI',PI,QI,C1) NW))
+    (rand: R)
+    (nonces: NS)
+    (prins: (Q PS)) .
+endm
+
+mod NSPK-FAKE21 is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  vars P Q : Prin .
+  vars PS : Set{Prin} .
+  vars N N' : Nonce .
+  ***
+  crl [fake21] :
+    (nw: NW)
+    (rand: R)
+    (nonces: (N N' NS))
+    (prins: (P Q PS))
+    =>
+    (nw: (m2(intrdr,Q,P,c2(P,N,N')) NW))
+    (rand: R)
+    (nonces: (N N' NS))
+    (prins: (P Q PS))
+   if not(N = N') and not(P = Q) .
+endm
+
+mod NSPK-FAKE21a is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  var P : Prin .
+  vars PS : Set{Prin} .
+  vars N N' : Nonce .
+  ***
+  crl [fake21a] :
+    (nw: NW)
+    (rand: R)
+    (nonces: (N N' NS))
+    (prins: (P PS))
+    =>
+    (nw: (m2(intrdr,intrdr,P,c2(P,N,N')) NW))
+    (rand: R)
+    (nonces: (N N' NS))
+    (prins: (P PS))
+   if not(N = N') .
+endm
+
+mod NSPK-FAKE21b is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  var Q : Prin .
+  vars PS : Set{Prin} .
+  vars N N' : Nonce .
+  ***
+  crl [fake21b] :
+    (nw: NW)
+    (rand: R)
+    (nonces: (N N' NS))
+    (prins: (Q PS))
+    =>
+    (nw: (m2(intrdr,Q,intrdr,c2(intrdr,N,N')) NW))
+    (rand: R)
+    (nonces: (N N' NS))
+    (prins: (Q PS))
+   if not(N = N') .
+endm
+
+mod NSPK-FAKE22 is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  vars PI QI QI' : Prin&Intrdr .
+  vars P Q : Prin .
+  vars PS : Set{Prin} .
+  var C2 : Cipher2 .
+  ***
+  crl [fake22] :
+    (nw: (m2(QI',QI,PI,C2) NW))
+    (rand: R)
+    (nonces: NS)
+    (prins: (P Q PS))
+    =>
+    (nw: (m2(intrdr,Q,P,C2)
+          m2(QI',QI,PI,C2) NW))
+    (rand: R)
+    (nonces: NS)
+    (prins: (P Q PS))
+   if not(P = Q) .
+endm
+
+mod NSPK-FAKE22a is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  vars PI QI QI' : Prin&Intrdr .
+  var P : Prin .
+  vars PS : Set{Prin} .
+  var C2 : Cipher2 .
+  ***
+  rl [fake22a] :
+    (nw: (m2(QI',QI,PI,C2) NW))
+    (rand: R)
+    (nonces: NS)
+    (prins: (P PS))
+    =>
+    (nw: (m2(intrdr,intrdr,P,C2)
+          m2(QI',QI,PI,C2) NW))
+    (rand: R)
+    (nonces: NS)
+    (prins: (P PS)) .
+endm
+
+mod NSPK-FAKE22b is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  vars PI QI QI' : Prin&Intrdr .
+  var Q : Prin .
+  vars PS : Set{Prin} .
+  var C2 : Cipher2 .
+  ***
+  rl [fake22b] :
+    (nw: (m2(QI',QI,PI,C2) NW))
+    (rand: R)
+    (nonces: NS)
+    (prins: (Q PS))
+    =>
+    (nw: (m2(intrdr,Q,intrdr,C2)
+          m2(QI',QI,PI,C2) NW))
+    (rand: R)
+    (nonces: NS)
+    (prins: (Q PS)) .
+endm
+
+mod NSPK-FAKE31 is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  vars P Q : Prin .
+  vars PS : Set{Prin} .
+  var N : Nonce .
+  ***
+  crl [fake31] :
+    (nw: NW)
+    (rand: R)
+    (nonces: (N NS))
+    (prins: (P Q PS))
+    =>
+    (nw: (m3(intrdr,P,Q,c3(Q,N)) NW))
+    (rand: R)
+    (nonces: (N NS))
+    (prins: (P Q PS))
+   if not(P = Q) .
+endm
+
+mod NSPK-FAKE31a is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  var P : Prin .
+  vars PS : Set{Prin} .
+  var N : Nonce .
+  ***
+  rl [fake31a] :
+    (nw: NW)
+    (rand: R)
+    (nonces: (N NS))
+    (prins: (P PS))
+    =>
+    (nw: (m3(intrdr,P,intrdr,c3(intrdr,N)) NW))
+    (rand: R)
+    (nonces: (N NS))
+    (prins: (P PS)) .
+endm
+
+mod NSPK-FAKE31b is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  var Q : Prin .
+  vars PS : Set{Prin} .
+  var N : Nonce .
+  ***
+  rl [fake31b] :
+    (nw: NW)
+    (rand: R)
+    (nonces: (N NS))
+    (prins: (Q PS))
+    =>
+    (nw: (m3(intrdr,intrdr,Q,c3(Q,N)) NW))
+    (rand: R)
+    (nonces: (N NS))
+    (prins: (Q PS)) .
+endm
+
+mod NSPK-FAKE32 is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  vars P Q : Prin .
+  vars PI QI PI' : Prin&Intrdr .
+  vars PS : Set{Prin} .
+  var C3 : Cipher3 .
+  ***
+  crl [fake32] :
+    (nw: (m3(PI',PI,QI,C3) NW))
+    (rand: R)
+    (nonces: NS)
+    (prins: (P Q PS))
+    =>
+    (nw: (m3(intrdr,P,Q,C3)
+          m3(PI',PI,QI,C3) NW))
+    (rand: R)
+    (nonces: NS)
+    (prins: (P Q PS))
+   if not(P = Q) .
+endm
+
+mod NSPK-FAKE32a is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  var P : Prin .
+  vars PI QI PI' : Prin&Intrdr .
+  vars PS : Set{Prin} .
+  var C3 : Cipher3 .
+  ***
+  rl [fake32a] :
+    (nw: (m3(PI',PI,QI,C3) NW))
+    (rand: R)
+    (nonces: NS)
+    (prins: (P PS))
+    =>
+    (nw: (m3(intrdr,P,intrdr,C3)
+          m3(PI',PI,QI,C3) NW))
+    (rand: R)
+    (nonces: NS)
+    (prins: (P PS)) .
+endm
+
+mod NSPK-FAKE32b is
+  inc CONFIG .
+  var NW : Set{Msg} .
+  var R : PNat .
+  var NS : Set{Nonce} .
+  var Q : Prin .
+  vars PI QI PI' : Prin&Intrdr .
+  vars PS : Set{Prin} .
+  var C3 : Cipher3 .
+  ***
+  rl [fake32b] :
+    (nw: (m3(PI',PI,QI,C3) NW))
+    (rand: R)
+    (nonces: NS)
+    (prins: (Q PS))
+    =>
+    (nw: (m3(intrdr,intrdr,Q,C3)
+          m3(PI',PI,QI,C3) NW))
+    (rand: R)
+    (nonces: NS)
+    (prins: (Q PS)) .
+endm
+
+mod NSPK is
+  inc NSPK-INIT .
+  inc NSPK-CHALLENGE1 .
+  inc NSPK-CHALLENGE2 .
+  inc NSPK-CHALLENGE3 .
+  inc NSPK-RESPONSE .
+  inc NSPK-CONFIRMATION .
+  inc NSPK-FAKE11 .
+  inc NSPK-FAKE11a .
+  inc NSPK-FAKE11b .
+  inc NSPK-FAKE12 .
+  inc NSPK-FAKE12a .
+  inc NSPK-FAKE12b .
+  inc NSPK-FAKE21 .
+  inc NSPK-FAKE21a .
+  inc NSPK-FAKE21b .
+  inc NSPK-FAKE22 .
+  inc NSPK-FAKE22a .
+  inc NSPK-FAKE22b .
+  inc NSPK-FAKE31 .
+  inc NSPK-FAKE31a .
+  inc NSPK-FAKE31b .
+  inc NSPK-FAKE32 .
+  inc NSPK-FAKE32a .
+  inc NSPK-FAKE32b .
+endm
+
+eof
+
+mod EXPERIMENT is
+  pr NSPK .
+  ops p q : -> Prin .
+  var C : Set{OVal} .
+  eq (p = q) = false .
+endm
+
+*** feasible
+search [1,5] in EXPERIMENT : init(p q) =>* C such that false .
+***
+***
+No solution.
+states: 680761  rewrites: 5917653 in 2674923114ms cpu (90015ms real) (2
+    rewrites/second)

@@ -1,0 +1,43 @@
+
+open NSPK + INV .
+  ops p q : -> Prin .
+  eq (p = q) = false .
+  var C : Config .
+  var Q : Prin .
+  vars PI PI' : Prin&Intrdr .
+  var N : Nonce .
+  var R : PNat .
+  var MS : Network .
+  op sXXXXXX : -> Config .
+  eq sXXXXXX
+     = nw: (m1(intrdr, p, q, c1(q, n(p, intrdr, seed), p))
+    m1(p, p, intrdr, c1(intrdr, n(p, intrdr, seed), p)) m2(intrdr, intrdr, p,
+    c2(p, n(p, intrdr, seed), n(q, p, next(seed)))) m2(q, q, p, c2(p, n(p,
+    intrdr, seed), n(q, p, next(seed)))) m3(p, p, intrdr, c3(intrdr, n(q, p,
+    next(seed))))) rand: next(next(seed)) nonces: (n(p, intrdr, seed) n(q, p,
+    next(seed))) prins: (p q) .
+  --
+  red sXXXXXX =(1,5)=>* ((nw: (m3(PI',PI,Q,c3(Q,n(Q,PI,R)))
+                               m2(Q,Q,PI,c2(PI,N,n(Q,PI,R))) MS)) C)
+      suchThat (not authInit((nw: (m3(PI',PI,Q,c3(Q,n(Q,PI,R)))
+                                   m2(Q,Q,PI,c2(PI,N,n(Q,PI,R))) MS)) C,
+                             Q,PI,PI',N,R)) .
+close
+
+eof
+
+--
+-- CafeOBJ can find a solution.
+--
+
+-- reduce in %NSPK + INV : (sXXXXXX = ( 1 , 5 ) =>* ((nw: (m3(PI',PI,Q,c3(Q,n(Q,PI,R))) (m2(Q,Q,PI,c2(PI,N,n(Q,PI,R))) MS))) C) suchThat (not authInit(((nw: (m3(PI',PI,Q,c3(Q,n(Q,PI,R))) (m2(Q,Q,PI,c2(PI,N,n(Q,PI,R))) MS))) C),Q,PI,PI',N,R))):Bool
+
+** Found [state 48] (((nw: (m3(intrdr,p,q,c3(q,n(q,p,next(seed)))) ((m1(intrdr,p,q,c1(q,n(p,intrdr,seed),p)) m1(p,p,intrdr,c1(intrdr,n(p,intrdr,seed),p))) (m2(intrdr,intrdr,p,c2(p,n(p,intrdr,seed),n(q,p,next(seed)))) (m2(q,q,p,c2(p,n(p,intrdr,seed),n(q,p,next(seed)))) m3(p,p,intrdr,c3(intrdr,n(q,p,next(seed))))))))) (rand: next(next(seed)))) ((nonces: (n(q,p,next(seed)) n(p,intrdr,seed))) (prins: (p q)))):Config
+    { Q |-> q, PI |-> p, N |-> n(p,intrdr,seed), R |-> next(seed), PI' |-> intrdr, MS |-> (m1(intrdr,p,q,c1(q,n(p,intrdr,seed),p)) (m1(p,p,intrdr,c1(intrdr,n(p,intrdr,seed),p)) (m2(intrdr,intrdr,p,c2(p,n(p,intrdr,seed),n(q,p,next(seed)))) m3(p,p,intrdr,c3(intrdr,n(q,p,next(seed))))))), C |-> ((rand: next(next(seed))) ((nonces: (n(q,p,next(seed)) n(p,intrdr,seed))) (prins: (p q)))), NS:NonceSet |-> n(p,intrdr,seed), N:Nonce |-> n(q,p,next(seed)), PS:PrinSet |-> noPrin, Q:Prin |-> q, P:Prin |-> p, NW:Network |-> ((m1(intrdr,p,q,c1(q,n(p,intrdr,seed),p)) m1(p,p,intrdr,c1(intrdr,n(p,intrdr,seed),p))) (m2(intrdr,intrdr,p,c2(p,n(p,intrdr,seed),n(q,p,next(seed)))) (m2(q,q,p,c2(p,n(p,intrdr,seed),n(q,p,next(seed)))) m3(p,p,intrdr,c3(intrdr,n(q,p,next(seed))))))), R:PNat |-> next(next(seed)) }
+-- found required number of solutions 1.
+(true):Bool
+(0.000 sec for parse, 32053 rewrites(1.342 sec), 171767 matches, 88 memo hits)
+
+--
+-- show path command cannot be used in the latest version of CafeOBJ.
+--

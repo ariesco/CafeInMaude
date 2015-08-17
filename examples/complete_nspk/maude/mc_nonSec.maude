@@ -1,0 +1,83 @@
+mod MC-NONSEC is
+  pr INV .
+  pr NSPK .
+  ops p q : -> Prin .
+  eq (p = q) = false .
+  var N : Nonce .
+  var NS : Set{Nonce} .
+  var C : Set{OVal} .
+endm
+
+eof
+
+search [1,5] in MC-NONSEC :
+  init(p q) =>* ((nonces: (N NS)) C)
+  such that (not nonSec((nonces: (N NS)) C,N)) .
+
+***
+*** Dec 28, 2013
+*** A counterexample is found:
+Solution 1 (state 307249)
+states: 307250  rewrites: 14374292 in 2674923572ms cpu (76304ms real) (5
+    rewrites/second)
+C --> nw: (m1(intrdr, p, q, c1(q, n(p, intrdr, seed), p)) m1(p, p, intrdr, c1(
+    intrdr, n(p, intrdr, seed), p)) m2(intrdr, intrdr, p, c2(p, n(p, intrdr,
+    seed), n(q, p, next(seed)))) m2(q, q, p, c2(p, n(p, intrdr, seed), n(q, p,
+    next(seed)))) m3(p, p, intrdr, c3(intrdr, n(q, p, next(seed))))) rand:
+    next(next(seed)) prins: (p q)
+N --> n(q, p, next(seed))
+NS --> n(p, intrdr, seed)
+Maude> show path 307249 .
+state 0, Set{OVal}: nw: emp rand: seed nonces: emp prins: (p q)
+===[ rl nw: NW:Set{Msg} rand: R:PNat nonces: NS prins: (P:Prin PS:Set{Prin}) =>
+    nw: (NW:Set{Msg} m1(P:Prin, P:Prin, intrdr, c1(intrdr, n(P:Prin, intrdr,
+    R:PNat), P:Prin))) rand: next(R:PNat) nonces: (NS n(P:Prin, intrdr,
+    R:PNat)) prins: (P:Prin PS:Set{Prin}) [label challenge2] . ]===>
+state 3, Set{OVal}: nw: m1(p, p, intrdr, c1(intrdr, n(p, intrdr, seed), p))
+    rand: next(seed) nonces: n(p, intrdr, seed) prins: (p q)
+===[ crl nw: NW:Set{Msg} rand: R:PNat nonces: (N NS) prins: (Q:Prin P:Prin
+    PS:Set{Prin}) => nw: (NW:Set{Msg} m1(intrdr, P:Prin, Q:Prin, c1(Q:Prin, N,
+    P:Prin))) rand: R:PNat nonces: (N NS) prins: (P:Prin Q:Prin PS:Set{Prin})
+    if not Q:Prin = P:Prin = true [label fake11] . ]===>
+state 41, Set{OVal}: nw: (m1(intrdr, p, q, c1(q, n(p, intrdr, seed), p)) m1(p,
+    p, intrdr, c1(intrdr, n(p, intrdr, seed), p))) rand: next(seed) nonces: n(
+    p, intrdr, seed) prins: (p q)
+===[ rl nw: (NW:Set{Msg} m1(PI':Prin&Intrdr, PI:Prin&Intrdr, QI:Prin&Intrdr,
+    c1(QI:Prin&Intrdr, N, PI:Prin&Intrdr))) rand: R:PNat nonces: NS prins:
+    PS:Set{Prin} => nw: ((NW:Set{Msg} m1(PI':Prin&Intrdr, PI:Prin&Intrdr,
+    QI:Prin&Intrdr, c1(QI:Prin&Intrdr, N, PI:Prin&Intrdr))) m2(QI:Prin&Intrdr,
+    QI:Prin&Intrdr, PI:Prin&Intrdr, c2(PI:Prin&Intrdr, N, n(QI:Prin&Intrdr,
+    PI:Prin&Intrdr, R:PNat)))) rand: next(R:PNat) nonces: if intrdr =
+    PI:Prin&Intrdr then (N NS) n(QI:Prin&Intrdr, PI:Prin&Intrdr, R:PNat) else
+    NS fi prins: PS:Set{Prin} [label Response] . ]===>
+state 737, Set{OVal}: nw: (m1(intrdr, p, q, c1(q, n(p, intrdr, seed), p)) m1(p,
+    p, intrdr, c1(intrdr, n(p, intrdr, seed), p)) m2(q, q, p, c2(p, n(p,
+    intrdr, seed), n(q, p, next(seed))))) rand: next(next(seed)) nonces: n(p,
+    intrdr, seed) prins: (p q)
+===[ rl nw: (NW:Set{Msg} m2(QI':Prin&Intrdr, QI:Prin&Intrdr, PI:Prin&Intrdr,
+    C2:Cipher2)) rand: R:PNat nonces: NS prins: (P:Prin PS:Set{Prin}) => nw: ((
+    NW:Set{Msg} m2(QI':Prin&Intrdr, QI:Prin&Intrdr, PI:Prin&Intrdr,
+    C2:Cipher2)) m2(intrdr, intrdr, P:Prin, C2:Cipher2)) rand: R:PNat nonces:
+    NS prins: (P:Prin PS:Set{Prin}) [label fake22a] . ]===>
+state 14569, Set{OVal}: nw: (m1(intrdr, p, q, c1(q, n(p, intrdr, seed), p)) m1(
+    p, p, intrdr, c1(intrdr, n(p, intrdr, seed), p)) m2(intrdr, intrdr, p, c2(
+    p, n(p, intrdr, seed), n(q, p, next(seed)))) m2(q, q, p, c2(p, n(p, intrdr,
+    seed), n(q, p, next(seed))))) rand: next(next(seed)) nonces: n(p, intrdr,
+    seed) prins: (p q)
+===[ rl nw: (NW:Set{Msg} m1(PI:Prin&Intrdr, PI:Prin&Intrdr, QI:Prin&Intrdr, c1(
+    QI:Prin&Intrdr, N, PI:Prin&Intrdr)) m2(QI':Prin&Intrdr, QI:Prin&Intrdr,
+    PI:Prin&Intrdr, c2(PI:Prin&Intrdr, N, N':Nonce))) rand: R:PNat nonces: NS
+    prins: PS:Set{Prin} => nw: (((NW:Set{Msg} m1(PI:Prin&Intrdr,
+    PI:Prin&Intrdr, QI:Prin&Intrdr, c1(QI:Prin&Intrdr, N, PI:Prin&Intrdr))) m2(
+    QI':Prin&Intrdr, QI:Prin&Intrdr, PI:Prin&Intrdr, c2(PI:Prin&Intrdr, N,
+    N':Nonce))) m3(PI:Prin&Intrdr, PI:Prin&Intrdr, QI:Prin&Intrdr, c3(
+    QI:Prin&Intrdr, N':Nonce))) rand: R:PNat nonces: if intrdr = QI:Prin&Intrdr
+    then N':Nonce NS else NS fi prins: PS:Set{Prin} [label Confirmation] .
+    ]===>
+state 307249, Set{OVal}: nw: (m1(intrdr, p, q, c1(q, n(p, intrdr, seed), p))
+    m1(p, p, intrdr, c1(intrdr, n(p, intrdr, seed), p)) m2(intrdr, intrdr, p,
+    c2(p, n(p, intrdr, seed), n(q, p, next(seed)))) m2(q, q, p, c2(p, n(p,
+    intrdr, seed), n(q, p, next(seed)))) m3(p, p, intrdr, c3(intrdr, n(q, p,
+    next(seed))))) rand: next(next(seed)) nonces: (n(p, intrdr, seed) n(q, p,
+    next(seed))) prins: (p q)
+Maude> 

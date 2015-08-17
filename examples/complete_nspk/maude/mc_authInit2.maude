@@ -1,0 +1,65 @@
+mod MC-AUTHINIT2 is
+  pr INV .
+  pr NSPK .
+  ops p q : -> Prin .
+  eq (p = q) = false .
+  var C : Set{OVal} .
+  var Q : Prin .
+  vars PI PI' : Prin&Intrdr .
+  var N : Nonce .
+  var R : PNat .
+  var MS : Set{Msg} .
+  op s307249 : -> Set{OVal} .
+  eq s307249
+     = nw: (m1(intrdr, p, q, c1(q, n(p, intrdr, seed), p))
+    m1(p, p, intrdr, c1(intrdr, n(p, intrdr, seed), p)) m2(intrdr, intrdr, p,
+    c2(p, n(p, intrdr, seed), n(q, p, next(seed)))) m2(q, q, p, c2(p, n(p,
+    intrdr, seed), n(q, p, next(seed)))) m3(p, p, intrdr, c3(intrdr, n(q, p,
+    next(seed))))) rand: next(next(seed)) nonces: (n(p, intrdr, seed) n(q, p,
+    next(seed))) prins: (p q) .
+endm
+
+eof
+
+***
+*** s307249 has been found by model checking nonSec(...)
+***
+search [1,5] in MC-AUTHINIT2 :
+  s307249 =>* ((nw: (m3(PI',PI,Q,c3(Q,n(Q,PI,R)))
+                       m2(Q,Q,PI,c2(PI,N,n(Q,PI,R))) MS)) C)
+  such that (not authInit((nw: (m3(PI',PI,Q,c3(Q,n(Q,PI,R)))
+                                m2(Q,Q,PI,c2(PI,N,n(Q,PI,R))) MS)) C,
+                           Q,PI,PI',N,R)) .
+***
+*** Dec 28, 2013
+*** A counterexample is found:
+Solution 1 (state 48)
+states: 49  rewrites: 300 in 2674923572ms cpu (6ms real) (0 rewrites/second)
+C --> rand: next(next(seed)) nonces: (n(p, intrdr, seed) n(q, p, next(seed)))
+    prins: (p q)
+MS --> m1(intrdr, p, q, c1(q, n(p, intrdr, seed), p)) m1(p, p, intrdr, c1(
+    intrdr, n(p, intrdr, seed), p)) m2(intrdr, intrdr, p, c2(p, n(p, intrdr,
+    seed), n(q, p, next(seed)))) m3(p, p, intrdr, c3(intrdr, n(q, p, next(
+    seed))))
+Q --> q
+PI --> p
+N --> n(p, intrdr, seed)
+R --> next(seed)
+PI' --> intrdr
+Maude> show path 48 .
+state 0, Set{OVal}: nw: (m1(intrdr, p, q, c1(q, n(p, intrdr, seed), p)) m1(p,
+    p, intrdr, c1(intrdr, n(p, intrdr, seed), p)) m2(intrdr, intrdr, p, c2(p,
+    n(p, intrdr, seed), n(q, p, next(seed)))) m2(q, q, p, c2(p, n(p, intrdr,
+    seed), n(q, p, next(seed)))) m3(p, p, intrdr, c3(intrdr, n(q, p, next(
+    seed))))) rand: next(next(seed)) nonces: (n(p, intrdr, seed) n(q, p, next(
+    seed))) prins: (p q)
+===[ crl nw: NW:Set{Msg} rand: R nonces: (N NS:Set{Nonce}) prins: (Q P:Prin
+    PS:Set{Prin}) => nw: (NW:Set{Msg} m3(intrdr, P:Prin, Q, c3(Q, N))) rand: R
+    nonces: (N NS:Set{Nonce}) prins: (P:Prin Q PS:Set{Prin}) if not Q = P:Prin
+    = true [label fake31] . ]===>
+state 48, Set{OVal}: nw: (m1(intrdr, p, q, c1(q, n(p, intrdr, seed), p)) m1(p,
+    p, intrdr, c1(intrdr, n(p, intrdr, seed), p)) m2(intrdr, intrdr, p, c2(p,
+    n(p, intrdr, seed), n(q, p, next(seed)))) m2(q, q, p, c2(p, n(p, intrdr,
+    seed), n(q, p, next(seed)))) m3(intrdr, p, q, c3(q, n(q, p, next(seed))))
+    m3(p, p, intrdr, c3(intrdr, n(q, p, next(seed))))) rand: next(next(seed))
+    nonces: (n(p, intrdr, seed) n(q, p, next(seed))) prins: (p q)

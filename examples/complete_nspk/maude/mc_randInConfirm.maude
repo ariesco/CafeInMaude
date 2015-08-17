@@ -1,0 +1,21 @@
+mod MC-RANDINCONFIRM is
+  pr INV .
+  pr NSPK .
+  ops p q : -> Prin .
+  eq (p = q) = false .
+  var C : Set{OVal} .
+  vars PI PI' PJ PK : Prin&Intrdr .
+  var N : Nonce .
+  var MS : Set{Msg} .
+endm
+
+search [1,5] in MC-RANDINCONFIRM :
+  init(p q) =>* ((nw: (m3(PI',PI,PJ,c3(PK,N)) MS)) C)
+  such that (not randInConfirm((nw: (m3(PI',PI,PJ,c3(PK,N)) MS)) C,
+                           PI',PI,PJ,PK,N)) .
+
+***
+*** Dec 28, 2013
+No solution.
+states: 710899  rewrites: 15229781 in 2674923572ms cpu (92394ms real) (5
+    rewrites/second)

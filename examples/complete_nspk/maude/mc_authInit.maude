@@ -1,0 +1,27 @@
+mod MC-AUTHINIT is
+  pr INV .
+  pr NSPK .
+  ops p q : -> Prin .
+  eq (p = q) = false .
+  var C : Set{OVal} .
+  var Q : Prin .
+  vars PI PI' : Prin&Intrdr .
+  var N : Nonce .
+  var R : PNat .
+  var MS : Set{Msg} .
+endm
+
+eof
+
+search [1,5] in MC-AUTHINIT :
+  init(p q) =>* ((nw: (m3(PI',PI,Q,c3(Q,n(Q,PI,R)))
+                       m2(Q,Q,PI,c2(PI,N,n(Q,PI,R))) MS)) C)
+  such that (not authInit((nw: (m3(PI',PI,Q,c3(Q,n(Q,PI,R)))
+                                m2(Q,Q,PI,c2(PI,N,n(Q,PI,R))) MS)) C,
+                           Q,PI,PI',N,R)) .
+***
+*** Dec 28, 2013
+No solution.
+states: 710899  rewrites: 6289425 in 2674924424ms cpu (66512ms real) (2
+    rewrites/second)
+

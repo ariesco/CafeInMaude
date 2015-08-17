@@ -539,7 +539,7 @@ fmod SEARCH_PREDICATE is
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
       metaSearch(M, T1, T4, nil, '!, BND, sd(N, 1)) == failure /\
       QIL := printAllSolutions(M, T1, T4, nil, '!, BND, NZ*, T6) .
-  ceq solveSearch(M, '_=`(_`,_`)=>!_suchThat_`{_`}[T1, T2, T3, T4, T5, T6]) = | 'true.Bool, QIL |
+  ceq solveSearch(M, '_=`(_`,_`)=>!_`{_`}[T1, T2, T3, T4, T5, T6]) = | 'true.Bool, QIL |
    if N := if T2 == '*.NzNat* then 0 else sd(downTerm(T2, 0), 1) fi /\
       NZ* := if T2 == '*.NzNat* then * else sd(downTerm(T2, 0), 1) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
@@ -629,7 +629,7 @@ fmod SEARCH_PREDICATE is
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
       metaSearch(M, T1, T4, nil, '+, BND, sd(N, 1)) == failure /\
       QIL := printAllSolutions(M, T1, T4, nil, '+, BND, NZ*, T6) .
-  ceq solveSearch(M, '_=`(_`,_`)=>+_suchThat_`{_`}[T1, T2, T3, T4, T5, T6]) = | 'true.Bool, QIL |
+  ceq solveSearch(M, '_=`(_`,_`)=>+_`{_`}[T1, T2, T3, T4, T5, T6]) = | 'true.Bool, QIL |
    if N := if T2 == '*.NzNat* then 0 else sd(downTerm(T2, 0), 1) fi /\
       NZ* := if T2 == '*.NzNat* then * else sd(downTerm(T2, 0), 1) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
@@ -640,11 +640,11 @@ fmod SEARCH_PREDICATE is
   --------------------------------------------------------------------------------
   ceq solveSearch(M, '_=`(_`,_`)=>+_suchThat_[T1, T2, T3, T4, T5]) = | 'false.Bool, QIL |
    if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
-      NZ* := if T2 == '*.NzNat* then * else downTerm(T2, 0) fi /\
+      NZ* := if T2 == '*.NzNat* then * else sd(downTerm(T2, 0), 1) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\
       metaSearch(M, T1, T4, T5 = 'true.Bool, '+, BND, sd(N, 1)) == failure /\
       QIL := printAllSolutions(M, T1, T4, T5 = 'true.Bool, '+, BND, NZ*, noInfo) .
-  ceq solveSearch(M, '_=`(_`,_`)=>+_suchThat_[T1, T2, T3, T4, T5]) = | 'true.Bool, nil |
+  ceq solveSearch(M, '_=`(_`,_`)=>+_suchThat_[T1, T2, T3, T4, T5]) = | 'true.Bool, QIL |
    if N := if T2 == '*.NzNat* then 1 else downTerm(T2, 0) fi /\
       NZ* := if T2 == '*.NzNat* then * else sd(downTerm(T2, 0), 1) fi /\
       BND := if T3 == '*.NzNat* then unbounded else downTerm(T3, 0) fi /\

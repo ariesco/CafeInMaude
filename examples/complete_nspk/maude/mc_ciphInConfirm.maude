@@ -1,0 +1,23 @@
+mod MC-CIPHERINCONFIRM is
+  pr INV .
+  pr NSPK .
+  ops p q : -> Prin .
+  eq (p = q) = false .
+  var C : Set{OVal} .
+  vars P Q : Prin .
+  var N : Nonce .
+  var R : PNat .
+  var MS : Set{Msg} .
+endm
+
+eof
+
+search [1,5] in MC-CIPHERINCONFIRM :
+  init(p q) =>* ((nw: (m2(Q,Q,P,c2(P,N,n(Q,P,R))) MS)) C)
+  such that (not ciphInConfirm((nw: (m2(Q,Q,P,c2(P,N,n(Q,P,R))) MS)) C,
+                     P,Q,N,R)) .
+***
+*** Dec 28, 2013
+No solution.
+states: 710899  rewrites: 8343635 in 2674923572ms cpu (104235ms real) (3
+    rewrites/second)

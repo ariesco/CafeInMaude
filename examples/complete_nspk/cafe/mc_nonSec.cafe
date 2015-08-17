@@ -1,0 +1,17 @@
+open NSPK + INV .
+  ops p q : -> Prin .
+  eq (p = q) = false .
+  var N : Nonce .
+  var NS : NonceSet .
+  var C : Config .
+  --
+  red init(p q) =(1,5)=>* ((nonces: (N NS)) C)
+      suchThat (not nonSec((nonces: (N NS)) C,N)) .
+close
+
+--
+-- This is not doable by CafeOBJ.
+--
+
+
+

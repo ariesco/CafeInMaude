@@ -1,0 +1,43 @@
+open NSPK-FAKE32b + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op q : -> Prin .
+  ops pi qi pi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  op c3 : -> Cipher3 .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE32b can be applied
+  eq c = (nw: (m3(pi',pi,qi,c3) nw))
+         (rand: r) (nonces: ns) (prins: (q ps)) .
+  -- check if FAKE32b can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- One solution:
+  -- (((nw: ((m3(intrdr,intrdr,q,c3) m3(pi',pi,qi,c3)) nw)) (rand: r))
+-- ((nonces: ns) (prins: (q ps))))
+  --
+  red authInit(c,b,pj,pj',m,rn) .
+  -- red authInit(C,b,pj,pj',m,rn) .
+  red authInit((((nw: ((m3(intrdr,intrdr,q,c3) m3(pi',pi,qi,c3)) nw))
+(rand: r)) ((nonces: ns) (prins: (q ps)))),b,pj,pj',m,rn) .
+  red authInit(c,b,pj,pj',m,rn)
+      implies
+      authInit((((nw: ((m3(intrdr,intrdr,q,c3) m3(pi',pi,qi,c3)) nw))
+(rand: r)) ((nonces: ns) (prins: (q ps)))),b,pj,pj',m,rn) .
+  red check(authInit(c,b,pj,pj',m,rn),
+            authInit((((nw: ((m3(intrdr,intrdr,q,c3) m3(pi',pi,qi,c3))
+nw)) (rand: r)) ((nonces: ns) (prins: (q ps)))),b,pj,pj',m,rn)) .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+
+close
