@@ -1,0 +1,46 @@
+-- ========================================================================
+--                  QLOCK system Specification extension
+--                another combinations of trans and ctrans
+-- ========================================================================
+
+-- ========================================================================
+-- a comment starts with '-- ' or '** ' and ends at the end of line
+--
+-- a convention for commenting:
+--   '-- ' is used before the commented CafeOBJ text
+--   '** ' is used after the commented CafeOBJ text
+-- ========================================================================
+
+-- ========================================================================
+-- this file requires the modules in the file qlock-sys.cafe
+-- if the feature qlock-sys is not provided yet
+-- require qlock-sys
+
+-- ========================================================================
+-- tyc: try transition with a condition
+mod! TYc {pr(STATE)
+ctrans[tyc]:
+         ((A1:Aid & Q:Qu) $ ((lb[A2:Aid]: ws) AS:Aobs))
+      => ((A1     & Q)    $ ((lb[A2]:     cs) AS))
+         if (A1 = A2) .
+}
+-- ========================================================================
+-- ex: exit transition
+mod! EX {pr(STATE)
+trans[ex]:
+         ((A:Aid & Q:Qu) $ ((lb[A:Aid]: cs) AS:Aobs))
+      => (         Q     $ ((lb[A    ]: rs) AS)) .
+}
+-- ========================================================================
+-- system specifications of QLOCK with 'trans' and 'ctrans'
+mod! QLOCKsys0{pr(WT + TY  + EX)}
+mod! QLOCKsys2{pr(WT + TYc + EX)}
+mod! QLOCKsys3{pr(WT + TYc + EXc)}
+
+-- ========================================================================
+-- this file provides the feature 'qlock-sys-ex'
+provide qlock-sys-ex
+
+-- ========================================================================
+eof
+** end of file

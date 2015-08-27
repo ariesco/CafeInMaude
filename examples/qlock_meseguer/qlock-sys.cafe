@@ -1,0 +1,94 @@
+-- ========================================================================
+--                    QLOCK System Specification
+-- ========================================================================
+
+-- ========================================================================
+-- a comment starts with '-- ' or '** ' and ends at the end of line
+--
+-- a convention for commenting:
+--   '-- ' is used before the commented CafeOBJ text
+--   '** ' is used after the commented CafeOBJ text
+-- ========================================================================
+
+-- ========================================================================
+-- require qlock-natQuSet
+
+-- ========================================================================
+-- three labels for indicating status of each agent
+mod! LABEL {
+-- label literals and labels
+[LabelLt < Label]
+-- declaration of constructor constants (operators without arguments)
+ops rs ws cs : -> LabelLt {constr}
+** rs: remainder section, ws: waiting section, cs: critical section
+-- an equation to declare that the elements of LabelLt are literals
+eq (L1:LabelLt = L2:LabelLt) = (L1 == L2) .
+}
+-- ========================================================================
+-- agent identifiers
+mod* AID {[Aid]}
+** Aid is declared to be any set of agent identifiers
+
+-- ========================================================================
+-- Queues of Aid (agent identifiers)
+mod! AID-QUEUE {pr(QUEUE(AID{sort Elt -> Aid}))}
+** AID-QUEUE is defined by instantiating formal parameter X of QUEUE
+** with AID by viewing sort Elt as sort Aid
+** '{...}' is a CafeOBJ costruct for defining a 'view'
+-- =======================================================================
+-- agent observer
+mod! AOB {pr(LABEL + AID)
+** pr(LABEL + AID) is same as 'pr(LABEL) pr(AID)'
+-- agent observer (Aob) and its constructor
+[Aob]
+op (lb[_]:_) : Aid Label -> Aob {constr}
+** (lb[A:Aid]: L:Label) is a term of the sort Aob
+** that indicates an agent A is with a label L
+}
+-- ========================================================================
+-- a state is defined as a pair of a queue of Aid and a set of Aob
+mod! STATE{pr(AID-QUEUE) pr(SET(AOB{sort Elt -> Aob})*{sort Set -> Aobs})
+** '*{...}' is a CafeOBJ construct for defining a 'rename'
+-- a state is a pair of Qu and Aobs
+[State] op _$_ : Qu Aobs -> State {constr}
+** the sort State has no subsort
+}
+
+-- ========================================================================
+-- the following transition rules (rewrite rules) are designed
+-- so that a rule is applicable only to the terms of sort State
+-- ========================================================================
+
+-- ========================================================================
+-- wt: want transition
+mod! WT {pr(STATE)
+trans[wt]:
+          (Q:Qu   $ ((lb[A:Aid]: rs) AS:Aobs))
+      => ((Q & A) $ ((lb[A    ]: ws) AS)) .
+}
+-- ========================================================================
+-- ty: try transition
+mod! TY {pr(STATE)
+trans[ty]:
+         ((A:Aid & Q:Qu) $ ((lb[A]: ws) AS:Aobs))
+      => ((A     & Q)    $ ((lb[A]: cs) AS)) .
+}
+-- ========================================================================
+-- exc: exit transition with a condition
+mod! EXc {pr(STATE)
+ctrans[exc]:
+          ((A1:Aid & Q:Qu) $ ((lb[A2:Aid]: cs) AS:Aobs))
+       => (          Q     $ ((lb[A2    ]: rs) AS))
+          if (A1 = A2) .
+}
+-- ========================================================================
+-- system specification of QLOCK
+mod! QLOCKsys1{pr(WT + TY + EXc)}
+
+-- ========================================================================
+-- this file provides the feature 'qlock-sys'
+provide qlock-sys
+
+-- ========================================================================
+eof
+** end of file

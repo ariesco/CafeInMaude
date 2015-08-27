@@ -217,12 +217,12 @@ It first defines all the required sorts, and the subsort relations between them:
 \begin{verbatim}
 %)
 
-  sorts @CafeMODULE@ @HiddenSortDecl@ @VisibleSortDecl@ @CafeOpDecl@
+  sorts @CafeMODULE@ @OpenCloseEnv@ @HiddenSortDecl@ @VisibleSortDecl@ @CafeOpDecl@
         @CafeImportDecl@ @CafeType@ @CafeTypeList@ @CafeSortList@ @CafeSort@
         @BehaviorEquationDecl@ @CafeDeclList@ @CafeEqDecl@ @CafeVarDecl@
-        @CafeSubSortRel@ @CafeLDeclList@ @CafeModExp@ @CafeParameter@ @CafeParameters@
-        @CafeInterface@ @CafeViewDecl@ @CafeViewDeclList@ @CafeTransDecl@ @CafeViewId@
-        @CafeViewIdList@ @ReductionDecl@ @ReqProvDecl@ .
+        @CafeSubSortRel@ @CafeLDeclList@ @OpenCloseDeclList@ @CafeModExp@ @CafeParameter@
+        @CafeParameters@ @CafeInterface@ @CafeViewDecl@ @CafeViewDeclList@ @CafeTransDecl@
+        @CafeViewId@ @CafeViewIdList@ @ExecutionDecl@ @ReqProvDecl@ .
 
   subsort @CafeToken@ < @CafeSort@ < @CafeType@ .
 
@@ -238,7 +238,7 @@ It first defines all the required sorts, and the subsort relations between them:
   subsort @CafeSort@ < @CafeSortList@ .
   subsort @CafeType@ < @CafeTypeList@ .
   subsorts @CafeImportDecl@ @CafeVarDecl@ @CafeEqDecl@ @VisibleSortDecl@ @CafeOpDecl@
-           @CafeTransDecl@ @ReductionDecl@ < @CafeLDeclList@ .
+           @CafeTransDecl@ @ExecutionDecl@ < @CafeLDeclList@ < @OpenCloseDeclList@  .
   subsorts @HiddenSortDecl@ @BehaviorEquationDecl@ @CafeLDeclList@
            < @CafeDeclList@ .
   subsort @ModExp@ < @CafeModExp@ . *** !!!!
@@ -249,7 +249,7 @@ It first defines all the required sorts, and the subsort relations between them:
   subsort @CafeToken@  < @CafeInterface@ .
   subsort @CafeViewDecl@ < @CafeViewDeclList@ .
 
-  subsort @CafeMODULE@ @ReqProvDecl@ < @Input@ .
+  subsort @CafeMODULE@ @OpenCloseEnv@ @ReqProvDecl@ < @Input@ .
 
   op __ : @CafeDeclList@ @CafeDeclList@ -> @CafeDeclList@ [assoc prec 10] .
   op __ : @CafeLDeclList@ @CafeLDeclList@ -> @CafeLDeclList@ [assoc prec 10] .
@@ -526,8 +526,9 @@ declared or not:
   op bop_->_. : @CafeBubble@ @CafeBubble@ -> @CafeViewDecl@ [ctor] .
 
   *** Reduction declarations
-  op reduce_. : @CafeBubble@ -> @ReductionDecl@ [ctor] .
-  op red_. : @CafeBubble@ -> @ReductionDecl@ [ctor] .
+  op reduce_. : @CafeBubble@ -> @ExecutionDecl@ [ctor] .
+  op red_. : @CafeBubble@ -> @ExecutionDecl@ [ctor] .
+  op exec_. : @CafeBubble@ -> @ExecutionDecl@ [ctor] .
 
   *** Requires and provides
   op require_ : @NeCafeTokenList@ -> @ReqProvDecl@ [ctor] .
@@ -566,7 +567,7 @@ so the user is not required to type it:
 \begin{verbatim}
 %)
 
-  op copen_._close : @CafeModExp@ @CafeLDeclList@ -> @CafeMODULE@ [ctor] .
+  op copen_._close : @CafeModExp@ @OpenCloseDeclList@ -> @OpenCloseEnv@ [ctor] .
 endfm
 
 ***(%
@@ -1461,6 +1462,9 @@ the view identifier itself, and the database.
   op parseCafeViewExp : ParameterDeclList Term SortMap Database -> ParseResult .
   ceq parseCafeViewExp(PDL, 'token[T], PSM, DB) = < 'viewToken[T], DB >
    if Q := downQid(T) /\
+      isParamName(Q, PDL) .
+  ceq parseCafeViewExp(PDL, 'token[T], PSM, DB) = < 'viewToken[T], DB >
+   if Q := downQid(T) /\
       getView(Q, DB) :: View .
   ceq parseCafeViewExp(Q :: ME, 'token[T], PSM, DB) = < 'viewToken[T], DB' >
    if Q' := downQid(T) /\
@@ -1499,6 +1503,13 @@ the view identifier itself, and the database.
   eq parseCafeViewExp(PDL, '_<=_[T, T'], PSM, DB) = parseCafeViewExp(PDL, T', PSM, DB) .
   ceq parseCafeViewExp(PDL, '_`,_[TL], PSM, DB) = < '_`,_[TL'], DB' >
    if < TL', DB' > := parseCafeViewExp*(PDL, TL, PSM, DB) .
+
+  op isParamName : Qid ParameterDeclList -> Bool .
+  eq isParamName(Q, nil) = false .
+  eq isParamName(Q, (Q' :: ME, PDL)) = if Q == Q'
+                                       then true
+                                       else isParamName(Q, PDL)
+                                       fi .
 
   op newName : Module Qid -> Qid .
   eq newName(M, Q) = if M :: FTheory or M :: STheory

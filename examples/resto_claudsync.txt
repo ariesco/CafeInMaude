@@ -1,0 +1,52 @@
+
+--> Second step of the proof:
+--> Show that if the invariant holds in a state, then it holds in all
+--> states reachable by transitions
+--> We again show this by reducing this implication for all terms of
+--> the covering set given above.
+open CLOUDSYNC .
+  red inv-condition(s1, SS) . -- OK
+  red inv-condition(s2, SS) . -- OK
+  red inv-condition(s3, SS) . -- OK
+  red inv-condition(t1, SS) . -- OK
+  --> The following condition does not reduce directly to true
+  --> we will deal with it late on
+  red inv-condition(t2, SS) . -- BAD
+  red inv-condition(t3, SS) . -- OK
+close
+
+
+-- proof of the invariant condition for t2
+--> We have to deal with the open case
+-->   inv-condition(t2, SS)
+--> This is done by making a case distinction on M>K or not
+-->
+--> case i) M > K , i.e., M <= K => false
+open CLOUDSYNC .
+  eq ( M <= K ) = false .
+  red inv-condition(t2, SS) .
+  --> case i) reduced to true
+close
+
+--> case ii) M <= K => true
+--> We make a second case distinction on N = K or not
+--> case iia) N = K
+open CLOUDSYNC .
+  eq ( M <= K ) = true .
+  eq N = K .
+  red inv-condition(t2, SS) .
+  --> case iia) reduced to true
+close
+
+--> case iib) N not= K
+open CLOUDSYNC .
+  eq ( M <= K ) = true .
+  eq ( N = K ) = false .
+  red inv-condition(t2, SS) .
+  --> case iib) reduced to true
+close
+
+--> qed
+
+
+eof

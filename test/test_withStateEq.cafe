@@ -1,0 +1,24 @@
+mod* FOO {
+ [Foo]
+
+ ops a b c d e : -> Foo {constr}
+
+ op areEqual : Foo Foo -> Bool {comm} .
+ eq areEqual(a, a) = true .
+ eq areEqual(a, b) = true .
+ eq areEqual(a, c) = true .
+ eq areEqual(F1:Foo, F2:Foo) = false {owise} .
+
+ trans a => b .
+ trans a => c .
+ trans a => d .
+ trans a => e .
+
+}
+
+open FOO .
+ red a =(2, *)=>* F:Foo withStateEq areEqual(F1:Foo, F2:Foo) .
+ red a =(2, *)=>* F:Foo withStateEq areEqual(F1:Foo, F2:Foo) { F } .
+ red a =(1, *)=>* F:Foo suchThat F =/= e withStateEq areEqual(F1:Foo, F2:Foo) { F } .
+ red a =(2, *)=>* F:Foo suchThat F =/= e withStateEq areEqual(F1:Foo, F2:Foo) { F } .
+close

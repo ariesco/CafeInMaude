@@ -1,0 +1,55 @@
+
+
+mod! M {
+  [S]
+  ops a b c d e : -> S
+  op f : S -> S
+  trans a => f(b) .
+  trans a => f(c) .
+  trans b => e .
+}
+
+open M .
+  red (f(a) =(*,2)=>+ f(SS:S) if CC:Bool suchThat true {CC}) or
+      (f(b) =(*,2)=>+ f(SS:S) if CC:Bool suchThat true {CC}) .
+close
+
+mod! M {
+  [S]
+  ops a b c d e : -> S
+  op f : S -> S
+  trans a => f(b) .
+  ctrans a => f(c) if a = b .
+  ctrans a => f(d) if true .
+  ctrans a => f(e) if not (a = e) .
+  ctrans a => e if not (a = e) .
+}
+
+open M .
+  red a =(*,1)=>+ f(SS:S) if CC:Bool suchThat true {CC} .
+close
+
+eof
+
+open M .
+  red a =(*,1)=>+ f(SS:S) if CC:Bool suchThat true {CC} .
+  red a =(*,1)=>+ f(SS:S) if CC:Bool suchThat false {CC} .
+  red a =(*,1)=>+ SS:S if CC:Bool suchThat true {CC} .
+  red a =(*,1)=>+ SS:S if CC:Bool suchThat false {CC} .
+close
+
+eof
+
+mod! M {
+  [S]
+  ops a b c d e : -> S
+  op f : S -> S
+  trans a => f(b) .
+  trans a => f(c) .
+  trans b => e .
+}
+
+open M .
+  red (f(a) =(*,2)=>+ f(SS:S) if CC:Bool suchThat true {CC}) or
+      (f(b) =(*,2)=>+ f(SS:S) if CC:Bool suchThat true {CC}) .
+close

@@ -1,0 +1,78 @@
+
+(fmod VERTEX is ---> fth VERTEX 
+ pr BOOL . 
+ pr INT .
+ op no : -> Nat .
+ sort Vertex .
+ op _~_ : Vertex Vertex -> Bool [comm] .
+ vars I J : Vertex .
+ eq  I ~ I = true .
+ ceq I = J if I ~ J [nonexec]. 
+endfm)
+
+(fmod VTXSET is
+ pr VERTEX .
+ sort VtxSet .
+ subsorts Vertex < VtxSet .
+ op empty : -> VtxSet [ctor].
+ op _U_ : Vertex VtxSet -> VtxSet [ctor assoc comm].
+ op _U_ : VtxSet VtxSet -> VtxSet [assoc comm].
+ vars A B : VtxSet .
+ vars I J : Vertex . 
+ eq (A U A) = A .
+ ---
+ op _in_ : Vertex VtxSet -> Bool .
+ eq  I in empty   = false .
+ ceq I in (J U A) = true   if I = J .
+ ceq I in (J U A) = I in A if (I ~ J) = false .
+---
+ op card : VtxSet -> Nat .
+ eq card(empty) = 0 .
+ eq card(I U A) = 1 + card(A).
+---
+ op _<_ : VtxSet VtxSet -> Bool .
+ eq  empty < B = true .
+ ceq I U A < B = A < B if I in B .
+ ceq I U A < B = false  if I in B = false .
+---
+ op _<>_ : VtxSet VtxSet -> Bool [comm].
+ eq A <> A = true .
+ ceq A <> B = true if A < B and B < A .
+ ceq A <> B = false if not A < B .
+ ceq A <> B = false if not B < A .
+endfm)
+
+
+
+(fmod GRAPH is
+ pr VTXSET .
+ sorts Edge Graph .
+ op <_`,_> : Vertex Vertex -> Edge [ctor].
+ op nil : -> Graph [ctor].
+ op _;_ : Edge Graph -> Graph [ctor].
+ ---
+ vars A B C : Vertex .
+ var G : Graph .
+ ---
+ op mcc : Vertex Graph -> VtxSet .
+ eq  mcc(A,nil) = A .
+ ceq mcc(A,< B,C > ; G) = mcc(B,G) U mcc(C,G) if mcc(A,G) = mcc(B,G) [metadata "CA-1"].
+ ceq mcc(A,< B,C > ; G) = mcc(B,G) U mcc(C,G) if mcc(A,G) = mcc(C,G) [metadata "CA-2"].
+ ceq mcc(A,< B,C > ; G) = mcc(A,G) if mcc(A,G) <> mcc(B,G) = false /\ 
+                                      mcc(A,G) <> mcc(C,G) = false   [metadata "CA-3"].
+ ---
+ op nocycle : Graph -> Bool .
+ eq  nocycle(nil) = true .
+ ceq nocycle(< A,B > ; G) = false      if mcc(A,G) = mcc(B,G)         [metadata "CA-1"].
+ ceq nocycle(< A,B > ; G) = nocycle(G) if mcc(A,G) <> mcc(B,G) = false[metadata "CA-2"].
+ ---
+ op nomcc : Graph -> Int .
+ eq nomcc(nil) = no .
+ ceq nomcc(< A,B > ; G) = nomcc(G)     if mcc(A,G) = mcc(B,G)          [metadata "CA-1"]. 
+ ceq nomcc(< A,B > ; G) = nomcc(G) - 1 if mcc(A,G) <> mcc(B,G) = false [metadata "CA-2"].
+ ---
+ op mktree : Graph -> Graph .
+ eq  mktree(nil) = nil .
+ ceq mktree(< A,B > ; G) = mktree(G)           if mcc(A,G) = mcc(B,G)          [metadata "CA-1"].
+ ceq mktree(< A,B > ; G) = < A,B > ; mktree(G) if mcc(A,G) <> mcc(B,G) = false [metadata "CA-1"].
+endfm)

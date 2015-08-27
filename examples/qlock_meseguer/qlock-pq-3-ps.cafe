@@ -1,0 +1,78 @@
+-- ========================================================================
+--         QLOCK Proof Scores for a (p leads-to q) property
+--                the third verification condition 
+-- ========================================================================
+
+-- ========================================================================
+require qlock-genCheck
+require qlock-constAndLitl
+require qlock-genStTerm
+require qlock-factTbu
+
+-- ========================================================================
+mod! Q-PQ-3-genCheck {
+ex(Q-PQ-3 + CONSTandLITL + GENstTerm)
+op ck : -> IndTr .
+eq ck = check
+(
+ [(g("_%_")[(g("_$_")[q,empty]),b1]),SS:ExState]
+      ||
+ [(g("_%_")[(g("_$_")[empQ,(g("lb[_]:__")[b1,(rs;ws;cs),as])]),
+             (b1;b2)]),SS]
+      || 
+ [(g("_%_")[(g("_$_")[(b1 & q),(g("lb[_]:__")[b1,(rs;ws;cs),as])]),
+             (b1;b2)]),SS]
+) .
+}
+open Q-PQ-3-genCheck .
+pr(QLOCKsys1 + INV)
+eq pq-3-inv = inv1 inv2 .
+red ck .
+close
+
+-- ========================================================================
+eof
+** end of file
+** the text after this is comment and not read by the system
+
+-- ========================================================================
+--  A QLOCK state is constructed with
+--      op _$_ : Qu Aobs -> State {constr}.
+--  And, because the predicate 'qas' is an invariant,
+--  if the Qu part of a concrete state is of (A:Aid & Q:Qu),
+--  then the Aobs part must contain (lb[A]: L:Labe),
+--  hence it is justified that  
+--  any reachable state with (A:Aid & Q:Qu) can be assumed to be
+--  an instance of 
+--     ((A:Aid & Q:Qu) $ (((lb[A]: L:Label) AS:Aobs))).
+--
+--  The following combinatorial generation of cover set 
+--  is based on this observation.
+--
+-- ========================================================================
+
+ [(g("_%_")[(g("_$_")[q,empty]),b1]),SS:ExState]
+      ||
+ [(g("_%_")[(g("_$_")[empQ,(g("lb[_]:__")[b1,(rs;ws;cs),as])]),
+             (b1;b2)]),SS]
+      || 
+ [(g("_%_")[(g("_$_")[(b1 & q),(g("lb[_]:__")[b1,(rs;ws;cs),as])]),
+             (b1;b2)]),SS]
+=red=>
+(
+       [ (((q $ empty) % b1) , SS) ] || 
+    [ (((empQ $ ((lb [ b1 ] : rs) as)) % b1) , SS) ] || 
+    [ (((empQ $ ((lb [ b1 ] : ws) as)) % b1) , SS) ] || 
+    [ (((empQ $ ((lb [ b1 ] : cs) as)) % b1) , SS) ] || 
+    [ (((empQ $ ((lb [ b1 ] : rs) as)) % b2) , SS) ] || 
+    [ (((empQ $ ((lb [ b1 ] : ws) as)) % b2) , SS) ] || 
+    [ (((empQ $ ((lb [ b1 ] : cs) as)) % b2) , SS) ] || 
+[ ((((b1 & q) $ ((lb [ b1 ] : rs) as)) % b1) , SS) ] || 
+[ ((((b1 & q) $ ((lb [ b1 ] : ws) as)) % b1) , SS) ] || 
+[ ((((b1 & q) $ ((lb [ b1 ] : cs) as)) % b1) , SS) ] || 
+[ ((((b1 & q) $ ((lb [ b1 ] : rs) as)) % b2) , SS) ] || 
+[ ((((b1 & q) $ ((lb [ b1 ] : ws) as)) % b2) , SS) ] || 
+[ ((((b1 & q) $ ((lb [ b1 ] : cs) as)) % b2) , SS) ])
+
+-- ========================================================================
+

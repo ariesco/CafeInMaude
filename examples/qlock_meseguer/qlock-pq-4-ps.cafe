@@ -1,0 +1,72 @@
+-- ========================================================================
+--         QLOCK Proof Scores for a (p leads-to q) property
+--                the Fourth verification condition 
+-- ========================================================================
+
+-- ========================================================================
+require qlock-genCheck
+require qlock-genStTerm
+require qlock-constAndLitl
+
+-- ========================================================================
+mod! Q-PQ-4-genCheck {
+ex(Q-PQ-4 + CONSTandLITL + GENstTerm)
+op ck : -> IndTr .
+eq ck = check
+(
+   [(g("_%_")[(g("_$_")[q,empty]),b1])]
+      ||
+   [(g("_%_")[(g("_$_")[empQ,(g("lb[_]:__")[b1,(rs;ws;cs),as])]),
+              (b1;b2)])]
+      || 
+   [(g("_%_")[(g("_$_")[(b1 & q),(g("lb[_]:__")[b1,(rs;ws;cs),as])]),
+              (b1;b2)])]
+) .
+}
+--> case: eq #lss((as),cs) = 0 .
+open Q-PQ-4-genCheck .
+pr(INV)
+eq pq-4-inv = inv2 .
+eq #lss((as),cs) = 0 .
+red ck .
+close
+--> case: eq (#lss((as),cs) = 0) = false .
+open Q-PQ-4-genCheck .
+pr(INV)
+eq pq-4-inv = inv2 .
+eq (#lss((as),cs) = 0) = false .
+red ck .
+close
+
+-- ========================================================================
+eof
+** end of file
+** the text after this is comment and not read by the system
+
+-- ========================================================================
+-- expansion of combination script
+
+   [(g("_%_")[(g("_$_")[q,empty]),b1])]
+      ||
+   [(g("_%_")[(g("_$_")[empQ,(g("lb[_]:__")[b1,(rs;ws;cs),as])]),
+              (b1;b2)])]
+      || 
+   [(g("_%_")[(g("_$_")[(b1 & q),(g("lb[_]:__")[b1,(rs;ws;cs),as])]),
+              (b1;b2)])]
+=red=>
+(
+[ ((q $ empty) % b1) ] || 
+[ ((empQ $ ((lb [ b1 ] : rs) as)) % b1) ] || 
+[ ((empQ $ ((lb [ b1 ] : ws) as)) % b1) ] || 
+[ ((empQ $ ((lb [ b1 ] : cs) as)) % b1) ] || 
+[ ((empQ $ ((lb [ b1 ] : rs) as)) % b2) ] || 
+[ ((empQ $ ((lb [ b1 ] : ws) as)) % b2) ] || 
+[ ((empQ $ ((lb [ b1 ] : cs) as)) % b2) ] || 
+[ (((b1 & q) $ ((lb [ b1 ] : rs) as)) % b1) ] || 
+[ (((b1 & q) $ ((lb [ b1 ] : ws) as)) % b1) ] || 
+[ (((b1 & q) $ ((lb [ b1 ] : cs) as)) % b1) ] || 
+[ (((b1 & q) $ ((lb [ b1 ] : rs) as)) % b2) ] || 
+[ (((b1 & q) $ ((lb [ b1 ] : ws) as)) % b2) ] || 
+[ (((b1 & q) $ ((lb [ b1 ] : cs) as)) % b2) ])
+
+-- ========================================================================

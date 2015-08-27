@@ -1,0 +1,49 @@
+-- ========================================================================
+--         QLOCK Proof Scores for a (p leads-to q) property
+--                the second verification condition 
+-- ========================================================================
+
+-- ========================================================================
+require qlock-genCheck
+require qlock-genStTerm
+require qlock-constAndLitl
+require qlock-factTbu
+
+-- ========================================================================
+mod! Q-PQ-2-genCheck {
+ex(Q-PQ-2 + GENstTerm + CONSTandLITL)
+op ck : -> IndTr .
+eq ck = check
+(
+ [(g("_%_")[(g("_$_")[empQ,(g("lb[_]:__")[b1,rs,as])]),
+            (b1;b2)]),SS:ExState,CC:Bool]
+        || 
+ [(g("_%_")[(g("_$_")[(b1 & q),(g("lb[_]:__")[(b1;b2),rs,as])]),
+            (b1;b2;b3)]),SS,CC]
+        ||
+ [(g("_%_")[(g("_$_")[(b1 & q),(g("lb[_]:__")[b1,ws,as])]),
+            (b1;b2)]),SS,CC]
+        ||
+ [(g("_%_")[(g("_$_")[(b1 & q),(g("lb[_]:__")[(b1;b2),cs,as])]),
+            (b1;b2;b3)]),SS,CC]
+) .
+}
+-- ========================================================================
+--> case: eq #lss((as),cs) = 0 .
+open Q-PQ-2-genCheck .
+pr(QLOCKsys1 + INV + FACTtbu)
+-- eq pq-2-inv = inv2 .  -- this is not necessary!
+eq #lss((as),cs) = 0 .
+red ck .
+close
+--> case: eq (#lss((as),cs) = 0) = false .
+open Q-PQ-2-genCheck .
+pr(QLOCKsys1 + INV + FACTtbu)
+eq pq-2-inv = inv2 .
+eq (#lss((as),cs) = 0) = false .
+red ck .
+close
+
+-- ========================================================================
+eof
+** end of file
