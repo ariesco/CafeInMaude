@@ -1,0 +1,1173 @@
+open NSPK-INIT + INV .
+  -- begin of fresh constants
+  op ps : -> PrinSet .
+  op b : -> Prin .
+  ops pj pj' : -> Prin&Intrdr .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- check that this reduces to true
+  red check(true,authInit(init(ps),b,pj,pj',m,rn)) .
+close
+
+open NSPK-CHALLENGE1 + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  ops p q : -> Prin .
+  op ps : -> PrinSet .
+  op b : -> Prin .
+  ops pj pj' : -> Prin&Intrdr .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- end of case analysis
+  -- an arbitrary configuration to which CHALLENGE1 can be applied
+  eq c = (nw: nw) (rand: r) (nonces: ns) (prins: (p q ps)) .
+  eq (p = q) = false .
+  -- check if CHALLENGE1 can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-CHALLENGE2 + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op p : -> Prin .
+  op ps : -> PrinSet .
+  op b : -> Prin .
+  ops pj pj' : -> Prin&Intrdr .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- end of case analysis
+  -- an arbitrary configuration to which CHALLENGE2 can be applied
+  eq c = (nw: nw) (rand: r) (nonces: ns) (prins: (p ps)) .
+  -- check if CHALLENGE2 can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-CHALLENGE3 + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op q : -> Prin .
+  op ps : -> PrinSet .
+  op b : -> Prin .
+  ops pj pj' : -> Prin&Intrdr .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- end of case analysis
+  -- an arbitrary configuration to which CHALLENGE3 can be applied
+  eq c = (nw: nw) (rand: r) (nonces: ns) (prins: (q ps)) .
+  -- check if CHALLENGE3 can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-RESPONSE + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op ps : -> PrinSet .
+  op n : -> Nonce .
+  op b : -> Prin .
+  ops pi pi' qi : -> Prin&Intrdr .
+  ops pj pj' : -> Prin&Intrdr .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  eq (m2(qi,qi,pi,c2(pi,n,n(qi,pi,r))) = m2(b,b,pj,c2(pj,m,n(b,pj,rn)))) = false .
+  -- end of case analysis
+  -- an arbitrary configuration to which RESPONSE can be applied
+  eq c = (nw: (m1(pi',pi,qi,c1(qi,n,pi)) nw))
+         (rand: r) (nonces: ns) (prins: ps) .
+  -- check if RESPONSE can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+open NSPK-RESPONSE + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op ps : -> PrinSet .
+  op n : -> Nonce .
+  op b : -> Prin .
+  ops pi pi' qi : -> Prin&Intrdr .
+  ops pj pj' : -> Prin&Intrdr .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- eq m2(qi,qi,pi,c2(pi,n,n(qi,pi,r))) = m2(b,b,pj,c2(pj,m,n(b,pj,rn))) .
+  eq qi = b .
+  eq pi = pj .
+  eq n = m .
+  eq r = rn .
+  --
+  eq m3(pj',pj,b,c3(b,n(b,pj,rn))) \in nw = false .
+  -- end of case analysis
+  -- an arbitrary configuration to which RESPONSE can be applied
+  eq c = (nw: (m1(pi',pi,qi,c1(qi,n,pi)) nw))
+         (rand: r) (nonces: ns) (prins: ps) .
+  -- check if RESPONSE can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+open NSPK-RESPONSE + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op ps : -> PrinSet .
+  op n : -> Nonce .
+  op b : -> Prin .
+  ops pi pi' qi : -> Prin&Intrdr .
+  ops pj pj' : -> Prin&Intrdr .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- eq m2(qi,qi,pi,c2(pi,n,n(qi,pi,r))) = m2(b,b,pj,c2(pj,m,n(b,pj,rn))) .
+  eq qi = b .
+  eq pi = pj .
+  eq n = m .
+  eq r = rn .
+  --
+  eq m3(pj',pj,b,c3(b,n(b,pj,rn))) \in nw = true .
+  -- end of case analysis
+  -- an arbitrary configuration to which RESPONSE can be applied
+  eq c = (nw: (m1(pi',pi,qi,c1(qi,n,pi)) nw))
+         (rand: r) (nonces: ns) (prins: ps) .
+  -- check if RESPONSE can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn) and
+                           randInConfirm(c,pj',pj,b,b,n(b,pj,rn)),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-CONFIRMATION + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  ops pi qi qi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  ops n n' : -> Nonce .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- eq m3(pj',pj,b,c3(b,n(b,pj,rn))) = m3(pi,pi,qi,c3(qi,n')) .
+  eq pj' = pi .
+  eq pj = pi .
+  eq qi = b .
+  eq n' = n(b,pj,rn).
+  --
+  -- end of case analysis
+  -- an arbitrary configuration to which CONFIRMATION can be applied
+  eq c = (nw: (m2(qi',qi,pi,c2(pi,n,n'))
+               m1(pi,pi,qi,c1(qi,n,pi)) nw))
+         (rand: r) (nonces: ns) (prins: ps) .
+  -- check if CONFIRMATION can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+open NSPK-CONFIRMATION + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  ops pi qi qi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  ops n n' : -> Nonce .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  eq (m3(pj',pj,b,c3(b,n(b,pj,rn))) = m3(pi,pi,qi,c3(qi,n'))) = false .
+  eq m3(pj,pj,b,c3(b,n(b,pj,rn))) = m3(pi,pi,qi,c3(qi,n')) .
+  -- end of case analysis
+  -- an arbitrary configuration to which CONFIRMATION can be applied
+  eq c = (nw: (m2(qi',qi,pi,c2(pi,n,n'))
+               m1(pi,pi,qi,c1(qi,n,pi)) nw))
+         (rand: r) (nonces: ns) (prins: ps) .
+  -- check if CONFIRMATION can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+open NSPK-CONFIRMATION + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  ops pi qi qi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  ops n n' : -> Nonce .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  eq (m3(pj',pj,b,c3(b,n(b,pj,rn))) = m3(pi,pi,qi,c3(qi,n'))) = false .
+  eq (m3(pj,pj,b,c3(b,n(b,pj,rn))) = m3(pi,pi,qi,c3(qi,n'))) = false .
+  -- end of case analysis
+  -- an arbitrary configuration to which CONFIRMATION can be applied
+  eq c = (nw: (m2(qi',qi,pi,c2(pi,n,n'))
+               m1(pi,pi,qi,c1(qi,n,pi)) nw))
+         (rand: r) (nonces: ns) (prins: ps) .
+  -- check if CONFIRMATION can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-FAKE11 + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  ops p q : -> Prin .
+  op ps : -> PrinSet .
+  op n : -> Nonce .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE11 can be applied
+  eq c = (nw: nw) (rand: r) (nonces: (n ns)) (prins: (p q ps)) .
+  eq (p = q) = false .
+  -- check if FAKE11 can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-FAKE11a + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op p : -> Prin .
+  op ps : -> PrinSet .
+  op n : -> Nonce .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE11a can be applied
+  eq c = (nw: nw) (rand: r) (nonces: (n ns)) (prins: (p ps)) .
+  -- check if FAKE11a can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-FAKE11b + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op q : -> Prin .
+  op ps : -> PrinSet .
+  op n : -> Nonce .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE11b can be applied
+  eq c = (nw: nw) (rand: r) (nonces: (n ns)) (prins: (q ps)) .
+  -- check if FAKE11b can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-FAKE12 + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  ops p q : -> Prin .
+  ops pi qi pi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  op c1 : -> Cipher1 .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE12 can be applied
+  eq c = (nw: (m1(pi',pi,qi,c1) nw))
+         (rand: r) (nonces: ns) (prins: (p q ps)) .
+  eq (p = q) = false .
+  -- check if FAKE12 can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-FAKE12a + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op p : -> Prin .
+  ops pi qi pi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  op c1 : -> Cipher1 .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE12a can be applied
+  eq c = (nw: (m1(pi',pi,qi,c1) nw))
+         (rand: r) (nonces: ns) (prins: (p ps)) .
+  -- check if FAKE12a can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-FAKE12b + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op q : -> Prin .
+  ops pi qi pi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  op c1 : -> Cipher1 .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE12b can be applied
+  eq c = (nw: (m1(pi',pi,qi,c1) nw))
+         (rand: r) (nonces: ns) (prins: (q ps)) .
+  -- check if FAKE12b can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-FAKE21 + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  ops p q : -> Prin .
+  op ps : -> PrinSet .
+  ops n n' : -> Nonce .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE21 can be applied
+  eq c = (nw: nw) (rand: r) (nonces: (n n' ns)) (prins: (p q ps)) .
+  eq (n = n') = false .
+  eq (p = q) = false .
+  -- check if FAKE21 can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-FAKE21a + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op p : -> Prin .
+  op ps : -> PrinSet .
+  ops n n' : -> Nonce .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE21a can be applied
+  eq c = (nw: nw) (rand: r) (nonces: (n n' ns)) (prins: (p ps)) .
+  eq (n = n') = false .
+  -- check if FAKE21a can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-FAKE21b + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op q : -> Prin .
+  op ps : -> PrinSet .
+  ops n n' : -> Nonce .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE21b can be applied
+  eq c = (nw: nw) (rand: r) (nonces: (n n' ns)) (prins: (q ps)) .
+  eq (n = n') = false .
+  -- check if FAKE21b can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-FAKE22 + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  ops p q : -> Prin .
+  ops pi qi qi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  op c2 : -> Cipher2 .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE22 can be applied
+  eq c = (nw: (m2(qi',qi,pi,c2) nw))
+         (rand: r) (nonces: ns) (prins: (p q ps)) .
+  eq (p = q) = false .
+  -- check if FAKE22 can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-FAKE22a + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op p : -> Prin .
+  ops pi qi qi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  op c2 : -> Cipher2 .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE22a can be applied
+  eq c = (nw: (m2(qi',qi,pi,c2) nw))
+         (rand: r) (nonces: ns) (prins: (p ps)) .
+  -- check if FAKE22a can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-FAKE22b + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op q : -> Prin .
+  ops pi qi qi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  op c2 : -> Cipher2 .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE22b can be applied
+  eq c = (nw: (m2(qi',qi,pi,c2) nw))
+         (rand: r) (nonces: ns) (prins: (q ps)) .
+  -- check if FAKE22b can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-FAKE31 + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  ops p q : -> Prin .
+  op ps : -> PrinSet .
+  op n : -> Nonce .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- eq m3(pj',pj,b,c3(b,n(b,pj,rn))) = m3(intrdr,p,q,c3(q,n)) .
+  eq pj' = intrdr .
+  eq pj = p .
+  eq b = q .
+  eq n = n(b,pj,rn) .
+  --
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE31 can be applied
+  eq c = (nw: nw) (rand: r) (nonces: (n ns)) (prins: (p q ps)) .
+  eq (p = q) = false .
+  -- check if FAKE31 can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn) and
+                           nonSec(c,n),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+open NSPK-FAKE31 + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  ops p q : -> Prin .
+  op ps : -> PrinSet .
+  op n : -> Nonce .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  eq (m3(pj',pj,b,c3(b,n(b,pj,rn))) = m3(intrdr,p,q,c3(q,n))) = false .
+  -- eq m3(pj',pj,b,c3(b,n(b,pj,rn))) = m3(intrdr,q,p,c3(p,n)) .
+  eq pj' = intrdr .
+  eq pj = q .
+  eq b = p .
+  eq n = n(b,pj,rn) .
+  --
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE31 can be applied
+  eq c = (nw: nw) (rand: r) (nonces: (n ns)) (prins: (p q ps)) .
+  eq (p = q) = false .
+  -- check if FAKE31 can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn) and
+                           nonSec(c,n),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+open NSPK-FAKE31 + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  ops p q : -> Prin .
+  op ps : -> PrinSet .
+  op n : -> Nonce .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  eq (m3(pj',pj,b,c3(b,n(b,pj,rn))) = m3(intrdr,p,q,c3(q,n))) = false .
+  eq (m3(pj',pj,b,c3(b,n(b,pj,rn))) = m3(intrdr,q,p,c3(p,n))) = false .
+  --
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE31 can be applied
+  eq c = (nw: nw) (rand: r) (nonces: (n ns)) (prins: (p q ps)) .
+  eq (p = q) = false .
+  -- check if FAKE31 can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn) and
+                           nonSec(c,n),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-FAKE31a + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op p : -> Prin .
+  op ps : -> PrinSet .
+  op n : -> Nonce .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE31a can be applied
+  eq c = (nw: nw) (rand: r) (nonces: (n ns)) (prins: (p ps)) .
+  -- check if FAKE31a can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-FAKE31b + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op q : -> Prin .
+  op ps : -> PrinSet .
+  op n : -> Nonce .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- eq m3(pj',pj,b,c3(b,n(b,pj,rn))) = m3(intrdr,intrdr,q,c3(q,n)) .
+  eq pj' = intrdr .
+  eq pj = intrdr .
+  eq b = q .
+  eq n = n(b,pj,rn) .
+  --
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE31b can be applied
+  eq c = (nw: nw) (rand: r) (nonces: (n ns)) (prins: (q ps)) .
+  -- check if FAKE31b can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+open NSPK-FAKE31b + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op q : -> Prin .
+  op ps : -> PrinSet .
+  op n : -> Nonce .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  eq (m3(pj',pj,b,c3(b,n(b,pj,rn))) = m3(intrdr,intrdr,q,c3(q,n))) = false .
+  eq m3(pj,pj,b,c3(b,n(b,pj,rn))) = m3(intrdr,intrdr,q,c3(q,n)) .
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE31b can be applied
+  eq c = (nw: nw) (rand: r) (nonces: (n ns)) (prins: (q ps)) .
+  -- check if FAKE31b can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+open NSPK-FAKE31b + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op q : -> Prin .
+  op ps : -> PrinSet .
+  op n : -> Nonce .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  eq (m3(pj',pj,b,c3(b,n(b,pj,rn))) = m3(intrdr,intrdr,q,c3(q,n))) = false .
+  eq (m3(pj,pj,b,c3(b,n(b,pj,rn))) = m3(intrdr,intrdr,q,c3(q,n))) = false .
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE31b can be applied
+  eq c = (nw: nw) (rand: r) (nonces: (n ns)) (prins: (q ps)) .
+  -- check if FAKE31b can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-FAKE32 + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  ops p q : -> Prin .
+  ops pi qi pi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  op c3 : -> Cipher3 .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- eq m3(intrdr,p,q,c3) = m3(pj',pj,b,c3(b,n(b,pj,rn))) .
+  eq pj' = intrdr .
+  eq pj = p .
+  eq b = q .
+  eq c3 = c3(b,n(b,pj,rn)) .
+  --
+  eq m2(q,q,p,c2(p,m,n(q,p,rn))) \in nw = false .
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE32 can be applied
+  eq c = (nw: (m3(pi',pi,qi,c3) nw))
+         (rand: r) (nonces: ns) (prins: (p q ps)) .
+  eq (p = q) = false .
+  -- check if FAKE32 can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+open NSPK-FAKE32 + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  ops p q : -> Prin .
+  ops pi qi pi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  op c3 : -> Cipher3 .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- eq m3(intrdr,p,q,c3) = m3(pj',pj,b,c3(b,n(b,pj,rn))) .
+  eq pj' = intrdr .
+  eq pj = p .
+  eq b = q .
+  eq c3 = c3(b,n(b,pj,rn)) .
+  --
+  eq m2(q,q,p,c2(p,m,n(q,p,rn))) \in nw = true .
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE32 can be applied
+  eq c = (nw: (m3(pi',pi,qi,c3) nw))
+         (rand: r) (nonces: ns) (prins: (p q ps)) .
+  eq (p = q) = false .
+  -- check if FAKE32 can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn) and
+                           ciphInConfirm(c,p,q,m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+open NSPK-FAKE32 + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  ops p q : -> Prin .
+  ops pi qi pi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  op c3 : -> Cipher3 .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  eq (m3(intrdr,p,q,c3) = m3(pj',pj,b,c3(b,n(b,pj,rn)))) = false .
+  -- eq m3(intrdr,q,p,c3) = m3(pj',pj,b,c3(b,n(b,pj,rn))) .
+  eq pj' = intrdr .
+  eq pj = q .
+  eq b = p .
+  eq c3 = c3(b,n(b,pj,rn)) .
+  --
+  eq m2(p,p,q,c2(q,m,n(p,q,rn))) \in nw = false .
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE32 can be applied
+  eq c = (nw: (m3(pi',pi,qi,c3) nw))
+         (rand: r) (nonces: ns) (prins: (p q ps)) .
+  eq (p = q) = false .
+  -- check if FAKE32 can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+open NSPK-FAKE32 + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  ops p q : -> Prin .
+  ops pi qi pi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  op c3 : -> Cipher3 .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  eq (m3(intrdr,p,q,c3) = m3(pj',pj,b,c3(b,n(b,pj,rn)))) = false .
+  -- eq m3(intrdr,q,p,c3) = m3(pj',pj,b,c3(b,n(b,pj,rn))) .
+  eq pj' = intrdr .
+  eq pj = q .
+  eq b = p .
+  eq c3 = c3(b,n(b,pj,rn)) .
+  --
+  eq m2(p,p,q,c2(q,m,n(p,q,rn))) \in nw = false .
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE32 can be applied
+  eq c = (nw: (m3(pi',pi,qi,c3) nw))
+         (rand: r) (nonces: ns) (prins: (p q ps)) .
+  eq (p = q) = false .
+  -- check if FAKE32 can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+open NSPK-FAKE32 + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  ops p q : -> Prin .
+  ops pi qi pi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  op c3 : -> Cipher3 .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  eq (m3(intrdr,p,q,c3) = m3(pj',pj,b,c3(b,n(b,pj,rn)))) = false .
+  -- eq m3(intrdr,q,p,c3) = m3(pj',pj,b,c3(b,n(b,pj,rn))) .
+  eq pj' = intrdr .
+  eq pj = q .
+  eq b = p .
+  eq c3 = c3(b,n(b,pj,rn)) .
+  --
+  eq m2(p,p,q,c2(q,m,n(p,q,rn))) \in nw = true .
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE32 can be applied
+  eq c = (nw: (m3(pi',pi,qi,c3) nw))
+         (rand: r) (nonces: ns) (prins: (p q ps)) .
+  eq (p = q) = false .
+  -- check if FAKE32 can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn) and
+                           ciphInConfirm(c,q,p,m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+open NSPK-FAKE32 + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  ops p q : -> Prin .
+  ops pi qi pi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  op c3 : -> Cipher3 .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  eq (m3(intrdr,p,q,c3) = m3(pj',pj,b,c3(b,n(b,pj,rn)))) = false .
+  eq (m3(intrdr,q,p,c3) = m3(pj',pj,b,c3(b,n(b,pj,rn)))) = false .
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE32 can be applied
+  eq c = (nw: (m3(pi',pi,qi,c3) nw))
+         (rand: r) (nonces: ns) (prins: (p q ps)) .
+  eq (p = q) = false .
+  -- check if FAKE32 can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-FAKE32a + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op p : -> Prin .
+  ops pi qi pi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  op c3 : -> Cipher3 .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE32a can be applied
+  eq c = (nw: (m3(pi',pi,qi,c3) nw))
+         (rand: r) (nonces: ns) (prins: (p ps)) .
+  -- check if FAKE32a can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+
+open NSPK-FAKE32b + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op q : -> Prin .
+  ops pi qi pi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  op c3 : -> Cipher3 .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  eq (c3 = c3(b,n(b,pj,rn))) = false .
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE32b can be applied
+  eq c = (nw: (m3(pi',pi,qi,c3) nw))
+         (rand: r) (nonces: ns) (prins: (q ps)) .
+  -- check if FAKE32b can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+open NSPK-FAKE32b + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op q : -> Prin .
+  ops pi qi pi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  op c3 : -> Cipher3 .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  eq c3 = c3(b,n(b,pj,rn)) .
+  eq (b = q) = false .
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE32b can be applied
+  eq c = (nw: (m3(pi',pi,qi,c3) nw))
+         (rand: r) (nonces: ns) (prins: (q ps)) .
+  -- check if FAKE32b can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+open NSPK-FAKE32b + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op q : -> Prin .
+  ops pi qi pi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  op c3 : -> Cipher3 .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  eq c3 = c3(b,n(b,pj,rn)) .
+  eq b = q .
+  eq (pj = intrdr) = false .
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE32b can be applied
+  eq c = (nw: (m3(pi',pi,qi,c3) nw))
+         (rand: r) (nonces: ns) (prins: (q ps)) .
+  -- check if FAKE32b can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+open NSPK-FAKE32b + INV .
+  -- begin of fresh constants
+  op c : -> Config .
+  op nw : -> Network .
+  op r : -> PNat .
+  op ns : -> NonceSet .
+  op q : -> Prin .
+  ops pi qi pi' : -> Prin&Intrdr .
+  op ps : -> PrinSet .
+  op c3 : -> Cipher3 .
+  ops pj pj' : -> Prin&Intrdr .
+  op b : -> Prin .
+  op m : -> Nonce .
+  op rn : -> PNat .
+  -- end of fresh constants
+  -- begin of case analysis
+  eq c3 = c3(b,n(b,pj,rn)) .
+  eq b = q .
+  eq pj = intrdr .
+  -- end of case analysis
+  -- an arbitrary configuration to which FAKE32b can be applied
+  eq c = (nw: (m3(pi',pi,qi,c3) nw))
+         (rand: r) (nonces: ns) (prins: (q ps)) .
+  -- check if FAKE32b can be applied to c
+  red c =(*,1)=>+ C:Config .
+  -- check that this reduces to false
+  red c =(*,1)=>+ C:Config
+      suchThat (not (check(authInit(c,b,pj,pj',m,rn),
+                           authInit(C,b,pj,pj',m,rn)))) .
+close
+

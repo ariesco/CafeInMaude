@@ -1,0 +1,323 @@
+mod! DATA principal-sort Data {
+  protecting(BOOL)
+  [ Nat Bool < Data ]
+}
+
+mod! QUEUE(X :: TRIV) {
+ [ NeQueue < Queue ]
+ op nil : -> Queue
+ op front : NeQueue -> Elt
+ op enq : Elt Queue -> NeQueue op deq : NeQueue -> Queue
+ vars D E : Elt var Q : Queue eq deq(enq(E,nil)) = nil .
+ eq deq(enq(E,enq(D,Q))) = enq(E,deq(enq(D,Q))) . eq front(enq(E,nil)) = E .
+ eq front(enq(E,enq(D,Q))) = front(enq(D,Q)) .
+}
+
+mod* SENDER {
+ protecting(DATA)
+ *[ Sender ]*
+ bop bit : Sender -> Bool
+ bop val : Sender -> Data
+ bop in : Data Bool Sender -> Sender
+ op init : -> Sender
+ var D : Data
+ var B : Bool
+ var S : Sender
+
+ eq bit(init) = true .
+ ceq val(in(D,B,S)) = D
+  if bit(S) == B . -- new data for right ack
+ ceq bit(in(D,B,S)) = not bit(S)
+  if bit(S) == B . -- alternates bit
+ bceq in(D,B,S) = S
+  if bit(S) =/= B . -- stays put for wrong ack
+}
+
+mod* RECEIVER {
+ protecting(DATA)
+ *[ Receiver ]*
+ bop bit : Receiver -> Bool
+ bop val : Receiver -> Data
+ bop get : Data Bool Receiver -> Receiver
+
+ op init : -> Receiver
+
+ var D : Data
+ var B : Bool
+ var R : Receiver
+
+ eq bit(init) = true .
+ ceq val(get(D,B,R)) = D if bit(R) =/= B . -- output value
+ ceq bit(get(D,B,R)) = not bit(R) if bit(R) =/= B .
+ bceq get(D,B,R) = R if bit(R) == B . -- stays put for wrong bit
+}
+
+mod* ABP {
+ protecting(SENDER + RECEIVER + QUEUE(DATA))
+ *[ Abp ]*
+ op Init : -> Abp
+ op Protocol : Sender Receiver Queue Queue Queue
+                -> Abp
+ bop In : Data Abp -> Abp
+ bop Out : Abp -> Abp
+ bop Val : Abp -> Data
+ vars D E : Data
+ var B : Bool
+ var A : Abp
+ var S : Sender
+ var R : Receiver
+ vars L L1 L2 : Queue
+ beq Init = Protocol(init,init,nil,nil,nil) .
+ bceq In(D,Protocol(S,R,L1,L2,enq(B,L)))
+ = Protocol(in(D,front(enq(B,L)),S),R,enq(D,L1), enq(not bit(S),L2),deq(enq(B,L)))
+ if bit(S) == front(enq(B,L)) .
+
+ beq In(D,Protocol(S,R,enq(E,L1),enq(B,L2),nil))
+ = Protocol(S,R,enq(E,L1),enq(B,L2),nil) .
+
+ bceq [ 1 ] : Protocol(S,R,L1,L2,enq(B,L))
+ = Protocol(S,R,L1,L2,deq(enq(B,L)))
+ if bit(S) =/= front(enq(B,L)) .
+
+ bceq Out(Protocol(S,R,enq(D,L1),enq(B,L2),L))
+ = Protocol(S,get(front(enq(D,L1)),front(enq(B,L2)),R), deq(enq(D,L1)),deq(enq(B,L2)),enq(not bit(R),L))
+ if bit(R) =/= front(enq(B,L2)) .
+}
+
+mod* BUF {
+ [Nat]
+ *[Buf]*
+ op init : -> Buf
+ bop in : Nat Buf -> Buf
+ bop val : Buf -> Nat
+ bop out : Buf -> Buf
+ bop empty? : Buf -> Bool
+
+ var N : Nat
+ var B : Buf
+
+ eq empty?(init) = true .
+ ceq empty?(out(B)) = true
+  if not empty?(B) .
+ eq empty?(in(N,B)) = false .
+ ceq val(out(in(N,B))) = N
+  if empty?(B) .
+ bceq in(N,B) = B
+   if not empty?(B) .
+ bceq out(B) = B
+   if empty?(B) .
+}
+
+mod! BASIC-INT{
+  [Zero < Int]
+  op 0 : -> Zero {constr}
+  ops (s_) (p_) : Int -> Int
+  eq s p X:Int = X .
+  eq p s X:Int = X .
+}
+
+open BASIC-INT .
+ red p s 0 .
+close
+
+mod* MY-BOOL{
+  [Bool]
+  ops true false : -> Bool
+  op _and_ : Bool Bool -> Bool
+  op _or_ : Bool Bool -> Bool
+  op not_ : Bool -> Bool
+}
+
+mod* GROUP{
+ [G]
+ op 0 : -> G
+ op _+_ : G G -> G {comm}
+ op -_ : G -> G
+ vars X Y Z : G
+ eq (X + Y) + Z = X + (Y + Z) .
+ eq 0 + X = X .
+ eq (- X) + X = 0 .
+}
+
+open GROUP .
+ op g : -> G .
+ red g + (- g) .
+close
+
+mod! SIG-INT+{
+  pr(BASIC-INT)
+  op _+_ : Int Int -> Int
+}
+
+mod! INT+{
+  pr(SIG-INT+)
+  vars X Y : Int
+  eq 0 + X = X .
+  eq (s X) + Y = s(X + Y) .
+  eq (p X) + Y = p(X + Y) .
+}
+
+open INT+ .
+ red s(s(0)) + 0 .
+ red s(s(0)) + s(s(s(0))) .
+close
+
+mod! INToo{
+  ex(BASIC-INT)
+  op oo : -> Int {constr}
+  eq s oo = oo .
+  eq p oo = oo .
+}
+
+mod! INT3{
+  us(BASIC-INT)
+  eq s s s X:Int = X .
+  eq p p p X:Int = X .
+}
+
+open INT3 .
+ red s s 0 .
+ red s s s 0 .
+close
+
+mod! BAG(D :: TRIV) {
+  pr(MY-BOOL)
+  [Elt.D < Bag]
+  op _ _ : Bag Bag -> Bag {assoc comm}
+  pred _in_ : Elt.D Bag
+  vars X Y : Elt.D
+  var B : Bag
+}
+
+mod! RULES{
+  pr(BOOL)
+  [A]
+
+  pred d : A A .
+  ops a b c : -> A
+  trans [a] : a => b .
+  ctrans b => c if d(a,c) .
+  eq d(a,c) = true .
+}
+
+mod! MY-NAT {
+  [Nat]
+
+  op 0 : -> Nat {constr}
+  op s : Nat -> Nat {constr}
+
+  op _>_ : Nat Nat -> Bool .
+  op _<_ : Nat Nat -> Bool .
+  op _rem_ : Nat Nat -> Nat .
+  op _*_ : Nat Nat -> Nat .
+  op _+_ : Nat Nat -> Nat .
+  op _quo_ : Nat Nat -> Nat .
+
+  op _==_ : Nat Nat -> Bool {prec: 15} .
+  op _divides_ : Nat Nat -> Bool .
+}
+
+mod! GCD {
+  pr(MY-NAT)
+  op gcd : Nat Nat -> Nat
+  vars X Y : Nat
+  eq gcd(X,0) = X .
+  ceq gcd(X,Y) = gcd(Y,X rem Y) if Y > 0 .
+}
+
+mod! NATLISTpre {
+  pr(MY-NAT)
+  [NatList]
+  op nil : -> NatList
+  op _|_ : Nat NatList -> NatList
+}
+
+mod! NATLIST {
+  pr(MY-NAT)
+
+  [NatList]
+  op nil : -> NatList {constr}
+  op _|_ : Nat NatList -> NatList {constr}
+
+  op _@_ : NatList NatList -> NatList
+  op mkl : Nat Nat -> NatList
+
+  vars X Y : Nat
+  vars L1 L2 : NatList
+
+  eq nil @ L2 = L2 .
+  eq (X | L1) @ L2 = X | (L1 @ L2) .
+
+  eq mkl(X,Y)
+     = if Y < X then nil else (X | mkl(s(X),Y)) fi .
+}
+
+mod! QSORT {
+  pr(NATLIST)
+  op qs : NatList -> NatList
+  op sqs : Nat NatList NatList NatList -> NatList
+  vars X Y : Nat
+  vars L L1 L2 : NatList
+  eq qs(nil) = nil .
+  eq qs(X | L) = sqs(X,L,nil,nil) .
+  eq sqs(X,nil,L1,L2) = qs(L1) @ (X | qs(L2)) .
+  eq sqs(X,Y | L,L1,L2)
+     = if Y < X then sqs(X,L,Y | L1,L2)
+                else sqs(X,L,L1,Y | L2) fi .
+}
+
+mod! SIEVE {
+  pr(NATLIST)
+  op primes : Nat -> NatList
+  op sieve : NatList -> NatList
+  op check : Nat NatList -> NatList
+
+  vars X Y : Nat
+  vars L L' : NatList
+
+  eq primes(X) = sieve(mkl(s(s(0)),X)) .
+  eq sieve(nil) = nil .
+  eq sieve(X | L) = X | sieve(check(X,L)) .
+  eq check(X,nil) = nil .
+  eq check(X,Y | L)
+     = if X divides Y then check(X,L) else Y | check(X,L) fi .
+}
+
+mod! VAR {
+  pr(MY-NAT)
+  [Var]
+  op v : Nat -> Var
+}
+
+mod! EXP {
+  pr(VAR)
+  [Nat Var < Exp]
+  op _++_ : Exp Exp -> Exp {l-assoc prec: 30}
+  op _**_ : Exp Exp -> Exp {l-assoc prec: 29}
+}
+
+mod! LIST(X :: TRIV) {
+  [List]
+  op nil : -> List
+  op _|_ : Elt.X List -> List
+}
+
+view TRIV2NAT from TRIV to NAT {
+  sort Elt -> Nat
+}
+
+mod! MY-NATLIST {
+  pr(LIST(X <= TRIV2NAT))
+}
+
+mod* FLAG {
+ *[ Flag ]*
+ bops (up_) (dn_) (rev_) : Flag -> Flag -- methods
+ bop up?_ : Flag -> Bool
+ var F : Flag
+ eq up? up F = true .
+ eq up? dn F = false .
+ eq up? rev F = not up? F .
+}
+
+

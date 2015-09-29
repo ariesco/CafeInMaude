@@ -1,0 +1,19 @@
+open NSPK + INV .
+  ops p q : -> Prin .
+  eq (p = q) = false .
+  var C : Config .
+  var Q : Prin .
+  vars PI PI' : Prin&Intrdr .
+  var N : Nonce .
+  var R : PNat .
+  var MS : Network .
+  red init(p q) =(1,5)=>* ((nw: (m3(PI',PI,Q,c3(Q,n(Q,PI,R)))
+                                 m2(Q,Q,PI,c2(PI,N,n(Q,PI,R))) MS)) C)
+      suchThat (not authInit((nw: (m3(PI',PI,Q,c3(Q,n(Q,PI,R)))
+                                   m2(Q,Q,PI,c2(PI,N,n(Q,PI,R))) MS)) C,
+                              Q,PI,PI',N,R)) .
+close
+
+--
+-- This is not doable by the current implementation of CafeOBJ.
+--

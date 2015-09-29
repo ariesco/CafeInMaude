@@ -1,0 +1,127 @@
+** ===============================================================
+** ==== QLOCK Proof Score for the invariant property inv =========
+** ==== that implies the mutual exclusion property mx    =========
+** ===============================================================
+
+require QLOCKsys qlock-sys.cafe
+require QLOCKprop qlock-prop.cafe
+require CONSTandLITL constAndLitl.cafe
+require VALIDq validQ.cafe
+require FACTtbu factTbu.cafe
+
+-- ===============================================================
+-- covering state patterns for QLOCK
+-- ===============================================================
+--
+-- the following shows left hand sides of
+-- the three transition rules of QLOCK
+--
+-- [wt] l1 =           (Q:Qu  $ ((lb[A:Aid]:  rs) AS:Aobs))
+-- [ty] l2 =  ((A:Aid & Q:Qu) $ ((lb[A]:      ws) AS:Aobs))
+-- [ex] l3 = ((A1:Aid & Q:Qu) $ ((lb[A2:Aid]: cs) AS:Aobs))
+--
+--
+-- require CONSTandLITL constAndLitl.cafe
+-- let op q : -> Qu . op as : -> Aobs . ops b1 b2 : -> AidLt .
+-- then the following state patterns t1-t6 are covering
+-- the left hand sides of the transition rules
+
+mod STATEpatterns {inc(CONSTandLITL)
+-- State patterns
+ops t1 t2 t3 t4 t5 t6 : -> State .
+
+-- covering l1
+eq t1 = (empQ $ ((lb[b1]: rs) as)) .      -- wt
+eq t2 = ((b1 & q) $ ((lb[b1]: rs) as)) .  -- wt
+eq t3 = ((b1 & q) $ ((lb[b2]: rs) as)) .  -- wt
+
+-- covering l2
+eq t4 = ((b1 & q) $ ((lb[b1]: ws) as)) .  -- ty
+
+-- covering l2
+eq t5 = ((b1 & q) $ ((lb[b1]: cs) as)) .  -- ex
+eq t6 = ((b1 & q) $ ((lb[b2]: cs) as)) .  -- ex
+}
+
+--> ==============================================================
+--> Verification of the Invariant Condition:
+-->    (1) using GENERATE&CHECK-T2
+-->   without combinatorial generation of cases
+--> (for-all One-Step-Transition (S->S'):State->State)
+-->                 (inv(S) implies inv(S'))
+--> ==============================================================
+
+-- verification consition for inductive invariant
+mod INVq {inc(QLOCKprop)
+pred q : State State .
+eq q(S:State,SS:State) = (inv(S) implies inv(SS)) .
+}
+
+mod INVcond { inc(VALIDq(INVq{sort Ste -> State}))
+pred inv-c : State State Bool .
+eq inv-c(S:State,SS:State,CC:Bool) = valid-q(S,SS,CC) .
+
+-- modify information shown by i(S:State,SS:State,CC:Bool)
+-- to iq
+op iq : State State Bool -> Info .
+eq i(S:State,SS:State,CC:Bool) = iq(S,SS,q(S,SS)) .
+}
+
+-- checking inv-c for [wt]
+open (CONSTandLITL + INVcond + FACTtbu + WT) .
+-- check t1,t2,t3 for the want transition [wt]
+red inv-c((    empQ $ ((lb[b1]: rs) as)),SS:State,CC:Bool) .
+red inv-c(((b1 & q) $ ((lb[b1]: rs) as)),SS:State,CC:Bool) .
+red inv-c(((b1 & q) $ ((lb[b2]: rs) as)),SS:State,CC:Bool) .
+close
+
+-- checking inv-c for [ty]
+open (CONSTandLITL + INVcond + TY) .
+-- check t4 for the try  transition [ty]
+red inv-c(((b1 & q) $ ((lb[b1]: ws) as)),SS:State,CC:Bool) .
+close
+
+-- checking inv-c for [ex]
+open (CONSTandLITL + INVcond + FACTtbu + EX) .
+-- ckeck t5,t6 for the exit transition [ex]
+red inv-c(((b1 & q) $ ((lb[b1]: cs) as)),SS:State,CC:Bool) .
+red inv-c(((b1 & q) $ ((lb[b2]: cs) as)),SS:State,CC:Bool) .
+close
+
+--> ==============================================================
+--> Verification of the Invariant Condition:
+-->    (2) using GENERATE&CHECK-T1
+-->   with combinatorial generation of cases
+--> (for-all One-Step-Transition (S->S'):State->State)
+-->                 (inv(S) implies inv(S'))
+--> ==============================================================
+-- generate & check for inv-c
+mod GEN&CHECKinv {inc(INVcond + GENcasesNp)
+-- declaring sub-sorts of Val for combinatorial generation
+[Bool Qu Aid Label Aobs State < Val]
+-- predicate v_ used in GENcasesNp for checking validity
+-- is defined to be inv-c
+eq v(S:State,SS:State,CC:Bool) = inv-c(S,SS,CC) .
+}
+
+-- running GEN&CHECKinv
+open (GEN&CHECKinv + CONSTandLITL + FACTtbu + QLOCKsys) .
+red check-for-all(
+   [(tg(2)[(empQ),(tg(1)[(b1),rs,(as)])]),SS:State,CC:Bool]
+          ||
+   [(tg(2)[(b1 & q),(tg(1)[(b1),(rs;ws;cs),(as)])]),SS:State,CC:Bool]
+          ||
+   [(tg(2)[(b1 & q),(tg(1)[(b2),(rs;cs),(as)])]),SS:State,CC:Bool]) .
+close
+-- this does the same checks as:
+-- "{
+open (STATEpatterns + INVcond + FACTtbu + WT + TY + EX) .
+red inv-c(t1,SS:State,CC:Bool) .  -- wt
+red inv-c(t2,SS:State,CC:Bool) .  -- wt
+red inv-c(t5,SS:State,CC:Bool) .  -- ty
+red inv-c(t3,SS:State,CC:Bool) .  -- ex
+red inv-c(t4,SS:State,CC:Bool) .  -- wt
+red inv-c(t6,SS:State,CC:Bool) .  -- ex
+close
+-- }"
+

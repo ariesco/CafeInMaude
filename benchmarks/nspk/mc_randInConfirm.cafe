@@ -1,0 +1,19 @@
+open NSPK + INV .
+  ops p q : -> Prin .
+  eq (p = q) = false .
+  var C : Config .
+  vars PI PI' PJ PK : Prin&Intrdr .
+  var N : Nonce .
+  var MS : Network .
+  --
+  red init(p q) =(1,5)=>* ((nw: (m3(PI',PI,PJ,c3(PK,N)) MS)) C)
+      suchThat (not randInConfirm((nw: (m3(PI',PI,PJ,c3(PK,N)) MS)) C,
+                                  PI',PI,PJ,PK,N)) .
+close
+
+--
+-- This is not doable by CafeOBJ.
+--
+
+
+

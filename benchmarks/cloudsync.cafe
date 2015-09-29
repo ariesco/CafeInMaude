@@ -1,0 +1,410 @@
+-- cloudsync.cafe
+-- educational module to explain CafeOBJ and verification
+--
+-- Copyright (c) 2013-2014 Norbert Preining <preining@jaist.ac.jp>
+-- Japan Advanced Institute of Science and Technology
+-- Research Center for Software Verification
+--
+-- Explanation
+-- one cloud computer and arbitrary many PCs have one value each that
+-- they want to keep in sync. This value is a natural number and higher
+-- means newer (think of svn revision number or similar).
+-- The protocoll is simply that the Cloud can be in two states: idlecl, busy
+-- and the PCs in the following states:
+--   idlepc, gotvalue, updated
+-- A PC can only connect to the cloud (i.e., initiate a sync) if the
+-- cloud is in idle state and the PC also in idle state.
+-- In this case the Cloud goes into busy state, and the PC into gotvalue
+-- where it obtained the value of the cloud (written in gotvalue(n)).
+-- After that the PC compares the values, updates them according to the
+-- highest value, and goes in updated state.
+-- From the updated state PC goes back into idle state,
+--  and Cloud goes to idle state.
+--
+-- Transitions in detail (CloudVal, CloudState, PCVal, PCState)
+-- (assuming m<n)
+--   (idlecl,n,idlepc,m) -> (busy,n,gotvalue(n),m) -> (busy,n,updated,n) ->
+--     -> (idlecl,n,idlepc,n)
+--
+-- Invariant: If PC is in state updated the values of Cloud and PC agree
+--
+
+mod! CLLABEL {
+  [ClLabelLt < ClLabel]
+  ops idlecl busy : -> ClLabelLt {constr} .
+  eq (L1:ClLabelLt = L2:ClLabelLt) = (L1 == L2) .
+}
+
+mod! PCLABEL {
+  [PcLabelLt < PcLabel]
+  ops idlepc gotvalue updated : -> PcLabelLt {constr} .
+  eq (L1:PcLabelLt = L2:PcLabelLt) = (L1 == L2) .
+}
+
+mod! PAIR(X :: TRIV,Y :: TRIV) {
+  [Pair]
+  op <_,_> : Elt.X Elt.Y -> Pair {constr}
+  op fst : Pair -> Elt.X
+  op snd : Pair -> Elt.Y
+  eq fst(< A:Elt.X,B:Elt.Y >) = A .
+  eq snd(< A:Elt.X,B:Elt.Y >) = B .
+}
+
+-- generic multi set
+mod! MULTISET(X :: TRIV) {
+  [ Elt.X < MultiSet ]
+  op empty : -> MultiSet {constr} .
+  -- associative and commutative set constructor with identity empty
+  op (_ _) : MultiSet MultiSet -> MultiSet { constr assoc comm id: empty }
+}
+
+mod! CLSTATE {
+  pr(PAIR(NAT, CLLABEL{sort Elt -> ClLabel})*{sort Pair -> ClState, op fst -> fst.clstate, op snd -> snd.clstate })
+}
+
+mod! PCSTATE {
+  pr(3TUPLE(NAT, NAT, PCLABEL{sort Elt -> PcLabel})*{sort 3Tuple -> PcState})
+}
+
+mod! PCSTATES {
+  pr(MULTISET(PCSTATE{sort Elt -> PcState})*{sort MultiSet -> PcStates})
+}
+
+mod! STATE {
+  pr(PAIR(CLSTATE{sort Elt -> ClState},PCSTATES{sort Elt -> PcStates})*{sort Pair -> State})
+}
+
+--
+-- declaration of the transitions between states
+--
+
+mod! GETVALUE { pr(STATE)
+  -- since set is comm,assoc,dist we can assume that the first element
+  -- of the multiset is th one that acts
+  trans[getvalue]:
+    < < ClVal:Nat , idlecl > , ( << PcVal:Nat ; OldClVal:Nat ; idlepc >> S:PcStates ) >
+    =>
+    < < ClVal , busy > , ( << PcVal ; ClVal ; gotvalue >> S ) > .
+}
+
+mod! UPDATE {
+  pr(STATE)
+  trans[update]:
+    < < ClVal:Nat , busy > , ( << PcVal:Nat ; GotClVal:Nat ; gotvalue >> S:PcStates ) >
+    =>
+      if PcVal <= GotClVal then
+	< < ClVal , busy > , ( << GotClVal ; GotClVal ; updated >> S ) >
+      else
+	< < PcVal , busy > , ( << PcVal ; PcVal ; updated >> S ) >
+      fi .
+}
+
+mod! GOTOIDLE {
+  pr(STATE)
+  trans[gotoidle]:
+    < < ClVal:Nat , busy > , ( << PcVal:Nat ; OldClVal:Nat ; updated >> S:PcStates ) >
+    =>
+    < < ClVal , idlecl > , ( << PcVal ; OldClVal ; idlepc >> S ) > .
+}
+
+mod! CLOUD {
+ pr(GETVALUE + UPDATE + GOTOIDLE)
+}
+
+-- ------------------------------------------------------------
+--> Proof score
+-- ------------------------------------------------------------
+-- how to prove correctness of this method
+--
+-- valid states
+--   given by the format, no need for further specification
+-- qualify an initial state:
+--   cloud and all PCs are in idle state
+-- induction properties
+--   all PCs in updated state agree between their and the cloud value
+--   all PCs in gotvalue state have their gotvalue equal to cloud value
+
+-- elementary functions on states
+mod! STATEfuncs {
+  pr(NAT + STATE)
+  -- no pc in gotvalue state
+  pred zero-gotvalue : State .
+  pred zero-gotvalue-pcs : PcStates .
+  eq zero-gotvalue ( < C:ClState , PCS:PcStates > ) = zero-gotvalue-pcs(PCS) .
+  eq zero-gotvalue-pcs ( << N:Nat ; M:Nat ; L:PcLabel >> PS:PcStates ) =
+    if L = gotvalue then false  else zero-gotvalue-pcs (PS) fi .
+  -- no pc in updated state
+  pred zero-updated : State .
+  pred zero-updated-pcs : PcStates .
+  eq zero-updated ( < C:ClState , PCS:PcStates > ) = zero-updated-pcs(PCS) .
+  eq zero-updated-pcs ( << N:Nat ; M:Nat ; L:PcLabel >> PS:PcStates  ) =
+    if L = updated then false  else zero-updated-pcs (PS) fi .
+}
+
+mod! APPLYPREDS {
+  pr(STATE)
+  [PredName < PredNameSeq]
+  op (_ _) : PredNameSeq PredNameSeq -> PredNameSeq {assoc} .
+  op apply : PredNameSeq State -> Bool .
+  eq apply(P:PredName PS:PredNameSeq, S:State) = apply(P,S) and apply(PS,S) .
+}
+
+mod! INITPREDS {
+  pr(STATEfuncs)
+  ex(APPLYPREDS)
+  -- we don't need well defined predicate, as this is implicite by
+  -- the format of the pairs, and we have no restriction on the
+  -- content
+
+  -- Cloud is in idle state
+  op cl-is-idle-name : -> PredName .
+  eq [cl-is-idle] : apply(cl-is-idle-name,S:State) = ( snd.clstate(fst(S)) = idlecl ) .
+
+  -- all the PCs are in idle state
+  op pcs-are-idle-name : -> PredName .
+  eq [pcs-are-idle] : apply(pcs-are-idle-name,S:State) =
+    zero-gotvalue(S) and zero-updated(S) .
+}
+
+mod! INITIALSTATE {
+  pr(INITPREDS)
+  op init-name : -> PredNameSeq .
+  eq init-name = cl-is-idle-name pcs-are-idle-name .
+  pred init : State .
+  eq init(S:State) = apply(init-name, S) .
+}
+
+-- ----------------------------
+-- invariant properties through transitions
+--
+--  all PCs in updated state agree between their and the cloud value
+--  all PCs in gotvalue state have their gotvalue equal to cloud value
+--  if Cloud is in idle state, then all the PCs are in idle state
+-- --------------------
+
+mod! INVPREDS {
+  pr(INITPREDS)
+  vars K M N : Nat
+
+  -- if Cloud is in idle state, all the PCs have to be in idle state
+  op cloud-idle-pcs-idle-name : -> PredName .
+  pred cloud-idle-pcs-idle : State .
+  pred pcstates-idle : PcStates .
+  eq[cloud-idle-pcs-idle] :
+    apply(cloud-idle-pcs-idle-name, S:State) = cloud-idle-pcs-idle(S) .
+  eq cloud-idle-pcs-idle(if B:Bool then S1:State else S2:State fi) =
+    if B then cloud-idle-pcs-idle(S1) else cloud-idle-pcs-idle(S2) fi .
+  eq cloud-idle-pcs-idle( < < N , idlecl > , PCS:PcStates > ) =
+    zero-gotvalue-pcs(PCS) and zero-updated-pcs(PCS) .
+  ceq cloud-idle-pcs-idle( < < N , L:ClLabel > , PCS:PcStates > ) =
+    true if not (L = idlecl) .
+  --
+  --  all PCs in gotvalue state have their gotvalue equal to cloud value
+  op gotvalue-cloud-value-name : -> PredName .
+  pred gotvalue-cloud-value : State .
+  pred pcstates-gotvalue-cloud-value : Nat PcStates .
+  eq[gotvalue-cloud-value] :
+    apply(gotvalue-cloud-value-name, S:State) = gotvalue-cloud-value(S) .
+  eq gotvalue-cloud-value(if B:Bool then S1:State else S2:State fi) =
+    if B then gotvalue-cloud-value(S1) else gotvalue-cloud-value(S2) fi .
+  eq gotvalue-cloud-value( < < N , CS:ClLabel > , PCS:PcStates > ) =
+    if zero-gotvalue-pcs(PCS) then
+      true
+    else
+      pcstates-gotvalue-cloud-value(N, PCS)
+    fi .
+  eq pcstates-gotvalue-cloud-value(N, empty) = true .
+  ceq pcstates-gotvalue-cloud-value(N, << K ; M ; gotvalue >> PP:PcStates) =
+    pcstates-gotvalue-cloud-value(N, PP) if (N = M) .
+  ceq pcstates-gotvalue-cloud-value(N, << K ; M ; gotvalue >> PP:PcStates) =
+    false if not (N = M) .
+  ceq pcstates-gotvalue-cloud-value(N, << K ; M ; S:PcLabel >> PP:PcStates) =
+    pcstates-gotvalue-cloud-value(N, PP) if not (S = gotvalue) .
+
+  --  all PCs in updated state agree between their and  the cloud value
+  op goal-name : -> PredName .
+  pred goal : State .
+  pred pcstates-goal : Nat PcStates .
+  eq[goal] : apply(goal-name, S:State) = goal(S) .
+  eq goal(if B:Bool then S1:State else S2:State fi) =
+    if B then goal(S1) else goal(S2) fi .
+  eq goal( < < N, CS:ClLabel > , PCS:PcStates > ) =
+    if zero-updated-pcs(PCS) then
+      true
+    else
+      pcstates-goal(N, PCS)
+    fi .
+  eq pcstates-goal(N, empty) = true .
+  ceq pcstates-goal(N, << K ; M ; updated >> PP:PcStates ) =
+    pcstates-goal(N, PP) if (N = K) .
+  ceq pcstates-goal(N, << K ; M ; updated >> PP:PcStates ) =
+    false if not (N = K) .
+  ceq pcstates-goal(N, << K ; M ; CL:PcLabel >> PP:PcStates ) =
+    pcstates-goal(N, PP) if not (CL = updated) .
+
+  -- if Cloud is in busy state, then the value of the cloud and
+  -- the gotvalue of the pcs agree
+  op pc-clval-name : -> PredName .
+  pred pc-clval : State .
+  eq[pc-clval] : apply(pc-clval-name, S:State) = pc-clval(S) .
+  eq pc-clval(if B:Bool then S1:State else S2:State fi) =
+    if B then pc-clval(S1) else pc-clval(S2) fi .
+  eq pc-clval( < < ClVal:Nat , busy > , ( << PcVal:Nat ; ClVal ; gotvalue >> S:PcStates ) > ) = true .
+  eq pc-clval( < < ClVal:Nat , busy > , ( << PcVal:Nat ; ClVal ; updated >> S:PcStates ) > ) = true .
+  eq pc-clval( < < ClVal:Nat , idlecl > , PCS:PcStates > ) = true .
+
+  -- only at most one PC is out of idle state
+  op one-active-name : -> PredName .
+  pred one-active : State .
+  eq[one-active] : apply(one-active-name, S:State) = one-active(S) .
+  eq one-active(if B:Bool then S1:State else S2:State fi) =
+    if B then one-active(S1) else one-active(S2) fi .
+  eq one-active ( < < N , busy > , ( << K ; M ; gotvalue >> PCS:PcStates ) > )
+    = ( zero-updated(< < N , busy > , PCS >) and zero-gotvalue(< < N , busy > , PCS >) ) .
+  eq one-active ( < < N , busy > , ( << K ; M ; updated >> PCS:PcStates ) > )
+    = ( zero-updated(< < N , busy > , PCS >) and zero-gotvalue(< < N , busy > , PCS >) ) .
+  eq one-active ( < < N , busy > , ( << K ; M ; idlepc >> PCS:PcStates ) > )
+    = one-active ( < < N , busy > , PCS > ) .
+  eq one-active ( < < N , idlecl > , PCS:PcStates > ) = true .
+}
+
+mod! INVARIANT {
+  pr(INVPREDS)
+  op invariant-name : -> PredNameSeq .
+  eq invariant-name = cloud-idle-pcs-idle-name gotvalue-cloud-value-name goal-name one-active-name pc-clval-name .
+  pred invariant : State .
+  eq invariant(S:State) = apply(invariant-name, S) .
+}
+
+mod! CLOUDSYNCPROP {
+  pr(INITIALSTATE + INVARIANT)
+}
+
+mod! NECESSARYFACTS {
+  pr(CLOUDSYNCPROP)
+  -- some elementary properties of if_then_else_fi
+  eq (if B:Bool then A:Bool else A fi) = A .
+  eq (if B:Bool then true else D:Bool fi) and B = B .
+  eq (if A:Bool then A else A and B:Bool fi) = A .
+
+  -- we want to describe A -> B = true, but that makes A be dropped, and
+  -- we might need it for further rewriting
+  -- thus we use to rewrite A -> B ==> A
+  eq ( zero-gotvalue-pcs(PCS:PcStates) and zero-updated-pcs(PCS) and
+       one-active( < C:ClState, PCS > ) ) =
+  	 zero-gotvalue-pcs(PCS) and zero-updated-pcs(PCS) .
+
+  eq ( zero-gotvalue-pcs(PCS:PcStates) and
+       pcstates-gotvalue-cloud-value( L:Nat , PCS ) ) =
+	   zero-gotvalue-pcs(PCS) .
+
+  eq ( zero-gotvalue-pcs(PCS:PcStates) and
+       pcstates-goal ( L:Nat , PCS ) ) = zero-gotvalue-pcs( PCS ) .
+
+}
+
+
+-- ---------------------------------------------
+--> one set of covering state terms consists of the following 6 states:
+--> < < N:Nat , idlecl > , ( << M:Nat ; K:Nat ; idlepc   >> PCS:PcStates ) >
+--> < < N:Nat , idlecl > , ( << M:Nat ; K:Nat ; gotvalue >> PCS:PcStates ) >
+--> < < N:Nat , idlecl > , ( << M:Nat ; K:Nat ; updated  >> PCS:PcStates ) >
+--> < < N:Nat , busy   > , ( << M:Nat ; K:Nat ; idlepc   >> PCS:PcStates ) >
+--> < < N:Nat , busy   > , ( << M:Nat ; K:Nat ; gotvalue >> PCS:PcStates ) >
+--> < < N:Nat , busy   > , ( << M:Nat ; K:Nat ; updated  >> PCS:PcStates ) >
+
+mod! CLOUDSYNC {
+  pr(CLOUD + CLOUDSYNCPROP + NECESSARYFACTS)
+  ops M N K : -> Nat
+  op PCS : -> PcStates .
+  vars S SS : State .
+  ops s1 s2 s3 s4 t1 t2 t3 t4 : -> State .
+  eq s1 =  < < N , idlecl > , ( << M ; K ; idlepc   >> PCS ) >  .
+  eq s2 =  < < N , idlecl > , ( << M ; K ; gotvalue >> PCS ) >  .
+  eq s3 =  < < N , idlecl > , ( << M ; K ; updated  >> PCS ) >  .
+  eq t1 =  < < N , busy   > , ( << M ; K ; idlepc   >> PCS ) >  .
+  eq t2 =  < < N , busy   > , ( << M ; K ; gotvalue >> PCS ) >  .
+  eq t3 =  < < N , busy   > , ( << M ; K ; updated  >> PCS ) >  .
+
+  op inv-condition : State State -> Bool .
+  eq inv-condition(S, SS) =
+    (not (S =(*,1)=>+ SS
+       suchThat (not((invariant(S) implies invariant(SS)) == true)))) .
+}
+
+
+--> First step of the proof:
+--> Show that the if S is an initial state, then the invariant
+--> condition holds
+--> We show this by reducing this implication for all terms of
+--> the covering set given above.
+open CLOUDSYNC .
+  -- show that if s is an initial state, then it has the invariant property
+  -- this is the base case of the induction
+  -- set trace whole off
+  red init(s1) implies invariant(s1) . -- OK
+  red init(s2) implies invariant(s2) . -- OK
+  red init(s3) implies invariant(s3) . -- OK
+  red init(t1) implies invariant(t1) . -- OK
+  red init(t2) implies invariant(t2) . -- OK
+  red init(t3) implies invariant(t3) . -- OK
+  --> init(S) implies invariant(S) has been shown for all
+  --> elements of a cover set of the states
+close
+
+
+--> Second step of the proof:
+--> Show that if the invariant holds in a state, then it holds in all
+--> states reachable by transitions
+--> We again show this by reducing this implication for all terms of
+--> the covering set given above.
+open CLOUDSYNC .
+  var SS : State .
+  red inv-condition(s1, SS) . -- OK
+  red inv-condition(s2, SS) . -- OK
+  red inv-condition(s3, SS) . -- OK
+  red inv-condition(t1, SS) . -- OK
+  --> The following condition does not reduce directly to true
+  --> we will deal with it late on
+  red inv-condition(t2, SS) . -- BAD
+  red inv-condition(t3, SS) . -- OK
+close
+
+-- proof of the invariant condition for t2
+--> We have to deal with the open case
+-->   inv-condition(t2, SS)
+--> This is done by making a case distinction on M>K or not
+-->
+--> case i) M > K , i.e., M <= K => false
+open CLOUDSYNC .
+  eq ( M <= K ) = false .
+  var SS : State .
+  red inv-condition(t2, SS) .
+  --> case i) reduced to true
+close
+
+--> case ii) M <= K => true
+--> We make a second case distinction on N = K or not
+--> case iia) N = K
+open CLOUDSYNC .
+  eq ( M <= K ) = true .
+  eq N = K .
+  var SS : State .
+  red inv-condition(t2, SS) .
+  --> case iia) reduced to true
+close
+
+--> case iib) N not= K
+open CLOUDSYNC .
+  eq ( M <= K ) = true .
+  eq ( N = K ) = false .
+  var SS : State .
+  red inv-condition(t2, SS) .
+  --> case iib) reduced to true
+close
+
+--> qed
+
+
+eof
+

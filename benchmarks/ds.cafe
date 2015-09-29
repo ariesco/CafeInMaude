@@ -1,0 +1,149 @@
+--> Note : Since Maude doesn't allow to import theories in protecting,
+--> all modules wil be imported with "including" but the intended semantics is that of protecting
+--> ---------------------------------------------
+--> ---------------------------------------------
+--> ---------------------------------------------
+--> ---------------------------------------------
+mod! SEQUENCE(X :: TRIV) {
+ [Elt < Sequence]
+--> constructors
+ op empty : -> Sequence {constr}
+ op _,_ : Sequence Sequence -> Sequence {constr id: empty assoc}
+-->
+ vars E F : Elt .
+ vars Sq Se Sn : Sequence .
+--> proof rule
+ ceq true = false if Sq,E,Se := empty .
+--> equality predicate
+ op _~_ : Sequence Sequence -> Bool .
+ eq Sq ~ Sq = true .
+ eq E,Sq ~ F,Se = (E == F) and (Sq ~ Se) .
+--> matching predicate Se,E,Sn := Sq
+ op match : Sequence Sequence Sequence -> Bool .
+ eq match(empty,Se,Sn) = false .
+ eq match((E,Sq),empty,Sn) = Sq ~ Sn .
+ eq match((E,Sq),(F,Se),Sn) = (E == F)and match(Sq,Se,Sn) .
+}
+
+--> ---------------------------------------------
+--> ---------------------------------------------
+mod! PAIR(X :: TRIV, Y :: TRIV) {
+ [Pair]
+ -->
+ op <_,_> : Elt.X Elt.Y -> Pair {constr}
+ op fst : Pair -> Elt.X .
+ op snd : Pair -> Elt.Y .
+ -->
+ vars A : Elt.X .
+ vars B : Elt.Y .
+ -->
+ eq fst(< A,B >) = A .
+ eq snd(< A,B >) = B .
+}
+--> ---------------------------------------------
+--> ---------------------------------------------
+mod! DATA {
+ inc(NAT)
+ [Data]
+ op data : Nat -> Data {constr}
+}
+--> ---------------------------------------------
+--> ---------------------------------------------
+mod! BIT {
+ [Bit]
+ op t : -> Bit {constr}
+ op f : -> Bit {constr}
+ op not_ : Bit -> Bit .
+ eq not f = t .
+ eq not t = f .
+-->
+ var B : Bit .
+ eq  not not B = B .
+--> proof rule --- discharges goal1(init) ---
+ ceq true = false if t = f .
+}
+--> ---------------------------------------------
+--> ---------------------------------------------
+view TRIV2BIT from TRIV to BIT {
+ sort Elt -> Bit
+}
+
+view TRIV2DATA from TRIV to DATA {
+ sort Elt -> Data
+}
+
+mod! BIT-DATA-PAIR {
+ inc(PAIR(TRIV2BIT, TRIV2DATA) * {sort Pair -> BDPair})
+}
+
+view TRIV2BIT-DATA-PAIR from TRIV to BIT-DATA-PAIR {
+ sort Elt -> BDPair
+}
+
+mod! CHANNEL {
+ inc(SEQUENCE(TRIV2BIT-DATA-PAIR) * {sort Sequence -> Channel})
+}
+--> ---------------------------------------------
+--> ---------------------------------------------
+mod! PACKET-LIST {
+ inc(SEQUENCE(TRIV2DATA) *
+  {sort Sequence -> List,
+   op empty -> nil})
+ op mk : Nat -> List .
+ var N : Nat .
+ eq mk(0) = data(0),nil .
+ eq mk(s N) = data(s N), mk(N) .
+}
+--> ---------------------------------------------
+--> ---------------------------------------------
+mod* DS {
+ inc(CHANNEL)
+ inc(PACKET-LIST)
+ [Sys]
+--> constructors ---
+ op init : -> Sys {constr}
+ op send : Sys -> Sys {constr}
+ op rec : Sys -> Sys  {constr}
+ op drop : Sys -> Sys {constr}
+--> observations ---
+ op channel : Sys -> Channel .
+ op bit  : Sys -> Bit .
+ op next : Sys -> Nat .
+ op list : Sys -> List .
+--> variables ---
+  vars S S' : Sys .
+  var B : Bit .
+  var C : Channel .
+  var D : Data .
+--> init ---
+ eq channel(init) = (empty).Channel .
+ eq bit(init) = f .
+ eq next(init) = 0 .
+ eq list(init) = nil .
+--> send ---
+ eq channel(send(S)) = channel(S),< bit(S),data(next(S)) > .
+ eq bit(send(S)) = bit(S).
+ eq next(send(S)) = next(S) .
+ eq list(send(S)) = list(S) .
+--> rec ---
+ ceq channel(rec(S)) = channel(S)   if channel(S) = empty       [metadata "CA-r1"].
+ ceq channel(rec(S)) = C            if < B,D >,C := channel(S)  [metadata "CA-r2"].
+ ceq bit(rec(S)) = bit(S)     if channel(S) = empty                        [metadata "CA-b1"].
+ ceq bit(rec(S)) = bit(S)     if < B,D >,C := channel(S) /\ B = not bit(S) [metadata "CA-b2"].
+ ceq bit(rec(S)) = not bit(S) if < B,D >,C := channel(S) /\ B = bit(S)     [metadata "CA-b3"].
+ ceq next(rec(S)) = next(S)   if channel(S) = empty                        [metadata "CA-n1"].
+ ceq next(rec(S)) = next(S)   if < B,D >,C := channel(S) /\ B = not bit(S) [metadata "CA-n2"].
+ ceq next(rec(S)) = s next(S) if < B,D >,C := channel(S) /\ B = bit(S)     [metadata "CA-n3"].
+ ceq list(rec(S)) = list(S)               if channel(S) = empty                        [metadata "CA-l1"].
+ ceq list(rec(S)) = list(S)               if < B,D >,C := channel(S) /\ B = not bit(S) [metadata "CA-l2"].
+ ceq list(rec(S)) = data(next(S)),list(S) if < B,D >,C := channel(S) /\ B = bit(S)     [metadata "CA-l3"].
+--> underspecified operations ---
+ ops x y : Sys -> Channel .
+--> drop ---
+ ceq channel(drop(S)) = x(S),y(S)  if x(S),< B,D >,y(S) := channel(S)     [metadata "CA-d1"].
+ ceq channel(drop(S)) = channel(S) if match(channel(S),x(S),y(S)) = false [metadata "CA-d2"].
+ eq bit(drop(S)) = bit(S).
+ eq next(drop(S)) = next(S) .
+ eq list(drop(S)) = list(S) .
+}
+*** ****************************************************************************

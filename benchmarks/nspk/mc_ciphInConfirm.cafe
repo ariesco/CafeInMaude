@@ -1,0 +1,20 @@
+open NSPK + INV .
+  ops p q : -> Prin .
+  eq (p = q) = false .
+  var C : Config .
+  vars P Q : Prin .
+  var N : Nonce .
+  var R : PNat .
+  var MS : Network .
+  --
+  red init(p q) =(1,5)=>* ((nw: (m2(Q,Q,P,c2(P,N,n(Q,P,R))) MS)) C)
+      suchThat (not ciphInConfirm((nw: (m2(Q,Q,P,c2(P,N,n(Q,P,R))) MS)) C,
+                                   P,Q,N,R)) .
+close
+
+--
+-- This is not doable by CafeOBJ.
+--
+
+
+

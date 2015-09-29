@@ -1,0 +1,195 @@
+mod! BASIC-INT{
+  [Zero < Int]
+  op 0 : -> Zero {constr}
+  ops suc_ p_ : Int -> Int
+  eq [eq1] : s p X:Int = X:Int {nonexec metadata "eq1"} .
+  eq [eq2] : p s X:Int = X:Int .
+  trans [tr1] : 0 => 0 .
+}
+
+mod! PNAT {
+ [PNat PNzNat PZero]
+ [PZero PNzNat < PNat]
+-->
+ op 0 : -> PZero {constr}
+ op s_ : PNat -> PNzNat {constr}
+ op _+_ : PNat PNat -> PNat .
+-->
+ var M : PNat .
+ var N : PNat .
+-->
+ eq 0 + N = N .
+ eq s M + N = s(M + N) .
+}
+
+mod* ELT {
+ inc(BOOL)
+ [Elt]
+ op vo : -> Elt .
+ op _~_ : Elt Elt -> Bool .
+ vars E E' : Elt .
+-->
+ eq E ~ E = true .
+ ceq E = E'
+  if E ~ E' {nonexec}
+}
+
+mod! LISTS(X :: ELT) {
+  [List]
+  op nil : -> List {constr}
+  op __ : Elt List -> List {constr}
+ -->
+  vars L L1 L2 : List .
+  vars E E' : Elt .
+ -->
+  op _@_ : List List -> List .
+  eq nil @ L2 = L2 .
+  ceq (E L1) @ L2 = E (L1 @ L2)
+   if (E ~ vo) = false {metadata "CA-1"} .
+  ceq (E L1) @ L2 = L1 @ L2
+   if E = vo           {metadata "CA-2"} .
+}
+
+mod! SEQUENCE (X :: TRIV){
+ [Elt.X < Sequence]
+
+ --> constructors
+ op empty : -> Sequence {constr}
+ op _,_ : Sequence Sequence -> Sequence {constr id: (empty) assoc}
+ -->
+ vars E F : Elt.X .
+ vars Sq Se Sn : Sequence .
+ --> matching predicate Se,E,Sn := Sq
+ pred match : Sequence Sequence Sequence
+ eq match(empty, Se, Sn) = false .
+ eq match((E,Sq),empty,Sn) = Sq ~ Sn .
+ eq match((E,Sq),(F,Se),Sn) = (E == F) and match(Sq,Se,Sn) .
+ --> equality predicate
+ pred _~_ : Sequence Sequence
+ eq Sq ~ Sq = true .
+ eq E,Sq ~ F,Se = (E == F) and (Sq ~ Se) .
+ --> proof rule
+ ceq true = false
+  if Sq,E,Se == empty {nonexec} . *** Not used in the Maude spec.
+}
+
+mod! PAIR (X :: TRIV, Y :: TRIV) {
+ [Pair]
+ -->
+ op <_,_> : Elt.X Elt.Y -> Pair {constr}
+ op fst : Pair -> Elt.X
+ op snd : Pair -> Elt.Y
+ -->
+ vars A : Elt.X
+ vars B : Elt.Y
+ -->
+ eq fst(< A,B >) = A .
+ eq snd(< A,B >) = B .
+}
+
+mod! FG-FUN {
+ pr(NAT)
+ op F : Nat -> Nat .
+ op G : Nat -> Nat .
+ vars X Y : Nat .
+ ceq F(X) = 5
+  if X <= 7 { metadata "CA-"}
+ ceq F(X) = 1
+  if 8 <= X { metadata "CA-"}
+ ceq G(Y) = 2
+  if Y <= 4 { metadata "CA-"}
+ ceq G(Y) = 7
+  if 5 <= Y { metadata "CA-"}
+}
+
+mod! VERTEX {
+ pr(BOOL)
+ pr(INT)
+ op no : -> Nat .
+ [Vertex]
+ op _~_ : Vertex Vertex -> Bool {comm} .
+ vars I J : Vertex .
+ eq  I ~ I = true .
+ ceq I = J
+  if I ~ J {nonexec} .
+}
+
+mod! VTXSET {
+ pr(VERTEX)
+ [Vertex < VtxSet]
+ op empty : -> VtxSet {constr}
+ op _U_ : Vertex VtxSet -> VtxSet {constr assoc comm}
+ op _U_ : VtxSet VtxSet -> VtxSet {assoc comm}
+ vars A B : VtxSet .
+ vars I J : Vertex .
+ eq (A U A) = A .
+ -->
+ op _in_ : Vertex VtxSet -> Bool .
+ eq  I in empty   = false .
+ ceq I in (J U A) = true
+  if I = J .
+ ceq I in (J U A) = I in A
+  if (I ~ J) = false .
+-->
+ op card : VtxSet -> Nat .
+ eq card(empty) = 0 .
+ eq card(I U A) = 1 + card(A).
+-->
+ op _<_ : VtxSet VtxSet -> Bool .
+ eq  empty < B = true .
+ ceq I U A < B = A < B
+  if I in B .
+ ceq I U A < B = false
+  if I in B = false .
+-->
+ op _<>_ : VtxSet VtxSet -> Bool {comm}
+ eq A <> A = true .
+ ceq A <> B = true
+  if A < B and B < A .
+ ceq A <> B = false
+  if not A < B .
+ ceq A <> B = false
+  if not B < A .
+}
+
+mod! GRAPH {
+ pr(VTXSET)
+ [Edge Graph]
+ op <_,_> : Vertex Vertex -> Edge {constr}
+ op nil : -> Graph {constr}
+ op _;_ : Edge Graph -> Graph {constr}
+ -->
+ vars A B C : Vertex .
+ var G : Graph .
+ -->
+ op mcc : Vertex Graph -> VtxSet .
+ eq  mcc(A,nil) = A .
+ ceq mcc(A,< B,C > ; G) = mcc(B,G) U mcc(C,G)
+  if mcc(A,G) = mcc(B,G) {metadata "CA-1"} .
+ ceq mcc(A,< B,C > ; G) = mcc(B,G) U mcc(C,G)
+  if mcc(A,G) = mcc(C,G) {metadata "CA-2"} .
+ ceq mcc(A,< B,C > ; G) = mcc(A,G)
+  if mcc(A,G) <> mcc(B,G) = false /\
+     mcc(A,G) <> mcc(C,G) = false {metadata "CA-3"} .
+ -->
+ op nocycle : Graph -> Bool .
+ eq nocycle(nil) = true .
+ ceq nocycle(< A,B > ; G) = false
+  if mcc(A,G) = mcc(B,G) {metadata "CA-1"} .
+ ceq nocycle(< A,B > ; G) = nocycle(G)
+  if mcc(A,G) <> mcc(B,G) = false {metadata "CA-2"} .
+ -->
+ op nomcc : Graph -> Int .
+ eq nomcc(nil) = no .
+ ceq nomcc(< A,B > ; G) = nomcc(G)
+  if mcc(A,G) = mcc(B,G) {metadata "CA-1"} .
+ ceq nomcc(< A,B > ; G) = nomcc(G) - 1
+  if mcc(A,G) <> mcc(B,G) = false {metadata "CA-2"} .
+ -->
+ op mktree : Graph -> Graph .
+ eq  mktree(nil) = nil .
+ ceq mktree(< A,B > ; G) = mktree(G)
+  if mcc(A,G) = mcc(B,G) {metadata "CA-1"} .
+ ceq mktree(< A,B > ; G) = < A,B > ; mktree(G)
+  if mcc(A,G) <> mcc(B,G) = false {metadata "CA-1"} .
+}

@@ -1,0 +1,49 @@
+mod! INV {
+  inc(CONFIG)
+  op check : Bool Bool -> Bool
+  --
+  op isValid : Config -> Bool
+  op authInit : Config Prin Prin&Intrdr Prin&Intrdr Nonce PNat -> Bool
+  op randInConfirm : Config Prin&Intrdr Prin&Intrdr Prin&Intrdr Prin&Intrdr Nonce -> Bool
+  op ciphInConfirm : Config Prin Prin Nonce PNat -> Bool
+  op nonSec : Config Nonce -> Bool
+  --
+  var C : Config
+  vars P Q : Prin
+  vars PI PI' PJ PK : Prin&Intrdr
+  var N : Nonce
+  var R : PNat
+  vars LEMS F2P : Bool
+  -- check
+  -- LEMS is lemmas and induction hypotheses, and
+  -- F2P is a formula to prove
+  eq check(LEMS,F2P)
+     = if (LEMS implies F2P) == true
+       then true else false fi .
+  -- isValid
+  eq isValid(C)
+     = (#nw(C) = s(z)) and (#rand(C) = s(z)) and
+       (#nonces(C) = s(z)) and (#prins(C) = s(z)) .
+  -- authInit
+  eq authInit(C,Q,PI,PI',N,R)
+     = m3(PI',PI,Q,c3(Q,n(Q,PI,R))) \in msgs(C) and
+       m2(Q,Q,PI,c2(PI,N,n(Q,PI,R))) \in msgs(C)
+       implies
+       m3(PI,PI,Q,c3(Q,n(Q,PI,R))) \in msgs(C) .
+  -- randInConfirm
+  eq randInConfirm(C,PI',PI,PJ,PK,N)
+     = m3(PI',PI,PJ,c3(PK,N)) \in msgs(C)
+       implies
+       not(rand(N) = rand(C)) .
+  -- ciphInConfirm
+  eq ciphInConfirm(C,P,Q,N,R)
+     = m2(Q,Q,P,c2(P,N,n(Q,P,R))) \in msgs(C) and
+       c3(Q,n(Q,P,R)) \in msgs(C)
+       implies
+       m3(P,P,Q,c3(Q,n(Q,P,R))) \in msgs(C) .
+  -- nonSec
+  eq nonSec(C,N)
+     = N \in nonces(C)
+       implies
+       (gen(N) = intrdr or forWhom(N) = intrdr) .
+}

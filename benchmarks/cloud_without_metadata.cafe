@@ -1,0 +1,145 @@
+mod! LABELC {
+ [LabelC]
+ ops idlec busy : -> LabelC .
+ ceq true = false if idlec = busy .
+-->
+ op _~_ : LabelC LabelC -> Bool {comm} .
+ vars A B : LabelC .
+ eq A ~ A = true .
+ eq idlec ~ busy = false .
+}
+
+mod! LABELP {
+ [LabelP]
+ ops idlep gotval updated : -> LabelP .
+ ceq true = false if idlep = gotval .
+ ceq true = false if idlep = updated .
+ ceq true = false if gotval = updated .
+-->
+ op _~_ : LabelP LabelP -> Bool {comm} .
+ vars A B : LabelP .
+ eq A ~ A = true .
+ eq idlep ~ gotval = true .
+ eq idlep ~ updated = false .
+ eq gotval ~ updated = false .
+}
+
+mod* CLIENT {
+ inc(BOOL)
+ [Client]
+ op _~_ : Client Client -> Bool {comm}
+ vars I J : Client .
+ eq I ~ I = true .
+ ceq I = J if I ~ J . --> {nonexec}
+}
+
+mod* CLOUD {
+ pr(LABELC)
+ pr(LABELP)
+ pr(NAT)
+ eq (N:Nat <= N:Nat) = true . --> lemma ---
+ pr(CLIENT)
+ [Sys]
+
+--> constructors ---
+ op init : -> Sys {constr}
+ ops modval getval update gotoidle : Sys Client -> Sys {constr}
+--> observers ---
+ op statusc : Sys -> LabelC .
+ op valc : Sys -> Nat .
+ op statusp : Sys Client -> LabelP .
+ op valp : Sys Client -> Nat .
+ op tmp : Sys Client -> Nat .
+-->
+ var S : Sys .
+ vars I J : Client .
+--> init ---
+ eq statusc(init) = idlec .
+ eq statusp(init,I) = idlep .
+--> modval ---
+ op new : Sys Client -> Nat .
+-->
+ eq statusc(modval(S,I)) = statusc(S) .
+ eq valc(modval(S,I)) = valc(S) .
+
+ eq statusp(modval(S,I),J) = statusp(S,J) .
+
+ ceq valp(modval(S,I),J) = new(S,I) if J = I and statusp(S,I) = idlep . --> [metadata "CA-1"].
+ ceq valp(modval(S,I),J) = valp(S,J) if J ~ I = false . --> [metadata "CA-2"].
+ ceq valp(modval(S,I),J) = valp(S,J) if statusp(S,I) ~ idlep = false . --> [metadata "CA-3"].
+
+ eq tmp(modval(S,I),J) = tmp(S,J) .
+
+--> getval ---
+ ceq statusc(getval(S,I)) = busy if statusp(S,I) = idlep and statusc(S) = idlec . --> [metadata "CA-1"].
+ ceq statusc(getval(S,I)) = statusc(S) if statusp(S,I) ~ idlep = false        . --> [metadata "CA-2"].
+ ceq statusc(getval(S,I)) = statusc(S) if statusc(S) ~ idlec = false          . --> [metadata "CA-3"].
+
+ eq valc(getval(S,I)) = valc(S) .
+
+ ceq statusp(getval(S,I),J) = gotval
+     if J = I and statusp(S,I) = idlep  and statusc(S) = idlec              . --> [metadata "CA-1"].
+ ceq statusp(getval(S,I),J) = statusp(S,J) if J ~ I = false               . --> [metadata "CA-2"].
+ ceq statusp(getval(S,I),J) = statusp(S,J) if statusp(S,I) ~ idlep = false . --> [metadata "CA-3"].
+ ceq statusp(getval(S,I),J) = statusp(S,J) if statusc(S) ~ idlec = false  . --> [metadata "CA-4"].
+
+ eq valp(getval(S,I),J) = valp(S,J) .
+
+ ceq tmp(getval(S,I),J) = valc(S)
+     if J = I and statusp(S,I) = idlep and statusc(S) = idlec       . --> [metadata "CA-1"].
+ ceq tmp(getval(S,I),J) = tmp(S,J) if J ~ I = false               . --> [metadata "CA-2"].
+ ceq tmp(getval(S,I),J) = tmp(S,J) if statusp(S,I) ~ idlep = false . --> [metadata "CA-3"].
+ ceq tmp(getval(S,I),J) = tmp(S,J) if statusc(S) ~ idlec = false  . --> [metadata "CA-4"].
+
+--> update ---
+ eq statusc(update(S,I)) = statusc(S) .
+
+ ceq valc(update(S,I)) = valp(S,I) if
+     statusc(S) = busy and statusp(S,I) = gotval and tmp(S,I) <= valp(S,I) . --> [metadata "CA-1"].
+ ceq valc(update(S,I)) = valc(S)  if statusc(S) ~ busy = false           . --> [metadata "CA-2"].
+ ceq valc(update(S,I)) = valc(S)  if statusp(S,I) ~ gotval = false       . --> [metadata "CA-3"].
+ ceq valc(update(S,I)) = valc(S)  if valp(S,I) < tmp(S,I)                . --> [metadata "CA-4"].
+
+ ceq statusp(update(S,I),J)= updated if J = I and
+                  statusp(S,I)= gotval and statusc(S)= busy                 . --> [metadata "CA-1"].
+ ceq statusp(update(S,I),J)= statusp(S,J) if J ~ I = false                 . --> [metadata "CA-2"].
+ ceq statusp(update(S,I),J)= statusp(S,J) if statusp(S,I) ~ gotval = false . --> [metadata "CA-3"].
+ ceq statusp(update(S,I),J)= statusp(S,J) if statusc(S) ~ busy = false     . --> [metadata "CA-4"].
+
+ ceq valp(update(S,I),J) = tmp(S,J) if J = I and
+     statusp(S,I)= gotval and statusc(S)= busy and valp(S,I) < tmp(S,I)        . --> [metadata "CA-1"].
+ ceq valp(update(S,I),J) = valp(S,J) if J ~ I = false                        . --> [metadata "CA-2"].
+ ceq valp(update(S,I),J) = valp(S,J) if statusp(S,I)~ gotval = false         . --> [metadata "CA-3"].
+ ceq valp(update(S,I),J) = valp(S,J) if statusc(S) ~ busy = false            . --> [metadata "CA-4"].
+ ceq valp(update(S,I),J) = valp(S,J) if tmp(S,I) <= valp(S,I)                . --> [metadata "CA-5"].
+
+ ceq tmp(update(S,I),J) = valp(S,J) if J = I and
+     statusp(S,I)= gotval and statusc(S) = busy and tmp(S,I)<= valp(S,I) . --> [metadata "CA-1"].
+ ceq tmp(update(S,I),J) = tmp(S,J) if J ~ I = false                    . --> [metadata "CA-2"].
+ ceq tmp(update(S,I),J) = tmp(S,J) if statusp(S,I)~ gotval = false     . --> [metadata "CA-3"].
+ ceq tmp(update(S,I),J) = tmp(S,J) if statusc(S)~ busy = false         . --> [metadata "CA-4"] .
+ ceq tmp(update(S,I),J) = tmp(S,J) if valp(S,I)< tmp(S,I)              . --> [metadata "CA-5"].
+
+--> gotoidle ---
+ ceq statusc(gotoidle(S,I)) = idlec if
+     statusc(S) = busy and statusp(S,I) = updated                           . --> [metadata "CA-1"].
+ ceq statusc(gotoidle(S,I)) = statusc(S) if statusc(S) ~ busy = false      . --> [metadata "CA-2"].
+ ceq statusc(gotoidle(S,I)) = statusc(S) if statusp(S,I) ~ updated = false . --> [metadata "CA-3"].
+
+ eq valc(gotoidle(S,I)) = valc(S).
+
+ ceq statusp(gotoidle(S,I),J) = idlep if J = I and
+     statusp(S,I) = updated and statusc(S) = busy                             . --> [metadata "CA-1"].
+ ceq statusp(gotoidle(S,I),J) = statusp(S,J) if J ~ I = false                . --> [metadata "CA-2"].
+ ceq statusp(gotoidle(S,I),J) = statusp(S,J) if statusp(S,I)~ updated = false . --> [metadata "CA-3"].
+ ceq statusp(gotoidle(S,I),J) = statusp(S,J) if statusc(S)~ busy = false     . --> [metadata "CA-4"].
+
+
+ eq valp(gotoidle(S,I),J) = valp(S,J).
+
+ ceq tmp(gotoidle(S,I),J) = 0         if J = I and
+     statusp(S,I) = updated and statusc(S) = busy                     . -->  [metadata "CA-1"].
+ ceq tmp(gotoidle(S,I),J) = tmp(S,J)  if J ~ I = false                . --> [metadata "CA-2"].
+ ceq tmp(gotoidle(S,I),J) = tmp(S,J)  if statusp(S,I)~ updated = false . --> [metadata "CA-3"].
+ ceq tmp(gotoidle(S,I),J) = tmp(S,J)  if statusc(S)~ busy = false     . --> [metadata "CA-4"].
+}
