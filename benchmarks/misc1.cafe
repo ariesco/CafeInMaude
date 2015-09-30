@@ -1,12 +1,3 @@
-mod! BASIC-INT{
-  [Zero < Int]
-  op 0 : -> Zero {constr}
-  ops suc_ p_ : Int -> Int
-  eq [eq1] : s p X:Int = X:Int {nonexec metadata "eq1"} .
-  eq [eq2] : p s X:Int = X:Int .
-  trans [tr1] : 0 => 0 .
-}
-
 mod! PNAT {
  [PNat PNzNat PZero]
  [PZero PNzNat < PNat]
@@ -48,43 +39,6 @@ mod! LISTS(X :: ELT) {
    if (E ~ vo) = false {metadata "CA-1"} .
   ceq (E L1) @ L2 = L1 @ L2
    if E = vo           {metadata "CA-2"} .
-}
-
-mod! SEQUENCE (X :: TRIV){
- [Elt.X < Sequence]
-
- --> constructors
- op empty : -> Sequence {constr}
- op _,_ : Sequence Sequence -> Sequence {constr id: (empty) assoc}
- -->
- vars E F : Elt.X .
- vars Sq Se Sn : Sequence .
- --> matching predicate Se,E,Sn := Sq
- pred match : Sequence Sequence Sequence
- eq match(empty, Se, Sn) = false .
- eq match((E,Sq),empty,Sn) = Sq ~ Sn .
- eq match((E,Sq),(F,Se),Sn) = (E == F) and match(Sq,Se,Sn) .
- --> equality predicate
- pred _~_ : Sequence Sequence
- eq Sq ~ Sq = true .
- eq E,Sq ~ F,Se = (E == F) and (Sq ~ Se) .
- --> proof rule
- ceq true = false
-  if Sq,E,Se == empty {nonexec} . *** Not used in the Maude spec.
-}
-
-mod! PAIR (X :: TRIV, Y :: TRIV) {
- [Pair]
- -->
- op <_,_> : Elt.X Elt.Y -> Pair {constr}
- op fst : Pair -> Elt.X
- op snd : Pair -> Elt.Y
- -->
- vars A : Elt.X
- vars B : Elt.Y
- -->
- eq fst(< A,B >) = A .
- eq snd(< A,B >) = B .
 }
 
 mod! FG-FUN {
@@ -192,4 +146,107 @@ mod! GRAPH {
   if mcc(A,G) = mcc(B,G) {metadata "CA-1"} .
  ceq mktree(< A,B > ; G) = < A,B > ; mktree(G)
   if mcc(A,G) <> mcc(B,G) = false {metadata "CA-1"} .
+}
+
+mod! LABELS {
+ [Labels]
+ ops rm wt cs : -> Labels {constr}
+ op _~_ : Labels Labels -> Bool {comm}
+ var  L : Labels .
+ eq L ~ L = true .
+ eq (rm ~ wt) = false .
+ eq (rm ~ cs) = false .
+ eq (wt ~ cs) = false .
+---
+ ceq true = false
+  if rm = wt .
+ ceq true = false
+  if rm = cs .
+ ceq true = false
+  if wt = cs .
+}
+
+mod* PID {
+ inc(BOOL)
+ [Pid]
+ op _~_ : Pid Pid -> Bool {comm}
+ vars I J : Pid .
+ eq I ~ I = true .
+ ceq I = J
+  if I ~ J {nonexec} .
+}
+
+mod! SEQUENCE(X :: PID) {
+ [Pid.X < Sequence]
+--- constructors
+ op empty : -> Sequence {constr}
+ op _,_ : Sequence Sequence -> Sequence {constr id: empty assoc}
+ vars Q Q' : Sequence .
+ var I : Pid.X .
+---
+ op top : Sequence -> Pid.X .
+ eq top(empty) = empty .
+ eq top(I,Q) = I .
+---
+ op get : Sequence -> Sequence .
+ eq get(empty) = empty .
+ eq get(I,Q) = Q .
+---
+ ceq true = false if Q,I,Q' := empty .
+ ceq [lemma-top]: top(Q,I) = top(Q)
+  if top(Q) :: Pid.X .
+}
+
+mod! QLOCK(X :: PID) {
+ inc(SEQUENCE(X))
+ inc(LABELS)
+ [Sys]
+ --- actions
+ op init : -> Sys {constr}
+ ops want try exit : Sys Pid.X -> Sys {constr}
+ --- observers
+ op pc : Sys Pid.X -> Labels .
+ op sq : Sys -> Sequence .
+---
+ var S : Sys .
+ vars I J K : Pid.X .
+ var Q : Sequence .
+--- init ---
+ eq pc(init,I) = rm  .
+ eq sq(init) = empty .
+--- want ---
+ ceq pc(want(S,I),J) = wt
+  if pc(S,I) = rm /\
+     J = I {metadata "CA-w1"} .
+ ceq pc(want(S,I),J) = pc(S,J)
+  if pc(S,I) = rm /\
+     J ~ I = false {metadata "CA-w2"} .
+ ceq pc(want(S,I),J) = pc(S,J)
+  if pc(S,I) ~ rm = false {metadata "CA-w3"} .
+ ceq sq(want(S,I)) = sq(S),I
+  if pc(S,I) = rm .
+ ceq sq(want(S,I)) = sq(S)
+  if pc(S,I) ~ rm = false .
+--- try ---
+ ceq pc(try(S,I),J) = cs
+  if pc(S,I) = wt /\ I,Q := sq(S) /\
+     J = I {metadata "CA-t1"} .
+ ceq pc(try(S,I),J) = pc(S,J)
+  if (J ~ I) = false {metadata "CA-t2"} .
+ ceq pc(try(S,I),J) = pc(S,J)
+  if pc(S,I) ~ wt = false {metadata "CA-t3"} .
+ ceq pc(try(S,I),J) = pc(S,J)
+  if top(sq(S)) ~ I = false {metadata "CA-t4"} .
+ eq sq(try(S,I)) = sq(S) .
+--- exit ---
+ ceq pc(exit(S,I),J) = rm
+  if pc(S,I) = cs /\ J = I {metadata "CA-e1"} .
+ ceq pc(exit(S,I),J) = pc(S,J)
+  if pc(S,I) = cs /\ I ~ J = false {metadata "CA-e2"} .
+ ceq pc(exit(S,I),J) = pc(S,J)
+  if pc(S,I) ~ cs = false {metadata "CA-e3"} .
+ ceq sq(exit(S,I)) = get(sq(S))
+  if pc(S,I) = cs .
+ ceq sq(exit(S,I)) = sq(S)
+  if pc(S,I) ~ cs = false .
 }

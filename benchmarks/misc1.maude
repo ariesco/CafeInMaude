@@ -1,0 +1,251 @@
+(fmod PNAT is
+ sorts PNat PNzNat PZero .
+ subsorts PZero PNzNat < PNat .
+---
+ op 0 : -> PZero [ctor] .
+ op s_ : PNat -> PNzNat [ctor].
+ op _+_ : PNat PNat -> PNat .
+---
+ var M : PNat .
+ var N : PNat .
+---
+ eq 0 + N = N .
+ eq s M + N = s(M + N) .
+endfm)
+
+(fth ELT is
+ inc BOOL .
+ sorts Elt .
+ op vo : -> Elt .
+ op _~_ : Elt Elt -> Bool .
+ vars E E' : Elt .
+---
+ eq E ~ E = true .
+ ceq E = E' if E ~ E' [nonexec].
+endfth)
+
+(fmod LISTS{X :: ELT} is
+  sorts List .
+  op nil : -> List [ctor] .
+  op __ : X$Elt List -> List [ctor] .
+ ---
+  vars L L1 L2 : List .
+  vars E E' : X$Elt .
+ ---
+  op _@_ : List List -> List .
+  eq nil @ L2 = L2 .
+  ceq (E L1) @ L2 = E (L1 @ L2)
+   if (E ~ vo) = false [metadata "CA-1"].
+  ceq (E L1) @ L2 = L1 @ L2
+   if E = vo [metadata "CA-2"].
+endfm)
+
+(fmod FG-FUN is
+ protecting NAT .
+ op F : Nat -> Nat .
+ op G : Nat -> Nat .
+ vars X Y : Nat .
+ ceq F(X) = 5
+  if X <= 7 [metadata "CA-"].
+ ceq F(X) = 1
+  if 8 <= X [metadata "CA-"].
+ ceq G(Y) = 2
+  if Y <= 4 [metadata "CA-"].
+ ceq G(Y) = 7
+  if 5 <= Y [metadata "CA-"].
+endfm)
+
+(fmod LABELS is
+ sort Labels .
+ ops rm wt cs : -> Labels [ctor].
+ op _~_ : Labels Labels -> Bool [comm].
+ var  L : Labels .
+ eq L ~ L = true .
+ eq (rm ~ wt) = false .
+ eq (rm ~ cs) = false .
+ eq (wt ~ cs) = false .
+---
+ ceq true = false
+  if rm = wt .
+ ceq true = false
+  if rm = cs .
+ ceq true = false
+  if wt = cs .
+endfm)
+
+
+(fth PID is inc BOOL .
+ sort Pid .
+ op _~_ : Pid Pid -> Bool [comm].
+ vars I J : Pid .
+ eq I ~ I = true .
+ ceq I = J
+  if I ~ J [nonexec].
+endfth)
+
+
+(fmod SEQUENCE{X :: PID} is
+ sort Sequence .
+ subsorts X$Pid < Sequence .
+--- constructors
+ op empty : -> Sequence [ctor] .
+ op _`,_ : Sequence Sequence -> Sequence [ctor id: empty assoc].
+ vars Q Q' : Sequence .
+ var I : X$Pid .
+---
+ op top : Sequence -> X$Pid .
+ eq top(empty) = empty .
+ eq top(I,Q) = I .
+---
+ op get : Sequence -> Sequence .
+ eq get(empty) = empty .
+ eq get(I,Q) = Q .
+---
+ ceq true = false
+  if Q,I,Q' := empty .
+ ceq [lemma-top]: top(Q,I) = top(Q)
+  if top(Q) :: X$Pid .
+endfm)
+
+
+(fmod QLOCK{X :: PID} is
+ inc SEQUENCE{X} .
+ inc LABELS .
+ sort Sys .
+ --- actions
+ op init : -> Sys [ctor].
+ ops want try exit : Sys X$Pid -> Sys [ctor].
+ --- observers
+ op pc : Sys X$Pid -> Labels .
+ op sq : Sys -> Sequence .
+---
+ var S : Sys . vars I J K : X$Pid . var Q : Sequence .
+--- init ---
+ eq pc(init,I) = rm  .
+ eq sq(init) = empty .
+--- want ---
+ ceq pc(want(S,I),J) = wt
+  if pc(S,I) = rm /\ J = I [metadata "CA-w1"].
+ ceq pc(want(S,I),J) = pc(S,J)
+  if pc(S,I) = rm /\ J ~ I = false [metadata "CA-w2"].
+ ceq pc(want(S,I),J) = pc(S,J)
+  if pc(S,I) ~ rm = false [metadata "CA-w3"].
+ ceq sq(want(S,I)) = sq(S),I
+  if pc(S,I) = rm .
+ ceq sq(want(S,I)) = sq(S)
+  if pc(S,I) ~ rm = false .
+--- try ---
+ ceq pc(try(S,I),J) = cs
+  if pc(S,I) = wt /\ I,Q := sq(S) /\
+     J = I [metadata "CA-t1"].
+ ceq pc(try(S,I),J) = pc(S,J)
+  if (J ~ I) = false [metadata "CA-t2"].
+ ceq pc(try(S,I),J) = pc(S,J)
+  if pc(S,I) ~ wt = false [metadata "CA-t3"].
+ ceq pc(try(S,I),J) = pc(S,J)
+  if top(sq(S)) ~ I = false [metadata "CA-t4"].
+  eq sq(try(S,I)) = sq(S) .
+--- exit ---
+ ceq pc(exit(S,I),J) = rm
+  if pc(S,I) = cs /\
+     J = I [metadata "CA-e1"].
+ ceq pc(exit(S,I),J) = pc(S,J)
+  if pc(S,I) = cs /\ I ~ J = false [metadata "CA-e2"].
+ ceq pc(exit(S,I),J) = pc(S,J)
+  if pc(S,I) ~ cs = false [metadata "CA-e3"].
+ ceq sq(exit(S,I)) = get(sq(S))
+  if pc(S,I) = cs .
+ ceq sq(exit(S,I)) = sq(S)
+  if pc(S,I) ~ cs = false .
+endfm)
+
+
+(fmod VERTEX is ---> fth VERTEX
+ pr BOOL .
+ pr INT .
+ op no : -> Nat .
+ sort Vertex .
+ op _~_ : Vertex Vertex -> Bool [comm] .
+ vars I J : Vertex .
+ eq  I ~ I = true .
+ ceq I = J if I ~ J [nonexec].
+endfm)
+
+(fmod VTXSET is
+ pr VERTEX .
+ sort VtxSet .
+ subsorts Vertex < VtxSet .
+ op empty : -> VtxSet [ctor].
+ op _U_ : Vertex VtxSet -> VtxSet [ctor assoc comm].
+ op _U_ : VtxSet VtxSet -> VtxSet [assoc comm].
+ vars A B : VtxSet .
+ vars I J : Vertex .
+ eq (A U A) = A .
+ ---
+ op _in_ : Vertex VtxSet -> Bool .
+ eq  I in empty   = false .
+ ceq I in (J U A) = true   if I = J .
+ ceq I in (J U A) = I in A if (I ~ J) = false .
+---
+ op card : VtxSet -> Nat .
+ eq card(empty) = 0 .
+ eq card(I U A) = 1 + card(A).
+---
+ op _<_ : VtxSet VtxSet -> Bool .
+ eq  empty < B = true .
+ ceq I U A < B = A < B if I in B .
+ ceq I U A < B = false  if I in B = false .
+---
+ op _<>_ : VtxSet VtxSet -> Bool [comm].
+ eq A <> A = true .
+ ceq A <> B = true
+  if A < B and B < A .
+ ceq A <> B = false
+  if not A < B .
+ ceq A <> B = false
+  if not B < A .
+endfm)
+
+
+
+(fmod GRAPH is
+ pr VTXSET .
+ sorts Edge Graph .
+ op <_`,_> : Vertex Vertex -> Edge [ctor].
+ op nil : -> Graph [ctor].
+ op _;_ : Edge Graph -> Graph [ctor].
+ ---
+ vars A B C : Vertex .
+ var G : Graph .
+ ---
+ op mcc : Vertex Graph -> VtxSet .
+ eq  mcc(A,nil) = A .
+ ceq mcc(A,< B,C > ; G) = mcc(B,G) U mcc(C,G)
+  if mcc(A,G) = mcc(B,G) [metadata "CA-1"].
+ ceq mcc(A,< B,C > ; G) = mcc(B,G) U mcc(C,G)
+  if mcc(A,G) = mcc(C,G) [metadata "CA-2"].
+ ceq mcc(A,< B,C > ; G) = mcc(A,G)
+  if mcc(A,G) <> mcc(B,G) = false /\
+     mcc(A,G) <> mcc(C,G) = false   [metadata "CA-3"].
+ ---
+ op nocycle : Graph -> Bool .
+ eq  nocycle(nil) = true .
+ ceq nocycle(< A,B > ; G) = false
+  if mcc(A,G) = mcc(B,G) [metadata "CA-1"].
+ ceq nocycle(< A,B > ; G) = nocycle(G)
+  if mcc(A,G) <> mcc(B,G) = false[metadata "CA-2"].
+ ---
+ op nomcc : Graph -> Int .
+ eq nomcc(nil) = no .
+ ceq nomcc(< A,B > ; G) = nomcc(G)
+  if mcc(A,G) = mcc(B,G) [metadata "CA-1"].
+ ceq nomcc(< A,B > ; G) = nomcc(G) - 1
+  if mcc(A,G) <> mcc(B,G) = false [metadata "CA-2"].
+ ---
+ op mktree : Graph -> Graph .
+ eq  mktree(nil) = nil .
+ ceq mktree(< A,B > ; G) = mktree(G)
+  if mcc(A,G) = mcc(B,G) [metadata "CA-1"].
+ ceq mktree(< A,B > ; G) = < A,B > ; mktree(G)
+  if mcc(A,G) <> mcc(B,G) = false [metadata "CA-1"].
+endfm)
