@@ -5790,6 +5790,10 @@ set print attribute on .
 }
 %)
 
+load model-checker.maude
+
+select CAFE2MAUDE .
+
 loop cafe4maude-init .
 
 load predefined.maude

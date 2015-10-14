@@ -1,0 +1,127 @@
+open NAT + BOOL .
+ ops i j k : -> Nat
+ red (0 + j) + k == 0 + (j + k) .       -- base step
+ eq (i + j) + k = i + (j + k) .         -- induction hypothesis
+ red (s(i) + j) + k == s(i) + (j + k) . -- inductive step
+close
+
+mod! LIST {
+  pr(NAT)
+  [Nat < List]
+
+  op nil : -> List {constr}
+  op __ : List List -> List {constr assoc id: (nil)}
+
+  var  N : Nat
+  vars L L' : List
+
+  op reverse : List -> List
+  eq [r1] : reverse(nil) = 0 .
+  eq [r2] : reverse(N L) = reverse(L) N .
+}
+
+mod! SET {
+  pr(NAT)
+  [Nat < Set]
+
+  op mt : -> Set {constr}
+  op _;_ : Set Set -> Set {constr comm assoc id: mt}
+
+  var N : Nat
+  var S : Set
+
+  pred _in_ : Nat Set .
+  eq N in (N ; S) = true .
+  eq N in S = false {owise} .
+}
+
+mod! PROP-LIST {
+  pr(LIST)
+
+  var L : List
+
+  op prop : List -> Bool .
+  eq [p1] : prop(L) = reverse(reverse(L)) == L .
+}
+
+mod! MEP {
+ pr(LIST)
+ pr(SET)
+
+ [MEP]
+
+ op _|_[_] : Set List Set -> MEP {constr}
+
+ var  N : Nat .
+ var  L : List .
+ vars S S' : Set .
+
+ trans [wait] : N ; S | L [ S' ] => S | N L [ S' ] .
+ trans [cs]   : S | L N [ mt ] => S | L [ N ] .
+ trans [end]  : S | L [ N ] => N ; S | L [ mt ] .
+}
+
+mod! MEP-PROPS {
+ pr(MEP)
+ inc(SATISFACTION)
+
+ [MEP < State]
+
+ op atMostOneInCS : -> Prop {constr}
+ op inCS : Nat -> Prop {constr}
+
+ vars S S' : Set .
+ var  L : List .
+ vars N N' : Nat .
+
+ eq S | L [mt] |= atMostOneInCS = true .
+ eq S | L [N] |= atMostOneInCS = true .
+ eq S | L [N ; S] |= inCS(N) = true .
+}
+
+mod! MEP-CHECK {
+  pr(MEP-PROPS)
+  pr(MODEL-CHECKER)
+  pr(LTL-SIMPLIFIER)
+
+  op init : -> MEP .
+  eq init = 1 ; 2 ; 3 | nil [ mt ] .
+}
+
+open MEP-CHECK .
+ red modelCheck(init, [] atMostOneInCS) .
+ red modelCheck(init, <> inCS(1)) .
+close
+
+mod! LIST-PROP {
+  pr(NAT)
+  [List]
+
+  op nil : -> List {constr}
+  op __ : Nat List -> List {constr}
+
+  var  N : Nat
+  vars L L' : List
+
+  op _@_ : List List -> List
+  eq [c1] : nil @ L = L {metadata "CA-1"} .
+  eq [c2] : (N L) @ L' = N (L @ L') {metadata "CA-2"} .
+}
+
+
+
+eof
+
+(goal LIST-PROP |- eq L1:List @ (L2:List @ L3:List) = (L1:List @ L2:List) @ L3:List ;)
+
+(set ind on L1:List .)
+
+(apply SI TC CA .)
+
+eof
+
+Maude> (red modelCheck(init, [] atMostOneInCS) .)
+reduce in MEP-CHECK :
+  modelCheck(init,[]~ twoinSC)
+result Bool :
+  true

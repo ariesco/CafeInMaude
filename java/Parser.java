@@ -300,6 +300,16 @@ public class Parser {
 				res = ")\n\n" + line;
 			}
 		}
+		if (startsWithIgnoreBlanks(line, "load") ||
+				(startsWithIgnoreBlanks(line, "in") && !startsWithIgnoreBlanks(line, "inc"))){
+			if (started){
+				res = ")\n\n" + line;
+			}
+			else{
+				res = "\n" + line;
+			}
+			started = false;
+		}
 		return res;
 	}
 
