@@ -859,8 +859,8 @@ fmod SEARCH_PREDICATE is
   op mySearch : Module NzNat* Term Term Variable Term Queue TermSet Nat QidList -> QidList .
   eq mySearch(M, 0, PAT, TCOND, CC, INFO, QUEUE, TS, N, QIL) = QIL .
   eq mySearch(M, NUMSOLS, PAT, TCOND, CC, INFO, mt, TS, N, QIL) = QIL .
-  ceq mySearch(M, NUMSOLS, PAT, TCOND, CC, INFO, E QUEUE, TS, N, QIL) =
-       mySearch(M, NUMSOLS', PAT, TCOND, CC, INFO, QUEUE QUEUE', TS', N', QIL QIL')
+  ceq mySearch(M, NUMSOLS, PAT, TCOND, CC, INFO, E . QUEUE, TS, N, QIL) =
+       mySearch(M, NUMSOLS', PAT, TCOND, CC, INFO, QUEUE . QUEUE', TS', N', QIL QIL')
    if NUMSOLS =/= 0 /\
      [ NUMSOLS', TS', QUEUE', N', QIL' ] :=
             applyAllRules(M, getRls(M), NUMSOLS, PAT, TCOND, CC, INFO, TS, E, mt, N, nil) .
@@ -873,7 +873,7 @@ fmod SEARCH_PREDICATE is
                                      [ NUMSOLS, TS, QUEUE, N, QIL] .
   ceq applyAllRules(M, Rl RS, NUMSOLS, PAT, TCOND, CC, INFO, TS, | T, STEPS |, QUEUE, N, QIL) =
          applyAllRules(M, RS, NUMSOLS', PAT, TCOND, CC, INFO, TS', | T, STEPS |,
-                       QUEUE QUEUE', N', QIL QIL' QIL'')
+                       QUEUE . QUEUE', N', QIL QIL' QIL'')
    if | L, R, TCONDR | := getParts(Rl) /\
       {SB, CTX} := metaXmatch(M, L, T, nil, 0, unbounded, 0) /\
       R' := getTerm(metaReduce(M, applySubstitution(insertInContext(CTX, R), SB))) /\
@@ -907,7 +907,7 @@ fmod SEARCH_PREDICATE is
   op |_,_| : Term NzNat* -> Element .
 
   op mt : -> Queue [ctor] .
-  op __ : Queue Queue -> Queue [ctor assoc id: mt] .
+  op _._ : Queue Queue -> Queue [ctor assoc id: mt] .
 
   op _inTermSet_ : Term TermSet -> Bool .
   eq T inTermSet T | TS = true .

@@ -68,15 +68,16 @@ mod! MEP-PROPS {
  [MEP < State]
 
  op atMostOneInCS : -> Prop {constr}
- op inCS : Nat -> Prop {constr}
+ ops waiting cs : Nat -> Prop {constr}
 
  vars S S' : Set .
- var  L : List .
+ vars L L' : List .
  vars N N' : Nat .
 
  eq S | L [mt] |= atMostOneInCS = true .
  eq S | L [N] |= atMostOneInCS = true .
- eq S | L [N ; S] |= inCS(N) = true .
+ eq S | L N L' [S'] |= waiting(N) = true .
+ eq S | L [N ; S'] |= cs(N) = true .
 }
 
 mod! MEP-CHECK {
@@ -90,7 +91,7 @@ mod! MEP-CHECK {
 
 open MEP-CHECK .
  red modelCheck(init, [] atMostOneInCS) .
- red modelCheck(init, <> inCS(1)) .
+ red modelCheck(init, [] (waiting(1) -> <> cs(1))) .
 close
 
 mod! LIST-PROP {

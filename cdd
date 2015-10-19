@@ -1,0 +1,17 @@
+#!/bin/sh
+declare -r TEMP=trans-temp-mod
+declare -r ALL=all-temp-mod.cafe
+declare -r MAUDE=/Applications/maude-darwin/maude.darwin64
+declare -r PARSER=./parser.jar
+declare -r MDD=./mdd/mdd.maude
+rm -f $ALL
+rm -f $TEMP
+for (( i=1; i<=$#; i++ ))
+do
+   eval arg=\$$i
+   java -jar $PARSER $arg $TEMP
+   cat $TEMP >> $ALL
+done
+$MAUDE $MDD $ALL
+rm -f $TEMP
+rm -f $ALL

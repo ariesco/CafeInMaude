@@ -5506,32 +5506,32 @@ CafeOBJ statement:
   op normalizeImports : QidList QidList -> QidList .
   eq normalizeImports(nil, QIL) = QIL .
   ceq normalizeImports('protecting '`( QIL, QIL') = normalizeImports(QIL3, QIL' 'pr '`( QIL2)
-   if < QIL2, QIL3 > := normalizeImp(QIL, nil, 0) .
+   if <<< QIL2, QIL3 >>> := normalizeImp(QIL, nil, 0) .
   ceq normalizeImports('pr '`( QIL, QIL') = normalizeImports(QIL3, QIL' 'pr '`( QIL2)
-   if < QIL2, QIL3 > := normalizeImp(QIL, nil, 0) .
+   if <<< QIL2, QIL3 >>> := normalizeImp(QIL, nil, 0) .
   ceq normalizeImports('including '`( QIL, QIL') = normalizeImports(QIL3, QIL' 'inc '`( QIL2)
-   if < QIL2, QIL3 > := normalizeImp(QIL, nil, 0) .
+   if <<< QIL2, QIL3 >>> := normalizeImp(QIL, nil, 0) .
   ceq normalizeImports('inc '`( QIL, QIL') = normalizeImports(QIL3, QIL' 'inc '`( QIL2)
-   if < QIL2, QIL3 > := normalizeImp(QIL, nil, 0) .
+   if <<< QIL2, QIL3 >>> := normalizeImp(QIL, nil, 0) .
   ceq normalizeImports('extending '`( QIL, QIL') = normalizeImports(QIL3, QIL' 'ex '`( QIL2)
-   if < QIL2, QIL3 > := normalizeImp(QIL, nil, 0) .
+   if <<< QIL2, QIL3 >>> := normalizeImp(QIL, nil, 0) .
   ceq normalizeImports('ex '`( QIL, QIL') = normalizeImports(QIL3, QIL' 'ex '`( QIL2)
-   if < QIL2, QIL3 > := normalizeImp(QIL, nil, 0) .
+   if <<< QIL2, QIL3 >>> := normalizeImp(QIL, nil, 0) .
   ceq normalizeImports('using '`( QIL, QIL') = normalizeImports(QIL3, QIL' 'us '`( QIL2)
-   if < QIL2, QIL3 > := normalizeImp(QIL, nil, 0) .
+   if <<< QIL2, QIL3 >>> := normalizeImp(QIL, nil, 0) .
   ceq normalizeImports('us '`( QIL, QIL') = normalizeImports(QIL3, QIL' 'us '`( QIL2)
-   if < QIL2, QIL3 > := normalizeImp(QIL, nil, 0) .
+   if <<< QIL2, QIL3 >>> := normalizeImp(QIL, nil, 0) .
   eq normalizeImports(Q QIL, QIL') = normalizeImports(QIL, QIL' Q) [owise] .
 
   sort NormRes .
-  op <_,_> : QidList QidList -> NormRes [ctor] .
+  op <<<_,_>>> : QidList QidList -> NormRes [ctor] .
 
   op normalizeImp : QidList QidList Nat -> NormRes .
-  eq normalizeImp('`) QIL, QIL', 0) = < QIL' '`), QIL > .
+  eq normalizeImp('`) QIL, QIL', 0) = <<< QIL' '`), QIL >>> .
   eq normalizeImp('`) QIL, QIL', s(N)) = normalizeImp(QIL, QIL' '`), N) .
   eq normalizeImp('`( QIL, QIL', N) = normalizeImp(QIL, QIL' '`(, s(N)) .
   ceq normalizeImp('`{ QIL, QIL', N) = normalizeImp(QIL3, QIL' '`{ QIL2, N)
-   if < QIL2, QIL3 > := otfView(QIL, 0) .
+   if <<< QIL2, QIL3 >>> := otfView(QIL, 0) .
   eq normalizeImp(Q QIL, QIL', N) = normalizeImp(QIL, QIL' Q, N) [owise] .
 
 
@@ -5547,7 +5547,7 @@ CafeOBJ statement:
   eq otfView(QIL, N) = otfView(QIL, nil, N) .
 
   op otfView : QidList QidList Nat -> NormRes .
-  eq otfView('`} QIL, QIL', 0) = < normalizeCafeOBJView(QIL' '. '`}), QIL > .
+  eq otfView('`} QIL, QIL', 0) = <<< normalizeCafeOBJView(QIL' '. '`}), QIL >>> .
   eq otfView('`} QIL, QIL', s(N)) = otfView(QIL, QIL' '`}, N) .
   eq otfView('`{ QIL, QIL', N) = otfView(QIL, QIL' '`{, s(N)) .
   eq otfView(Q QIL, QIL', N) = otfView(QIL, QIL' Q, N) [owise] .
