@@ -56,3 +56,11 @@ Using the MFE
 The code here includes the last version of the translation integrated with the
 Maude Formal Environment. The latest version of the MFE is available
 [here](http://maude.lcc.uma.es/MFE/).
+
+Using the MDDTCG
+----------------
+
+The code here includes the last version of the Maude Declarative Debugger and
+Test-Case Generator. More details are available
+[here](http://maude.sip.ucm.es/debugging/) for the declarative debugger and
+[here](http://maude.sip.ucm.es/testing/) for the test-case generator.
