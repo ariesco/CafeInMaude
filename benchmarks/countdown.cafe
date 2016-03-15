@@ -1,0 +1,21 @@
+mod! COUNTDOWN {
+ pr(NAT)
+ [Nat < Countdown]
+
+ op mt : -> Countdown {constr}
+ op __ : Countdown Countdown -> Countdown {constr assoc comm id: mt}
+
+ vars N N' : Nat
+
+ trans [add] : N N' => N + N' .
+ trans [sub] : N N' => sd(N, N') .
+ trans [mul] : N N' => _*_(N, N') .
+ trans [quo] : N N' => N quo N' .
+
+ op init : -> Countdown .
+ eq init = 3 5 4 6 4 .
+}
+
+open COUNTDOWN .
+  red init ==> 3 .
+close

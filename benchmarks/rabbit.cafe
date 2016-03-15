@@ -1,0 +1,17 @@
+mod! RABBIT-HOP {
+  pr(NAT)
+  [Rabbit < RabbitList]
+
+  ops x o free : -> Rabbit {constr}
+  op __ : RabbitList RabbitList -> RabbitList {constr assoc}
+
+  trans [xAdvances] : x free => free x .
+  trans [xJumps] : x o free => free o x .
+  trans [oAdvances] : free o => o free .
+  trans [oJumps] : free x o => o x free .
+}
+
+open RABBIT-HOP .
+  red x x x x x x x x x x free o o o o o o o o o o ==>
+      o o o o o o o o o o free x x x x x x x x x x .
+close

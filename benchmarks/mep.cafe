@@ -1,0 +1,62 @@
+mod! LIST {
+  pr(NAT)
+  [Nat < List]
+
+  op nil : -> List {constr}
+  op __ : List List -> List {constr assoc id: (nil)}
+
+  var  N : Nat
+  vars L L' : List
+
+  op reverse : List -> List
+  eq [r1] : reverse(nil) = 0 .
+  eq [r2] : reverse(N L) = reverse(L) N .
+}
+
+mod! SET {
+  pr(NAT)
+  [Nat < Set]
+
+  op mt : -> Set {constr}
+  op _;_ : Set Set -> Set {constr comm assoc id: mt}
+
+  var N : Nat
+  var S : Set
+
+  pred _in_ : Nat Set .
+  eq N in (N ; S) = N in S .
+  eq N in mt = false .
+}
+
+mod! PROP-LIST {
+  pr(LIST)
+
+  var L : List
+
+  op prop : List -> Bool .
+  eq [p1] : prop(L) = reverse(reverse(L)) == L .
+}
+
+mod! MEP {
+ pr(LIST)
+ pr(SET)
+
+ [MEP]
+
+ op _|_[_] : Set List Set -> MEP {constr}
+
+ var  N : Nat .
+ var  L : List .
+ vars S S' : Set .
+
+ trans [wait] : N ; S | L [ S' ] => S | N L [ S' ] .
+ trans [cs]   : S | L N [ mt ] => S | L [ N ] .
+ trans [end]  : S | L [ N ] => N ; S | L [ mt ] .
+
+ op init : -> MEP .
+ eq init = 0 ; 1 ; 2 ; 3 ; 5 ; 6 ; 7 ; 8 | nil [mt] .
+}
+
+open MEP .
+ red init ==> S:Set | L:List [N:Nat ; N':Nat] .
+close
