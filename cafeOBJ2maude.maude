@@ -1,5 +1,87 @@
 load predefined_core.maude
 
+fmod GOAL is
+ pr META-LEVEL .
+
+ sort Goal .
+ *** Id
+ *** Sentence
+ *** Is it the current one?
+ *** Is it proven?
+ op [_,_,_,_,_] : Nat Qid Equation Bool Bool -> Goal [ctor] .
+
+ op noGoal : -> Goal [ctor] .
+ op _+_ : Goal Goal -> Goal [ctor assoc id: noGoal] .
+
+ sort ProofTree ProofTreeList .
+ subsort ProofTree < ProofTreeList .
+
+ op mtPT : -> ProofTree [ctor] .
+ op __ : ProofTreeList ProofTreeList -> ProofTreeList [ctor assoc id: mtPT] .
+
+ op |_,_,_,_| : Module Goal ProofTreeList Nat -> ProofTree [ctor] .
+
+ var  M : Module .
+ var  G : Goal .
+ vars PrL PrL' : ProofTreeList .
+ vars N N' : Nat .
+ var  Q : Qid .
+ var  Eq : Equation .
+ vars CURR PRV : Bool .
+ vars SR SR' : SearchRes .
+
+ op getEq : Goal -> Equation .
+ eq getEq([N, Q, Eq, CURR, PRV]) = Eq .
+
+ op getId : Goal -> Nat .
+ eq getId([N, Q, Eq, CURR, PRV]) = N .
+
+ op isProven : Goal -> Bool .
+ eq isProven([N, Q, Eq, CURR, PRV]) = PRV .
+
+ op size : ProofTree -> Nat .
+ eq size(mtPT) = 0 .
+ eq size(| M, G, PrL, N |) = N .
+
+ op size* : ProofTreeList -> Nat .
+ eq size*(mtPT) = 0 .
+ eq size*(| M, G, PrL, N | PrL') = N + size*(PrL') .
+
+ sort SearchRes .
+ subsort Nat < SearchRes .
+
+ op allProven : -> SearchRes [ctor] .
+
+ op minSR : SearchRes SearchRes -> SearchRes [comm assoc] .
+ eq minSR(allProven, SR) = SR .
+ eq minSR(N, N') = min(N, N') .
+
+ op getFirstUnproven : ProofTree -> SearchRes .
+ eq getFirstUnproven(mtPT) = allProven .
+ ceq getFirstUnproven(| M, G, mtPT, N |) = getId(G)
+  if not isProven(G) .
+ eq getFirstUnproven(| M, G, PrL, N |) = getFirstUnproven*(PrL) [owise] .
+
+ op getFirstUnproven* : ProofTree -> SearchRes .
+ eq getFirstUnproven*(mtPT) = allProven .
+ ceq getFirstUnproven*(| M, G, PrL, N | PrL') = minSR(SR, SR')
+  if SR := getFirstUnproven(| M, G, PrL, N |) /\
+     SR' := getFirstUnproven*(PrL') .
+endfm
+
+fmod MACROS is
+ pr META-LEVEL .
+
+ sorts Macro Macros .
+ subsort Macro < Macros .
+
+ op #_,_-_# : Module Qid Equation -> Macro [ctor] .
+ op #_,_-_# : Module Qid Term -> Macro [ctor] .
+
+ op mtMacros : -> Macros [ctor] .
+ op __ : Macros Macros -> Macros [ctor assoc comm id: mtMacros] .
+endfm
+
 ***(%
 
 We present in this section the main modules required for dealing with CafeOBJ
@@ -103,7 +185,7 @@ argument, while the precedence attribute takes a token:
 %)
 
   op __ : @CafeAttrList@ @CafeAttrList@ -> @CafeAttrList@ [ctor assoc] .
-  ops assoc associative l-assoc r-assoc comm commutative constr nonexec
+  ops assoc associative l-assoc r-assoc comm commutative constr nonexec :nonexec
       idem idempotent owise : -> @CafeAttr@ [ctor] .
 ***  TODO: Remove if not required
 ***  op id:`(_`) : @CafeBubble@ -> @CafeAttr@ [ctor] .
@@ -222,7 +304,8 @@ It first defines all the required sorts, and the subsort relations between them:
         @BehaviorEquationDecl@ @CafeDeclList@ @CafeEqDecl@ @CafeVarDecl@
         @CafeSubSortRel@ @CafeLDeclList@ @OpenCloseDeclList@ @CafeModExp@ @CafeParameter@
         @CafeParameters@ @CafeInterface@ @CafeViewDecl@ @CafeViewDeclList@ @CafeTransDecl@
-        @CafeViewId@ @CafeViewIdList@ @ExecutionDecl@ @ReqProvDecl@ .
+        @CafeViewId@ @CafeViewIdList@ @ExecutionDecl@ @ReqProvDecl@
+        @CafeInductiveComm@ .
 
   subsort @CafeToken@ < @CafeSort@ < @CafeType@ .
 
@@ -238,7 +321,8 @@ It first defines all the required sorts, and the subsort relations between them:
   subsort @CafeSort@ < @CafeSortList@ .
   subsort @CafeType@ < @CafeTypeList@ .
   subsorts @CafeImportDecl@ @CafeVarDecl@ @CafeEqDecl@ @VisibleSortDecl@ @CafeOpDecl@
-           @CafeTransDecl@ @ExecutionDecl@ < @CafeLDeclList@ < @OpenCloseDeclList@  .
+           @CafeTransDecl@ @ExecutionDecl@ @CafeInductiveComm@
+           < @CafeLDeclList@ < @OpenCloseDeclList@  .
   subsorts @HiddenSortDecl@ @BehaviorEquationDecl@ @CafeLDeclList@
            < @CafeDeclList@ .
   subsort @ModExp@ < @CafeModExp@ . *** !!!!
@@ -533,6 +617,16 @@ declared or not:
   *** Requires and provides
   op require_ : @NeCafeTokenList@ -> @ReqProvDecl@ [ctor] .
   op provide_ : @NeCafeTokenList@ -> @ReqProvDecl@ [ctor] .
+
+  *** Commands for induction
+  op :goal{_} : @CafeLDeclList@ -> @CafeInductiveComm@ [ctor] .
+  op :def_=`:ctf{_} : @CafeToken@ @CafeEqDecl@ -> @CafeInductiveComm@ [ctor] .
+  op :ind`on(_) : @CafeToken@ -> @CafeInductiveComm@ [ctor] .
+  op :apply(_) : @NeCafeTokenList@ -> @CafeInductiveComm@ [ctor] .
+  op :imp[_]. : @CafeToken@ -> @CafeInductiveComm@ [ctor] .
+  op :sel(_) : @CafeToken@ -> @CafeInductiveComm@ [ctor] .
+  op :show`proof : -> @CafeInductiveComm@ [ctor] .
+  op :desc`. : -> @CafeInductiveComm@ [ctor] .
 
 ***(%
 \end{comment}
@@ -2380,6 +2474,7 @@ of the list, until the empty list is reached:
   eq map2MaudeAttr(('idempotent.@CafeAttr@, TL)) = 'idem.@Attr@, map2MaudeAttr(TL) .
   eq map2MaudeAttr(('idem.@CafeAttr@, TL)) = 'idem.@Attr@, map2MaudeAttr(TL) .
   eq map2MaudeAttr(('nonexec.@CafeAttr@, TL)) = 'nonexec.@Attr@, map2MaudeAttr(TL) .
+  eq map2MaudeAttr((':nonexec.@CafeAttr@, TL)) = 'nonexec.@Attr@, map2MaudeAttr(TL) .
   eq map2MaudeAttr(('owise.@CafeAttr@, TL)) = 'owise.@Attr@, map2MaudeAttr(TL) .
   eq map2MaudeAttr(('id:`(_`)['CafeBubble[T]], TL)) = 'id:_['bubble[T]], map2MaudeAttr(TL) .
   eq map2MaudeAttr(('id:_['CafeBubble[T]], TL)) = 'id:_['bubble[T]], map2MaudeAttr(TL) .
@@ -2516,7 +2611,7 @@ the attributes and then using \verb"parseDecl":
 
   ceq parseCafeDecl('beq_=_.['CafeBubble[T], 'CafeBubble[T']], PU, U, VDS, PSM, TSM, DB) =
                                               < PDR, nil, none, DB >
-   if QIL := downQidList(T) /\
+   if QIL := improveLabel(downQidList(T)) /\
       VDS' := opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
       TOTF' := behavioralEq(renameOnTheFly(cafeEqAtS2maudeEqAts(T'), VDS')) /\
@@ -2535,7 +2630,7 @@ the \verb"parseDecl" function:
 
   ceq parseCafeDecl('ceq_=_if_.['CafeBubble[T], 'CafeBubble[T'], 'CafeBubble[T'']],
                     PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
-   if QIL := downQidList(T) /\
+   if QIL := improveLabel(downQidList(T)) /\
       VDS' := opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
       TOTF' := renameOnTheFly(T', VDS') /\
@@ -2552,7 +2647,7 @@ the \verb"parseDecl" function:
 
   ceq parseCafeDecl('cq_=_if_.['CafeBubble[T], 'CafeBubble[T'], 'CafeBubble[T'']], PU, U,
                     VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
-   if QIL := downQidList(T) /\
+   if QIL := improveLabel(downQidList(T)) /\
       VDS' := opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
       TOTF' := renameOnTheFly(T', VDS') /\
@@ -2561,7 +2656,7 @@ the \verb"parseDecl" function:
 
   ceq parseCafeDecl('bceq_=_if_.['CafeBubble[T], 'CafeBubble[T'], 'CafeBubble[T'']], PU, U,
                     VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
-   if QIL := downQidList(T) /\
+   if QIL := improveLabel(downQidList(T)) /\
       VDS' := opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
       TOTF' := renameOnTheFly(T', VDS') /\
@@ -2570,7 +2665,7 @@ the \verb"parseDecl" function:
 
   ceq parseCafeDecl('bcq_=_if_.['CafeBubble[T], 'CafeBubble[T'], 'CafeBubble[T'']], PU, U,
                     VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
-   if QIL := downQidList(T) /\
+   if QIL := improveLabel(downQidList(T)) /\
       VDS' := opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
       TOTF' := renameOnTheFly(T', VDS') /\
@@ -2590,7 +2685,7 @@ by \verb"parseDecl" is a Maude rule:
 
   ceq parseCafeDecl('trans_=>_.['CafeBubble[T], 'CafeBubble[T']], PU, U,
                     VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
-   if QIL := downQidList(T) /\
+   if QIL := improveLabel(downQidList(T)) /\
       VDS' := opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
       TOTF' := renameOnTheFly(cafeEqAtS2maudeEqAts(T'), VDS') /\
@@ -2606,7 +2701,7 @@ by \verb"parseDecl" is a Maude rule:
 
   ceq parseCafeDecl('trns_=>_.['CafeBubble[T], 'CafeBubble[T']], PU, U, VDS, PSM,
                     TSM, DB) = < PDR, nil, none, DB >
-   if QIL := downQidList(T) /\
+   if QIL := improveLabel(downQidList(T)) /\
       VDS' := opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
       TOTF' := renameOnTheFly(cafeEqAtS2maudeEqAts(T'), VDS') /\
@@ -2614,7 +2709,7 @@ by \verb"parseDecl" is a Maude rule:
 
   ceq parseCafeDecl('ctrans_=>_if_.['CafeBubble[T], 'CafeBubble[T'], 'CafeBubble[T'']],
                     PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
-   if QIL := downQidList(T) /\
+   if QIL := improveLabel(downQidList(T)) /\
       VDS' := opDeclSetFromQidList(QIL) /\
       TOTF := renameOnTheFly(T, VDS') /\
       TOTF' := renameOnTheFly(T', VDS') /\
@@ -2795,8 +2890,8 @@ identifiers to extend the variable set with the variables defined on the fly in 
 
 \end{itemize}
 
-% The reduction commands are just skipped when parsing a module. We will deal with them
-% separately in the open-close environment:
+% The reduction and induction commands are just skipped when parsing a module.
+% We will deal with them separately in the open-close environment:
 
 {\codesize
 \begin{comment}
@@ -2804,8 +2899,26 @@ identifiers to extend the variable set with the variables defined on the fly in 
 
   ceq parseCafeDecl('reduce_.[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if PDR := < PU ; U ; VDS > .
-
   ceq parseCafeDecl('red_.[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
+   if PDR := < PU ; U ; VDS > .
+  ceq parseCafeDecl(':goal`{_`}[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
+   if PDR := < PU ; U ; VDS > .
+  ceq parseCafeDecl(':ind`on`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
+   if PDR := < PU ; U ; VDS > .
+  ceq parseCafeDecl(':apply`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
+   if PDR := < PU ; U ; VDS > .
+  ceq parseCafeDecl(':sel`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
+   if PDR := < PU ; U ; VDS > .
+  ceq parseCafeDecl(':imp`[_`].[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
+   if PDR := < PU ; U ; VDS > .
+  ceq parseCafeDecl(':def_=`:ctf`{_`}[T, T'], PU, U, VDS, PSM, TSM, DB) =
+                                                                < PDR, nil, none, DB >
+   if PDR := < PU ; U ; VDS > .
+  ceq parseCafeDecl(':show`proof.@CafeInductiveComm@, PU, U, VDS, PSM, TSM, DB) =
+                                                               < PDR, nil, none, DB >
+   if PDR := < PU ; U ; VDS > .
+  ceq parseCafeDecl(':desc`..@CafeInductiveComm@, PU, U, VDS, PSM, TSM, DB) =
+                                                               < PDR, nil, none, DB >
    if PDR := < PU ; U ; VDS > .
 
 ***(%
@@ -2834,6 +2947,8 @@ mod CafePARSER is
   inc CafeDECL-PARSING .
   pr DATABASE-HANDLING .
   pr SEARCH_PREDICATE .
+  pr MACROS .
+  pr GOAL .
 
 ***(%
 \end{verbatim}
@@ -2889,11 +3004,12 @@ a list of quoted identifiers reporting the errors found during the parsing proce
   vars PDR PDR' : ParseDeclResult .
   vars PU PU' U U' M : Module .
   var  Ty : Type .
-  vars N N' : Nat .
+  vars N N' N'' : Nat .
   **** PSM: Principal Sort Map
   vars PSM PSM' SM SM' : SortMap .
   vars TSM TSM' HSM HSM' : TheorySortMap .
   vars QS QS' : QidSet .
+  var  MACS : Macros .
 
 ***(%
 \end{comment}
@@ -3349,6 +3465,14 @@ of the \verb"evalPreModule" function:
       DB3 := updateDatabase4cafe(getName(U), DB'') /\
       HSM' := addHiddenSort(HSM, getName(U), SS) .
 
+  ceq procCafeMod4(T, C, PU, U, VDS, PSM, HSM, TSM, DB) = < DB3, PSM, HSM', nil >
+   if < PDR, nil, SS, DB' > := parseCafeDecl(C, PU, U, VDS, PSM, TSM, DB) /\
+      DB'' := evalPreModule(predefinedCafeEqual(preModule(PDR)),
+                            predefinedCafeEqual(unit(PDR)),
+                            vars(PDR), insTermModule(getName(U), T, DB')) /\
+      DB3 := updateDatabase4cafe(getName(U), DB'') /\
+      HSM' := addHiddenSort(HSM, getName(U), SS) .
+
   ceq procCafeMod4(T, F[TL], PU, U, VDS, PSM, HSM, TSM, DB) = < DB, PSM, HSM', QIL >
    if F =/= '__ /\
       < PDR, QIL, SS, DB' > := parseCafeDecl(F[TL], PU, U, VDS, PSM, TSM, DB) /\
@@ -3366,21 +3490,45 @@ of the \verb"evalPreModule" function:
   vars VES VES' VES'' VES3 : Set{ViewExp} .
   vars MIS MIS' : Set{ModuleInfo} .
   var  VIS : Set{ViewInfo} .
+  vars STR STR' : String .
+  var  COND : Condition .
+
+  op nonexecInLabel : Module -> Module .
+  eq nonexecInLabel(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm) =
+       fmod H is IL sorts SS . SSDS ODS MAS nonexecInLabel(EqS) endfm .
+  eq nonexecInLabel(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm) =
+       mod H is IL sorts SS . SSDS ODS MAS nonexecInLabel(EqS) RS endm .
+  eq nonexecInLabel(fth H is IL sorts SS . SSDS ODS MAS EqS endfth) =
+       fth H is IL sorts SS . SSDS ODS MAS nonexecInLabel(EqS) endfth .
+  eq nonexecInLabel(th H is IL sorts SS . SSDS ODS MAS EqS RS endth) =
+       th H is IL sorts SS . SSDS ODS MAS nonexecInLabel(EqS) RS endth .
+  eq nonexecInLabel(M?) = M? [owise] .
+
+  op nonexecInLabel : EquationSet -> EquationSet .
+  eq nonexecInLabel((none).EquationSet) = none .
+  eq nonexecInLabel(eq T = T' [AtS] . EqS) = eq T = T' [nonexecInLabel(AtS)] .
+                                             nonexecInLabel(EqS) .
+  eq nonexecInLabel(ceq T = T' if COND [AtS] . EqS) =
+             ceq T = T' if COND [nonexecInLabel(AtS)] . nonexecInLabel(EqS) .
+
+  op nonexecInLabel : AttrSet -> AttrSet .
+  eq nonexecInLabel(label('cafe-label-:nonexec) AtS) = nonexec AtS .
+  ceq nonexecInLabel(label(Q) AtS) = label(Q') nonexec AtS
+   if STR := string(Q) /\
+      N := find(STR, "-:nonexec", 0) /\
+      STR' := substr(STR, 0, N) + substr(STR, N + 9, length(STR)) /\
+      Q' := qid(STR') .
+  ceq nonexecInLabel(label(Q) AtS) = label(Q') nonexec AtS
+   if STR := string(Q) /\
+      N := find(STR, "cafe-label-:nonexec-", 0) /\
+      STR' := substr(STR, 0, N) + substr(STR, N + 20, length(STR)) /\
+      Q' := qid(STR') .
+  eq nonexecInLabel(AtS) = AtS [owise] .
 
   op updateDatabase4cafe : ModuleExpression Database -> Database .
-  ceq updateDatabase4cafe(ME, DB) = DB''
-   if DB' := updateDatabase4cafeAux(ME, DB) /\
-      DB'' := updateDatabaseWithMetaSearch(ME, DB') .
+  ceq updateDatabase4cafe(ME, DB) = DB'
+   if DB' := updateDatabase4cafeAux(ME, DB) .
   eq updateDatabase4cafe(ME, DB) = DB [owise] .
-
-  op updateDatabaseWithMetaSearch : ModuleExpression Database -> Database .
-  ***(
-  ceq updateDatabaseWithMetaSearch(ME, DB) = DB1
-   if db(< ME ; T ; U' ; U'' ; U3 ; VDS ; MNS ; VES > MIS, MNS', VIS, VES', MNS'',
-           MNS3, MNS4, QIL) := DB /\
-      isSystem(TM) .
-  )
-  eq updateDatabaseWithMetaSearch(ME, DB) = DB [owise] .
 
   op filterPredefEqs : EquationSet -> EquationSet .
   eq filterPredefEqs(eq T = T' [AtS metadata("built-in in CafeOBJ")] . EqS) =
@@ -3396,7 +3544,8 @@ of the \verb"evalPreModule" function:
 
   op updateDatabase4cafeAux : ModuleExpression Database -> Database .
   ceq updateDatabase4cafeAux(ME, DB) =
-             db(< ME ; T ; addEqual&SearchEqs(U') ; addEqual&SearchEqs(U'') ; U3 ;
+             db(< ME ; T ; nonexecInLabel(addEqual&SearchEqs(U')) ;
+                  nonexecInLabel(addEqual&SearchEqs(U'')) ; U3 ;
                   VDS ; MNS ; VES > MIS, MNS', VIS, VES', MNS'', MNS3, MNS4, QIL)
    if db(< ME ; T ; U' ; U'' ; U3 ; VDS ; MNS ; VES > MIS, MNS', VIS, VES', MNS'',
            MNS3, MNS4, QIL) := DB /\
@@ -3411,15 +3560,24 @@ of the \verb"evalPreModule" function:
   vars SS SS' : SortSet .
   var  SSDS : SubsortDeclSet .
   vars ODS ODS' : OpDeclSet .
+  var  OD : OpDecl .
   var  MAS : MembAxSet .
   vars EqS EqS' : EquationSet .
   var  RS : RuleSet .
   var  M? : [Module] .
-  var  M' : Module .
+  vars M' M'' M''' : Module .
   vars DB'' DB3 : Database .
   var  AtS : AttrSet .
   var  CND : Condition .
   vars ST ST' ST'' : SharingTable .
+  vars G G' G'' : Goal .
+  var  TyL : TypeList .
+  vars Eq Eq' : Equation .
+  var  CMD : Qid .
+  vars P P' P'' : ProofTree .
+  vars PrL PrL' PrL'' PrL1 PrL2 : ProofTreeList .
+  vars B B' : Bool .
+  var  SR : SearchRes .
 
   op addEqual&SearchEqs : Module -> Module .
   ceq addEqual&SearchEqs(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm) =
@@ -3453,7 +3611,6 @@ of the \verb"evalPreModule" function:
   op createEqsFromSorts : SortSet -> EquationSet .
   eq createEqsFromSorts(none) = none .
   ceq createEqsFromSorts(Srt ; SS) = eq '_=_[V, V] = 'true.Bool [metadata("built-in in CafeOBJ")] .
-***                                     eq '_=_[V, V'] = 'false.Bool [owise metadata("built-in in CafeOBJ")] .
                                      createEqsFromSorts(SS)
    if V := qid("V:" + string(Srt)) /\
       V' := qid("V':" + string(Srt)) .
@@ -3567,9 +3724,9 @@ the \verb"maps2maps" function shown above to the body:
    if T1 := 'CafeToken[openCloseModNameUp] /\
       T2 := '__['inc`(_`)[cleanOpenCloseName(T)], T'] /\
       < DB', PSM', HSM', QIL > := procCafeMod('cmod!_`{_`}[T1, T2], PSM, HSM, TSM, DB) /\
-      M := getFlatModule(openCloseModName, DB') /\
-      TL := getRedCommands(T') /\
-      QIL' := processRedCommands(M, DB', TL, T2) .
+      M := nonexecInLabel(getFlatModule(openCloseModName, DB')) /\
+      TL := getRedThCommands(T') /\
+      QIL' := processRedThCommands(M, PSM, HSM, TSM, DB', TL, T2, mtPT, 'foo:Foo, mtMacros) .
   eq procOpenCloseEnv(T, T', PSM, HSM, TSM, DB) =
                          < DB | nil | 'Environment 'not 'parsed. > [owise] .
 
@@ -3577,20 +3734,73 @@ the \verb"maps2maps" function shown above to the body:
   eq cleanOpenCloseName('`(_`)[T]) = T .
   eq cleanOpenCloseName(T) = T [owise] .
 
-  op getRedCommands : Term -> TermList .
-  eq getRedCommands('__[T, T']) = getRedCommands(T), getRedCommands(T') .
-  eq getRedCommands(T) = getRedCommand(T) [owise] .
+  op getRedThCommands : Term -> TermList .
+  eq getRedThCommands('__[T, T']) = getRedThCommand(T), getRedThCommands(T') .
+  eq getRedThCommands(T) = getRedThCommand(T) [owise] .
 
-  op getRedCommand : Term -> TermList .
-  eq getRedCommand('reduce_.['CafeBubble[T]]) = 'red_.['bubble[T]] .
-  eq getRedCommand('red_.['CafeBubble[T]]) = 'red_.['bubble[T]] .
-  eq getRedCommand(T) = empty [owise] .
+  op getRedThCommand : Term -> TermList .
+  eq getRedThCommand('reduce_.['CafeBubble[T]]) = 'red_.['bubble[T]] .
+  eq getRedThCommand('red_.['CafeBubble[T]]) = 'red_.['bubble[T]] .
+  eq getRedThCommand(':goal`{_`}[T]) = ':goal`{_`}[T] .
+  eq getRedThCommand(':ind`on`(_`)['CafeToken[T]]) = ':ind`on`(_`)[T] .
+  eq getRedThCommand(':apply`(_`)['neCafeTokenList[T]]) = ':apply`(_`)[T] .
+  eq getRedThCommand(':sel`(_`)['CafeToken[T]]) = ':sel`(_`)[T] .
+  eq getRedThCommand(':imp`[_`].['CafeToken[T]]) = ':imp`[_`].[T] .
+  eq getRedThCommand(':def_=`:ctf`{_`}['CafeToken[T], T']) =
+                                                   ':def_=`:ctf`{_`}[T, T'] .
+  eq getRedThCommand(':show`proof.@CafeInductiveComm@) = ':show`proof.@CafeInductiveComm@ .
+  eq getRedThCommand(':desc`..@CafeInductiveComm@) = ':desc`..@CafeInductiveComm@ .
+  eq getRedThCommand(T) = empty [owise] .
 
-  op processRedCommands : Module Database TermList Term -> QidList .
-  eq processRedCommands(M, DB, empty, T) = nil .
-  ceq processRedCommands(M, DB, ('red_.['bubble[T]], TL), T1) = QIL
-                                                   processRedCommands(M, DB, TL, T1)
+  op processRedThCommands : Module SortMap TheorySortMap TheorySortMap Database
+                            TermList Term ProofTree Variable Macros -> QidList .
+  eq processRedThCommands(M, PSM, HSM, TSM, DB, empty, T, P, V, MACS) = nil .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':goal`{_`}[T], TL), T1, P, V, MACS) =
+                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P', V, MACS)
+   if [P', QIL] := evalGoalCommand(M, T, T1, PSM, HSM, TSM, DB) .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':ind`on`(_`)[T], TL), T1, P, V, MACS) =
+                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, T', MACS)
+   if T' := downTerm(T) /\
+      T' :: Variable /\
+      QIL := '\n 'Induction 'set 'on metaPrettyPrint(M, T', po) '\n .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':apply`(_`)[T], TL), T1, P, V, MACS) =
+                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P', V, MACS)
+   if Q := downQid(T) /\
+      [P', QIL] := evalApply(M, Q, P, V, MACS) .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':sel`(_`)[T], TL), T1, P, V, MACS) =
+                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P', V, MACS)
+   if Q := downQid(T) /\
+      N := rat(string(Q), 10) /\
+      P' := selectGoal(P, N) /\
+      QIL := '\n 'Sentence Q 'selected. '\n .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':imp`[_`].[T], TL), T1, P, V, MACS) =
+                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P', V, MACS)
+   if Q := downQid(T) /\
+      [P', B] := applyImp(P, Q) /\
+      QIL := if B
+             then '\n 'New 'goal 'generated: printCurrent(P')
+             else '\n 'Command 'failed. '\n
+             fi .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB,
+                          (':def_=`:ctf`{_`}[T, T'], TL), T1, P, V, MACS) =
+                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V, MACS # M', Q - Eq #)
+   if Q := downQid(T) /\
+      # M', Q - Eq # := parseEqMacro(P, Q, T') /\
+      QIL := '\n Q 'defined 'as ':ctf ' '`{ ' printEq(M', Eq) ' '`} '\n .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB,
+                           (':show`proof.@CafeInductiveComm@, TL), T1, P, V, MACS) =
+                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V, MACS)
+   if QIL := '\n 'Current 'proof: printGoals(P) .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB,
+                           (':desc`..@CafeInductiveComm@, TL), T1, P, V, MACS) =
+                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V, MACS)
+   if QIL := '\n 'Current 'goal: printCurrent(P) .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB, ('red_.['bubble[T]], TL), T1, P, V, MACS) =
+                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V, MACS)
    if QIL := evalRedCommand(M, T, T1) .
+  eq processRedThCommands(M, PSM, HSM, TSM, DB, (T, TL), T1, P, V, MACS) =
+                         '\n 'Error 'in 'command.
+                         processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,MACS) [owise] .
 
   *** Module.
   *** Term to be reduced.
@@ -3626,6 +3836,469 @@ the \verb"maps2maps" function shown above to the body:
    if | T', QIL | := myRed(M, T) /\
       QIL' := printRedRes(M, T1, T', type(M, T')) .
 )
+
+  sort GoalPair .
+  op [_,_] : ProofTree QidList -> GoalPair [ctor] .
+
+  op evalGoalCommand : Module Term Term SortMap TheorySortMap TheorySortMap Database
+                       -> GoalPair .
+  ceq evalGoalCommand(M, T, T2, PSM, HSM, TSM, DB) = [P, QIL']
+   if T1 := 'CafeToken[openCloseModNameUp] /\
+      < DB', PSM', HSM', QIL > := procCafeMod('cmod!_`{_`}[T1, addEqs(T2, T)], PSM, HSM, TSM, DB) /\
+      M' := nonexecInLabel(getFlatModule(openCloseModName, DB')) /\
+      P := getNew(M, getEqs(M), getEqs(M')) /\
+      QIL' := 'New 'goal 'introduced: '\n printGoals(P) '\n .
+  eq evalGoalCommand(M, T, T1, PSM, HSM, TSM, DB) =
+                       [mtPT, '\n 'Error 'processing 'goal. '\n] [owise] .
+
+  op evalApply : Module Qid ProofTree Variable Macros -> GoalPair .
+  ceq evalApply(M, 'si, P, V, MACS) = [P', QIL]
+   if ODS := getCtors(M, getType(V)) /\
+      TL := buildTermsCtors(ODS) /\
+      P' := selectGoal(applyInduction(P, V, TL), size(P)) /\
+      QIL := '\n 'Induction 'applied 'on metaPrettyPrint(M, V, po) ':
+             '\n 'New 'goal: printGoals(P') '\n .
+  ceq evalApply(M, 'tc, P, V, MACS) = [P', QIL]
+   if P' := applyTC(P) /\
+      QIL := '\n 'Theorem 'of 'constants 'applied.
+             '\n 'New 'goal: printGoals(P') '\n .
+  ceq evalApply(M, 'rd, P, V, MACS) = [P'', QIL]
+   if [P', B] := applyRed(P) /\
+      SR := getFirstUnproven(P') /\
+      P'' := if B and (SR :: Nat)
+             then selectGoal(P', SR)
+             else P'
+             fi /\
+      QIL := '\n '\n 'Reduction 'applied.
+             'The 'goal 'was if B then nil else 'not fi 'discarded
+             if B and (SR :: Nat)
+             then '\n 'Next 'goal 'is '\! qid(string(SR, 10)) '\o
+             else nil
+             fi
+             '\n 'New 'goal: printGoals(P'') '\n .
+  ceq evalApply(M, Q, P, V, # M', Q - Eq # MACS) = [P', QIL]
+   if P' := applyEquationMacro(P, Q, Eq) /\
+      QIL := '\n 'Generated 'new 'goals
+             '\n printGoals(P') .
+
+  op getCtors : Module Sort -> OpDeclSet .
+  eq getCtors(M, Srt) = getCtors(M, getOps(M), Srt) .
+
+  op getCtors : Module OpDeclSet Sort -> OpDeclSet .
+  eq getCtors(M, op Q : TyL -> Srt [AtS] . ODS, Srt) = op Q : TyL -> Srt [AtS] .
+                                                       getCtors(M, ODS, Srt) .
+  ceq getCtors(M, op Q : TyL -> Ty [AtS] . ODS, Srt) = op Q : TyL -> Srt [AtS] .
+                                                       getCtors(M, ODS, Srt)
+   if Ty =/= 'Universal /\
+      sameKind(M, Ty, Srt) /\
+      sortLeq(M, Ty, Srt) .
+  eq getCtors(M, ODS, Srt) = none [owise] .
+
+  op buildTermsCtors : OpDeclSet -> TermList .
+  eq buildTermsCtors(none) = empty .
+  ceq buildTermsCtors(OD ODS) = (T, TL)
+   if T := buildTermCtor(OD) /\
+      TL := buildTermsCtors(ODS) .
+
+  op buildTermCtor : OpDecl -> Term .
+  ceq buildTermCtor(op Q : nil -> Srt [AtS] .) = C
+   if C := qid(string(Q) + "." + string(Srt)) .
+  ceq buildTermCtor(op Q : TyL -> Srt [AtS] .) = Q[TL]
+   if TL := buildArgs(TyL, 0) [owise] .
+
+  ************************************************************************************
+  ******************************* APPLY EQUATION MACRO *******************************
+  ************************************************************************************
+
+  op applyEquationMacro : ProofTree Qid Equation -> ProofTree .
+  eq applyEquationMacro(P, Q, Eq) = $applyEquationMacro(P, Q, Eq, size(P)) .
+
+  op $applyEquationMacro : ProofTree Qid Equation Nat -> ProofTree .
+  eq $applyEquationMacro(mtPT, Q, Eq, N) = mtPT .
+  ceq $applyEquationMacro(| M, [N, CMD, Eq, false, PRVN], PrL, N' |, Q, Eq', N'') =
+                                   | M, [N, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |
+   if PrL' := $applyEquationMacro*(PrL, Q, Eq', N'') .
+  ceq $applyEquationMacro(| M, [N, CMD, Eq, true, PRVN], mtPT, N' |, Q, Eq', N'') =
+                                   | M, [N, CMD, Eq, false, PRVN], PrL', 3 |
+   if M' := createCTFmodTrue(M, Eq') /\
+      M'' := createCTFmodFalse(M, Eq') /\
+      PrL' := | M', [N'', Q, Eq, true, false], mtPT, 1 |
+              | M'', [s(N''), Q, Eq, false, false], mtPT, 1 | .
+
+  op $applyEquationMacro* : ProofTreeList Qid Equation Nat -> ProofTree .
+  eq $applyEquationMacro*(mtPT, Q, Eq, N') = mtPT .
+  eq $applyEquationMacro*(| M', G, PrL, N | PrL', Q, Eq, N') =
+                $applyEquationMacro(| M', G, PrL, N |, Q, Eq, N')
+                $applyEquationMacro*(PrL', Q, Eq, N') .
+
+  op createCTFmodTrue : Module Equation -> Module .
+  ceq createCTFmodTrue(M, eq T = T' [AtS] .) = addEq(M, Eq)
+   if Eq := eq T = T' [AtS metadata("CTF-true")] . .
+
+  op createCTFmodFalse : Module Equation -> Module .
+  ceq createCTFmodFalse(M, eq T = T' [AtS] .) = addEq(M, Eq)
+   if Eq := eq '_=_[T, T'] = 'false.Bool [AtS metadata("CTF-false")] . .
+
+  ************************************************************************************
+  ********************************** EQUATION MACRO **********************************
+  ************************************************************************************
+
+  op parseEqMacro : ProofTree Qid Term -> Macros .
+  eq parseEqMacro(mtPT, Q, T) = mtMacros .
+  eq parseEqMacro(| M, [N, CMD, Eq, false, PRVN], PrL, N' |, Q, T) =
+          parseEqMacro*(PrL, Q, T) .
+  eq parseEqMacro(| M, [N, CMD, Eq, true, PRVN], PrL, N' |, Q, T) =
+          parseEqMacro(M, Q, T) .
+
+  op parseEqMacro* : ProofTreeList Qid Term -> Macros .
+  eq parseEqMacro*(mtPT, Q, T) = mtMacros .
+  eq parseEqMacro*(| M', G, PrL, N | PrL', Q, T) = parseEqMacro(| M', G, PrL, N |, Q, T)
+                                                   parseEqMacro*(PrL', Q, T) .
+
+  op parseEqMacro : Module Qid Term -> Macros .
+  ceq parseEqMacro(M, Q, 'eq_=_.['CafeBubble[T],'CafeBubble[T']]) = # M, Q - Eq #
+   if T1 := getTerm(metaParse(M, downQidList(T), anyType)) /\
+      T2 := getTerm(metaParse(M, downQidList(T'), anyType)) /\
+      Eq := eq T1 = T2 [none] . .
+  eq parseEqMacro(M, Q, T) = mtMacros [owise] .
+
+  ************************************************************************************
+  ****************************** SIMULTANEOUS INDUCTION ******************************
+  ************************************************************************************
+
+  op applyInduction : ProofTree Variable TermList -> ProofTree .
+  eq applyInduction(P, V, TL) = $applyInduction(P, V, TL, size(P)) .
+
+  op $applyInduction : ProofTree Variable TermList Nat -> ProofTree .
+  eq $applyInduction(mtPT, V, TL, N) = mtPT .
+  ceq $applyInduction(| M, [N, CMD, Eq, false, PRVN], PrL, N' |, V, TL, N'') =
+                                   | M, [N, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |
+   if PrL' := $applyInduction*(PrL, V, TL, N'') .
+  ceq $applyInduction(| M, [N, CMD, Eq, true, PRVN], mtPT, N' |, V, TL, N'') =
+                                   | M, [N, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |
+   if Ty := getType(V) /\
+      C := qid(substr(string(Ty), 0, 1) + "#" + string(Ty) + "." + string(Ty)) /\
+      Eq' := createHI(Eq, V, C) /\
+      OD := op getName(C) : nil -> getType(C) [metadata("generated-si")] . /\
+      M' := addEq(addOp(M, OD), Eq') /\
+      PrL' := subGoal*(M', [N, CMD, Eq, true, PRVN], V, TL, N'') .
+
+  op $applyInduction* : ProofTreeList Variable TermList Nat -> ProofTree .
+  eq $applyInduction*(mtPT, V, TL, N') = mtPT .
+  eq $applyInduction*(| M', G, PrL, N | PrL', V, TL, N') =
+                $applyInduction(| M', G, PrL, N |, V, TL, N')
+                $applyInduction*(PrL', V, TL, N') .
+
+  op subGoal* : Module Goal Variable TermList Nat -> ProofTreeList .
+  eq subGoal*(M, G, V, empty, N) = mtPT .
+  eq subGoal*(M, G, V, (T, TL), N) = subGoal(M, getEq(G), V, T, N)
+                                     subGoal*(M, G, V, TL, s(N)) .
+
+  op subGoal : Module Equation Variable Term Nat -> ProofTree .
+  eq subGoal(M, Eq, V, T, N) =
+            | addCons(M, T), [N, 'SI, makeSub(Eq, V, T), false, false], mtPT, 1 | .
+
+  *** We make sure not to add constant constructors by skipping them at first.
+  op addCons : Module Term -> Module .
+  eq addCons(M, C) = M .
+  eq addCons(M, T) = $addCons(M, T) [owise] .
+
+  op $addCons : Module Term -> Module .
+  eq $addCons(M, V) = M .
+  ceq $addCons(M, C) = addOp(M, OD)
+   if OD := op getName(C) : nil -> getType(C) [metadata("generated-si")] . .
+  eq $addCons(M, Q[TL]) = $addCons*(M, TL) .
+
+  op $addCons* : Module TermList -> Module .
+  eq $addCons*(M, empty) = M .
+  eq $addCons*(M, (T, TL)) = $addCons*($addCons(M, T), TL) .
+
+  op makeSub : Equation Variable Term -> Equation .
+  eq makeSub(eq T = T' [AtS] ., V, T1) =
+         eq subTerm(T, V, T1) = subTerm(T', V, T1) [AtS] . .
+  eq makeSub(ceq T = T' if COND [AtS] ., V, T1) =
+         ceq subTerm(T, V, T1) = subTerm(T', V, T1) if subCond(COND, V, T1) [AtS] . .
+
+  op createHI : Equation Variable Term -> Equation .
+  eq createHI(eq T = T' [AtS] ., V, T1) =
+         eq subTerm(T, V, T1) = subTerm(T', V, T1) [metadata("HI") AtS] . .
+  eq createHI(ceq T = T' if COND [AtS] ., V, T1) =
+         ceq subTerm(T, V, T1) = subTerm(T', V, T1) if subCond(COND, V, T1) [metadata("HI") AtS] . .
+
+  op subTerm : Term Variable Term -> Term .
+  eq subTerm(Q[TL], V, T) = Q[subTermList(TL, V, T)] .
+  eq subTerm(V, V, T) = T .
+  eq subTerm(T, V, T') = T [owise] .
+
+  op subTermList : TermList Variable Term -> TermList .
+  eq subTermList(empty, V, T) = empty .
+  eq subTermList((T, TL), V, T') = subTerm(T, V, T'), subTermList(TL, V, T') .
+
+  op subCond : Condition Variable Term -> Condition .
+  eq subCond(nil, V, T) = nil .
+  eq subCond(T = T' /\ COND, V, T1) = subTerm(T, V, T1) = subTerm(T', V, T1) /\
+                                      subCond(COND, V, T1) .
+  eq subCond(T : Srt /\ COND, V, T1) = subTerm(T, V, T1) : Srt /\
+                                       subCond(COND, V, T1) .
+  eq subCond(T := T' /\ COND, V, T1) = subTerm(T, V, T1) := subTerm(T', V, T1) /\
+                                       subCond(COND, V, T1) .
+  eq subCond(T => T' /\ COND, V, T1) = subTerm(T, V, T1) => subTerm(T', V, T1) /\
+                                       subCond(COND, V, T1) .
+
+  op buildArgs : TypeList Nat -> TermList .
+  eq buildArgs(nil, N) = empty .
+  ceq buildArgs(Ty TyL, N) = (C, TL)
+   if *** C := qid(substr(string(Ty), 0, 1) + string(N, 10) + "#" + string(Ty) + "." + string(Ty)) /\
+      C := qid(substr(string(Ty), 0, 1) + "#" + string(Ty) + "." + string(Ty)) /\
+      TL := buildArgs(TyL, s(N)) .
+
+  sort Vars2ConsPair .
+  op [_,_] : Equation Module -> Vars2ConsPair [ctor] .
+  op [_,_] : TermList Module -> Vars2ConsPair [ctor] .
+  op [_,_] : Condition Module -> Vars2ConsPair [ctor] .
+
+  ***********************************************************************************
+  ********************************** APPLY IMPLIES **********************************
+  ***********************************************************************************
+
+  op applyImp : ProofTree Qid -> ProofBool .
+  eq applyImp(P, Q) = $applyImp(P, Q, size(P)) .
+
+  op $applyImp : ProofTree Qid Nat -> ProofBool .
+  eq $applyImp(mtPT, Q, N) = [mtPT, false] .
+  ceq $applyImp(| M, [N, CMD, Eq, false, PRVN], PrL, N' |, Q, N'') =
+                           [| M, [N, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |, B]
+   if [PrL', B] := $applyImp*(PrL, Q, N'') .
+  ceq $applyImp(| M, [N, CMD, Eq, true, PRVN], mtPT, N' |, Q, N'') =
+                           [| M, [N, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |, B]
+   if [PrL', B] := applyImp(M, Eq, Q, N'') .
+
+  op $applyImp* : ProofTreeList Qid Nat -> ProofBool .
+  eq $applyImp*(mtPT, Q, N) = [mtPT, false] .
+  ceq $applyImp*(| M', G, PrL, N | PrL', Q, N') = [PrL1 PrL2, B or B']
+   if [PrL1, B] := $applyImp(| M', G, PrL, N |, Q, N') /\
+      [PrL2, B'] := $applyImp*(PrL', Q, N') .
+
+  op applyImp : Module Equation Qid Nat -> ProofBool .
+  ceq applyImp(M, Eq, Q, N) = [| M, [N, 'imp, Eq', true, false], mtPT, 1 |, true]
+   if eq T = 'true.Bool [label(Q) AtS] . EqS := getEqs(M) /\
+      Eq' := impEq(M, Eq, T) .
+  eq applyImp(M, Eq, Q, N) = [mtPT, false] [owise] .
+
+  op impEq : Module Equation Term -> Equation .
+  ceq impEq(M, eq T = 'true.Bool [AtS] ., T') = eq '_implies_[T1, T] = 'true.Bool [AtS] .
+   if T1 := getTerm(metaReduce(M, T')) .
+  ceq impEq(M, eq T = T' [AtS] ., T'') = eq '_implies_[T1, '_=_[T', T]] =
+                                        'true.Bool [AtS] .
+   if T1 := getTerm(metaReduce(M, T'')) [owise] .
+
+  ************************************************************************************
+  ******************************* THEOREM OF CONSTANTS *******************************
+  ************************************************************************************
+
+  op applyTC : ProofTree -> ProofTree .
+  eq applyTC(P) = $applyTC(P, size(P)) .
+
+  op $applyTC : ProofTree Nat -> ProofTree .
+  eq $applyTC(mtPT, N) = mtPT .
+  ceq $applyTC(| M', [N, CMD, Eq, false, PRVN], PrL, N' |, N'') =
+                                   | M', [N, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |
+   if PrL' := $applyTC*(PrL, N'') .
+  ceq $applyTC(| M', [N, CMD, Eq, true, PRVN], mtPT, N' |, N'') =
+                                   | M', [N, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |
+   if PrL' := vars2cons*(Eq, M', N'') .
+
+  op $applyTC* : ProofTreeList Nat -> ProofTree .
+  eq $applyTC*(mtPT, N) = mtPT .
+  eq $applyTC*(| M', G, PrL, N | PrL', N') =
+                $applyTC(| M', G, PrL, N |, N') $applyTC*(PrL', N') .
+
+  op vars2cons* : Equation Module Nat -> ProofTree .
+  ceq vars2cons*(Eq, M, N) = | M', [N, 'TC, Eq', true, false], mtPT, 1 |
+   if [Eq', M'] := vars2cons(Eq, M) .
+
+  op vars2cons : Equation Module -> Vars2ConsPair .
+  ceq vars2cons(eq T = T' [AtS] ., M) = [eq T1 = T2 [AtS] ., M'']
+   if [T1, M'] := vars2cons(T, M) /\
+      [T2, M''] := vars2cons(T', M') .
+  ceq vars2cons(ceq T = T' if COND [AtS] ., M) =
+               [ceq T1 = T2 if CND [AtS] ., M''']
+   if [T1, M'] := vars2cons(T, M) /\
+      [T2, M''] := vars2cons(T', M') /\
+      [CND, M'''] := vars2cons*(COND, M) .
+
+  op vars2cons* : TermList Module -> Vars2ConsPair .
+  eq vars2cons*(empty, M) = [empty, M] .
+  ceq vars2cons*((T, TL), M) = [(T', TL'), M'']
+   if [T', M'] := vars2cons(T, M) /\
+      [TL', M''] := vars2cons*(TL, M') .
+
+  op vars2cons : Term Module -> Vars2ConsPair .
+  eq vars2cons(C, M) = [C, M] .
+  ceq vars2cons(V, M) = [C, M']
+   if C := qid(string(getName(V)) + "." + string(getType(V))) /\
+      OD := op getName(V) : nil -> getType(V) [none] . /\
+      M' := addOp(M, OD) .
+  ceq vars2cons(Q[TL], M) = [Q[TL'], M']
+   if [TL', M'] := vars2cons*(TL, M) .
+
+  op vars2cons* : Condition Module -> Vars2ConsPair .
+  eq vars2cons*((nil).Condition, M) = [(nil).Condition, M] .
+  ceq vars2cons*(T = T' /\ COND, M) = [T1 = T2 /\ CND, M''']
+   if [T1, M'] := vars2cons(T, M) /\
+      [T2, M''] := vars2cons(T', M') /\
+      [CND, M'''] := vars2cons*(COND, M'') .
+  ceq vars2cons*(T : Srt /\ COND, M) = [T1 : Srt /\ CND, M'']
+   if [T1, M'] := vars2cons(T, M) /\
+      [CND, M''] := vars2cons*(COND, M') .
+  ceq vars2cons*(T := T' /\ COND, M) = [T1 := T2 /\ CND, M''']
+   if [T1, M'] := vars2cons(T, M) /\
+      [T2, M''] := vars2cons(T', M') /\
+      [CND, M'''] := vars2cons*(COND, M'') .
+  ceq vars2cons*(T => T' /\ COND, M) = [T1 => T2 /\ CND, M''']
+   if [T1, M'] := vars2cons(T, M) /\
+      [T2, M''] := vars2cons(T', M') /\
+      [CND, M'''] := vars2cons*(COND, M'') .
+
+  ***********************************************************************************
+  *********************************** SELECT GOAL ***********************************
+  ***********************************************************************************
+
+  op selectGoal : ProofTree Nat -> ProofTree .
+  eq selectGoal(mtPT, N) = mtPT .
+  ceq selectGoal(| M, [N, CMD, Eq, CURR, PRVN], PrL, N' |, N'') =
+                            | M, [N, CMD, Eq, N == N'', PRVN], PrL', N' |
+   if PrL' := selectGoal*(PrL, N'') .
+
+  op selectGoal* : ProofTreeList Nat -> ProofTreeList .
+  eq selectGoal*(mtPT, N) = mtPT .
+  eq selectGoal*(| M, [N, CMD, Eq, CURR, PRVN], PrL, N' | PrL', N'') =
+       selectGoal(| M, [N, CMD, Eq, CURR, PRVN], PrL, N' |, N'') selectGoal*(PrL', N'') .
+
+  vars CURR PRVN : Bool .
+
+  op addOp : Module OpDecl -> Module .
+  eq addOp(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, OD) =
+             fmod H is IL sorts SS . SSDS ODS OD MAS EqS endfm .
+  eq addOp(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, OD) =
+             mod H is IL sorts SS . SSDS ODS OD MAS EqS RS endm .
+  eq addOp(fth H is IL sorts SS . SSDS ODS MAS EqS endfth, OD) =
+             fth H is IL sorts SS . SSDS ODS OD MAS EqS endfth .
+  eq addOp(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, OD) =
+             th H is IL sorts SS . SSDS ODS OD MAS EqS RS endth .
+
+  op addEq : Module Equation -> Module .
+  eq addEq(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, Eq) =
+             fmod H is IL sorts SS . SSDS ODS MAS EqS Eq endfm .
+  eq addEq(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, Eq) =
+             mod H is IL sorts SS . SSDS ODS MAS EqS Eq RS endm .
+  eq addEq(fth H is IL sorts SS . SSDS ODS MAS EqS endfth, Eq) =
+             fth H is IL sorts SS . SSDS ODS MAS EqS Eq endfth .
+  eq addEq(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, Eq) =
+             th H is IL sorts SS . SSDS ODS MAS EqS Eq RS endth .
+
+  op addEqs : Term Term -> Term .
+  eq addEqs('__[T1, T2], T) = '__[T1, addEqs(T2, T)] .
+  eq addEqs(T, T') = '__[T, T'] [owise] .
+
+  ************************************************************************************
+  *********************************** GET NEW GOAL ***********************************
+  ************************************************************************************
+
+  op getNew : Module EquationSet EquationSet ~> ProofTree .
+  eq getNew(M, Eq EqS, Eq EqS') = getNew(M, EqS, EqS') .
+  ceq getNew(M, none, EqS) = setToGoal(M, EqS, 0)
+   if EqS =/= none .
+
+  op setToGoal : Module EquationSet Nat ~> ProofTree .
+  eq setToGoal(M, none, N) = mtPT .
+  eq setToGoal(M, Eq, N) = | M, [N, 'root, Eq, N == 0, false], mtPT, 1 | .
+*** It is not expected to start with more than one sentence
+***  eq setToGoal(Eq EqS, N) = [N, 'root, Eq, N == 0, false] + setToGoal(EqS, s(N)) .
+
+  ************************************************************************************
+  ************************************ REDUCE COMM ***********************************
+  ************************************************************************************
+
+  sort ProofBool .
+  op [_,_] : ProofTreeList Bool -> ProofBool [ctor] .
+
+  op applyRed : ProofTree -> ProofBool .
+  ceq applyRed(| M, [N, CMD, eq T = T' [AtS] ., true, PRVN], PrL, N' |) =
+               [| M, [N, CMD, eq T = T' [AtS] ., not B, B], PrL, N' |, B]
+   if T1 := getTerm(metaReduce(M, T)) /\
+      T2 := getTerm(metaReduce(M, T')) /\
+      B := T1 == T2 [print T1 " - " T2] .
+  ceq applyRed(| M, [N, CMD, Eq, false, PRVN], PrL, N' |) =
+                         [| M, [N, CMD, Eq, false, PRVN], PrL', N' |, B]
+   if [PrL', B] := applyRed*(PrL) .
+
+  op applyRed* : ProofTreeList -> ProofBool .
+  eq applyRed*(mtPT) = [mtPT, false] .
+  ceq applyRed*(| M, G, PrL, N' | PrL') = [P PrL'', B or B']
+   if [P, B] := applyRed(| M, G, PrL, N' |) /\
+      [PrL'', B'] := applyRed*(PrL') .
+
+  **************************************************************************************
+  *********************************** PRINT CURRENT ************************************
+  **************************************************************************************
+
+  op printCurrent : ProofTree -> QidList .
+  eq printCurrent(mtPT) = nil .
+  eq printCurrent(| M, [N, CMD, Eq, true, PRVN], mtPT, N' |) =
+                                   '\n CMD ' printEq(M, Eq) '\n .
+  eq printCurrent(| M, [N, CMD, Eq, CURR, PRVN], PrL, N' |) = printCurrent*(PrL) [owise] .
+
+  op printCurrent* : ProofTreeList -> QidList .
+  eq printCurrent*(mtPT) = nil .
+  eq printCurrent*(| M, [N, CMD, Eq, CURR, PRVN], PrL, N' | PrL') =
+         printCurrent(| M, [N, CMD, Eq, CURR, PRVN], PrL, N' |) printCurrent*(PrL') .
+
+  ************************************************************************************
+  *********************************** PRINT PROOF ************************************
+  ************************************************************************************
+
+  op printGoals : ProofTree -> QidList .
+  eq printGoals(mtPT) = nil .
+  eq printGoals(| M, [N, CMD, Eq, CURR, PRVN], mtPT, N' |) =
+                                   '\n qid(string(N, 10) + ".")
+                                   if PRVN then '* else nil fi
+                                   if CURR then '> else nil fi
+                                   CMD '
+                                   printEq(M, Eq) .
+  eq printGoals(| M, [N, CMD, Eq, CURR, PRVN], PrL, N' |) = printGoals*(PrL) [owise] .
+
+  op printGoals* : ProofTreeList -> QidList .
+  eq printGoals*(mtPT) = nil .
+  eq printGoals*(| M, [N, CMD, Eq, CURR, PRVN], PrL, N' | PrL') =
+         printGoals(| M, [N, CMD, Eq, CURR, PRVN], PrL, N' |) printGoals*(PrL') .
+
+  op printEq : Module Equation -> QidList .
+  eq printEq(M, eq T = T' [label(Q) nonexec] .) = 'eq ' '`[ Q ':nonexec '`] ':
+                                                      metaPrettyPrint(M, T, po) ' '=
+                                                      metaPrettyPrint(M, T', po) '. .
+  eq printEq(M, eq T = T' [label(Q)] .) = 'eq ' '`[ Q '`] ':
+                                              metaPrettyPrint(M, T, po) ' '=
+                                              metaPrettyPrint(M, T', po) '. .
+  eq printEq(M, eq T = T' [nonexec] .) = 'eq ' '`[ ':nonexec '`] ':
+                                             metaPrettyPrint(M, T, po) ' '=
+                                             metaPrettyPrint(M, T', po) '. .
+  eq printEq(M, eq T = T' [metadata(S) AtS] .) = printEq(M, eq T = T' [AtS] .) .
+  eq printEq(M, eq T = T' [none] .) = 'eq metaPrettyPrint(M, T, po) ' '=
+                                          metaPrettyPrint(M, T', po) '. .
+  eq printEq(M, ceq T = T' if COND [label(Q) nonexec] .) =
+                    'ceq ' '`[ Q ':nonexec '`] ': metaPrettyPrint(M, T, po) ' '=
+                                                 metaPrettyPrint(M, T', po) '. .
+  eq printEq(M, ceq T = T' if COND [label(Q)] .) =
+                    'ceq ' '`[ Q '`] ': metaPrettyPrint(M, T, po) ' '=
+                                        metaPrettyPrint(M, T', po) '. .
+  eq printEq(M, ceq T = T' if COND [nonexec] .) =
+                    'ceq ' '`[ ':nonexec '`] ': metaPrettyPrint(M, T, po) ' '=
+                                                metaPrettyPrint(M, T', po) '. .
+
+  ************************************************************************************
+  ******************************* AUXILIARY FUNCTIONS ********************************
+  ************************************************************************************
 
   op parseModule4Vars : TermList -> OpDeclSet .
   eq parseModule4Vars(empty) = none .
@@ -5048,12 +5721,14 @@ Similarly, the attribute \verb"hsorts" keeps track of hidden sorts:
 
   op provided :_ : QidSet -> Attribute [ctor] .
 
+  op goal :_ : Goal -> Attribute [ctor] .
+
   op initialPrincipalSorts : -> SortMap .
   eq initialPrincipalSorts = ('NAT |-> 'Nat) .
 
   op initCafeAttS : -> AttributeSet .
   eq initCafeAttS = strict : false, psorts : initialPrincipalSorts, hsorts : empty,
-                    provided : none .
+                    provided : none, goal : noGoal .
 
 
 ***(%
@@ -5484,7 +6159,7 @@ CafeOBJ statement:
 
   op normalizeCafeOBJ : QidList -> QidList .
   ceq normalizeCafeOBJ(QIL Q Q' QIL') = normalizeCafeOBJ(QIL Q '. Q' QIL')
-   if Q =/= '. /\ Q =/= '`, /\ Q =/= '`] /\ Q =/= '* /\ Q =/= '`) /\
+   if Q =/= '. /\ Q =/= '`, /\ Q =/= '`] /\ Q =/= '* /\ Q =/= '`) /\ Q =/= 'proof /\
      (Q' == 'eq or-else Q' == 'ceq or-else Q' == 'cq or-else
       Q' == 'op or-else Q' == 'ops or-else Q' == 'bop or-else
       Q' == 'bops or-else Q' == 'var or-else
@@ -5494,7 +6169,7 @@ CafeOBJ statement:
       Q' == 'ctrns or-else Q' == 'btrns or-else Q' == 'bctrns or-else
       Q' == 'pred or-else Q' == 'red or-else Q' == 'reduce) .
   eq normalizeCafeOBJ(QIL Q '`}) = if Q =/= '. and Q =/= '`] and
-                                      Q =/= '* and Q =/= '`)
+                                      Q =/= '* and Q =/= '`) and Q =/= 'proof
                                    then normalizeImports(QIL Q '. '`})
                                    else normalizeImports(QIL Q '`})
                                    fi [owise] .
@@ -5570,7 +6245,8 @@ CafeOBJ statement:
 
   op normOpenCloseAux : QidList -> QidList .
   ceq normOpenCloseAux(QIL Q Q' QIL') = normOpenCloseAux(QIL Q '. Q' QIL')
-   if Q =/= '. /\ Q =/= '`, /\ Q =/= '`] /\ Q =/= '* /\ Q =/= '`) /\
+   if Q =/= '. /\ Q =/= '`, /\ Q =/= '`] /\ Q =/= '* /\ Q =/= '`) /\ Q =/= '`{ /\
+      Q =/= '`} /\ Q =/= 'proof /\
      (Q' == 'eq or-else Q' == 'ceq or-else Q' == 'cq or-else
       Q' == 'op or-else Q' == 'ops or-else Q' == 'bop or-else
       Q' == 'bops or-else Q' == 'var or-else
@@ -5580,7 +6256,8 @@ CafeOBJ statement:
       Q' == 'ctrns or-else Q' == 'btrns or-else Q' == 'bctrns or-else
       Q' == 'pred or-else Q' == 'red or-else Q' == 'reduce) .
   eq normOpenCloseAux(QIL Q 'close) = if Q =/= '. and Q =/= '`] and
-                                         Q =/= '* and Q =/= '`)
+                                         Q =/= '* and Q =/= '`) and
+                                         Q =/= '`} and Q =/= 'proof
                                       then QIL Q '. 'close
                                       else QIL Q 'close
                                       fi [owise] .
@@ -5773,7 +6450,7 @@ endm
 set print conceal on .
 
 print conceal mod_is_sorts_._____endm .
-print conceal fmod_is_sorts_.____endfm .
+*** print conceal fmod_is_sorts_.____endfm .
 print conceal db .
 
 
