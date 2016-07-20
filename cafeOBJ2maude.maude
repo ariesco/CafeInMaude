@@ -8,7 +8,7 @@ fmod GOAL is
  *** Sentence
  *** Is it the current one?
  *** Is it proven?
- op [_,_,_,_,_] : Nat Qid Equation Bool Bool -> Goal [ctor] .
+ op [_,_,_,_,_] : NatList Qid Equation Bool Bool -> Goal [ctor] .
 
  op noGoal : -> Goal [ctor] .
  op _+_ : Goal Goal -> Goal [ctor assoc id: noGoal] .
@@ -25,19 +25,21 @@ fmod GOAL is
  var  G : Goal .
  vars PrL PrL' : ProofTreeList .
  vars N N' : Nat .
+ vars NL NL' : NatList .
  var  Q : Qid .
  var  Eq : Equation .
  vars CURR PRV : Bool .
  vars SR SR' : SearchRes .
+ var  PO : ProofOrder .
 
  op getEq : Goal -> Equation .
- eq getEq([N, Q, Eq, CURR, PRV]) = Eq .
+ eq getEq([NL, Q, Eq, CURR, PRV]) = Eq .
 
- op getId : Goal -> Nat .
- eq getId([N, Q, Eq, CURR, PRV]) = N .
+ op getId : Goal -> NatList .
+ eq getId([NL, Q, Eq, CURR, PRV]) = NL .
 
  op isProven : Goal -> Bool .
- eq isProven([N, Q, Eq, CURR, PRV]) = PRV .
+ eq isProven([NL, Q, Eq, CURR, PRV]) = PRV .
 
  op size : ProofTree -> Nat .
  eq size(mtPT) = 0 .
@@ -48,13 +50,17 @@ fmod GOAL is
  eq size*(| M, G, PrL, N | PrL') = N + size*(PrL') .
 
  sort SearchRes .
- subsort Nat < SearchRes .
+ subsort NatList < SearchRes .
 
  op allProven : -> SearchRes [ctor] .
 
  op minSR : SearchRes SearchRes -> SearchRes [comm assoc] .
  eq minSR(allProven, SR) = SR .
- eq minSR(N, N') = min(N, N') .
+ eq minSR(N NL, N' NL') = if N < N'
+                          then N NL
+                          else N' NL'
+                          fi .
+ eq minSR(NL, nil) = NL .
 
  op getFirstUnproven : ProofTree -> SearchRes .
  eq getFirstUnproven(mtPT) = allProven .
@@ -67,6 +73,18 @@ fmod GOAL is
  ceq getFirstUnproven*(| M, G, PrL, N | PrL') = minSR(SR, SR')
   if SR := getFirstUnproven(| M, G, PrL, N |) /\
      SR' := getFirstUnproven*(PrL') .
+
+ sort ProofOrder .
+ subsort NatList < ProofOrder .
+ op finished : -> ProofOrder [ctor] .
+ op _y_ : ProofOrder ProofOrder -> ProofOrder [ctor assoc id: finished] .
+
+ op pop : ProofOrder -> ProofOrder .
+ eq pop(finished) = finished .
+ eq pop(NL y PO) = PO .
+
+ op fst : ProofOrder ~> NatList .
+ eq fst(NL y PO) = NL .
 endfm
 
 fmod MACROS is
@@ -626,6 +644,7 @@ declared or not:
   op :imp[_]. : @CafeToken@ -> @CafeInductiveComm@ [ctor] .
   op :sel(_) : @CafeToken@ -> @CafeInductiveComm@ [ctor] .
   op :show`proof : -> @CafeInductiveComm@ [ctor] .
+  op :desc`proof : -> @CafeInductiveComm@ [ctor] .
   op :desc`. : -> @CafeInductiveComm@ [ctor] .
 
 ***(%
@@ -2917,6 +2936,9 @@ identifiers to extend the variable set with the variables defined on the fly in 
   ceq parseCafeDecl(':show`proof.@CafeInductiveComm@, PU, U, VDS, PSM, TSM, DB) =
                                                                < PDR, nil, none, DB >
    if PDR := < PU ; U ; VDS > .
+  ceq parseCafeDecl(':desc`proof.@CafeInductiveComm@, PU, U, VDS, PSM, TSM, DB) =
+                                                               < PDR, nil, none, DB >
+   if PDR := < PU ; U ; VDS > .
   ceq parseCafeDecl(':desc`..@CafeInductiveComm@, PU, U, VDS, PSM, TSM, DB) =
                                                                < PDR, nil, none, DB >
    if PDR := < PU ; U ; VDS > .
@@ -3578,6 +3600,8 @@ of the \verb"evalPreModule" function:
   vars PrL PrL' PrL'' PrL1 PrL2 : ProofTreeList .
   vars B B' : Bool .
   var  SR : SearchRes .
+  vars NL NL' : NatList .
+  vars PO PO' : ProofOrder .
 
   op addEqual&SearchEqs : Module -> Module .
   ceq addEqual&SearchEqs(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm) =
@@ -3726,7 +3750,8 @@ the \verb"maps2maps" function shown above to the body:
       < DB', PSM', HSM', QIL > := procCafeMod('cmod!_`{_`}[T1, T2], PSM, HSM, TSM, DB) /\
       M := nonexecInLabel(getFlatModule(openCloseModName, DB')) /\
       TL := getRedThCommands(T') /\
-      QIL' := processRedThCommands(M, PSM, HSM, TSM, DB', TL, T2, mtPT, 'foo:Foo, mtMacros) .
+      QIL' := processRedThCommands(M, PSM, HSM, TSM, DB', TL, T2, mtPT, 'foo:Foo,
+                                   mtMacros, finished) .
   eq procOpenCloseEnv(T, T', PSM, HSM, TSM, DB) =
                          < DB | nil | 'Environment 'not 'parsed. > [owise] .
 
@@ -3749,32 +3774,34 @@ the \verb"maps2maps" function shown above to the body:
   eq getRedThCommand(':def_=`:ctf`{_`}['CafeToken[T], T']) =
                                                    ':def_=`:ctf`{_`}[T, T'] .
   eq getRedThCommand(':show`proof.@CafeInductiveComm@) = ':show`proof.@CafeInductiveComm@ .
+  eq getRedThCommand(':desc`proof.@CafeInductiveComm@) = ':desc`proof.@CafeInductiveComm@ .
   eq getRedThCommand(':desc`..@CafeInductiveComm@) = ':desc`..@CafeInductiveComm@ .
   eq getRedThCommand(T) = empty [owise] .
 
   op processRedThCommands : Module SortMap TheorySortMap TheorySortMap Database
-                            TermList Term ProofTree Variable Macros -> QidList .
-  eq processRedThCommands(M, PSM, HSM, TSM, DB, empty, T, P, V, MACS) = nil .
-  ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':goal`{_`}[T], TL), T1, P, V, MACS) =
-                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P', V, MACS)
-   if [P', QIL] := evalGoalCommand(M, T, T1, PSM, HSM, TSM, DB) .
-  ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':ind`on`(_`)[T], TL), T1, P, V, MACS) =
-                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, T', MACS)
+                            TermList Term ProofTree Variable Macros ProofOrder -> QidList .
+  eq processRedThCommands(M, PSM, HSM, TSM, DB, empty, T, P, V, MACS, PO) = nil .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':goal`{_`}[T], TL), T1, P, V, MACS, PO) =
+                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P', V, MACS, PO')
+   if [P', PO', QIL] := evalGoalCommand(M, T, T1, PSM, HSM, TSM, DB, PO) .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':ind`on`(_`)[T], TL), T1, P, V, MACS, PO) =
+                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, T', MACS, PO)
    if T' := downTerm(T) /\
       T' :: Variable /\
       QIL := '\n 'Induction 'set 'on metaPrettyPrint(M, T', po) '\n .
-  ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':apply`(_`)[T], TL), T1, P, V, MACS) =
-                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P', V, MACS)
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':apply`(_`)[T], TL), T1, P, V, MACS, PO) =
+                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P', V, MACS, PO')
    if Q := downQid(T) /\
-      [P', QIL] := evalApply(M, Q, P, V, MACS) .
-  ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':sel`(_`)[T], TL), T1, P, V, MACS) =
-                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P', V, MACS)
+      [P', PO', QIL] := evalApply(M, Q, P, V, MACS, PO) .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':sel`(_`)[T], TL), T1, P, V, MACS, PO) =
+                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P', V, MACS, PO')
    if Q := downQid(T) /\
-      N := rat(string(Q), 10) /\
-      P' := selectGoal(P, N) /\
+      NL := qid2natlist(Q) /\
+      P' := selectGoal(P, NL) /\
+      PO' := selectGoal(PO, NL) /\
       QIL := '\n 'Sentence Q 'selected. '\n .
-  ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':imp`[_`].[T], TL), T1, P, V, MACS) =
-                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P', V, MACS)
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':imp`[_`].[T], TL), T1, P, V, MACS, PO) =
+                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P', V, MACS, PO)
    if Q := downQid(T) /\
       [P', B] := applyImp(P, Q) /\
       QIL := if B
@@ -3782,25 +3809,30 @@ the \verb"maps2maps" function shown above to the body:
              else '\n 'Command 'failed. '\n
              fi .
   ceq processRedThCommands(M, PSM, HSM, TSM, DB,
-                          (':def_=`:ctf`{_`}[T, T'], TL), T1, P, V, MACS) =
-                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V, MACS # M', Q - Eq #)
+                          (':def_=`:ctf`{_`}[T, T'], TL), T1, P, V, MACS, PO) =
+                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,
+                                          MACS # M', Q - Eq #, PO)
    if Q := downQid(T) /\
       # M', Q - Eq # := parseEqMacro(P, Q, T') /\
       QIL := '\n Q 'defined 'as ':ctf ' '`{ ' printEq(M', Eq) ' '`} '\n .
   ceq processRedThCommands(M, PSM, HSM, TSM, DB,
-                           (':show`proof.@CafeInductiveComm@, TL), T1, P, V, MACS) =
-                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V, MACS)
-   if QIL := '\n 'Current 'proof: printGoals(P) .
+                           (':show`proof.@CafeInductiveComm@, TL), T1, P, V, MACS, PO) =
+                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V, MACS, PO)
+   if QIL := '\n 'Current 'goals: printGoals(P) .
   ceq processRedThCommands(M, PSM, HSM, TSM, DB,
-                           (':desc`..@CafeInductiveComm@, TL), T1, P, V, MACS) =
-                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V, MACS)
+                           (':desc`proof.@CafeInductiveComm@, TL), T1, P, V, MACS, PO) =
+                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V, MACS, PO)
+   if QIL := '\n 'Current 'proof: printProofTree(P) .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB,
+                           (':desc`..@CafeInductiveComm@, TL), T1, P, V, MACS, PO) =
+                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V, MACS, PO)
    if QIL := '\n 'Current 'goal: printCurrent(P) .
-  ceq processRedThCommands(M, PSM, HSM, TSM, DB, ('red_.['bubble[T]], TL), T1, P, V, MACS) =
-                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V, MACS)
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB, ('red_.['bubble[T]], TL), T1, P, V, MACS, PO) =
+                 QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V, MACS, PO)
    if QIL := evalRedCommand(M, T, T1) .
-  eq processRedThCommands(M, PSM, HSM, TSM, DB, (T, TL), T1, P, V, MACS) =
+  eq processRedThCommands(M, PSM, HSM, TSM, DB, (T, TL), T1, P, V, MACS, PO) =
                          '\n 'Error 'in 'command.
-                         processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,MACS) [owise] .
+                         processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,MACS, PO) [owise] .
 
   *** Module.
   *** Term to be reduced.
@@ -3837,47 +3869,53 @@ the \verb"maps2maps" function shown above to the body:
       QIL' := printRedRes(M, T1, T', type(M, T')) .
 )
 
-  sort GoalPair .
-  op [_,_] : ProofTree QidList -> GoalPair [ctor] .
+  sort GoalRes .
+  op [_,_,_] : ProofTree ProofOrder QidList -> GoalRes [ctor] .
 
   op evalGoalCommand : Module Term Term SortMap TheorySortMap TheorySortMap Database
-                       -> GoalPair .
-  ceq evalGoalCommand(M, T, T2, PSM, HSM, TSM, DB) = [P, QIL']
+                       ProofOrder -> GoalRes .
+  ceq evalGoalCommand(M, T, T2, PSM, HSM, TSM, DB, PO) = [P, (nil).NatList, QIL']
    if T1 := 'CafeToken[openCloseModNameUp] /\
       < DB', PSM', HSM', QIL > := procCafeMod('cmod!_`{_`}[T1, addEqs(T2, T)], PSM, HSM, TSM, DB) /\
       M' := nonexecInLabel(getFlatModule(openCloseModName, DB')) /\
       P := getNew(M, getEqs(M), getEqs(M')) /\
       QIL' := 'New 'goal 'introduced: '\n printGoals(P) '\n .
-  eq evalGoalCommand(M, T, T1, PSM, HSM, TSM, DB) =
-                       [mtPT, '\n 'Error 'processing 'goal. '\n] [owise] .
+  eq evalGoalCommand(M, T, T1, PSM, HSM, TSM, DB, PO) =
+                       [mtPT, finished, '\n 'Error 'processing 'goal. '\n] [owise] .
 
-  op evalApply : Module Qid ProofTree Variable Macros -> GoalPair .
-  ceq evalApply(M, 'si, P, V, MACS) = [P', QIL]
+  op evalApply : Module Qid ProofTree Variable Macros ProofOrder -> GoalRes .
+  ceq evalApply(M, 'si, P, V, MACS, PO) = [P', PO', QIL]
    if ODS := getCtors(M, getType(V)) /\
       TL := buildTermsCtors(ODS) /\
       P' := selectGoal(applyInduction(P, V, TL), size(P)) /\
+      PO' := indProofOrder(fst(PO), size(TL)) y pop(PO) /\
       QIL := '\n 'Induction 'applied 'on metaPrettyPrint(M, V, po) ':
              '\n 'New 'goal: printGoals(P') '\n .
-  ceq evalApply(M, 'tc, P, V, MACS) = [P', QIL]
+  ceq evalApply(M, 'tc, P, V, MACS, PO) = [P', PO, QIL]
    if P' := applyTC(P) /\
       QIL := '\n 'Theorem 'of 'constants 'applied.
              '\n 'New 'goal: printGoals(P') '\n .
-  ceq evalApply(M, 'rd, P, V, MACS) = [P'', QIL]
+  ceq evalApply(M, 'rd, P, V, MACS, PO) = [P'', PO', QIL]
    if [P', B] := applyRed(P) /\
-      SR := getFirstUnproven(P') /\
-      P'' := if B and (SR :: Nat)
-             then selectGoal(P', SR)
+      PO' := if B
+             then pop(PO)
+             else PO
+             fi /\
+      B' := PO' == finished /\
+      P'' := if B and (not B')
+             then selectGoal(P', fst(PO'))
              else P'
              fi /\
       QIL := '\n '\n 'Reduction 'applied.
              'The 'goal 'was if B then nil else 'not fi 'discarded
-             if B and (SR :: Nat)
-             then '\n 'Next 'goal 'is '\! qid(string(SR, 10)) '\o
-             else nil
-             fi
-             '\n 'New 'goal: printGoals(P'') '\n .
-  ceq evalApply(M, Q, P, V, # M', Q - Eq # MACS) = [P', QIL]
+             if B and (not B')
+             then '\n 'Next 'goal 'is '\! printIndex(fst(PO')) '\o
+***                  '\n 'New 'goal: printGoals(P'') '\n
+             else '\n '\!  'PROOF 'FINISHED '\o
+             fi .
+  ceq evalApply(M, Q, P, V, # M', Q - Eq # MACS, PO) = [P', PO', QIL]
    if P' := applyEquationMacro(P, Q, Eq) /\
+      PO' := indProofOrder(fst(PO), 2) y pop(PO) /\
       QIL := '\n 'Generated 'new 'goals
              '\n printGoals(P') .
 
@@ -3911,25 +3949,25 @@ the \verb"maps2maps" function shown above to the body:
   ************************************************************************************
 
   op applyEquationMacro : ProofTree Qid Equation -> ProofTree .
-  eq applyEquationMacro(P, Q, Eq) = $applyEquationMacro(P, Q, Eq, size(P)) .
+  eq applyEquationMacro(P, Q, Eq) = $applyEquationMacro(P, Q, Eq) .
 
-  op $applyEquationMacro : ProofTree Qid Equation Nat -> ProofTree .
-  eq $applyEquationMacro(mtPT, Q, Eq, N) = mtPT .
-  ceq $applyEquationMacro(| M, [N, CMD, Eq, false, PRVN], PrL, N' |, Q, Eq', N'') =
-                                   | M, [N, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |
-   if PrL' := $applyEquationMacro*(PrL, Q, Eq', N'') .
-  ceq $applyEquationMacro(| M, [N, CMD, Eq, true, PRVN], mtPT, N' |, Q, Eq', N'') =
-                                   | M, [N, CMD, Eq, false, PRVN], PrL', 3 |
+  op $applyEquationMacro : ProofTree Qid Equation -> ProofTree .
+  eq $applyEquationMacro(mtPT, Q, Eq) = mtPT .
+  ceq $applyEquationMacro(| M, [NL, CMD, Eq, false, PRVN], PrL, N' |, Q, Eq') =
+                                   | M, [NL, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |
+   if PrL' := $applyEquationMacro*(PrL, Q, Eq') .
+  ceq $applyEquationMacro(| M, [NL, CMD, Eq, true, PRVN], mtPT, N' |, Q, Eq') =
+                                   | M, [NL, CMD, Eq, false, PRVN], PrL', 3 |
    if M' := createCTFmodTrue(M, Eq') /\
       M'' := createCTFmodFalse(M, Eq') /\
-      PrL' := | M', [N'', Q, Eq, true, false], mtPT, 1 |
-              | M'', [s(N''), Q, Eq, false, false], mtPT, 1 | .
+      PrL' := | M', [NL 1, Q, Eq, true, false], mtPT, 1 |
+              | M'', [NL 2, Q, Eq, false, false], mtPT, 1 | .
 
-  op $applyEquationMacro* : ProofTreeList Qid Equation Nat -> ProofTree .
-  eq $applyEquationMacro*(mtPT, Q, Eq, N') = mtPT .
-  eq $applyEquationMacro*(| M', G, PrL, N | PrL', Q, Eq, N') =
-                $applyEquationMacro(| M', G, PrL, N |, Q, Eq, N')
-                $applyEquationMacro*(PrL', Q, Eq, N') .
+  op $applyEquationMacro* : ProofTreeList Qid Equation -> ProofTree .
+  eq $applyEquationMacro*(mtPT, Q, Eq) = mtPT .
+  eq $applyEquationMacro*(| M', G, PrL, N | PrL', Q, Eq) =
+                $applyEquationMacro(| M', G, PrL, N |, Q, Eq)
+                $applyEquationMacro*(PrL', Q, Eq) .
 
   op createCTFmodTrue : Module Equation -> Module .
   ceq createCTFmodTrue(M, eq T = T' [AtS] .) = addEq(M, Eq)
@@ -3945,9 +3983,9 @@ the \verb"maps2maps" function shown above to the body:
 
   op parseEqMacro : ProofTree Qid Term -> Macros .
   eq parseEqMacro(mtPT, Q, T) = mtMacros .
-  eq parseEqMacro(| M, [N, CMD, Eq, false, PRVN], PrL, N' |, Q, T) =
+  eq parseEqMacro(| M, [NL, CMD, Eq, false, PRVN], PrL, N' |, Q, T) =
           parseEqMacro*(PrL, Q, T) .
-  eq parseEqMacro(| M, [N, CMD, Eq, true, PRVN], PrL, N' |, Q, T) =
+  eq parseEqMacro(| M, [NL, CMD, Eq, true, PRVN], PrL, N' |, Q, T) =
           parseEqMacro(M, Q, T) .
 
   op parseEqMacro* : ProofTreeList Qid Term -> Macros .
@@ -3971,17 +4009,17 @@ the \verb"maps2maps" function shown above to the body:
 
   op $applyInduction : ProofTree Variable TermList Nat -> ProofTree .
   eq $applyInduction(mtPT, V, TL, N) = mtPT .
-  ceq $applyInduction(| M, [N, CMD, Eq, false, PRVN], PrL, N' |, V, TL, N'') =
-                                   | M, [N, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |
+  ceq $applyInduction(| M, [NL, CMD, Eq, false, PRVN], PrL, N' |, V, TL, N'') =
+                                   | M, [NL, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |
    if PrL' := $applyInduction*(PrL, V, TL, N'') .
-  ceq $applyInduction(| M, [N, CMD, Eq, true, PRVN], mtPT, N' |, V, TL, N'') =
-                                   | M, [N, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |
+  ceq $applyInduction(| M, [NL, CMD, Eq, true, PRVN], mtPT, N' |, V, TL, N'') =
+                                   | M, [NL, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |
    if Ty := getType(V) /\
       C := qid(substr(string(Ty), 0, 1) + "#" + string(Ty) + "." + string(Ty)) /\
       Eq' := createHI(Eq, V, C) /\
       OD := op getName(C) : nil -> getType(C) [metadata("generated-si")] . /\
       M' := addEq(addOp(M, OD), Eq') /\
-      PrL' := subGoal*(M', [N, CMD, Eq, true, PRVN], V, TL, N'') .
+      PrL' := subGoal*(M', [NL, CMD, Eq, true, PRVN], V, TL, N'') .
 
   op $applyInduction* : ProofTreeList Variable TermList Nat -> ProofTree .
   eq $applyInduction*(mtPT, V, TL, N') = mtPT .
@@ -4052,6 +4090,10 @@ the \verb"maps2maps" function shown above to the body:
       C := qid(substr(string(Ty), 0, 1) + "#" + string(Ty) + "." + string(Ty)) /\
       TL := buildArgs(TyL, s(N)) .
 
+  op indProofOrder : NatList Nat -> ProofOrder .
+  eq indProofOrder(NL, s(N)) = indProofOrder(NL, N) y NL s(N) .
+  eq indProofOrder(NL, 0) = finished .
+
   sort Vars2ConsPair .
   op [_,_] : Equation Module -> Vars2ConsPair [ctor] .
   op [_,_] : TermList Module -> Vars2ConsPair [ctor] .
@@ -4062,25 +4104,26 @@ the \verb"maps2maps" function shown above to the body:
   ***********************************************************************************
 
   op applyImp : ProofTree Qid -> ProofBool .
-  eq applyImp(P, Q) = $applyImp(P, Q, size(P)) .
+  eq applyImp(P, Q) = $applyImp(P, Q) .
 
-  op $applyImp : ProofTree Qid Nat -> ProofBool .
-  eq $applyImp(mtPT, Q, N) = [mtPT, false] .
-  ceq $applyImp(| M, [N, CMD, Eq, false, PRVN], PrL, N' |, Q, N'') =
-                           [| M, [N, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |, B]
-   if [PrL', B] := $applyImp*(PrL, Q, N'') .
-  ceq $applyImp(| M, [N, CMD, Eq, true, PRVN], mtPT, N' |, Q, N'') =
-                           [| M, [N, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |, B]
-   if [PrL', B] := applyImp(M, Eq, Q, N'') .
+  op $applyImp : ProofTree Qid -> ProofBool .
+  eq $applyImp(mtPT, Q) = [mtPT, false] .
+  ceq $applyImp(| M, [NL, CMD, Eq, false, PRVN], PrL, N' |, Q) =
+                           [| M, [NL, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |, B]
+   if [PrL', B] := $applyImp*(PrL, Q) .
+  ceq $applyImp(| M, [NL, CMD, Eq, true, PRVN], mtPT, N' |, Q) =
+                          *** [| M, [NL, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |, B]
+                          [PrL', B]
+   if [PrL', B] := applyImp(M, Eq, Q, NL) .
 
-  op $applyImp* : ProofTreeList Qid Nat -> ProofBool .
-  eq $applyImp*(mtPT, Q, N) = [mtPT, false] .
-  ceq $applyImp*(| M', G, PrL, N | PrL', Q, N') = [PrL1 PrL2, B or B']
-   if [PrL1, B] := $applyImp(| M', G, PrL, N |, Q, N') /\
-      [PrL2, B'] := $applyImp*(PrL', Q, N') .
+  op $applyImp* : ProofTreeList Qid -> ProofBool .
+  eq $applyImp*(mtPT, Q) = [mtPT, false] .
+  ceq $applyImp*(| M', G, PrL, N | PrL', Q) = [PrL1 PrL2, B or B']
+   if [PrL1, B] := $applyImp(| M', G, PrL, N |, Q) /\
+      [PrL2, B'] := $applyImp*(PrL', Q) .
 
-  op applyImp : Module Equation Qid Nat -> ProofBool .
-  ceq applyImp(M, Eq, Q, N) = [| M, [N, 'imp, Eq', true, false], mtPT, 1 |, true]
+  op applyImp : Module Equation Qid NatList -> ProofBool .
+  ceq applyImp(M, Eq, Q, NL) = [| M, [NL, 'imp, Eq', true, false], mtPT, 1 |, true]
    if eq T = 'true.Bool [label(Q) AtS] . EqS := getEqs(M) /\
       Eq' := impEq(M, Eq, T) .
   eq applyImp(M, Eq, Q, N) = [mtPT, false] [owise] .
@@ -4101,20 +4144,20 @@ the \verb"maps2maps" function shown above to the body:
 
   op $applyTC : ProofTree Nat -> ProofTree .
   eq $applyTC(mtPT, N) = mtPT .
-  ceq $applyTC(| M', [N, CMD, Eq, false, PRVN], PrL, N' |, N'') =
-                                   | M', [N, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |
+  ceq $applyTC(| M', [NL, CMD, Eq, false, PRVN], PrL, N' |, N'') =
+                                   | M', [NL, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |
    if PrL' := $applyTC*(PrL, N'') .
-  ceq $applyTC(| M', [N, CMD, Eq, true, PRVN], mtPT, N' |, N'') =
-                                   | M', [N, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |
-   if PrL' := vars2cons*(Eq, M', N'') .
+  ceq $applyTC(| M', [NL, CMD, Eq, true, PRVN], mtPT, N' |, N'') =
+                                   | M', [NL, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |
+   if PrL' := vars2cons*(Eq, M', NL) .
 
   op $applyTC* : ProofTreeList Nat -> ProofTree .
   eq $applyTC*(mtPT, N) = mtPT .
   eq $applyTC*(| M', G, PrL, N | PrL', N') =
                 $applyTC(| M', G, PrL, N |, N') $applyTC*(PrL', N') .
 
-  op vars2cons* : Equation Module Nat -> ProofTree .
-  ceq vars2cons*(Eq, M, N) = | M', [N, 'TC, Eq', true, false], mtPT, 1 |
+  op vars2cons* : Equation Module NatList -> ProofTree .
+  ceq vars2cons*(Eq, M, NL) = | M', [NL, 'TC, Eq', true, false], mtPT, 1 |
    if [Eq', M'] := vars2cons(Eq, M) .
 
   op vars2cons : Equation Module -> Vars2ConsPair .
@@ -4164,16 +4207,28 @@ the \verb"maps2maps" function shown above to the body:
   *********************************** SELECT GOAL ***********************************
   ***********************************************************************************
 
-  op selectGoal : ProofTree Nat -> ProofTree .
-  eq selectGoal(mtPT, N) = mtPT .
-  ceq selectGoal(| M, [N, CMD, Eq, CURR, PRVN], PrL, N' |, N'') =
-                            | M, [N, CMD, Eq, N == N'', PRVN], PrL', N' |
-   if PrL' := selectGoal*(PrL, N'') .
+  op selectGoal : ProofTree NatList -> ProofTree .
+  eq selectGoal(mtPT, NL) = mtPT .
+  ceq selectGoal(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N' |, NL') =
+                            | M, [NL, CMD, Eq, NL == NL', PRVN], PrL', N' |
+   if PrL' := selectGoal*(PrL, NL') .
 
-  op selectGoal* : ProofTreeList Nat -> ProofTreeList .
-  eq selectGoal*(mtPT, N) = mtPT .
-  eq selectGoal*(| M, [N, CMD, Eq, CURR, PRVN], PrL, N' | PrL', N'') =
-       selectGoal(| M, [N, CMD, Eq, CURR, PRVN], PrL, N' |, N'') selectGoal*(PrL', N'') .
+  op selectGoal* : ProofTreeList NatList -> ProofTreeList .
+  eq selectGoal*(mtPT, NL) = mtPT .
+  eq selectGoal*(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N' | PrL', NL') =
+       selectGoal(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N' |, NL') selectGoal*(PrL', NL') .
+
+  op qid2natlist : Qid -> NatList .
+  eq qid2natlist(Q) = str2natlist(string(Q)) .
+
+  op str2natlist : String -> NatList .
+  ceq str2natlist(S) = rat(substr(S, 0, N), 10) str2natlist(substr(S, N + 1, length(S)))
+   if N := find(S, "-", 0) .
+  eq str2natlist(S) = rat(S, 10) [owise] .
+
+  op selectGoal : ProofOrder NatList -> ProofOrder .
+  eq selectGoal(PO y NL y PO', NL) = NL y PO y PO' .
+  eq selectGoal(PO, NL) = PO [owise] .
 
   vars CURR PRVN : Bool .
 
@@ -4207,14 +4262,14 @@ the \verb"maps2maps" function shown above to the body:
 
   op getNew : Module EquationSet EquationSet ~> ProofTree .
   eq getNew(M, Eq EqS, Eq EqS') = getNew(M, EqS, EqS') .
-  ceq getNew(M, none, EqS) = setToGoal(M, EqS, 0)
+  ceq getNew(M, none, EqS) = setToGoal(M, EqS)
    if EqS =/= none .
 
-  op setToGoal : Module EquationSet Nat ~> ProofTree .
-  eq setToGoal(M, none, N) = mtPT .
-  eq setToGoal(M, Eq, N) = | M, [N, 'root, Eq, N == 0, false], mtPT, 1 | .
+  op setToGoal : Module EquationSet ~> ProofTree .
+  eq setToGoal(M, none) = mtPT .
+  eq setToGoal(M, Eq) = | M, [nil, 'root, Eq, true, false], mtPT, 1 | .
 *** It is not expected to start with more than one sentence
-***  eq setToGoal(Eq EqS, N) = [N, 'root, Eq, N == 0, false] + setToGoal(EqS, s(N)) .
+***  eq setToGoal(Eq EqS, N) = [NL, 'root, Eq, N == 0, false] + setToGoal(EqS, s(N)) .
 
   ************************************************************************************
   ************************************ REDUCE COMM ***********************************
@@ -4224,13 +4279,13 @@ the \verb"maps2maps" function shown above to the body:
   op [_,_] : ProofTreeList Bool -> ProofBool [ctor] .
 
   op applyRed : ProofTree -> ProofBool .
-  ceq applyRed(| M, [N, CMD, eq T = T' [AtS] ., true, PRVN], PrL, N' |) =
-               [| M, [N, CMD, eq T = T' [AtS] ., not B, B], PrL, N' |, B]
+  ceq applyRed(| M, [NL, CMD, eq T = T' [AtS] ., true, PRVN], PrL, N' |) =
+               [| M, [NL, CMD, eq T = T' [AtS] ., not B, B], PrL, N' |, B]
    if T1 := getTerm(metaReduce(M, T)) /\
       T2 := getTerm(metaReduce(M, T')) /\
-      B := T1 == T2 [print T1 " - " T2] .
-  ceq applyRed(| M, [N, CMD, Eq, false, PRVN], PrL, N' |) =
-                         [| M, [N, CMD, Eq, false, PRVN], PrL', N' |, B]
+      B := T1 == T2 .
+  ceq applyRed(| M, [NL, CMD, Eq, false, PRVN], PrL, N' |) =
+                         [| M, [NL, CMD, Eq, false, PRVN], PrL', N' |, B]
    if [PrL', B] := applyRed*(PrL) .
 
   op applyRed* : ProofTreeList -> ProofBool .
@@ -4245,33 +4300,68 @@ the \verb"maps2maps" function shown above to the body:
 
   op printCurrent : ProofTree -> QidList .
   eq printCurrent(mtPT) = nil .
-  eq printCurrent(| M, [N, CMD, Eq, true, PRVN], mtPT, N' |) =
+  eq printCurrent(| M, [NL, CMD, Eq, true, PRVN], mtPT, N' |) =
                                    '\n CMD ' printEq(M, Eq) '\n .
-  eq printCurrent(| M, [N, CMD, Eq, CURR, PRVN], PrL, N' |) = printCurrent*(PrL) [owise] .
+  eq printCurrent(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N' |) = printCurrent*(PrL) [owise] .
 
   op printCurrent* : ProofTreeList -> QidList .
   eq printCurrent*(mtPT) = nil .
-  eq printCurrent*(| M, [N, CMD, Eq, CURR, PRVN], PrL, N' | PrL') =
-         printCurrent(| M, [N, CMD, Eq, CURR, PRVN], PrL, N' |) printCurrent*(PrL') .
+  eq printCurrent*(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N' | PrL') =
+         printCurrent(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N' |) printCurrent*(PrL') .
 
   ************************************************************************************
   *********************************** PRINT PROOF ************************************
   ************************************************************************************
 
+  op printProofTree : ProofTree -> QidList .
+  eq printProofTree(P) = $printProofTree(P, 0) .
+
+  op $printProofTree : ProofTree Nat -> QidList .
+  eq $printProofTree(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N |, N') =
+                                   '\n printTab(N') printIndex(NL)
+                                   if PRVN then '* else nil fi
+                                   if CURR then '> else nil fi
+                                   CMD '
+                                   printEq(M, Eq)
+                                   $printProofTree*(PrL, s(N')) .
+
+  op $printProofTree* : ProofTreeList Nat -> QidList .
+  eq $printProofTree*(mtPT, N) = nil .
+  eq $printProofTree*(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N | PrL', N') =
+                       $printProofTree(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N |, N')
+                       $printProofTree*(PrL', N') .
+
+  op printTab : Nat -> QidList .
+  eq printTab(0) = nil .
+  eq printTab(s(N)) = '\t printTab(N) .
+
+  *************************************************************************************
+  *********************************** PRINT LEAVES ************************************
+  *************************************************************************************
+
   op printGoals : ProofTree -> QidList .
   eq printGoals(mtPT) = nil .
-  eq printGoals(| M, [N, CMD, Eq, CURR, PRVN], mtPT, N' |) =
-                                   '\n qid(string(N, 10) + ".")
+  eq printGoals(| M, [NL, CMD, Eq, CURR, PRVN], mtPT, N' |) =
+                                   '\n printIndex(NL)
                                    if PRVN then '* else nil fi
                                    if CURR then '> else nil fi
                                    CMD '
                                    printEq(M, Eq) .
-  eq printGoals(| M, [N, CMD, Eq, CURR, PRVN], PrL, N' |) = printGoals*(PrL) [owise] .
+  eq printGoals(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N' |) = printGoals*(PrL) [owise] .
 
   op printGoals* : ProofTreeList -> QidList .
   eq printGoals*(mtPT) = nil .
-  eq printGoals*(| M, [N, CMD, Eq, CURR, PRVN], PrL, N' | PrL') =
-         printGoals(| M, [N, CMD, Eq, CURR, PRVN], PrL, N' |) printGoals*(PrL') .
+  eq printGoals*(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N' | PrL') =
+         printGoals(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N' |) printGoals*(PrL') .
+
+  op printIndex : NatList -> QidList .
+  eq printIndex(nil) = nil .
+  eq printIndex(NL) = qid(natlist2string(NL) + ".") .
+
+  op natlist2string : NatList -> String .
+  eq natlist2string(nil) = "" .
+  eq natlist2string(N) = string(N, 10) .
+  eq natlist2string(N NL) = string(N, 10) + "-" + natlist2string(NL) [owise] .
 
   op printEq : Module Equation -> QidList .
   eq printEq(M, eq T = T' [label(Q) nonexec] .) = 'eq ' '`[ Q ':nonexec '`] ':
@@ -6450,7 +6540,7 @@ endm
 set print conceal on .
 
 print conceal mod_is_sorts_._____endm .
-*** print conceal fmod_is_sorts_.____endfm .
+print conceal fmod_is_sorts_.____endfm .
 print conceal db .
 
 
