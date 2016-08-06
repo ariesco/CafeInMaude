@@ -700,6 +700,7 @@ declared or not:
   op :apply(_) : @NeCafeTokenList@ -> @CafeInductiveComm@ [ctor] .
   op :imp[_]. : @CafeToken@ -> @CafeInductiveComm@ [ctor] .
   op :sel(_) : @CafeToken@ -> @CafeInductiveComm@ [ctor] .
+  op :postpone`. : -> @CafeInductiveComm@ [ctor] .
   op :show`proof : -> @CafeInductiveComm@ [ctor] .
   op :desc`proof : -> @CafeInductiveComm@ [ctor] .
   op :desc`. : -> @CafeInductiveComm@ [ctor] .
@@ -2989,6 +2990,9 @@ identifiers to extend the variable set with the variables defined on the fly in 
    if PDR := < PU ; U ; VDS > .
   ceq parseCafeDecl(':sel`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if PDR := < PU ; U ; VDS > .
+  ceq parseCafeDecl(':postpone`..@CafeInductiveComm@, PU, U, VDS, PSM, TSM, DB) =
+                                                                < PDR, nil, none, DB >
+   if PDR := < PU ; U ; VDS > .
   ceq parseCafeDecl(':imp`[_`].[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if PDR := < PU ; U ; VDS > .
   ceq parseCafeDecl(':def_=`:ctf`{_`}[T, T'], PU, U, VDS, PSM, TSM, DB) =
@@ -3878,6 +3882,7 @@ the \verb"maps2maps" function shown above to the body:
   eq getRedThCommand(':ind`on`(_`)['CafeToken[T]]) = ':ind`on`(_`)[T] .
   eq getRedThCommand(':apply`(_`)['neCafeTokenList[T]]) = ':apply`(_`)[T] .
   eq getRedThCommand(':sel`(_`)['CafeToken[T]]) = ':sel`(_`)[T] .
+  eq getRedThCommand(':postpone`..@CafeInductiveComm@) = ':postpone`..@CafeInductiveComm@ .
   eq getRedThCommand(':imp`[_`].['CafeToken[T]]) = ':imp`[_`].[T] .
   eq getRedThCommand(':id`(_`)['CafeToken[T]]) = empty .
   eq getRedThCommand(':proof`(_`)['CafeToken[T]]) = ':proof`(_`)[T] .
@@ -3915,6 +3920,12 @@ the \verb"maps2maps" function shown above to the body:
       P' := selectGoal(P, NL) /\
       PO' := selectGoal(PO, NL) /\
       QIL := '\n 'Sentence Q 'selected. '\n .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':postpone`..@CafeInductiveComm@, TL),
+                           T1, P, V, MACS, NL y PO, SIM) =
+           QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P', V, MACS, PO', SIM)
+   if PO' := PO y NL /\
+      P' := selectGoal(P, fst(PO')) /\
+      QIL := '\n 'Sentence printIndex(NL) 'postponed. '\n .
   ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':imp`[_`].[T], TL), T1, P, V, MACS,
                            PO, SIM) =
            QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P', V, MACS, PO, SIM)
@@ -4034,7 +4045,23 @@ the \verb"maps2maps" function shown above to the body:
              'The 'goal 'was if B then nil else 'not fi 'discarded
              if B and (not B')
              then '\n 'Next 'goal 'is '\! printIndex(fst(PO')) '\o
-***                  '\n 'New 'goal: printGoals(P'') '\n
+             else '\n '\!  'PROOF 'FINISHED! '\o '\n
+             fi .
+  ceq evalApply(M, 'rd-, P, V, MACS, PO) = [P'', PO', QIL]
+   if [P', B] := applyRed(P) /\
+      PO' := if B
+             then pop(PO)
+             else PO
+             fi /\
+      B' := PO' == finished /\
+      P'' := if B and (not B')
+             then selectGoal(P', fst(PO'))
+             else P'
+             fi /\
+      QIL := '\n '\n 'Reduction 'applied.
+             'The 'goal 'was if B then nil else 'not fi 'discarded
+             if B and (not B')
+             then '\n 'Next 'goal 'is '\! printIndex(fst(PO')) '\o
              else '\n '\!  'PROOF 'FINISHED! '\o '\n
              fi .
   ceq evalApply(M, Q, P, V, # M', Q - Eq # MACS, PO) = [P', PO', QIL]
@@ -4407,10 +4434,13 @@ the \verb"maps2maps" function shown above to the body:
 
   op applyRed : ProofTree -> ProofBool .
   ceq applyRed(| M, [NL, CMD, eq T = T' [AtS] ., true, PRVN], PrL, N' |) =
-               [| M, [NL, CMD, eq T = T' [AtS] ., not B, B], PrL, N' |, B]
+               [| M, [NL, CMD, Eq, not B, B], PrL, N' |, B]
    if T1 := getTerm(metaReduce(M, T)) /\
       T2 := getTerm(metaReduce(M, T')) /\
-      B := T1 == T2 .
+      B := T1 == T2 /\
+      Eq := if B then eq T = T' [AtS] .
+                 else eq T1 = T2 [AtS] .
+                 fi .
   ceq applyRed(| M, [NL, CMD, Eq, false, PRVN], PrL, N' |) =
                          [| M, [NL, CMD, Eq, false, PRVN], PrL', N' |, B]
    if [PrL', B] := applyRed*(PrL) .
@@ -4420,6 +4450,22 @@ the \verb"maps2maps" function shown above to the body:
   ceq applyRed*(| M, G, PrL, N' | PrL') = [P PrL'', B or B']
    if [P, B] := applyRed(| M, G, PrL, N' |) /\
       [PrL'', B'] := applyRed*(PrL') .
+
+  op applyRed- : ProofTree -> ProofBool .
+  ceq applyRed-(| M, [NL, CMD, eq T = T' [AtS] ., true, PRVN], PrL, N' |) =
+               [| M, [NL, CMD, eq T = T' [AtS] ., not B, B], PrL, N' |, B]
+   if T1 := getTerm(metaReduce(M, T)) /\
+      T2 := getTerm(metaReduce(M, T')) /\
+      B := T1 == T2 .
+  ceq applyRed-(| M, [NL, CMD, Eq, false, PRVN], PrL, N' |) =
+                         [| M, [NL, CMD, Eq, false, PRVN], PrL', N' |, B]
+   if [PrL', B] := applyRed-*(PrL) .
+
+  op applyRed-* : ProofTreeList -> ProofBool .
+  eq applyRed-*(mtPT) = [mtPT, false] .
+  ceq applyRed-*(| M, G, PrL, N' | PrL') = [P PrL'', B or B']
+   if [P, B] := applyRed-(| M, G, PrL, N' |) /\
+      [PrL'', B'] := applyRed-*(PrL') .
 
   **************************************************************************************
   *********************************** PRINT CURRENT ************************************
@@ -4506,7 +4552,7 @@ the \verb"maps2maps" function shown above to the body:
 
   op natlist2string : NatList -> String .
   eq natlist2string(nil) = "" .
-  eq natlist2string(N) = string(N, 10) .
+  eq natlist2string(N) = string(N, 10) + "." .
   eq natlist2string(N NL) = string(N, 10) + "-" + natlist2string(NL) [owise] .
 
   op printEq : Module Equation -> QidList .
@@ -4583,7 +4629,7 @@ the \verb"maps2maps" function shown above to the body:
       QIL := '\t ':apply ' '`( 'rd '`) '\n '\n .
   eq developProof(P, NL y PO, SIS, MACS) =
               if PO =/= finished
-              then '\t ':sel '`( printIndex(fst(PO)) '`) '\n '\n
+              then '\t ':postpone '. '\n '\n
                    developProof(selectGoal(P, fst(PO)), PO, SIS, MACS)
               else nil
               fi .
@@ -4624,8 +4670,27 @@ the \verb"maps2maps" function shown above to the body:
   ceq redRequired($ M, M', (TL, T, TL') $ SIS, M'', T') = true
    if CS := getSub(M, T, M'', T') /\
       T1 := applyCS(T, CS) /\
-      getTerm(metaReduce(M'', T1)) == getTerm(metaReduce(M'', T')) .
+      T2 := getTerm(metaReduce(M, T)) /\
+      T3 := getTerm(metaReduce(M'', T')) /\
+      *** Same premises
+      samePremises(M, M', M'', CS) /\
+      T2 == T3 .
   eq redRequired(SIS, M, T) = false [owise] .
+
+  *** Flat module
+  *** Top module
+  *** Goal module
+  op samePremises : Module Module Module ConsSub -> Bool .
+  eq samePremises(M, M', M'', CS) = samePremises(M, getEqs(M'), M'', CS) .
+
+  op samePremises : Module EquationSet Module ConsSub -> Bool .
+  ceq samePremises(M, eq T = T' [AtS] . EqS, M', CS) = (T1 == T3) and
+                                                       samePremises(M, EqS, M', CS)
+   if isExec(AtS) /\
+      T1 := getTerm(metaReduce(M, T)) /\
+      T2 := applyCS(T, CS) /\
+      T3 := getTerm(metaReduce(M', T2)) .
+  eq samePremises(M, EqS, M', CS) = true [owise] .
 
   op getNameProofScore : ScoreInfoSet -> Qid .
   eq getNameProofScore($ M, M', (T, TL)$ SIS) = getNameProofScore(getImports(M')) .
@@ -4683,8 +4748,16 @@ the \verb"maps2maps" function shown above to the body:
   eq isCtor(ODS, V) = true .
   ceq isCtor(op Q : nil -> Ty [ctor AtS] . ODS, C) = true
    if Q := getName(C) .
-  eq isCtor(op Q : TyL -> Ty [ctor AtS] . ODS, Q[TL]) = true .
+  eq isCtor(op Q : TyL -> Ty [ctor AtS] . ODS, Q[TL]) =
+            allNonCtorConstants(op Q : TyL -> Ty [ctor AtS] . ODS, TL) .
   eq isCtor(ODS, T) = false [owise] .
+
+  op allNonCtorConstants : OpDeclSet TermList -> Bool .
+  eq allNonCtorConstants(ODS, V) = false .
+  eq allNonCtorConstants(ODS, Q[TL]) = false .
+  ceq allNonCtorConstants(op Q : nil -> Ty [ctor AtS] . ODS, C) = false
+   if Q := getName(C) .
+  eq allNonCtorConstants(ODS, C) = true [owise] .
 
   op printProof : Module Qid Qid Term Variable QidList -> QidList .
   eq printProof(M, Q, Q', T, V, QIL) =
@@ -4709,6 +4782,9 @@ the \verb"maps2maps" function shown above to the body:
           then getIndVar(T, T')
           else getIndVar(Q[TL], Q[TL'])
           fi .
+
+  *** When inferring goal it is possible that fresh constants appear. In this case
+  *** we need to add them to turn them into variables.
 
   ***********************************************************************************
   ******************************* AUXILIARY FUNCTIONS *******************************
