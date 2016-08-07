@@ -3909,6 +3909,21 @@ the \verb"maps2maps" function shown above to the body:
       QIL := '\n 'Induction 'set 'on metaPrettyPrint(M, T', po) '\n .
   ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':apply`(_`)[T], TL), T1, P, V, MACS,
                            PO, SIM) =
+           QIL processRedThCommands(M, PSM, HSM, TSM, DB, (':apply`(_`)['__[T3, TL']], TL),
+                                    T1, P', V, MACS, PO', SIM)
+   if '__[T2, T3, TL'] := T /\
+      TL' =/= empty /\
+      Q := downQid(T2) /\
+      [P', PO', QIL] := evalApply(M, Q, P, V, MACS, PO) .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':apply`(_`)[T], TL), T1, P, V, MACS,
+                           PO, SIM) =
+           QIL processRedThCommands(M, PSM, HSM, TSM, DB, (':apply`(_`)[T3], TL),
+                                    T1, P', V, MACS, PO', SIM)
+   if '__[T2, T3] := T /\
+      Q := downQid(T2) /\
+      [P', PO', QIL] := evalApply(M, Q, P, V, MACS, PO) .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':apply`(_`)[T], TL), T1, P, V, MACS,
+                           PO, SIM) =
            QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P', V, MACS, PO', SIM)
    if Q := downQid(T) /\
       [P', PO', QIL] := evalApply(M, Q, P, V, MACS, PO) .
@@ -3968,7 +3983,7 @@ the \verb"maps2maps" function shown above to the body:
       QIL := inferProof(Q, SIM[Q], mtMacros) .
   eq processRedThCommands(M, PSM, HSM, TSM, DB, (T, TL), T1, P, V, MACS, PO, SIM) =
            '\n 'Error 'in 'command.
-           processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,MACS, PO, SIM) [owise] .
+           processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,MACS, PO, SIM) [owise print T] .
 
   *** Module.
   *** Term to be reduced.
@@ -4426,7 +4441,7 @@ the \verb"maps2maps" function shown above to the body:
 ***  eq setToGoal(Eq EqS, N) = [NL, 'root, Eq, N == 0, false] + setToGoal(EqS, s(N)) .
 
   ************************************************************************************
-  ************************************ REDUCE COMM ***********************************
+  *********************************** REDUCE COMMAND *********************************
   ************************************************************************************
 
   sort ProofBool .
