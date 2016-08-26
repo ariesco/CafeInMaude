@@ -738,7 +738,7 @@ fmod SEARCH_PREDICATE is
       QIL' := printAllSolutionsN(M, T1, T2, COND, Q, BND, N, T3, QIL) .
   ceq printAllSolutionsN(M, T1, T2, COND, Q, BND, s(N), T3, QIL) = QIL''
    if {FIN, Ty, SB} := metaSearch(M, T1, T2, COND, Q, BND, s(N)) /\
-      QIL' := printTerm(M, T1, FIN, T3, s(s(N)), SB) /\
+      QIL' := printTerm(M, T1, FIN, T3, s(N), SB) /\
       QIL'' := printAllSolutionsN(M, T1, T2, COND, Q, BND, N, T3, QIL' QIL) .
 
   **********************************************************************************
