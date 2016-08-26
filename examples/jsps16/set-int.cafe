@@ -1,0 +1,252 @@
+--> =================================================================
+-->             Proof Scores on
+-->             Generic Set with Intersection Operation
+-->                                                        kf160805
+--> =================================================================
+
+--> ================================================================
+--> generic sets: SET(X :: TRIV)
+--> ----------------------------------------------------------------
+mod! SET(X :: TRIV) {
+[Elt.X < Set]
+-- empty set
+op empty : -> Set {constr}
+-- assicative and commutative set constructor with identity 'empty'
+op __ : Set Set -> Set {constr assoc comm id: empty idem}
+-- in
+pred _in_ : Elt Set .
+eq (E:Elt in empty) = false .
+eq (E1:Elt in (E2:Elt S:Set)) = ((E1 = E2) or (E1 in S)) .
+}
+
+-- =================================================================
+-- set intersection: SET^
+--> ----------------------------------------------------------------
+mod! SET^ (X :: TRIV) {
+pr(SET(X))
+op _^_ : Set Set -> Set .
+eq empty ^ S2:Set = empty .
+eq (E:Elt S1:Set) ^ S2:Set =
+    if E in S2 then E (S1 ^ S2) else (S1 ^ S2) fi .
+}
+
+--> ================================================================
+--> proof score for the property:
+--> eq[in^]: E:Elt in (S1:Set ^ S2:Set) = E in S1 and E in S2 .
+--> with CITP
+--> ================================================================
+-- proof: by induction on the number of elements in S1:Set
+--> induction base
+open SET^ .
+-- check the base
+op e : -> Elt .
+op s2 : -> Set .
+red (e in (empty ^ s2)) = (e in empty and e in s2) .
+close
+--> induction step
+mod SET^in-iStep {
+pr(SET^)
+-- induction hypothesis
+op s1 : -> Set .
+eq (E:Elt in (s1 ^ S2:Set)) = (E in s1 and E in S2) .
+-- fresh constants
+ops e1 e2 : -> Elt .
+op s2 : -> Set .
+-- induction step proposition
+op iStep : -> Bool .
+eq iStep = ((e1 in ((e2 s1) ^ s2)) = (e1 in (e2 s1) and e1 in s2)) .
+}
+-- check the step
+open SET^in-iStep .
+:goal{eq iStep = true .}
+:def ctf-1 = :ctf[e1 = e2 .]
+:def ctf-2 = :ctf[e2 in s2 .]
+:apply(ctf-1 rd- ctf-2 rd-)
+close
+--> QED
+
+eof
+
+-- another proof score
+open SET^in-iStep .
+eq e1 = e2 .
+eq (e2 in s2) = true .
+red iStep .
+close
+--
+open SET^in-iStep .
+eq e1 = e2 .
+eq (e2 in s2) = false .
+red iStep .
+close
+--
+open SET^in-iStep .
+eq (e1 = e2) = false .
+eq (e2 in s2) = true .
+red iStep .
+close
+--
+open SET^in-iStep .
+eq (e1 = e2) = false .
+eq (e2 in s2) = false .
+red iStep .
+close
+
+--> ================================================================
+--> proof score for associativity of _^_:
+--> eq[^assoc]: S1:Set ^ (S2:Set ^ S3:Set) =
+-->            (S1:Set ^ S2:Set) ^ S3:Set .
+--> ================================================================
+-- proof: by induction on the number of elements in S:Set
+--> induction base
+open SET^ .
+-- check the base
+ops s2 s3 : -> Set .
+red empty ^ (s2 ^ s3) = (empty ^ s2) ^ s3 .
+close
+--> induction step
+mod SET^assoc-iStep {
+pr(SET^)
+-- induction hypothesis
+op s1 : -> Set .
+eq s1 ^ (S2:Set ^ S3:Set) = (s1 ^ S2) ^ S3 .
+-- already proved property
+eq E:Elt in (S1:Set ^ S2:Set) = (E in S1) and (E in S2) .
+-- fresh constants
+op e : -> Elt .
+ops s2 s3 : -> Set .
+-- induction step proposition
+op iStep : -> Bool .
+eq iStep = ((e s1) ^ (s2 ^ s3) = ((e s1) ^ s2) ^ s3) .
+}
+select SET^assoc-iStep .
+:goal{eq iStep = true .}
+:def ctf-1 = :ctf[e in s2 .]
+:def ctf-2 = :ctf[e in s3 .]
+:apply(ctf-1 rd- ctf-2 rd-)
+--> QED
+-- inspecting proof
+show proof
+desc proof
+
+--> ================================================================
+--> proof score for the property:
+--> eq[^em]: S1:Set ^ empty = empty .
+--> ================================================================
+-- proof: by induction on the number of elements in S1:Set
+--> induction base
+select SET^ .
+red empty ^ empty = empty .
+--> induction step
+open SET^ .
+-- induction hypothesis
+op s1 : -> Set .
+eq s1 ^ empty = empty .
+-- check the step
+op e : -> Elt .
+red (e s1) ^ empty = empty .
+close
+--> QED
+
+--> ================================================================
+--> proof score for the property:
+--> eq[^res]: S1:Set ^ (E:Elt S2:Set) =
+-->           if E in S1 then E (S1 ^ S2) else (S1 ^ S2) fi .
+--> ================================================================
+-- proof: induction on the number of elements in S1:Set
+--> induction base
+open SET^ .
+op e : -> Elt .
+op s2 : -> Set .
+red empty ^ (e s2) =
+     if e in empty then e (empty ^ s2) else (empty ^ s2) fi .
+close
+--> induction step
+mod SET^res-iStep {
+pr(SET^)
+-- induction hypothesis
+op s1 : -> Set .
+eq s1 ^ (E:Elt S2:Set) = if E in s1 then E (s1 ^ S2) else (s1 ^ S2) fi .
+-- fresh constants
+ops e1 e2 : -> Elt . op s2 : -> Set .
+-- induction step proposition
+op iStep : -> Bool .
+eq iStep = ((e1 s1) ^ (e2 s2) =
+            if e2 in (e1 s1) then e2 ((e1 s1) ^ s2)
+	                     else ((e1 s1) ^ s2) fi) .
+}
+-- check the induction step proposition
+select SET^res-iStep .
+:goal{eq iStep = true .}
+:def ctf-1 = :ctf[e1 = e2 .]
+:def ctf-2 = :ctf[e2 in s1 .]
+:def ctf-3 = :ctf[e2 in s2 .]
+:def ctf-4 = :ctf[e1 in s1 .]
+:def ctf-5 = :ctf[e1 in s2 .]
+-- either of the following three :apply(...) works
+-- :apply (ctf-1 rd- ctf-2 rd- ctf-3 rd- ctf-4 rd- ctf-5 rd-)
+-- :apply (ctf-1 rd- ctf-2 rd- ctf-3 rd- ctf-5 rd-)
+:apply (ctf-1 rd-) :apply(ctf-2 rd- ctf-3 rd-) :apply(ctf-2 rd- ctf-5 rd-)
+** successful
+--> QED
+-- :show proof
+-- :describe proof
+
+--> ================================================================
+--> proof score for commutativity of _^_:
+--> eq[^comm]: S1:Set ^ S2:Set = S2 ^ S1 .
+--> ================================================================
+-- proof: by induction on the number of elements in S1:Set
+--> induction base
+open SET^ .
+-- already proved property
+eq[^em]: S1:Set ^ empty = empty .
+-- check
+op s2 : -> Set .
+red empty ^ s2 = s2 ^ empty .
+close
+--> induction step
+mod SET^comm-iStep {pr(SET^)
+-- induction hypothesis
+op s1 : -> Set .
+eq s1 ^ S2:Set = S2 ^ s1 .
+-- already proved property
+eq[^res]: S1:Set ^ (E:Elt S2:Set) =
+          if E in S1 then E (S1 ^ S2) else (S1 ^ S2) fi .
+-- fresh constants
+op e : -> Elt .
+op s2 : -> Set .
+-- induction step proposition
+op iStep : -> Bool .
+eq iStep = ((e s1) ^ s2 = s2 ^ (e s1)) .
+}
+--> check the step
+select SET^comm-iStep .
+:goal{eq iStep = true .}
+:def ctf-1 = :ctf[e in s2 .]
+:apply (ctf-1 rd-)
+--> QED
+
+-- another proof score
+--> case: eq e in s2 = true .
+open SET^comm-iStep .
+-- case splitting eq
+eq e in s2 = true .
+-- check
+red iStep .
+close
+--> case: eq e in s2 = false .
+open SET^comm-iStep .
+-- case splitting eq
+eq e in s2 = false .
+-- check
+red iStep .
+close
+--> QED
+
+--> ================================================================
+eof
+--> ================================================================
+
+
+

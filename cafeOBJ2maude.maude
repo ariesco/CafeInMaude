@@ -8,7 +8,7 @@ fmod GOAL is
  *** Sentence
  *** Is it the current one?
  *** Is it proven?
- op [_,_,_,_,_] : NatList Qid Equation Bool Bool -> Goal [ctor] .
+ op [_,_,_,_,_] : NatList Qid EquationSet Bool Bool -> Goal [ctor] .
 
  op noGoal : -> Goal [ctor] .
  op _+_ : Goal Goal -> Goal [ctor assoc id: noGoal] .
@@ -28,19 +28,19 @@ fmod GOAL is
  vars N N' : Nat .
  vars NL NL' : NatList .
  var  Q : Qid .
- var  Eq : Equation .
+ var  EqS : EquationSet .
  vars CURR PRV : Bool .
  vars SR SR' : SearchRes .
  var  PO : ProofOrder .
 
- op getEq : Goal -> Equation .
- eq getEq([NL, Q, Eq, CURR, PRV]) = Eq .
+ op getEq : Goal -> EquationSet .
+ eq getEq([NL, Q, EqS, CURR, PRV]) = EqS .
 
  op getId : Goal -> NatList .
- eq getId([NL, Q, Eq, CURR, PRV]) = NL .
+ eq getId([NL, Q, EqS, CURR, PRV]) = NL .
 
  op isProven : Goal -> Bool .
- eq isProven([NL, Q, Eq, CURR, PRV]) = PRV .
+ eq isProven([NL, Q, EqS, CURR, PRV]) = PRV .
 
  op size : ProofTree -> Nat .
  eq size(mtPT) = 0 .
@@ -62,18 +62,6 @@ fmod GOAL is
                           else N' NL'
                           fi .
  eq minSR(NL, nil) = NL .
-
- op getFirstUnproven : ProofTree -> SearchRes .
- eq getFirstUnproven(mtPT) = allProven .
- ceq getFirstUnproven(| M, G, mtPT, N |) = getId(G)
-  if not isProven(G) .
- eq getFirstUnproven(| M, G, PrL, N |) = getFirstUnproven*(PrL) [owise] .
-
- op getFirstUnproven* : ProofTree -> SearchRes .
- eq getFirstUnproven*(mtPT) = allProven .
- ceq getFirstUnproven*(| M, G, PrL, N | PrL') = minSR(SR, SR')
-  if SR := getFirstUnproven(| M, G, PrL, N |) /\
-     SR' := getFirstUnproven*(PrL') .
 
  sort ProofOrder .
  subsort NatList < ProofOrder .
@@ -150,11 +138,15 @@ fmod SCORE-INFO-MAP is
 
  op completeTermList : ScoreInfoSet -> TermList .
  eq completeTermList(noScoreInfo) = empty .
- eq completeTermList(($ M, M', TL $) SIS) = TL, completeTermList(SIS) .
+ eq completeTermList($ M, M', TL $ SIS) = TL, completeTermList(SIS) .
 
  op _[_] : ScoreInfoMap Qid -> ScoreInfoSet .
  eq ((Q : SIS) SIM)[Q] = SIS .
  eq SIM[Q] = noScoreInfo [owise] .
+
+ op allReductions : ScoreInfoSet -> TermList .
+ eq allReductions(noScoreInfo) = empty .
+ eq allReductions($ M, M', TL $ SIS) = TL, allReductions(SIS) .
 endfm
 
 ***(%
@@ -696,9 +688,11 @@ declared or not:
   *** Commands for induction
   op :goal{_} : @CafeLDeclList@ -> @CafeInductiveComm@ [ctor] .
   op :def_=`:ctf{_} : @CafeToken@ @CafeEqDecl@ -> @CafeInductiveComm@ [ctor] .
+  op :def_=`:ctf[_] : @CafeToken@ @CafeBubble@ -> @CafeInductiveComm@ [ctor] .
   op :ind`on(_) : @CafeToken@ -> @CafeInductiveComm@ [ctor] .
   op :apply(_) : @NeCafeTokenList@ -> @CafeInductiveComm@ [ctor] .
   op :imp[_]. : @CafeToken@ -> @CafeInductiveComm@ [ctor] .
+  op :imp[_]by{_} : @CafeToken@ @NeCafeTokenList@ -> @CafeInductiveComm@ [ctor] .
   op :sel(_) : @CafeToken@ -> @CafeInductiveComm@ [ctor] .
   op :postpone`. : -> @CafeInductiveComm@ [ctor] .
   op :show`proof : -> @CafeInductiveComm@ [ctor] .
@@ -2995,7 +2989,13 @@ identifiers to extend the variable set with the variables defined on the fly in 
    if PDR := < PU ; U ; VDS > .
   ceq parseCafeDecl(':imp`[_`].[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if PDR := < PU ; U ; VDS > .
+  ceq parseCafeDecl(':imp`[_`]by`{_`}[T, T'], PU, U, VDS, PSM, TSM, DB) =
+                                                                < PDR, nil, none, DB >
+   if PDR := < PU ; U ; VDS > .
   ceq parseCafeDecl(':def_=`:ctf`{_`}[T, T'], PU, U, VDS, PSM, TSM, DB) =
+                                                                < PDR, nil, none, DB >
+   if PDR := < PU ; U ; VDS > .
+  ceq parseCafeDecl(':def_=`:ctf`[_`][T, T'], PU, U, VDS, PSM, TSM, DB) =
                                                                 < PDR, nil, none, DB >
    if PDR := < PU ; U ; VDS > .
   ceq parseCafeDecl(':show`proof.@CafeInductiveComm@, PU, U, VDS, PSM, TSM, DB) =
@@ -3079,8 +3079,9 @@ a list of quoted identifiers reporting the errors found during the parsing proce
 \begin{comment}
 %)
 
-  vars T T' T'' T1 T2 T3 T4 T5 T6 TP TI : Term .
-  vars TL TL' TL'' PL PL' TLR : TermList .
+  vars T T' T'' T''' T1 T2 T3 T4 T5 T6 TP TI : Term .
+  var  T? : [Term] .
+  vars TL TL' TL'' PL PL' TLR TL1 TL2 : TermList .
   vars V V' : Variable .
   vars C C' : Constant .
   vars DB DB' : Database .
@@ -3113,9 +3114,9 @@ a list of quoted identifiers reporting the errors found during the parsing proce
   vars EqS EqS' : EquationSet .
   var  RS : RuleSet .
   var  M? : [Module] .
-  vars M' M'' M''' : Module .
+  vars M' M'' M''' M1 M2 M3 : Module .
   vars DB'' DB3 : Database .
-  var  AtS : AttrSet .
+  vars AtS AtS' : AttrSet .
   var  CND : Condition .
   vars ST ST' ST'' : SharingTable .
   vars G G' G'' : Goal .
@@ -3129,8 +3130,12 @@ a list of quoted identifiers reporting the errors found during the parsing proce
   vars NL NL' : NatList .
   vars PO PO' PO'' : ProofOrder .
   vars SIM SIM' : ScoreInfoMap .
-  var  SIS : ScoreInfoSet .
-  var  CS : ConsSub .
+  vars SIS SIS1 SIS2 : ScoreInfoSet .
+  vars CS CS' : ConsSub .
+  var  ML : MList .
+  var  TrS : TermSet .
+  var  SB : Substitution .
+  var  SISP : SISPair .
 
 ***(%
 \end{comment}
@@ -3884,10 +3889,14 @@ the \verb"maps2maps" function shown above to the body:
   eq getRedThCommand(':sel`(_`)['CafeToken[T]]) = ':sel`(_`)[T] .
   eq getRedThCommand(':postpone`..@CafeInductiveComm@) = ':postpone`..@CafeInductiveComm@ .
   eq getRedThCommand(':imp`[_`].['CafeToken[T]]) = ':imp`[_`].[T] .
+  eq getRedThCommand(':imp`[_`]by`{_`}['CafeToken[T], 'neCafeTokenList[T']]) =
+                                                    ':imp`[_`]by`{_`}[T, T'] .
   eq getRedThCommand(':id`(_`)['CafeToken[T]]) = empty .
   eq getRedThCommand(':proof`(_`)['CafeToken[T]]) = ':proof`(_`)[T] .
   eq getRedThCommand(':def_=`:ctf`{_`}['CafeToken[T], T']) =
                                                    ':def_=`:ctf`{_`}[T, T'] .
+  eq getRedThCommand(':def_=`:ctf`[_`]['CafeToken[T], 'CafeBubble[T']]) =
+                                                   ':def_=`:ctf`[_`][T, T'] .
   eq getRedThCommand(':show`proof.@CafeInductiveComm@) = ':show`proof.@CafeInductiveComm@ .
   eq getRedThCommand(':desc`proof.@CafeInductiveComm@) = ':desc`proof.@CafeInductiveComm@ .
   eq getRedThCommand(':desc`..@CafeInductiveComm@) = ':desc`..@CafeInductiveComm@ .
@@ -3950,6 +3959,16 @@ the \verb"maps2maps" function shown above to the body:
              then '\n 'New 'goal 'generated: printCurrent(P')
              else '\n 'Command 'failed. '\n
              fi .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':imp`[_`]by`{_`}[T, T'], TL), T1, P, V, MACS,
+                           PO, SIM) =
+           QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P', V, MACS, PO, SIM)
+   if Q := downQid(T) /\
+      SB := procImpSub(getMod(P, fst(PO)), T') /\
+      [P', B] := applyImp(P, Q, SB) /\
+      QIL := if B
+             then '\n 'New 'goal 'generated: printCurrent(P')
+             else '\n 'Command 'failed. '\n
+             fi .
   ceq processRedThCommands(M, PSM, HSM, TSM, DB,
                           (':def_=`:ctf`{_`}[T, T'], TL), T1, P, V, MACS, PO, SIM) =
            QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,
@@ -3957,6 +3976,13 @@ the \verb"maps2maps" function shown above to the body:
    if Q := downQid(T) /\
       # M', Q - Eq # := parseEqMacro(P, Q, T') /\
       QIL := '\n Q 'defined 'as ':ctf ' '`{ ' printEq(M', Eq) ' '`} '\n .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB,
+                          (':def_=`:ctf`[_`][T, T'], TL), T1, P, V, MACS, PO, SIM) =
+           QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,
+                                          MACS # M', Q - T2 #, PO, SIM)
+   if Q := downQid(T) /\
+      # M', Q - T2 # := parseTermMacro(P, Q, T') /\
+      QIL := '\n Q 'defined 'as ':ctf ' '`[ ' metaPrettyPrint(M', T2, po) ' '`] '\n .
   ceq processRedThCommands(M, PSM, HSM, TSM, DB,
                            (':show`proof.@CafeInductiveComm@, TL), T1, P, V, MACS, PO, SIM) =
            QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V, MACS, PO, SIM)
@@ -3980,10 +4006,10 @@ the \verb"maps2maps" function shown above to the body:
                            PO, SIM) =
            QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V, MACS, PO, SIM)
    if Q := downQid(T) /\
-      QIL := inferProof(Q, SIM[Q], mtMacros) .
+      QIL := inferProof(M, Q, SIM[Q], mtMacros) .
   eq processRedThCommands(M, PSM, HSM, TSM, DB, (T, TL), T1, P, V, MACS, PO, SIM) =
            '\n 'Error 'in 'command.
-           processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,MACS, PO, SIM) [owise print T] .
+           processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,MACS, PO, SIM) [owise] .
 
   *** Module.
   *** Term to be reduced.
@@ -4037,12 +4063,11 @@ the \verb"maps2maps" function shown above to the body:
   op evalApply : Module Qid ProofTree Variable Macros ProofOrder -> GoalRes .
   ceq evalApply(M, 'si, P, V, MACS, PO) = [P', PO', QIL]
    if ODS := getCtors(M, getType(V)) /\
-      TL := buildTermsCtors(ODS) /\
       [P', PO'] := applyInduction(P, V, PO) /\
       QIL := '\n 'Induction 'applied 'on metaPrettyPrint(M, V, po) ':
              '\n 'New 'goal: printGoals(P') '\n .
-  ceq evalApply(M, 'tc, P, V, MACS, PO) = [P', PO, QIL]
-   if P' := applyTC(P) /\
+  ceq evalApply(M, 'tc, P, V, MACS, PO) = [P', PO', QIL]
+   if [P', PO'] := applyTC(P, PO) /\
       QIL := '\n 'Theorem 'of 'constants 'applied.
              '\n 'New 'goal: printGoals(P') '\n .
   ceq evalApply(M, 'rd, P, V, MACS, PO) = [P'', PO', QIL]
@@ -4060,7 +4085,10 @@ the \verb"maps2maps" function shown above to the body:
              'The 'goal 'was if B then nil else 'not fi 'discarded
              if B and (not B')
              then '\n 'Next 'goal 'is '\! printIndex(fst(PO')) '\o
-             else '\n '\!  'PROOF 'FINISHED! '\o '\n
+             else if B'
+                  then '\n '\! 'PROOF 'FINISHED! '\o '\n
+                  else nil
+                  fi
              fi .
   ceq evalApply(M, 'rd-, P, V, MACS, PO) = [P'', PO', QIL]
    if [P', B] := applyRed(P) /\
@@ -4077,11 +4105,19 @@ the \verb"maps2maps" function shown above to the body:
              'The 'goal 'was if B then nil else 'not fi 'discarded
              if B and (not B')
              then '\n 'Next 'goal 'is '\! printIndex(fst(PO')) '\o
-             else '\n '\!  'PROOF 'FINISHED! '\o '\n
+             else if B'
+                  then '\n '\! 'PROOF 'FINISHED! '\o '\n
+                  else nil
+                  fi
              fi .
   ceq evalApply(M, Q, P, V, # M', Q - Eq # MACS, PO) = [P', PO', QIL]
    if P' := applyEquationMacro(P, Q, Eq) /\
       PO' := indProofOrder(fst(PO), 2) y pop(PO) /\
+      QIL := '\n 'Generated 'new 'goals
+             '\n printGoals(P') .
+  ceq evalApply(M, Q, P, V, # M', Q - T # MACS, PO) = [P', PO', QIL]
+   if Ty := getType(metaReduce(M', T)) /\
+      [P', PO'] := applyTermMacro(P, PO, Q, T, Ty) /\
       QIL := '\n 'Generated 'new 'goals
              '\n printGoals(P') .
 
@@ -4089,26 +4125,95 @@ the \verb"maps2maps" function shown above to the body:
   eq getCtors(M, Srt) = getCtors(M, getOps(M), Srt) .
 
   op getCtors : Module OpDeclSet Sort -> OpDeclSet .
-  eq getCtors(M, op Q : TyL -> Srt [AtS] . ODS, Srt) = op Q : TyL -> Srt [AtS] .
-                                                       getCtors(M, ODS, Srt) .
-  ceq getCtors(M, op Q : TyL -> Ty [AtS] . ODS, Srt) = op Q : TyL -> Srt [AtS] .
-                                                       getCtors(M, ODS, Srt)
+  eq getCtors(M, op Q : TyL -> Srt [ctor AtS] . ODS, Srt) = op Q : TyL -> Srt [ctor AtS] .
+                                                            getCtors(M, ODS, Srt) .
+  ceq getCtors(M, op Q : TyL -> Ty [ctor AtS] . ODS, Srt) = op Q : TyL -> Srt [ctor AtS] .
+                                                            getCtors(M, ODS, Srt)
    if Ty =/= 'Universal /\
       sameKind(M, Ty, Srt) /\
       sortLeq(M, Ty, Srt) .
   eq getCtors(M, ODS, Srt) = none [owise] .
 
-  op buildTermsCtors : OpDeclSet -> TermList .
-  eq buildTermsCtors(none) = empty .
-  ceq buildTermsCtors(OD ODS) = (T, TL)
-   if T := buildTermCtor(OD) /\
-      TL := buildTermsCtors(ODS) .
+  op buildTermsCtors : OpDeclSet String -> TermList .
+  eq buildTermsCtors(none, STR) = empty .
+  ceq buildTermsCtors(OD ODS, STR) = (T, TL)
+   if T := buildTermCtor(OD, STR) /\
+      TL := buildTermsCtors(ODS, STR) .
 
-  op buildTermCtor : OpDecl -> Term .
-  ceq buildTermCtor(op Q : nil -> Srt [AtS] .) = C
+  op buildTermCtor : OpDecl String -> Term .
+  ceq buildTermCtor(op Q : nil -> Srt [AtS] ., STR) = C
    if C := qid(string(Q) + "." + string(Srt)) .
-  ceq buildTermCtor(op Q : TyL -> Srt [AtS] .) = Q[TL]
-   if TL := buildArgs(TyL, 0) [owise] .
+  ceq buildTermCtor(op Q : TyL -> Srt [AtS] ., STR) = Q[TL]
+   if TL := buildArgs(TyL, empty, STR) [owise] .
+
+  op procImpSub : Module Term ~> Substitution .
+  eq procImpSub(M, '__[TL]) = $procImpSub(getOps(M), TL) .
+
+  op $procImpSub : OpDeclSet TermList ~> Substitution .
+  eq $procImpSub(ODS, empty) = none .
+  ceq $procImpSub(ODS, (T, ''<-.Qid, T', '';.Qid, TL)) = V <- C ; $procImpSub(ODS, TL)
+   if V := downQid(T) /\
+      Q := downQid(T') /\
+      op Q : nil -> Ty [AtS] . ODS' := ODS /\
+      C := qid(string(Q) + "." + string(Ty)) .
+
+  ************************************************************************************
+  ********************************* APPLY TERM MACRO *********************************
+  ************************************************************************************
+
+  op applyTermMacro : ProofTree ProofOrder Qid Term Type -> IndResPair .
+  eq applyTermMacro(P, PO, Q, T, Ty) = $applyTermMacro(P, PO, Q, T, Ty) .
+
+  op $applyTermMacro : ProofTree ProofOrder Qid Term Type -> IndResPair .
+  eq $applyTermMacro(mtPT, PO, Q, T, Ty) = [mtPT, finished] .
+  ceq $applyTermMacro(| M, [NL, CMD, EqS, false, PRVN], PrL, N' |, PO, Q, T, Ty) =
+                               [| M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, PO']
+   if [ PrL', PO' ] := $applyTermMacro*(PrL, PO, Q, T, Ty) .
+  ceq $applyTermMacro(| M, [NL, CMD, EqS, true, PRVN], mtPT, N' |, PO, Q, T, Ty) =
+                               [| M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, PO']
+   if ODS := getCtors(M, Ty) /\
+      TL := ordTrueFalse(buildTermsCtors(ODS, "CS")) /\
+      ML := createModules(M, T, TL) /\
+      PrL' := createCTFTerm(ML, NL, Q, EqS) /\
+      PO' := indProofOrder(fst(PO), size(TL)) y pop(PO) .
+
+  op $applyTermMacro* : ProofTreeList ProofOrder Qid Term Type -> IndResPair .
+  eq $applyTermMacro*(mtPT, PO, Q, T, Ty) = [mtPT, finished] .
+  ceq $applyTermMacro*(| M', G, PrL, N | PrL', PO, Q, T, Ty) = [PrL1 PrL2, PO' y PO'']
+   if [PrL1, PO'] := $applyTermMacro(| M', G, PrL, N |, PO, Q, T, Ty) /\
+      [PrL2, PO''] := $applyTermMacro*(PrL', PO, Q, T, Ty) .
+
+  sort MList .
+  subsort Module < MList .
+
+  op mtML : -> MList [ctor] .
+  op _._ : MList MList -> MList [ctor assoc id: mtML] .
+
+  op ordTrueFalse : TermList -> TermList .
+  eq ordTrueFalse(('false.Bool, 'true.Bool)) = 'true.Bool, 'false.Bool .
+  eq ordTrueFalse(TL) = TL [owise] .
+
+  op createModules : Module Term TermList -> MList .
+  eq createModules(M, T, empty) = mtML .
+  ceq createModules(M, T, ('true.Bool, TL)) = addHyp(M, Eq) . createModules(M, T, TL)
+   if '_=_[T1, T2] := T /\
+      Eq := eq T1 = T2 [metadata("CTF-true")] . .
+  ceq createModules(M, T, (T', TL)) = addHyp(addCons(M, T'), Eq) . createModules(M, T, TL)
+   if STR := createName(T') /\
+      Eq := eq T = T' [metadata(STR)] . [owise] .
+
+  op createName : Term -> String .
+  eq createName(C) = "CTF-" + string(getName(C)) .
+  eq createName(V) = "CTF-" + string(getName(V)) .
+  eq createName(Q[TL]) = "CTF-" + string(Q) .
+
+  op createCTFTerm : MList NatList Qid EquationSet -> ProofTreeList .
+  eq createCTFTerm(ML, NL, Q, EqS) = $createCTFTerm(ML, NL, Q, EqS, 1) .
+
+  op $createCTFTerm : MList NatList Qid EquationSet Nat -> ProofTreeList .
+  eq $createCTFTerm(mtML, NL, Q, EqS, N) = mtPT .
+  eq $createCTFTerm(M . ML, NL, Q, EqS, N) = | M, [NL N, Q, EqS, N == 1, false], mtPT, 1 |
+                                             $createCTFTerm(ML, NL, Q, EqS, s(N)) .
 
   ************************************************************************************
   ******************************* APPLY EQUATION MACRO *******************************
@@ -4119,15 +4224,15 @@ the \verb"maps2maps" function shown above to the body:
 
   op $applyEquationMacro : ProofTree Qid Equation -> ProofTree .
   eq $applyEquationMacro(mtPT, Q, Eq) = mtPT .
-  ceq $applyEquationMacro(| M, [NL, CMD, Eq, false, PRVN], PrL, N' |, Q, Eq') =
-                                   | M, [NL, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |
+  ceq $applyEquationMacro(| M, [NL, CMD, EqS, false, PRVN], PrL, N' |, Q, Eq') =
+                                   | M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |
    if PrL' := $applyEquationMacro*(PrL, Q, Eq') .
-  ceq $applyEquationMacro(| M, [NL, CMD, Eq, true, PRVN], mtPT, N' |, Q, Eq') =
-                                   | M, [NL, CMD, Eq, false, PRVN], PrL', 3 |
+  ceq $applyEquationMacro(| M, [NL, CMD, EqS, true, PRVN], mtPT, N' |, Q, Eq') =
+                                   | M, [NL, CMD, EqS, false, PRVN], PrL', 3 |
    if M' := createCTFmodTrue(M, Eq') /\
       M'' := createCTFmodFalse(M, Eq') /\
-      PrL' := | M', [NL 1, Q, Eq, true, false], mtPT, 1 |
-              | M'', [NL 2, Q, Eq, false, false], mtPT, 1 | .
+      PrL' := | M', [NL 1, Q, EqS, true, false], mtPT, 1 |
+              | M'', [NL 2, Q, EqS, false, false], mtPT, 1 | .
 
   op $applyEquationMacro* : ProofTreeList Qid Equation -> ProofTree .
   eq $applyEquationMacro*(mtPT, Q, Eq) = mtPT .
@@ -4136,11 +4241,11 @@ the \verb"maps2maps" function shown above to the body:
                 $applyEquationMacro*(PrL', Q, Eq) .
 
   op createCTFmodTrue : Module Equation -> Module .
-  ceq createCTFmodTrue(M, eq T = T' [AtS] .) = addEq(M, Eq)
+  ceq createCTFmodTrue(M, eq T = T' [AtS] .) = addHyp(M, Eq)
    if Eq := eq T = T' [AtS metadata("CTF-true")] . .
 
   op createCTFmodFalse : Module Equation -> Module .
-  ceq createCTFmodFalse(M, eq T = T' [AtS] .) = addEq(M, Eq)
+  ceq createCTFmodFalse(M, eq T = T' [AtS] .) = addHyp(M, Eq)
    if Eq := eq '_=_[T, T'] = 'false.Bool [AtS metadata("CTF-false")] . .
 
   ************************************************************************************
@@ -4149,9 +4254,9 @@ the \verb"maps2maps" function shown above to the body:
 
   op parseEqMacro : ProofTree Qid Term -> Macros .
   eq parseEqMacro(mtPT, Q, T) = mtMacros .
-  eq parseEqMacro(| M, [NL, CMD, Eq, false, PRVN], PrL, N' |, Q, T) =
+  eq parseEqMacro(| M, [NL, CMD, EqS, false, PRVN], PrL, N' |, Q, T) =
           parseEqMacro*(PrL, Q, T) .
-  eq parseEqMacro(| M, [NL, CMD, Eq, true, PRVN], PrL, N' |, Q, T) =
+  eq parseEqMacro(| M, [NL, CMD, EqS, true, PRVN], PrL, N' |, Q, T) =
           parseEqMacro(M, Q, T) .
 
   op parseEqMacro* : ProofTreeList Qid Term -> Macros .
@@ -4167,6 +4272,34 @@ the \verb"maps2maps" function shown above to the body:
   eq parseEqMacro(M, Q, T) = mtMacros [owise] .
 
   ************************************************************************************
+  ************************************ TERM MACRO ************************************
+  ************************************************************************************
+
+  op parseTermMacro : ProofTree Qid Term -> Macros .
+  eq parseTermMacro(mtPT, Q, T) = mtMacros .
+  eq parseTermMacro(| M, [NL, CMD, EqS, false, PRVN], PrL, N' |, Q, T) =
+          parseTermMacro*(PrL, Q, T) .
+  eq parseTermMacro(| M, [NL, CMD, EqS, true, PRVN], PrL, N' |, Q, T) =
+          parseTermMacro(M, Q, T) .
+
+  op parseTermMacro* : ProofTreeList Qid Term -> Macros .
+  eq parseTermMacro*(mtPT, Q, T) = mtMacros .
+  eq parseTermMacro*(| M', G, PrL, N | PrL', Q, T) = parseTermMacro(| M', G, PrL, N |, Q, T)
+                                                     parseTermMacro*(PrL', Q, T) .
+
+  op parseTermMacro : Module Qid Term -> Macros .
+  ceq parseTermMacro(M, Q, '__[TL, ''..Qid]) = if T? :: Term
+                                          then # M, Q - T? #
+                                          else parseTermMacro(M, Q, '__[TL])
+                                          fi
+   if T? := getTerm(metaParse(M, downQidList('__[TL, '.]), anyType)) .
+  ceq parseTermMacro(M, Q, T) = if T? :: Term
+                                then # M, Q - T? #
+                                else mtMacros
+                                fi
+   if T? := getTerm(metaParse(M, downQidList(T), anyType)) [owise] .
+
+  ************************************************************************************
   ****************************** SIMULTANEOUS INDUCTION ******************************
   ************************************************************************************
 
@@ -4175,20 +4308,20 @@ the \verb"maps2maps" function shown above to the body:
 
   op applyInduction : ProofTree Variable ProofOrder -> IndResPair .
   eq applyInduction(mtPT, V, PO) = [mtPT, finished] .
-  ceq applyInduction(| M, [NL, CMD, Eq, false, PRVN], PrL, N' |, V, PO) =
-                          [| M, [NL, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |, PO']
+  ceq applyInduction(| M, [NL, CMD, EqS, false, PRVN], PrL, N' |, V, PO) =
+                          [| M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, PO']
    if [PrL', PO'] := applyInduction*(PrL, V, PO) .
-  ceq applyInduction(| M, [NL, CMD, Eq, true, PRVN], mtPT, N' |, V, PO) =
-                          [| M, [NL, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |, PO']
+  ceq applyInduction(| M, [NL, CMD, EqS, true, PRVN], mtPT, N' |, V, PO) =
+                          [| M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, PO']
    if ODS := getCtors(M, getType(V)) /\
-      TL := buildTermsCtors(ODS) /\
+      TL := buildTermsCtors(ODS, "") /\
       Ty := getType(V) /\
       C := qid(substr(string(Ty), 0, 1) + "#" + string(Ty) + "." + string(Ty)) /\
-      Eq' := createHI(Eq, V, C) /\
+      EqS' := createHI(EqS, V, C) /\
       OD := op getName(C) : nil -> getType(C) [metadata("generated-si")] . /\
-      M' := addEq(addOp(M, OD), Eq') /\
+      M' := addHyp(addOp(M, OD), EqS') /\
       PO' := indProofOrder(fst(PO), size(TL)) y pop(PO) /\
-      PrL' := subGoal*(M', [NL, CMD, Eq, true, PRVN], V, TL, NL, 1) .
+      PrL' := subGoal*(M', [NL, CMD, EqS, true, PRVN], V, TL, NL, 1) .
 
   op applyInduction* : ProofTreeList Variable ProofOrder -> IndResPair .
   eq applyInduction*(mtPT, V, PO) = [mtPT, finished] .
@@ -4201,9 +4334,9 @@ the \verb"maps2maps" function shown above to the body:
   eq subGoal*(M, G, V, (T, TL), NL, N) = subGoal(M, getEq(G), V, T, NL, N)
                                          subGoal*(M, G, V, TL, NL, s(N)) .
 
-  op subGoal : Module Equation Variable Term NatList Nat -> ProofTree .
-  eq subGoal(M, Eq, V, T, NL, N) =
-            | addCons(M, T), [NL N, 'SI, makeSub(Eq, V, T), N == 1, false], mtPT, 1 | .
+  op subGoal : Module EquationSet Variable Term NatList Nat -> ProofTree .
+  eq subGoal(M, EqS, V, T, NL, N) =
+            | addCons(M, T), [NL N, 'SI, makeSub(EqS, V, T), N == 1, false], mtPT, 1 | .
 
   *** We make sure not to add constant constructors by skipping them at first.
   op addCons : Module Term -> Module .
@@ -4220,17 +4353,24 @@ the \verb"maps2maps" function shown above to the body:
   eq $addCons*(M, empty) = M .
   eq $addCons*(M, (T, TL)) = $addCons*($addCons(M, T), TL) .
 
-  op makeSub : Equation Variable Term -> Equation .
-  eq makeSub(eq T = T' [AtS] ., V, T1) =
-         eq subTerm(T, V, T1) = subTerm(T', V, T1) [AtS] . .
-  eq makeSub(ceq T = T' if COND [AtS] ., V, T1) =
-         ceq subTerm(T, V, T1) = subTerm(T', V, T1) if subCond(COND, V, T1) [AtS] . .
+  op makeSub : EquationSet Variable Term -> EquationSet .
+  eq makeSub(none, V, T) = none .
+  eq makeSub(eq T = T' [AtS] . EqS, V, T1) =
+         eq subTerm(T, V, T1) = subTerm(T', V, T1) [AtS] .
+         makeSub(EqS, V, T1) .
+  eq makeSub(ceq T = T' if COND [AtS] . EqS, V, T1) =
+         ceq subTerm(T, V, T1) = subTerm(T', V, T1) if subCond(COND, V, T1) [AtS] .
+         makeSub(EqS, V, T1) .
 
-  op createHI : Equation Variable Term -> Equation .
-  eq createHI(eq T = T' [AtS] ., V, T1) =
-         eq subTerm(T, V, T1) = subTerm(T', V, T1) [metadata("HI") AtS] . .
-  eq createHI(ceq T = T' if COND [AtS] ., V, T1) =
-         ceq subTerm(T, V, T1) = subTerm(T', V, T1) if subCond(COND, V, T1) [metadata("HI") AtS] . .
+  op createHI : EquationSet Variable Term -> EquationSet .
+  eq createHI(none, V, T) = none .
+  eq createHI(eq T = T' [AtS] . EqS, V, T1) =
+         eq subTerm(T, V, T1) = subTerm(T', V, T1) [metadata("HI") AtS] .
+         createHI(EqS, V, T1) .
+  eq createHI(ceq T = T' if COND [AtS] . EqS, V, T1) =
+         ceq subTerm(T, V, T1) = subTerm(T', V, T1)
+          if subCond(COND, V, T1) [metadata("HI") AtS] .
+         createHI(EqS, V, T1) .
 
   op subTerm : Term Variable Term -> Term .
   eq subTerm(Q[TL], V, T) = Q[subTermList(TL, V, T)] .
@@ -4252,12 +4392,27 @@ the \verb"maps2maps" function shown above to the body:
   eq subCond(T => T' /\ COND, V, T1) = subTerm(T, V, T1) => subTerm(T', V, T1) /\
                                        subCond(COND, V, T1) .
 
-  op buildArgs : TypeList Nat -> TermList .
-  eq buildArgs(nil, N) = empty .
-  ceq buildArgs(Ty TyL, N) = (C, TL)
-   if *** C := qid(substr(string(Ty), 0, 1) + string(N, 10) + "#" + string(Ty) + "." + string(Ty)) /\
-      C := qid(substr(string(Ty), 0, 1) + "#" + string(Ty) + "." + string(Ty)) /\
-      TL := buildArgs(TyL, s(N)) .
+  op buildArgs : TypeList TermList String -> TermList .
+  eq buildArgs(nil, TL, STR) = empty .
+  ceq buildArgs(Ty TyL, TL, STR) = (C, TL')
+   if C := buildArg(Ty, TL, STR) /\
+      TL' := buildArgs(TyL, (C, TL), STR) .
+
+  op buildArg : Type TermList String -> TermList .
+  ceq buildArg(Ty, (TL, C, TL'), St) = $buildArg(Ty, (TL, TL'), 0)
+   if STR := string(Ty) /\
+      C := qid(substr(STR, 0, 1) +  "#" + St + STR + "." + STR) .
+  ceq buildArg(Ty, TL, St) = C
+   if STR := string(Ty) /\
+      C := qid(substr(STR, 0, 1) + "#" + St + STR + "." + STR) [owise] .
+
+  op $buildArg : Type TermList Nat -> TermList .
+  ceq $buildArg(Ty, (TL, C, TL'), N) = $buildArg(Ty, (TL, TL'), s(N))
+   if STR := string(Ty) /\
+      C := qid(substr(STR, 0, 1) + string(N, 10) + "#" + STR + "." + STR) .
+  ceq $buildArg(Ty, TL, N) = C
+   if STR := string(Ty) /\
+      C := qid(substr(STR, 0, 1) + string(N, 10) + "#" + STR + "." + STR) [owise] .
 
   op indProofOrder : NatList Nat -> ProofOrder .
   eq indProofOrder(NL, s(N)) = indProofOrder(NL, N) y NL s(N) .
@@ -4269,18 +4424,49 @@ the \verb"maps2maps" function shown above to the body:
   op [_,_] : Condition Module -> Vars2ConsPair [ctor] .
 
   ***********************************************************************************
+  ***************************** APPLY IMPLIES SUBSTITUTION **************************
+  ***********************************************************************************
+
+  op applyImp : ProofTree Qid Substitution -> ProofBool .
+  eq applyImp(mtPT, Q, SB) = [mtPT, false] .
+  ceq applyImp(| M, [NL, CMD, EqS, false, PRVN], PrL, N' |, Q, SB) =
+                           [| M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, B]
+   if [PrL', B] := applyImp*(PrL, Q, SB) .
+  ceq applyImp(| M, [NL, CMD, Eq, true, PRVN], mtPT, N' |, Q, SB) = [PrL', B]
+   if [PrL', B] := applyImp(M, Eq, Q, NL, SB) .
+
+  op applyImp* : ProofTreeList Qid Substitution -> ProofBool .
+  eq applyImp*(mtPT, Q, SB) = [mtPT, false] .
+  ceq applyImp*(| M', G, PrL, N | PrL', Q, SB) = [PrL1 PrL2, B or B']
+   if [PrL1, B] := applyImp(| M', G, PrL, N |, Q, SB) /\
+      [PrL2, B'] := applyImp*(PrL', Q, SB) .
+
+  op applyImp : Module Equation Qid NatList Substitution -> ProofBool .
+  ceq applyImp(M, Eq, Q, NL, SB) = [| M, [NL, 'imp, Eq', true, false], mtPT, 1 |, true]
+   if eq T = 'true.Bool [label(Q) AtS] . EqS := getEqs(M) /\
+      Eq' := impEq(M, Eq, substitute(T, SB)) .
+  eq applyImp(M, Eq, Q, N, SB) = [mtPT, false] [owise] .
+
+  op substitute : Term Substitution -> Term .
+  eq substitute(Q[TL], SB) = Q[substitute*(TL, SB)] .
+  eq substitute(C, SB) = C .
+  eq substitute(V, V <- T ; SB) = T .
+  eq substitute(V, SB) = V [owise] .
+
+  op substitute* : TermList Substitution -> TermList .
+  eq substitute*(empty, SB) = empty .
+  eq substitute*((T, TL), SB) = substitute(T, SB), substitute*(TL, SB) .
+
+  ***********************************************************************************
   ********************************** APPLY IMPLIES **********************************
   ***********************************************************************************
 
   op applyImp : ProofTree Qid -> ProofBool .
-  eq applyImp(P, Q) = $applyImp(P, Q) .
-
-  op $applyImp : ProofTree Qid -> ProofBool .
-  eq $applyImp(mtPT, Q) = [mtPT, false] .
-  ceq $applyImp(| M, [NL, CMD, Eq, false, PRVN], PrL, N' |, Q) =
+  eq applyImp(mtPT, Q) = [mtPT, false] .
+  ceq applyImp(| M, [NL, CMD, Eq, false, PRVN], PrL, N' |, Q) =
                            [| M, [NL, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |, B]
    if [PrL', B] := $applyImp*(PrL, Q) .
-  ceq $applyImp(| M, [NL, CMD, Eq, true, PRVN], mtPT, N' |, Q) =
+  ceq applyImp(| M, [NL, CMD, Eq, true, PRVN], mtPT, N' |, Q) =
                           *** [| M, [NL, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |, B]
                           [PrL', B]
    if [PrL', B] := applyImp(M, Eq, Q, NL) .
@@ -4288,7 +4474,7 @@ the \verb"maps2maps" function shown above to the body:
   op $applyImp* : ProofTreeList Qid -> ProofBool .
   eq $applyImp*(mtPT, Q) = [mtPT, false] .
   ceq $applyImp*(| M', G, PrL, N | PrL', Q) = [PrL1 PrL2, B or B']
-   if [PrL1, B] := $applyImp(| M', G, PrL, N |, Q) /\
+   if [PrL1, B] := applyImp(| M', G, PrL, N |, Q) /\
       [PrL2, B'] := $applyImp*(PrL', Q) .
 
   op applyImp : Module Equation Qid NatList -> ProofBool .
@@ -4308,25 +4494,29 @@ the \verb"maps2maps" function shown above to the body:
   ******************************* THEOREM OF CONSTANTS *******************************
   ************************************************************************************
 
-  op applyTC : ProofTree -> ProofTree .
-  eq applyTC(P) = $applyTC(P, size(P)) .
+  op applyTC : ProofTree ProofOrder -> IndResPair .
+  eq applyTC(P, PO) = $applyTC(P, PO) .
 
-  op $applyTC : ProofTree Nat -> ProofTree .
-  eq $applyTC(mtPT, N) = mtPT .
-  ceq $applyTC(| M', [NL, CMD, Eq, false, PRVN], PrL, N' |, N'') =
-                                   | M', [NL, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |
-   if PrL' := $applyTC*(PrL, N'') .
-  ceq $applyTC(| M', [NL, CMD, Eq, true, PRVN], mtPT, N' |, N'') =
-                                   | M', [NL, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |
-   if PrL' := vars2cons*(Eq, M', NL) .
+  op $applyTC : ProofTree ProofOrder -> IndResPair .
+  eq $applyTC(mtPT, PO) = [mtPT, finished] .
+  ceq $applyTC(| M', [NL, CMD, EqS, false, PRVN], PrL, N' |, PO) =
+                         [| M', [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, PO']
+   if [PrL', PO'] := $applyTC*(PrL, PO) .
+  ceq $applyTC(| M', [NL, CMD, EqS, true, PRVN], mtPT, N' |, PO) =
+                         [| M', [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, PO']
+   if PrL' := vars2cons*(EqS, M', NL, 1) /\
+      PO' := indProofOrder(fst(PO), sizeEQS(EqS)) y pop(PO) .
 
-  op $applyTC* : ProofTreeList Nat -> ProofTree .
-  eq $applyTC*(mtPT, N) = mtPT .
-  eq $applyTC*(| M', G, PrL, N | PrL', N') =
-                $applyTC(| M', G, PrL, N |, N') $applyTC*(PrL', N') .
+  op $applyTC* : ProofTreeList ProofOrder -> IndResPair .
+  eq $applyTC*(mtPT, PO) = [mtPT, finished] .
+  ceq $applyTC*(| M', G, PrL, N | PrL', PO) = [P PrL'', PO' y PO'']
+   if [P, PO'] := $applyTC(| M', G, PrL, N |, PO) /\
+      [PrL'', PO''] := $applyTC*(PrL', PO) .
 
-  op vars2cons* : Equation Module NatList -> ProofTree .
-  ceq vars2cons*(Eq, M, NL) = | M', [NL, 'TC, Eq', true, false], mtPT, 1 |
+  op vars2cons* : EquationSet Module NatList Nat -> ProofTreeList .
+  eq vars2cons*(none, M, NL, N) = mtPT .
+  ceq vars2cons*(Eq EqS, M, NL, N) = | M', [NL N, 'TC, Eq', N == 1, false], mtPT, 1 |
+                                     vars2cons*(EqS, M, NL, s(N))
    if [Eq', M'] := vars2cons(Eq, M) .
 
   op vars2cons : Equation Module -> Vars2ConsPair .
@@ -4348,8 +4538,9 @@ the \verb"maps2maps" function shown above to the body:
   op vars2cons : Term Module -> Vars2ConsPair .
   eq vars2cons(C, M) = [C, M] .
   ceq vars2cons(V, M) = [C, M']
-   if C := qid(string(getName(V)) + "." + string(getType(V))) /\
-      OD := op getName(V) : nil -> getType(V) [none] . /\
+   if STR := string(getType(V)) /\
+      C := qid(string(getName(V)) + "@" + STR + "." + STR) /\
+      OD := op getName(C) : nil -> getType(V) [none] . /\
       M' := addOp(M, OD) .
   ceq vars2cons(Q[TL], M) = [Q[TL'], M']
    if [TL', M'] := vars2cons*(TL, M) .
@@ -4372,20 +4563,24 @@ the \verb"maps2maps" function shown above to the body:
       [T2, M''] := vars2cons(T', M') /\
       [CND, M'''] := vars2cons*(COND, M'') .
 
+  op sizeEQS : EquationSet -> Nat .
+  eq sizeEQS(none) = 0 .
+  eq sizeEQS(Eq EqS) = s(sizeEQS(EqS)) .
+
   ***********************************************************************************
   *********************************** SELECT GOAL ***********************************
   ***********************************************************************************
 
   op selectGoal : ProofTree NatList -> ProofTree .
   eq selectGoal(mtPT, NL) = mtPT .
-  ceq selectGoal(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N' |, NL') =
-                            | M, [NL, CMD, Eq, NL == NL', PRVN], PrL', N' |
+  ceq selectGoal(| M, [NL, CMD, EqS, CURR, PRVN], PrL, N' |, NL') =
+                            | M, [NL, CMD, EqS, NL == NL', PRVN], PrL', N' |
    if PrL' := selectGoal*(PrL, NL') .
 
   op selectGoal* : ProofTreeList NatList -> ProofTreeList .
   eq selectGoal*(mtPT, NL) = mtPT .
-  eq selectGoal*(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N' | PrL', NL') =
-       selectGoal(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N' |, NL') selectGoal*(PrL', NL') .
+  eq selectGoal*(| M, [NL, CMD, EqS, CURR, PRVN], PrL, N' | PrL', NL') =
+       selectGoal(| M, [NL, CMD, EqS, CURR, PRVN], PrL, N' |, NL') selectGoal*(PrL', NL') .
 
   op qid2natlist : Qid -> NatList .
   eq qid2natlist(Q) = str2natlist(string(Q)) .
@@ -4411,15 +4606,15 @@ the \verb"maps2maps" function shown above to the body:
   eq addOp(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, OD) =
              th H is IL sorts SS . SSDS ODS OD MAS EqS RS endth .
 
-  op addEq : Module Equation -> Module .
-  eq addEq(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, Eq) =
-             fmod H is IL sorts SS . SSDS ODS MAS EqS Eq endfm .
-  eq addEq(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, Eq) =
-             mod H is IL sorts SS . SSDS ODS MAS EqS Eq RS endm .
-  eq addEq(fth H is IL sorts SS . SSDS ODS MAS EqS endfth, Eq) =
-             fth H is IL sorts SS . SSDS ODS MAS EqS Eq endfth .
-  eq addEq(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, Eq) =
-             th H is IL sorts SS . SSDS ODS MAS EqS Eq RS endth .
+  op addHyp : Module EquationSet -> Module .
+  eq addHyp(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, EqS') =
+             fmod H is IL sorts SS . SSDS ODS MAS EqS EqS' endfm .
+  eq addHyp(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, EqS') =
+             mod H is IL sorts SS . SSDS ODS MAS EqS EqS' RS endm .
+  eq addHyp(fth H is IL sorts SS . SSDS ODS MAS EqS endfth, EqS') =
+             fth H is IL sorts SS . SSDS ODS MAS EqS EqS' endfth .
+  eq addHyp(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, EqS') =
+             th H is IL sorts SS . SSDS ODS MAS EqS EqS' RS endth .
 
   op addEqs : Term Term -> Term .
   eq addEqs('__[T1, T2], T) = '__[T1, addEqs(T2, T)] .
@@ -4434,11 +4629,8 @@ the \verb"maps2maps" function shown above to the body:
   ceq getNew(M, none, EqS) = setToGoal(M, EqS)
    if EqS =/= none .
 
-  op setToGoal : Module EquationSet ~> ProofTree .
-  eq setToGoal(M, none) = mtPT .
-  eq setToGoal(M, Eq) = | M, [nil, 'root, Eq, true, false], mtPT, 1 | .
-*** It is not expected to start with more than one sentence
-***  eq setToGoal(Eq EqS, N) = [NL, 'root, Eq, N == 0, false] + setToGoal(EqS, s(N)) .
+  op setToGoal : Module EquationSet -> ProofTree .
+  eq setToGoal(M, EqS) = | M, [nil, 'root, EqS, true, false], mtPT, 1 | .
 
   ************************************************************************************
   *********************************** REDUCE COMMAND *********************************
@@ -4448,17 +4640,26 @@ the \verb"maps2maps" function shown above to the body:
   op [_,_] : ProofTreeList Bool -> ProofBool [ctor] .
 
   op applyRed : ProofTree -> ProofBool .
-  ceq applyRed(| M, [NL, CMD, eq T = T' [AtS] ., true, PRVN], PrL, N' |) =
-               [| M, [NL, CMD, Eq, not B, B], PrL, N' |, B]
+  ceq applyRed(| M, [NL, CMD, EqS, true, PRVN], PrL, N' |) =
+               [| M, [NL, CMD, EqS', not B, B], PrL, N' |, B]
+   if [EqS', B] := reduceAll(M, EqS) .
+  ceq applyRed(| M, [NL, CMD, EqS, false, PRVN], PrL, N' |) =
+                         [| M, [NL, CMD, EqS, false, PRVN], PrL', N' |, B]
+   if [PrL', B] := applyRed*(PrL) .
+
+  sort EquationReduction .
+  op [_,_] : EquationSet Bool -> EquationReduction [ctor] .
+
+  op reduceAll : Module EquationSet -> EquationReduction .
+  eq reduceAll(M, none) = [none, true] .
+  ceq reduceAll(M, eq T = T' [AtS] . EqS) = [Eq EqS', B and B']
    if T1 := getTerm(metaReduce(M, T)) /\
       T2 := getTerm(metaReduce(M, T')) /\
       B := T1 == T2 /\
       Eq := if B then eq T = T' [AtS] .
                  else eq T1 = T2 [AtS] .
-                 fi .
-  ceq applyRed(| M, [NL, CMD, Eq, false, PRVN], PrL, N' |) =
-                         [| M, [NL, CMD, Eq, false, PRVN], PrL', N' |, B]
-   if [PrL', B] := applyRed*(PrL) .
+                 fi /\
+      [EqS', B'] := reduceAll(M, EqS) .
 
   op applyRed* : ProofTreeList -> ProofBool .
   eq applyRed*(mtPT) = [mtPT, false] .
@@ -4488,14 +4689,14 @@ the \verb"maps2maps" function shown above to the body:
 
   op printCurrent : ProofTree -> QidList .
   eq printCurrent(mtPT) = nil .
-  eq printCurrent(| M, [NL, CMD, Eq, true, PRVN], mtPT, N' |) =
-                                   '\n CMD ' printEq(M, Eq) '\n .
-  eq printCurrent(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N' |) = printCurrent*(PrL) [owise] .
+  eq printCurrent(| M, [NL, CMD, EqS, true, PRVN], mtPT, N' |) =
+                                   '\n CMD ' printEqS(M, EqS, ' ) '\n .
+  eq printCurrent(| M, [NL, CMD, EqS, CURR, PRVN], PrL, N' |) = printCurrent*(PrL) [owise] .
 
   op printCurrent* : ProofTreeList -> QidList .
   eq printCurrent*(mtPT) = nil .
-  eq printCurrent*(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N' | PrL') =
-         printCurrent(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N' |) printCurrent*(PrL') .
+  eq printCurrent*(| M, [NL, CMD, EqS, CURR, PRVN], PrL, N' | PrL') =
+         printCurrent(| M, [NL, CMD, EqS, CURR, PRVN], PrL, N' |) printCurrent*(PrL') .
 
   ************************************************************************************
   *********************************** PRINT PROOF ************************************
@@ -4505,19 +4706,19 @@ the \verb"maps2maps" function shown above to the body:
   eq printProofTree(P) = $printProofTree(P, 0) .
 
   op $printProofTree : ProofTree Nat -> QidList .
-  eq $printProofTree(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N |, N') =
+  eq $printProofTree(| M, [NL, CMD, EqS, CURR, PRVN], PrL, N |, N') =
                                printPremises(M, N')
                                '\n printTab(N') printIndex(NL)
                                if PRVN then '* else nil fi
                                if CURR then '> else nil fi
                                CMD '
-                               printEq(M, Eq)
+                               printEqS(M, EqS, printTab(N'))
                                $printProofTree*(PrL, s(N')) .
 
   op $printProofTree* : ProofTreeList Nat -> QidList .
   eq $printProofTree*(mtPT, N) = nil .
-  eq $printProofTree*(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N | PrL', N') =
-                       $printProofTree(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N |, N')
+  eq $printProofTree*(| M, [NL, CMD, EqS, CURR, PRVN], PrL, N | PrL', N') =
+                       $printProofTree(| M, [NL, CMD, EqS, CURR, PRVN], PrL, N |, N')
                        $printProofTree*(PrL', N') .
 
   op printTab : Nat -> QidList .
@@ -4538,8 +4739,7 @@ the \verb"maps2maps" function shown above to the body:
         printPremises(M, EqS, N)
    if S == "generated-si" or
       S == "HI" or
-      S == "CTF-true" or
-      S == "CTF-false" .
+      find(S, "CTF", 0) =/= notFound .
   eq printPremises(M, EqS, N) = nil [owise] .
 
   *************************************************************************************
@@ -4548,18 +4748,18 @@ the \verb"maps2maps" function shown above to the body:
 
   op printGoals : ProofTree -> QidList .
   eq printGoals(mtPT) = nil .
-  eq printGoals(| M, [NL, CMD, Eq, CURR, PRVN], mtPT, N' |) =
+  eq printGoals(| M, [NL, CMD, EqS, CURR, PRVN], mtPT, N' |) =
                                    '\n printIndex(NL)
                                    if PRVN then '* else nil fi
                                    if CURR then '> else nil fi
                                    CMD '
-                                   printEq(M, Eq) .
-  eq printGoals(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N' |) = printGoals*(PrL) [owise] .
+                                   printEqS(M, EqS, ') .
+  eq printGoals(| M, [NL, CMD, EqS, CURR, PRVN], PrL, N' |) = printGoals*(PrL) [owise] .
 
   op printGoals* : ProofTreeList -> QidList .
   eq printGoals*(mtPT) = nil .
-  eq printGoals*(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N' | PrL') =
-         printGoals(| M, [NL, CMD, Eq, CURR, PRVN], PrL, N' |) printGoals*(PrL') .
+  eq printGoals*(| M, [NL, CMD, EqS, CURR, PRVN], PrL, N' | PrL') =
+         printGoals(| M, [NL, CMD, EqS, CURR, PRVN], PrL, N' |) printGoals*(PrL') .
 
   op printIndex : NatList -> QidList .
   eq printIndex(nil) = nil .
@@ -4570,7 +4770,11 @@ the \verb"maps2maps" function shown above to the body:
   eq natlist2string(N) = string(N, 10) + "." .
   eq natlist2string(N NL) = string(N, 10) + "-" + natlist2string(NL) [owise] .
 
-  op printEq : Module Equation -> QidList .
+  op printEqS : Module EquationSet QidList -> QidList .
+  eq printEqS(M, none, QIL) = nil .
+  eq printEqS(M, Eq EqS, QIL) = printEq(M, Eq) '\n QIL printEqS(M, EqS, QIL) .
+
+  op printEq : Module EquationSet -> QidList .
   eq printEq(M, eq T = T' [label(Q) nonexec] .) = 'eq ' '`[ Q ':nonexec '`] ':
                                                       metaPrettyPrint(M, T, po) ' '=
                                                       metaPrettyPrint(M, T', po) '. .
@@ -4597,39 +4801,45 @@ the \verb"maps2maps" function shown above to the body:
   *********************************** INFER PROOF ************************************
   ************************************************************************************
 
-  op inferProof : Qid ScoreInfoSet Macros -> QidList .
-  ceq inferProof(Q, SIS, MACS) = printProof(M, Q, Q', T, V, QIL)
+  op inferProof : Module Qid ScoreInfoSet Macros -> QidList .
+  ceq inferProof(M, Q, SIS, MACS) = printProof(M, Q, Q', TL, QIL)
    if Q' := getNameProofScore(SIS) /\
-      M := initialModule(SIS) /\
-      T := inferGoal(SIS) /\
-      V := getIndVar(SIS, T) /\
-      Eq := eq T = 'true.Bool [label(Q) nonexec] . /\
-      [P, PO] := applyInduction(| M, [nil, 'root, Eq, true, false], mtPT, 1 |, V, nil) /\
-      QIL := developProof(P, PO, SIS, MACS) .
-  eq inferProof(Q, SIS, MACS) = '\n '\! '\r 'Error 'while 'generating 'proof '\o '\n [owise] .
+      TL := inferGoal(SIS) /\
+      EqS := goalEqS(TL, Q, 0) /\
+      P := | M, [nil, 'root, EqS, true, false], mtPT, 1 | /\
+      QIL := developProof(P, nil, SIS, MACS) .
+  eq inferProof(M, Q, SIS, MACS) = '\n '\! '\r 'Error 'while 'generating 'proof '\o '\n [owise] .
+
+  op goalEqS : TermList Qid Nat -> EquationSet .
+  eq goalEqS(empty, Q, N) = none .
+  ceq goalEqS((T, TL), Q, N) = eq T = 'true.Bool [label(Q') nonexec] .
+                               goalEqS(TL, Q, s(N))
+   if Q' := if N == 0
+            then Q
+            else qid(string(Q) + string(N, 10))
+            fi .
 
   op developProof : ProofTree ProofOrder ScoreInfoSet Macros -> QidList .
   eq developProof(P, finished, SIS, MACS) = nil .
-  ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', NL y PO, SIS, MACS)
-   if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
+  ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', PO', SIS, MACS)
+   if eq T = 'true.Bool [AtS] . EqS := getGoal(P, NL) /\
       M := getMod(P, NL) /\
-      Q := impRequired(SIS, M, T) /\
-      [P', B] := applyImp(P, Q) /\
-      QIL := '\t ':imp ' '`[ Q '`] ' '. '\n '\n .
-  ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', PO', SIS, MACS')
-   if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
+      V := indRequired(SIS, M, T) /\
+      [P', PO'] := applyInduction(P, V, NL y PO) /\
+      QIL := '\t ':ind 'on ' '`( metaPrettyPrint(M, V, po) '`) '\n '\n
+             '\t ':apply '`( 'si '`) '\n '\n [print "SI"] .
+  ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', PO', SIS, MACS)
+   if eq T = 'true.Bool [AtS] . EqS := getGoal(P, NL) /\
       M := getMod(P, NL) /\
-      impRequired(SIS, M, T) == nil /\
-      Eq := ctfRequired(SIS, M, T) /\
-      | MACS', Q | := addNewMac(MACS, M, Eq) /\
-      P' := applyEquationMacro(P, Q, Eq) /\
-      PO' := indProofOrder(NL, 2) y PO /\
-      QIL := printCtfComm(M, Q, Eq) .
+      indRequired(SIS, M, T) == empty /\
+      tcRequired(T) /\
+      [P', PO'] := applyTC(P, NL y PO) /\
+      QIL := '\t ':apply '`( 'tc '`) '\n '\n [print "TC"] .
   ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P'', PO', SIS, MACS)
    if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
       M := getMod(P, NL) /\
-      ctfRequired(SIS, M, T) == none /\
-      impRequired(SIS, M, T) == nil /\
+      indRequired(SIS, M, T) == empty /\
+      not tcRequired(T) /\
       redRequired(SIS, M, T) /\
       [P', B] := applyRed(P) /\
       PO' := if B
@@ -4641,25 +4851,135 @@ the \verb"maps2maps" function shown above to the body:
              then selectGoal(P', fst(PO'))
              else P'
              fi /\
-      QIL := '\t ':apply ' '`( 'rd '`) '\n '\n .
+      QIL := '\t ':apply ' '`( 'rd '`) '\n '\n [print "RED"] .
+  ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', PO', SIS, MACS')
+   if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
+      M := getMod(P, NL) /\
+      indRequired(SIS, M, T) == empty /\
+      not tcRequired(T) /\
+      not redRequired(SIS, M, T) /\
+      T1 := ctfTermRequired(SIS, M, T) /\
+      Ty := getType(metaNormalize(M, T1)) /\
+      | MACS', Q | := addNewMac(MACS, M, T1) /\
+      [P', PO'] := applyTermMacro(P, NL y PO, Q, T1, Ty) /\
+      QIL := printCtfTermComm(M, Q, T1) [print "CTF-TERM " T1] .
+  ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', PO', SIS, MACS')
+   if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
+      M := getMod(P, NL) /\
+      indRequired(SIS, M, T) == empty /\
+      not tcRequired(T) /\
+      not redRequired(SIS, M, T) /\
+      ctfTermRequired(SIS, M, T) == empty /\
+      Eq := ctfRequired(SIS, M, T) /\
+      | MACS', Q | := addNewMac(MACS, M, Eq) /\
+      P' := applyEquationMacro(P, Q, Eq) /\
+      PO' := indProofOrder(NL, 2) y PO /\
+      QIL := printCtfComm(M, Q, Eq) [print "CTF-EQ " Eq] .
+  ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', NL y PO, SIS, MACS)
+   if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
+      M := getMod(P, NL) /\
+      indRequired(SIS, M, T) == empty /\
+      not tcRequired(T) /\
+      ctfTermRequired(SIS, M, T) == empty /\
+      ctfRequired(SIS, M, T) == none /\
+      | Q, SB | := impRequired(SIS, M, T) /\
+      [P', B] := if SB == none
+                 then applyImp(P, Q)
+                 else applyImp(P, Q, SB)
+                 fi /\
+      QIL := if SB == none
+             then '\t ':imp ' '`[ Q '`] ' '. '\n '\n
+             else '\t ':imp ' '`[ Q '`] ' 'by ' '`{ printSub(SB) '`} '\n '\n
+             fi [print "IMP"] .
   eq developProof(P, NL y PO, SIS, MACS) =
               if PO =/= finished
               then '\t ':postpone '. '\n '\n
                    developProof(selectGoal(P, fst(PO)), PO, SIS, MACS)
               else nil
-              fi .
+              fi [owise print "POST"] .
+
+  op indRequired : ScoreInfoSet Module Term -> TermList .
+  ceq indRequired(SIS, M, T) = V
+   if TrS := getVars(T) /\
+      V := getIndVar(T, TrS, SIS) .
+  eq indRequired(SIS, M, T) = empty [owise] .
+
+  op tcRequired : Term -> Bool .
+  eq tcRequired(T) = hasVariables(T) .
+
+  op ctfTermRequired : ScoreInfoSet Module Term -> TermList .
+  ceq ctfTermRequired(SIS, M, T) = $ctfTermRequired(SIS1, SIS2, M, T, 2)
+   if [SIS1, SIS2] := divideByExecEqs(SIS, 1) .
+
+  op $ctfTermRequired : ScoreInfoSet ScoreInfoSet Module Term Nat -> TermList .
+  ceq $ctfTermRequired($ M, M', (TL, T, TL') $ SIS, SIS2, M'', T', N) = T3
+   if CS := getSub(M, T, M'', T') /\
+      *** Consistent premises
+      consistentPremises(M', M'', CS) /\
+      eq T1 = T2 [AtS] . EqS := getEqs(M') /\
+      isExec(AtS) /\
+      ((T2 == 'true.Bool) or (T2 == 'false.Bool)) /\
+      not isEquality(T1) /\
+      T3 := applyCS(T1, CS) /\
+      T4 := applyCS(T2, CS) /\
+      T5 := getTerm(metaReduce(M'', '_=_[T3, T4])) /\
+      T5 =/= 'true.Bool /\
+      T5 =/= 'false.Bool .
+  ceq $ctfTermRequired($ M, M', (TL, T, TL') $
+                       $ M1, M2, (TL1, T1, TL2) $ SIS, SIS2, M'', T', N) = T5
+   if CS := getSub(M, T, M'', T') /\
+      *** Consistent premises
+      consistentPremises(M', M'', CS) /\
+      CS' := getSub(M1, T1, M'', T') /\
+      *** Consistent premises
+      consistentPremises(M1, M'', CS') /\
+      eq T3 = T'' [AtS] . EqS := getEqs(M') /\
+      isExec(AtS) /\
+      eq T4 = T''' [AtS'] . EqS' := getEqs(M2) /\
+      T5 := applyCS(T3, CS) /\
+      T5 := applyCS(T4, CS') /\
+      T'' =/= T''' /\
+      isExec(AtS') /\
+      not isEquality(T3) /\
+      ((T'' =/= 'true.Bool) and (T'' =/= 'false.Bool)) /\
+      ((T''' =/= 'true.Bool) and (T''' =/= 'false.Bool)) /\
+      not eqDefinedFor(M'', T5) [print "Eqs " T5] .
+  eq $ctfTermRequired(SIS1, SIS2, M, T, N) =
+      if (SIS2 == noScoreInfo) or (ctfRequired(SIS1, M, T) =/= none)
+      then empty
+      else $ctfTermRequired(fst(divideByExecEqs(SIS2, N)),
+                            snd(divideByExecEqs(SIS2, N)), M, T, s(N))
+      fi [owise] .
+
+  op eqDefinedFor : Module Term -> Bool .
+  ceq eqDefinedFor(M, T) = true
+   if eq T = T' [AtS] . EqS := getEqs(M) .
+  eq eqDefinedFor(M, T) = false [owise] .
 
   op ctfRequired : ScoreInfoSet Module Term -> EquationSet .
-  ceq ctfRequired($ M, M', (TL, T, TL') $ SIS, M'', T') = ctfEq(T3, T4)
+  ceq ctfRequired(SIS, M, T) = $ctfRequired(SIS1, SIS2, M, T, 2)
+   if [SIS1, SIS2] := divideByExecEqs(SIS, 1) .
+
+  op $ctfRequired : ScoreInfoSet ScoreInfoSet Module Term Nat -> EquationSet .
+  ceq $ctfRequired($ M, M', (TL, T, TL') $ SIS, SIS2, M'', T', N) = Eq
    if CS := getSub(M, T, M'', T') /\
+      *** Consistent premises
+      consistentPremises(M', M'', CS) /\
       eq T1 = T2 [AtS] . EqS := getEqs(M') /\
       isExec(AtS) /\
       T3 := applyCS(T1, CS) /\
       T4 := applyCS(T2, CS) /\
       T5 := getTerm(metaReduce(M'', '_=_[T3, T4])) /\
       T5 =/= 'true.Bool /\
-      T5 =/= 'false.Bool .
-  eq ctfRequired(SIS, M, T) = none [owise] .
+      T5 =/= 'false.Bool /\
+      Eq := ctfEq(T3, T4) /\
+      not eqDefinedFor(M'', T3) .
+  eq $ctfRequired(SIS1, SIS2, M, T, N) =
+      if SIS2 == noScoreInfo
+      then none
+      else $ctfRequired(fst(divideByExecEqs(SIS2, N)),
+                        snd(divideByExecEqs(SIS2, N)), M, T, s(N))
+      fi [owise] .
 
   op ctfEq : Term Term -> Equation .
   eq ctfEq('_=_[T1, T2], 'false.Bool) = eq T1 = T2 [none] . .
@@ -4669,21 +4989,58 @@ the \verb"maps2maps" function shown above to the body:
   eq isExec(nonexec AtS) = false .
   eq isExec(AtS) = true [owise] .
 
-  op impRequired : ScoreInfoSet Module Term -> QidList .
-  ceq impRequired($ M, M', (TL, '_implies_[T1, T2], TL') $ SIS, M'', T) = Q
+  sort ImpRequiredPair .
+  op noImpRequired : -> ImpRequiredPair [ctor] .
+  op |_,_| : Qid Substitution -> ImpRequiredPair [ctor] .
+
+  op impRequired : ScoreInfoSet Module Term -> ImpRequiredPair .
+  ceq impRequired($ M, M', (TL, '_implies_[T1, T2], TL') $ SIS, M'', T) = | Q, none |
    if CS := getSub(M, T2, M'', T) /\
-      T3 := applyCS(T1, CS) /\
-      not implies?(T) /\
+      *** Same premises
+      samePremises(M, M', M'', CS) /\
+      T3 := getTermImplication('_implies_[T1, T2], T, CS) /\
       eq T3 = 'true.Bool [label(Q) AtS] . EqS := getEqs(M'') .
-  eq impRequired(SIS, M, T) = nil [owise] .
+  ceq impRequired($ M, M', (TL, '_implies_[T1, T2], TL') $ SIS, M'', T) = | Q, SB |
+   if CS := getSub(M, T2, M'', T) /\
+      *** Same premises
+      samePremises(M, M', M'', CS) /\
+      T3 := getTermImplication('_implies_[T1, T2], T, CS) /\
+      eq T4 = 'true.Bool [label(Q) AtS] . EqS := getEqs(M'') /\
+      T3 =/= T4 /\
+      SB := computeSub(T4, T3) .
+  eq impRequired(SIS, M, T) = noImpRequired [owise] .
+
+  op getTermImplication : Term Term ConsSub -> TermList .
+  ceq getTermImplication('_implies_[T1, T2], T, CS) = T3
+   if impLevels(T) == impLevels(T2) /\
+      T3 := applyCS(T1, CS) .
+  ceq getTermImplication('_implies_[T1, T2], T, CS) = getTermImplication(T2, T, CS)
+   if impLevels(T2) > impLevels(T) .
+  eq getTermImplication(T, T', CS) = empty [owise] .
+
+  *** Term with variables (premise)
+  *** Ground term (term being reduced, once substituted)
+  op computeSub : Term Term ~> Substitution .
+  eq computeSub(C, C) = none .
+  eq computeSub(V, T) = V <- T .
+  eq computeSub(Q[TL], Q[TL']) = computeSub*(TL, TL') .
+
+  op computeSub* : TermList TermList ~> Substitution .
+  eq computeSub*(empty, empty) = none .
+  eq computeSub*((T, TL), (T', TL')) = computeSub(T, T') ; computeSub*(TL, TL') .
 
   op implies? : Term -> Bool .
   eq implies?('_implies_[TL]) = true .
   eq implies?(T) = false [owise] .
 
+  op impLevels : Term -> Nat .
+  eq impLevels('_implies_[T, T']) = s(impLevels(T')) .
+  eq impLevels(T) = 0 [owise] .
+
   op redRequired : ScoreInfoSet Module Term -> Bool .
   ceq redRequired($ M, M', (TL, T, TL') $ SIS, M'', T') = true
-   if CS := getSub(M, T, M'', T') /\
+   if impLevels(T) == impLevels(T') /\
+      CS := getSub(M, T, M'', T') /\
       T1 := applyCS(T, CS) /\
       T2 := getTerm(metaReduce(M, T)) /\
       T3 := getTerm(metaReduce(M'', T')) /\
@@ -4692,6 +5049,10 @@ the \verb"maps2maps" function shown above to the body:
       T2 == T3 .
   eq redRequired(SIS, M, T) = false [owise] .
 
+  op isEquality : Term -> Bool .
+  eq isEquality('_=_[T1, T2]) = true .
+  eq isEquality(T) = false [owise] .
+
   *** Flat module
   *** Top module
   *** Goal module
@@ -4699,13 +5060,28 @@ the \verb"maps2maps" function shown above to the body:
   eq samePremises(M, M', M'', CS) = samePremises(M, getEqs(M'), M'', CS) .
 
   op samePremises : Module EquationSet Module ConsSub -> Bool .
-  ceq samePremises(M, eq T = T' [AtS] . EqS, M', CS) = (T1 == T3) and
+  ceq samePremises(M, eq T = T' [AtS] . EqS, M', CS) = (T3 == 'true.Bool) and
                                                        samePremises(M, EqS, M', CS)
    if isExec(AtS) /\
-      T1 := getTerm(metaReduce(M, T)) /\
-      T2 := applyCS(T, CS) /\
-      T3 := getTerm(metaReduce(M', T2)) .
+      T1 := applyCS(T, CS) /\
+      T2 := applyCS(T', CS) /\
+      T3 := getTerm(metaReduce(M', '_=_[T1, T2])) .
   eq samePremises(M, EqS, M', CS) = true [owise] .
+
+  *** Flat module
+  *** Top module
+  *** Goal module
+  op consistentPremises : Module Module ConsSub -> Bool .
+  eq consistentPremises(M', M'', CS) = consistentPremises(getEqs(M'), M'', CS) .
+
+  op consistentPremises : EquationSet Module ConsSub -> Bool .
+  ceq consistentPremises(eq T = T' [AtS] . EqS, M', CS) = (T3 =/= 'false.Bool) and
+                                                          consistentPremises(EqS, M', CS)
+   if isExec(AtS) /\
+      T1 := applyCS(T, CS) /\
+      T2 := applyCS(T', CS) /\
+      T3 := getTerm(metaReduce(M', '_=_[T1, T2])) .
+  eq consistentPremises(EqS, M', CS) = true [owise] .
 
   op getNameProofScore : ScoreInfoSet -> Qid .
   eq getNameProofScore($ M, M', (T, TL)$ SIS) = getNameProofScore(getImports(M')) .
@@ -4721,23 +5097,80 @@ the \verb"maps2maps" function shown above to the body:
       N := find(STR, "-MODCAFE", 0) .
   eq cut(Q) = Q [owise] .
 
-  op initialModule : ScoreInfoSet -> Module .
-  eq initialModule($ M, M', TL $ SIS) = M .
+  op renameRepVars : Term -> Term .
+  ceq renameRepVars(T) = T
+   if TrS := getVars(T) /\
+      moreThanOne(T, TrS) == emptyTermSet .
+  ceq renameRepVars(T) = renameRepVars(oneSub(T, V, V'))
+   if TrS := getVars(T) /\
+      V := moreThanOne(T, TrS) /\
+      V' := newVar(V, TrS, 0) .
 
-  op inferGoal : ScoreInfoSet ~> Term .
-  eq inferGoal($ M, M', (T, TL)$ SIS) = inferGoal(M, T, (TL, completeTermList(SIS))) .
+  op renameRepVars* : TermList -> TermList .
+  eq renameRepVars*(empty) = empty .
+  eq renameRepVars*((T, TL)) = renameRepVars(T), renameRepVars*(TL) .
 
-  op inferGoal : Module Term TermList ~> Term .
-  eq inferGoal(M, T, empty) = T .
-  ceq inferGoal(M, T, (T', TL)) = T''
+  op oneSub : Term Variable Variable -> Term .
+  eq oneSub(Q[TL], V, V') = Q[oneSub*(TL, V, V')] .
+  eq oneSub(V, V, V') = V' .
+  eq oneSub(T, V, V') = T [owise] .
+
+  op oneSub* : TermList Variable Variable -> TermList .
+  eq oneSub*(empty, V, V') = empty .
+  eq oneSub*((TL, T), V, V') = if oneSub(T, V, V') == T
+                               then oneSub*(TL, V, V'), T
+                               else TL, oneSub(T, V, V')
+                               fi .
+
+  op newVar : Variable TermSet Nat -> Variable .
+  ceq newVar(V, V' | TrS, N) = newVar(V, TrS, s(N))
+   if V' := qid(string(getName(V)) + string(N, 10) + ":" + string(getType(V))) .
+  ceq newVar(V, TrS, N) = V'
+   if V' := qid(string(getName(V)) + string(N, 10) + ":" + string(getType(V))) [owise] .
+
+  op moreThanOne : Term TermSet -> TermSet .
+  ceq moreThanOne(T, V | TrS) = V
+   if numReps(T, V) =/= 1 .
+  eq moreThanOne(T, TrS) = emptyTermSet [owise] .
+
+  op numReps : Term Variable -> Nat .
+  eq numReps(C, V) = 0 .
+  eq numReps(V, V') = if V == V'
+                      then 1
+                      else 0
+                      fi .
+  eq numReps(Q[TL], V) = numReps*(TL, V) .
+
+  op numReps* : TermList Variable -> Nat .
+  eq numReps*(empty, V) = 0 .
+  eq numReps*((T, TL), V) = numReps(T, V) + numReps*(TL, V) .
+
+  op inferGoal : ScoreInfoSet ~> TermList .
+  ceq inferGoal($ M, M', (T, TL)$ SIS) = TL2
+   if TL' := TL, completeTermList(SIS) /\
+      TL1 := inferGoal(M, (T, TL')) /\
+      TL2 := renameRepVars*(TL1) .
+
+  sort InferenceResult .
+  op [_,_] : Term TermList -> InferenceResult [ctor] .
+
+  op inferGoal : Module TermList -> TermList .
+  ceq inferGoal(M, (T, TL)) = T1, TL'
+   if [T1, TL1] := $inferGoal(M, T, TL, empty) /\
+      TL' := inferGoal(M, TL1) .
+  eq inferGoal(M, empty) = empty .
+
+  op $inferGoal : Module Term TermList TermList ~> InferenceResult .
+  eq $inferGoal(M, T, empty, TL') = [T, TL'] .
+  ceq $inferGoal(M, T, (T', TL), TL') = $inferGoal(M, T'', TL, TL')
    if T'' := unifyGoal(M, T, T') .
+  eq $inferGoal(M, T, (T', TL), TL') = $inferGoal(M, T, TL, (TL', T')) [owise] .
 
   op unifyGoal : Module Term Term ~> Term .
   eq unifyGoal(M, V, V') = V .
-  eq unifyGoal(M, C, C) = C .
+  eq unifyGoal(M, V, C) = V .
   ceq unifyGoal(M, C, C') = V
-   if C =/= C' /\
-      not isCtor(M, C) /\
+   if not isCtor(M, C) /\
       not isCtor(M, C') /\
       Ty := getType(C) /\
       sameKind(M, Ty, getType(C')) /\
@@ -4750,11 +5183,129 @@ the \verb"maps2maps" function shown above to the body:
    if isCtor(M, T) /\
       isCtor(M, T') /\
       Ty := getType(metaReduce(M, T)) /\
-      V := qid(substr(string(Ty), 0, 1) + ":" + string(Ty)) .
+      V := qid(substr(string(Ty), 0, 1) + ":" + string(Ty)) [owise] .
 
   op unifyGoal* : Module TermList TermList ~> TermList .
   eq unifyGoal*(M, empty, empty) = empty .
   eq unifyGoal*(M, (T, TL), (T', TL')) = unifyGoal(M, T, T'), unifyGoal*(M, TL, TL') .
+
+  op printProof : Module Qid Qid TermList QidList -> QidList .
+  eq printProof(M, Q, Q', TL, QIL) =
+          '\n 'open Q' '. '\n
+          '\t ':goal '`{ '\n
+          printGoals(M, TL, Q, 0)
+          '\t '`} '\n '\n
+          QIL '\n
+          'close .
+
+  op printGoals : Module TermList Qid Nat -> QidList .
+  eq printGoals(M, empty, Q, N) = nil .
+  ceq printGoals(M, (T, TL), Q, N) =
+          '\t '\t 'eq ' '`[ Q' ':nonexec '`] ' ':
+                                 metaPrettyPrint(M, T, po) ' '= 'true '. '\n
+          printGoals(M, TL, Q, s(N))
+   if Q' := if N == 0
+            then Q
+            else qid(string(Q) + string(N, 10))
+            fi .
+
+  op printSub : Substitution -> QidList .
+  eq printSub(none) = nil .
+  eq printSub(V <- C ; SB) = V '<- getName(C) ';  printSub(SB) .
+
+  *** When inferring goal it is possible that fresh constants appear. In this case
+  *** we need to add them or turn them into variables.
+
+  sort SISPair .
+  op [_,_] : ScoreInfoSet ScoreInfoSet -> SISPair [ctor] .
+
+  ops fst snd : SISPair -> ScoreInfoSet .
+  eq fst([SIS1, SIS2]) = SIS1 .
+  eq snd([SIS1, SIS2]) = SIS2 .
+
+  op divideByExecEqs : ScoreInfoSet Nat -> SISPair .
+  eq divideByExecEqs(SIS, N) = $divideByExecEqs(SIS, N, [noScoreInfo, noScoreInfo]) .
+
+  op $divideByExecEqs : ScoreInfoSet Nat SISPair -> SISPair .
+  eq $divideByExecEqs(noScoreInfo, N, SISP) = SISP .
+  eq $divideByExecEqs($ M, M', TL $ SIS, N, [SIS1, SIS2]) =
+       if numExecEqs(M') == 0
+       then $divideByExecEqs(SIS, N, [SIS1, SIS2])
+       else if numExecEqs(M') == N
+            then $divideByExecEqs(SIS, N, [$ M, M', TL $ SIS1, SIS2])
+            else $divideByExecEqs(SIS, N, [SIS1, $ M, M', TL $ SIS2])
+            fi
+       fi .
+
+  op numExecEqs : Module -> Nat .
+  eq numExecEqs(M) = numExecEqs(getEqs(M)) .
+
+  op numExecEqs : EquationSet -> Nat .
+  ceq numExecEqs(eq T = T' [AtS] . EqS) = s(numExecEqs(EqS))
+   if isExec(AtS) .
+  ceq numExecEqs(ceq T = T' if COND [AtS] . EqS) = s(numExecEqs(EqS))
+   if isExec(AtS) .
+  eq numExecEqs(EqS) = 0 [owise] .
+
+  ***********************************************************************************
+  ******************************* AUXILIARY FUNCTIONS *******************************
+  *********************************** hasVariables **********************************
+  ***********************************************************************************
+
+  op hasVariables : Term -> Bool .
+  eq hasVariables(C) = false .
+  eq hasVariables(V) = true .
+  eq hasVariables(Q[TL]) = hasVariables*(TL) .
+
+  op hasVariables* : TermList -> Bool .
+  eq hasVariables*(empty) = false .
+  eq hasVariables*((T, TL)) = hasVariables(T) or hasVariables*(TL) .
+
+  ***********************************************************************************
+  ******************************* AUXILIARY FUNCTIONS *******************************
+  ************************************* getIndVar ***********************************
+  ***********************************************************************************
+
+  *** Variables
+  *** Reduced term
+  op getIndVar : Term TermSet ScoreInfoSet -> TermList .
+  eq getIndVar(T, emptyTermSet, SIS) = empty .
+  ceq getIndVar(T, (V | TrS), SIS) = V
+   if isIndVar(T, V, SIS) .
+  ceq getIndVar(T, (V | TrS), SIS) = getIndVar(T, TrS, SIS)
+   if not isIndVar(T, V, SIS) .
+
+  op isIndVar : Term Variable ScoreInfoSet -> Bool .
+  eq isIndVar(T, V, noScoreInfo) = true .
+  eq isIndVar(T, V, $ M, M', empty $ SIS) = isIndVar(T, V, SIS) .
+  ceq isIndVar(T, V, $ M, M', (T', TL) $ SIS) = isIndVar(T, V, $ M, M', TL $ SIS)
+   if T'' := getMatch(T, T', V) /\
+      isCtor(M, T'') .
+  *** In this case we have several goals and the current reduction is not related
+  *** to the current goal.
+  ceq isIndVar(T, V, $ M, M', (T', TL) $ SIS) = isIndVar(T, V, $ M, M', TL $ SIS)
+   if getMatch(T, T', V) == empty .
+  eq isIndVar(T, V, SIS) = false [owise] .
+
+  op getMatch : Term Term Variable -> TermList .
+  eq getMatch(V, T, V) = T .
+  eq getMatch(Q[TL], Q[TL'], V) = getMatch*(TL, TL', V) .
+  eq getMatch(T, '_implies_[T1, T2], V) = getMatch(T, T2, V) .
+  eq getMatch('_implies_[T1, T2], T, V) = getMatch(T2, T, V) .
+  eq getMatch(T, T', V) = empty [owise] .
+
+  op getMatch* : TermList TermList Variable ~> TermList .
+  eq getMatch*((T, TL), (T', TL'), V) = getMatch(T, T', V), getMatch*(TL, TL', V) .
+  eq getMatch*(TL, TL', V) = empty [owise] .
+
+  ***********************************************************************************
+  ******************************* AUXILIARY FUNCTIONS *******************************
+  ************************************* isCtor **************************************
+  ***********************************************************************************
+
+  *** This function checks whether the outer operator is a constructor while the rest
+  *** of the arguments are fresh constants.
+  *** In the case of constants it is enough for it to be a constructor.
 
   op isCtor : Module Term -> Bool .
   eq isCtor(M, T) = isCtor(getOps(M), T) .
@@ -4768,38 +5319,30 @@ the \verb"maps2maps" function shown above to the body:
   eq isCtor(ODS, T) = false [owise] .
 
   op allNonCtorConstants : OpDeclSet TermList -> Bool .
-  eq allNonCtorConstants(ODS, V) = false .
-  eq allNonCtorConstants(ODS, Q[TL]) = false .
-  ceq allNonCtorConstants(op Q : nil -> Ty [ctor AtS] . ODS, C) = false
+  eq allNonCtorConstants(ODS, empty) = true .
+  eq allNonCtorConstants(ODS, (T, TL)) = nonCtorConstant(ODS, T) and
+                                         allNonCtorConstants(ODS, TL) .
+
+  op nonCtorConstant : OpDeclSet Term -> Bool .
+  eq nonCtorConstant(ODS, V) = false .
+  eq nonCtorConstant(ODS, Q[TL]) = false .
+  ceq nonCtorConstant(op Q : nil -> Ty [ctor AtS] . ODS, C) = false
    if Q := getName(C) .
-  eq allNonCtorConstants(ODS, C) = true [owise] .
+  eq nonCtorConstant(ODS, C) = true [owise] .
 
-  op printProof : Module Qid Qid Term Variable QidList -> QidList .
-  eq printProof(M, Q, Q', T, V, QIL) =
-          '\n 'open Q' '. '\n
-          '\t ':goal '`{ '\n
-          '\t '\t 'eq ' '`[ Q ':nonexec '`] ' ':
-                                 metaPrettyPrint(M, T, po) ' '= 'true '. '\n
-          '\t '`} '\n '\n
-          '\t ':ind 'on ' '`( metaPrettyPrint(M, V, po) '`) '\n '\n
-          '\t ':apply '`( 'si '`) '\n '\n
-          QIL '\n
-          'close .
+  ***********************************************************************************
+  ******************************* AUXILIARY FUNCTIONS *******************************
+  ********************************** EXTRACTS VARS **********************************
+  ***********************************************************************************
 
-  op getIndVar : ScoreInfoSet Term -> Variable .
-  eq getIndVar($ M, M', (T, TL)$ SIS, T') = getIndVar(T', T) .
+  op getVars : Term -> TermSet .
+  eq getVars(C) = emptyTermSet .
+  eq getVars(V) = V .
+  eq getVars(Q[TL]) = getVars*(TL) .
 
-  op getIndVar : Term Term ~> Variable .
-  eq getIndVar(V, C) = V .
-  eq getIndVar(V, Q[TL]) = V .
-  eq getIndVar(Q[T, TL], Q[T', TL']) =
-          if getIndVar(T, T') :: Variable
-          then getIndVar(T, T')
-          else getIndVar(Q[TL], Q[TL'])
-          fi .
-
-  *** When inferring goal it is possible that fresh constants appear. In this case
-  *** we need to add them to turn them into variables.
+  op getVars* : TermList -> TermSet .
+  eq getVars*(empty) = emptyTermSet .
+  eq getVars*((T, TL)) = getVars(T) | getVars*(TL) .
 
   ***********************************************************************************
   ******************************* AUXILIARY FUNCTIONS *******************************
@@ -4811,6 +5354,11 @@ the \verb"maps2maps" function shown above to the body:
                                              metaPrettyPrint(M, T, po) ' '=
                                              metaPrettyPrint(M, T', po) '. '`} '\n '\n
                                              '\t ':apply '`( Q '`) '\n '\n .
+
+  op printCtfTermComm : Module Qid Term -> QidList .
+  eq printCtfTermComm(M, Q, T) = '\t ':def Q '= ':ctf ' '`[
+                             metaPrettyPrint(M, T, po) ' '. '`] '\n '\n
+                             '\t ':apply '`( Q '`) '\n '\n .
 
   ***********************************************************************************
   ******************************* AUXILIARY FUNCTIONS *******************************
@@ -4826,7 +5374,20 @@ the \verb"maps2maps" function shown above to the body:
   op addNewMac : Macros Module Equation Nat -> NewMacPair .
   ceq addNewMac(# M, Q - Eq # MACS, M', Eq', N) = addNewMac(# M, Q - Eq # MACS, M', Eq', s(N))
    if Q := qid("csb" + string(N, 10)) .
+  ceq addNewMac(# M, Q - T # MACS, M', Eq', N) = addNewMac(# M, Q - T # MACS, M', Eq', s(N))
+   if Q := qid("csb" + string(N, 10)) .
   ceq addNewMac(MACS, M, Eq, N) = | # M, Q - Eq # MACS, Q |
+   if Q := qid("csb" + string(N, 10)) [owise] .
+
+  op addNewMac : Macros Module Term -> NewMacPair .
+  eq addNewMac(MACS, M, T) = addNewMac(MACS, M, T, 1) .
+
+  op addNewMac : Macros Module Term Nat -> NewMacPair .
+  ceq addNewMac(# M, Q - Eq # MACS, M', T, N) = addNewMac(# M, Q - Eq # MACS, M', T, s(N))
+   if Q := qid("csb" + string(N, 10)) .
+  ceq addNewMac(# M, Q - T # MACS, M', T', N) = addNewMac(# M, Q - T # MACS, M', T', s(N))
+   if Q := qid("csb" + string(N, 10)) .
+  ceq addNewMac(MACS, M, T, N) = | # M, Q - T # MACS, Q |
    if Q := qid("csb" + string(N, 10)) [owise] .
 
   ************************************************************************************
@@ -7028,7 +7589,7 @@ endm
 set print conceal on .
 
 print conceal mod_is_sorts_._____endm .
-*** print conceal fmod_is_sorts_.____endfm .
+print conceal fmod_is_sorts_.____endfm .
 print conceal db .
 
 
@@ -7038,6 +7599,8 @@ set show loop timing off .
 
 *** for debugging purposes
 set print attribute on .
+
+set show advisories off .
 
 ***(%
 

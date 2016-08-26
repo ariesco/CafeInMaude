@@ -1,0 +1,106 @@
+--> =================================================================
+-->             Proof Scores on
+-->             Generic Set with Intersection Operation
+-->                                                        kf160805
+--> =================================================================
+
+--> ================================================================
+--> generic sets: SET(X :: TRIV)
+--> ----------------------------------------------------------------
+mod! MY-SET(X :: TRIV) {
+[Elt.X < Set]
+-- empty set
+op empty : -> Set {constr}
+-- assicative and commutative set constructor with identity 'empty'
+op __ : Set Set -> Set {constr assoc comm id: empty idem}
+-- in
+pred _in_ : Elt Set .
+eq (E:Elt in empty) = false .
+eq (E1:Elt in (E2:Elt S:Set)) = ((E1 = E2) or (E1 in S)) .
+}
+
+-- =================================================================
+-- set intersection: SET^
+--> ----------------------------------------------------------------
+mod! SET^ (X :: TRIV) {
+pr(MY-SET(X))
+op _^_ : Set Set -> Set .
+eq empty ^ S2:Set = empty .
+eq (E:Elt S1:Set) ^ S2:Set =
+    if E in S2 then E (S1 ^ S2) else (S1 ^ S2) fi .
+}
+
+view Qid from TRIV to QID {
+ sort Elt -> Qid
+}
+
+mod! QIDSET^{
+ pr(SET^(Qid))
+}
+
+--> ================================================================
+--> proof score for the property:
+--> eq[in^]: E:Elt in (S1:Set ^ S2:Set) = E in S1 and E in S2 .
+--> with CITP
+--> ================================================================
+-- proof: by induction on the number of elements in S1:Set
+--> induction base
+open QIDSET^ .
+-- check the base
+op e : -> Qid .
+op s2 : -> Set .
+red (e in (empty ^ s2)) = (e in empty and e in s2) .
+close
+
+--> induction step
+mod SET^in-iStep {
+pr(QIDSET^)
+-- induction hypothesis
+op s1 : -> Set .
+eq (E:Qid in (s1 ^ S2:Set)) = (E in s1 and E in S2) .
+-- fresh constants
+ops e1 e2 : -> Qid .
+op s2 : -> Set .
+-- induction step proposition
+op iStep : -> Bool .
+eq iStep = ((e1 in ((e2 s1) ^ s2)) = (e1 in (e2 s1) and e1 in s2)) .
+}
+
+
+-- another proof score
+open SET^in-iStep .
+:id(is)
+
+eq e1 = e2 .
+eq (e2 in s2) = true .
+red iStep .
+close
+--
+open SET^in-iStep .
+:id(is)
+
+eq e1 = e2 .
+eq (e2 in s2) = false .
+red iStep .
+close
+--
+open SET^in-iStep .
+:id(is)
+
+eq (e1 = e2) = false .
+eq (e2 in s2) = true .
+red iStep .
+close
+--
+open SET^in-iStep .
+:id(is)
+
+eq (e1 = e2) = false .
+eq (e2 in s2) = false .
+red iStep .
+close
+
+open SET^in-iStep .
+:proof(is)
+close
+

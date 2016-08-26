@@ -1,0 +1,125 @@
+--
+-- Qlock: a mutual exclustion protocol
+-- based on an atomic queue and an abstract
+-- version of the Dijkstra's binary semaphore
+--
+-- PidQueue queue = empty;
+-- ...
+-- Loop: Remainder Section
+--  rs: enq(queue,i);
+--  ws: repeat until top(queue) = i;
+--    Critical Section
+--  cs: deq(queue);
+--
+-- Note that queue is an atomic queue,
+-- where enq, top and deq are atomic, and
+-- queue is used in neither Remainder Section
+-- nor Critical Section.
+--
+
+mod! LABEL {
+  [Label]
+  ops rs ws cs : -> Label {constr}
+  eq (rs = ws) = false .
+  eq (rs = cs) = false .
+  eq (ws = cs) = false .
+}
+
+mod! PID {
+  [ErrPid Pid < Pid&Err]
+  op none : -> ErrPid
+  var I : Pid
+  var EI : ErrPid
+  eq (I = EI) = false .
+}
+
+mod* TRIVerr {
+  [ErrElt Elt < Elt&Err]
+  op err : -> ErrElt
+}
+
+mod! QUEUE(E :: TRIVerr) {
+  [EQueue NeQueue < Queue]
+  op empty :             -> EQueue {constr}
+  op _|_   : Elt.E Queue -> NeQueue {constr}
+  op enq : Queue Elt.E -> NeQueue
+  op deq : Queue -> Queue
+  op top : EQueue -> ErrElt.E
+  op top : NeQueue -> Elt.E
+  op top : Queue -> Elt&Err.E
+  var Q : Queue
+  vars X Y : Elt.E
+  eq enq(empty,X) = X | empty .
+  eq enq(Y | Q,X) = Y | enq(Q,X) .
+  eq deq(empty) = empty .
+  eq deq(X | Q) = Q .
+  eq top(empty) = err .
+  eq top(X | Q) = X .
+}
+
+view TRIVerr2PID from TRIVerr to PID {
+  sort Elt -> Pid,
+  sort ErrElt -> ErrPid,
+  sort Elt&Err -> Pid&Err,
+  op err -> none
+}
+
+mod* QLOCK {
+  pr(LABEL + PID)
+  pr(QUEUE(E <= TRIVerr2PID))
+  [Sys]
+-- any initial state
+  op init : -> Sys {constr}
+-- transitions
+  op want : Sys Pid -> Sys {constr}
+  op try  : Sys Pid -> Sys {constr}
+  op exit : Sys Pid -> Sys {constr}
+-- observations
+  op pc    : Sys Pid -> Label
+  op queue : Sys -> Queue
+-- CafeOBJ variables
+  var S : Sys
+  vars I J : Pid
+-- for any initial state
+  eq pc(init,I)  = rs .
+  eq queue(init) = empty .
+-- for want
+  op c-want : Sys Pid -> Bool
+  eq c-want(S,I) = (pc(S,I) = rs) .
+  --
+  ceq pc(want(S,I),J)  = (if I = J then ws else pc(S,J) fi) if c-want(S,I) .
+  ceq queue(want(S,I)) = enq(queue(S),I)                    if c-want(S,I) .
+  ceq want(S,I)        = S                                  if not c-want(S,I) .
+-- for try
+  op c-try : Sys Pid -> Bool
+  eq c-try(S,I) = ((pc(S,I) = ws) and top(queue(S)) = I) .
+  --
+  ceq pc(try(S,I),J)  = (if I = J then cs else pc(S,J) fi) if c-try(S,I) .
+  eq  queue(try(S,I)) = queue(S) .
+  ceq try(S,I)        = S                                  if not c-try(S,I) .
+-- for exit
+  op c-exit : Sys Pid -> Bool
+  eq c-exit(S,I) = (pc(S,I) = cs) .
+  --
+  ceq pc(exit(S,I),J)  = (if I = J then rs else pc(S,J) fi) if c-exit(S,I) .
+  ceq queue(exit(S,I)) = deq(queue(S))                      if c-exit(S,I) .
+  ceq exit(S,I)        = S                                  if not c-exit(S,I) .
+--
+-- Properties to prove
+--
+  op inv1 : Sys Pid Pid -> Bool
+  op inv2 : Sys Pid -> Bool
+  eq inv1(S:Sys,I:Pid,J:Pid)
+     = (((pc(S,I) = cs) and pc(S,J) = cs) implies I = J) .
+  eq inv2(S:Sys,I:Pid) = (pc(S,I) = cs implies top(queue(S)) = I) .
+  --
+  -- The following is the lemma systematically conjectured,
+  -- from which inv2(S,I) can be conjectured.
+  -- inv2(S,I) implies inv2-0(I',I,I'')
+  --
+  op inv2-0 : Sys Pid Pid Pid -> Bool
+  eq inv2-0(S:Sys,I:Pid,J:Pid,K:Pid)
+      = not((pc(S,K) = ws) and (top(queue(S)) = K) and
+            (I = K) and (not (J = K)) and (pc(S,J) = cs)) .
+}
+

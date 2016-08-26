@@ -1,0 +1,116 @@
+in qlock
+open QLOCK .
+
+:goal {
+eq [inv1 :nonexec] : inv1(S:Sys,I:Pid,J:Pid) = true .
+eq [inv2 :nonexec] : inv2(S:Sys,I:Pid) = true .
+}
+
+:ind on (S:Sys)
+
+:apply (si)
+
+-- init
+:apply (tc)
+
+-- inv1
+:apply (rd)
+-- inv2
+:apply (rd)
+
+-- want(S#Sys, S#Pid), J:Pid)
+:apply (tc)
+-- inv1
+:imp [inv1] by {I:Pid <- I@Pid ; J:Pid <- J@Pid ;}
+:def csb0 = :ctf{ eq pc(S#Sys, S#Pid) = rs . }
+:apply(csb0)
+:def csb1 = :ctf{eq I@Pid = S#Pid .}
+:apply(csb1)
+:apply (rd)
+:def csb2 = :ctf{eq J@Pid = S#Pid .}
+:apply(csb2)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+-- inv2
+:imp [inv2] by {I:Pid <- I@Pid ;}
+:def csb3 = :ctf{ eq pc(S#Sys, S#Pid) = rs . }
+:apply(csb3)
+:def csb4 = :ctf{ eq I@Pid = S#Pid . }
+:apply(csb4)
+:apply (rd)
+:def csb5 = :ctf[ queue(S#Sys) . ]
+:apply(csb5)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+
+-- try(S#Sys, S#Pid)
+:apply (tc)
+-- inv1
+:imp [inv1] by {I:Pid <- I@Pid ; J:Pid <- J@Pid ;}
+:def csb6 = :ctf{eq pc(S#Sys, S#Pid) = ws .}
+:apply(csb6)
+:def csb7 = :ctf{eq top(queue(S#Sys)) = S#Pid .}
+:apply(csb7)
+:def csb8 = :ctf{eq I@Pid = S#Pid .}
+:def csb9 = :ctf{eq J@Pid = S#Pid .}
+:apply(csb8 csb9)
+:apply(rd)
+:def csb10 = :ctf{ eq pc(S#Sys, J@Pid) = cs . }
+:apply(csb10)
+:imp [inv2] by {I:Pid <- J@Pid ;}
+:apply(rd)
+:apply(rd)
+:def csb11 = :ctf{ eq pc(S#Sys, I@Pid) = cs . }
+:apply(csb11)
+:imp [inv2] by {I:Pid <- I@Pid ;}
+:apply(rd)
+:apply(rd)
+:apply(rd)
+:apply(rd)
+:apply(rd)
+-- inv2
+:imp [inv2] by {I:Pid <- I@Pid ;}
+:def csb12 = :ctf{eq pc(S#Sys, S#Pid) = ws .}
+:apply(csb12)
+:def csb13 = :ctf{eq top(queue(S#Sys)) = S#Pid .}
+:apply(csb13)
+:def csb14 = :ctf{eq I@Pid = S#Pid .}
+:apply(csb14)
+:apply(rd)
+:apply(rd)
+:apply(rd)
+:apply(rd)
+
+-- exit(S#Sys, S#Pid)
+:apply (tc)
+-- inv1
+:imp [inv1] by {I:Pid <- I@Pid ; J:Pid <- J@Pid ;}
+:def csb15 = :ctf{eq pc(S#Sys, S#Pid) = cs .}
+:apply(csb15)
+:def csb16 = :ctf{eq I@Pid = S#Pid .}
+:apply(csb16)
+:apply(rd)
+:def csb17 = :ctf{eq J@Pid = S#Pid .}
+:apply(csb17)
+:apply(rd)
+:apply(rd)
+:apply(rd)
+-- inv2
+:imp [inv2] by {I:Pid <- I@Pid ;}
+:def csb18 = :ctf{eq pc(S#Sys, S#Pid) = cs .}
+:apply(csb18)
+:def csb19 = :ctf{eq I@Pid = S#Pid .}
+:apply(csb19)
+:apply(rd)
+:def csb20 = :ctf{ eq pc(S#Sys, I@Pid) = cs . }
+:apply(csb20)
+:imp [inv1] by {I:Pid <- I@Pid ; J:Pid <- S#Pid ;}
+:apply(rd)
+:apply(rd)
+:apply(rd)
+
+-- :show proof
+-- :desc proof
+close
