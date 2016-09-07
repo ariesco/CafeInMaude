@@ -4827,14 +4827,14 @@ the \verb"maps2maps" function shown above to the body:
       V := indRequired(SIS, M, T) /\
       [P', PO'] := applyInduction(P, V, NL y PO) /\
       QIL := '\t ':ind 'on ' '`( metaPrettyPrint(M, V, po) '`) '\n '\n
-             '\t ':apply '`( 'si '`) '\n '\n [print "SI"] .
+             '\t ':apply '`( 'si '`) '\n '\n .
   ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', PO', SIS, MACS)
    if eq T = 'true.Bool [AtS] . EqS := getGoal(P, NL) /\
       M := getMod(P, NL) /\
       indRequired(SIS, M, T) == empty /\
       tcRequired(T) /\
       [P', PO'] := applyTC(P, NL y PO) /\
-      QIL := '\t ':apply '`( 'tc '`) '\n '\n [print "TC"] .
+      QIL := '\t ':apply '`( 'tc '`) '\n '\n .
   ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P'', PO', SIS, MACS)
    if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
       M := getMod(P, NL) /\
@@ -4851,7 +4851,7 @@ the \verb"maps2maps" function shown above to the body:
              then selectGoal(P', fst(PO'))
              else P'
              fi /\
-      QIL := '\t ':apply ' '`( 'rd '`) '\n '\n [print "RED"] .
+      QIL := '\t ':apply ' '`( 'rd '`) '\n '\n .
   ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', PO', SIS, MACS')
    if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
       M := getMod(P, NL) /\
@@ -4862,7 +4862,7 @@ the \verb"maps2maps" function shown above to the body:
       Ty := getType(metaNormalize(M, T1)) /\
       | MACS', Q | := addNewMac(MACS, M, T1) /\
       [P', PO'] := applyTermMacro(P, NL y PO, Q, T1, Ty) /\
-      QIL := printCtfTermComm(M, Q, T1) [print "CTF-TERM " T1] .
+      QIL := printCtfTermComm(M, Q, T1) .
   ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', PO', SIS, MACS')
    if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
       M := getMod(P, NL) /\
@@ -4874,7 +4874,7 @@ the \verb"maps2maps" function shown above to the body:
       | MACS', Q | := addNewMac(MACS, M, Eq) /\
       P' := applyEquationMacro(P, Q, Eq) /\
       PO' := indProofOrder(NL, 2) y PO /\
-      QIL := printCtfComm(M, Q, Eq) [print "CTF-EQ " Eq] .
+      QIL := printCtfComm(M, Q, Eq) .
   ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', NL y PO, SIS, MACS)
    if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
       M := getMod(P, NL) /\
@@ -4890,13 +4890,13 @@ the \verb"maps2maps" function shown above to the body:
       QIL := if SB == none
              then '\t ':imp ' '`[ Q '`] ' '. '\n '\n
              else '\t ':imp ' '`[ Q '`] ' 'by ' '`{ printSub(SB) '`} '\n '\n
-             fi [print "IMP"] .
+             fi .
   eq developProof(P, NL y PO, SIS, MACS) =
               if PO =/= finished
               then '\t ':postpone '. '\n '\n
                    developProof(selectGoal(P, fst(PO)), PO, SIS, MACS)
               else nil
-              fi [owise print "POST"] .
+              fi [owise] .
 
   op indRequired : ScoreInfoSet Module Term -> TermList .
   ceq indRequired(SIS, M, T) = V
@@ -4943,7 +4943,7 @@ the \verb"maps2maps" function shown above to the body:
       not isEquality(T3) /\
       ((T'' =/= 'true.Bool) and (T'' =/= 'false.Bool)) /\
       ((T''' =/= 'true.Bool) and (T''' =/= 'false.Bool)) /\
-      not eqDefinedFor(M'', T5) [print "Eqs " T5] .
+      not eqDefinedFor(M'', T5) .
   eq $ctfTermRequired(SIS1, SIS2, M, T, N) =
       if (SIS2 == noScoreInfo) or (ctfRequired(SIS1, M, T) =/= none)
       then empty
