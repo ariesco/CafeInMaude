@@ -1,0 +1,279 @@
+in nslpk
+open NSLPK .
+
+:goal {
+eq [inv1 :nonexec] : 
+  ((N1:Nonce \in nonces(S:Sys)) implies (p1(N1) = intr or p2(N1) = intr))
+  = true .
+eq [inv2 :nonexec] : 
+  ((enc1(Q1:Prin,N1:Nonce,intr) \in nw(S:Sys))
+   implies (p1(N1) = intr or p2(N1) = intr or N1 \in nonces(S)))
+  = true .
+eq [inv3 :nonexec] : 
+  ((enc2(Q1:Prin,N1:Nonce,N2:Nonce,intr) \in nw(S:Sys))
+   implies (p1(N2) = intr or p2(N2) = intr or N2 \in nonces(S)))
+  = true .
+}
+
+:ind on (S:Sys)
+
+:apply (si)
+
+-- init
+:apply (tc)
+-- inv1
+:apply (rd)
+-- inv2
+:apply (rd)
+-- inv3
+:apply (rd)
+
+-- send1(S#Sys, S#Prin, S2#Prin)
+:apply (tc)
+-- inv1
+:imp [inv1] by {N1:Nonce <- N1@Nonce ;}
+:def csb1 = :ctf{ eq S2#Prin = intr . }
+:apply (csb1)
+:def csb2 = :ctf{ eq N1@Nonce = n(S#Prin, intr, rand(S#Sys)) . }
+:apply (csb2)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+-- inv2
+:imp [inv2] by {N1:Nonce <- N1@Nonce ; Q1:Prin <- Q1@Prin ;}
+:def csb3 = :ctf{ eq S2#Prin = intr . }
+:apply (csb3)
+:apply (rd)
+:def csb4 = :ctf{ eq N1@Nonce = n(intr,S2#Prin,rand(S#Sys)) .}
+:apply (csb4)
+:apply (rd)
+:def csb5 = :ctf{ eq N1@Nonce = n(S#Prin,S2#Prin,rand(S#Sys)) .}
+:apply (csb5)
+:apply (rd)
+:apply (rd)
+-- inv3
+:imp [inv3] by {N1:Nonce <- N1@Nonce ; N2:Nonce <- N2@Nonce ; Q1:Prin <- Q1@Prin ;}
+:def csb6 = :ctf{ eq S2#Prin = intr .}
+:apply (csb6)
+:apply (rd)
+:apply (rd)
+
+-- fake3S#Sys, S#Prin, S#Nonce)
+:apply (tc)
+-- inv1
+:imp [inv1] by {N1:Nonce <- N1@Nonce ; }
+:def csb7 = :ctf{ eq S#Nonce \in nonces(S#Sys) = true . }
+:apply (csb7)
+:apply (rd)
+:apply (rd)
+-- inv2
+:imp [inv2] by {N1:Nonce <- N1@Nonce ; Q1:Prin <- Q1@Prin ;}
+:def csb8 = :ctf{ eq S#Nonce \in nonces(S#Sys) = true . }
+:apply (csb8)
+:apply (rd)
+:apply (rd)
+-- inv3
+:imp [inv3] by {N1:Nonce <- N1@Nonce ; N2:Nonce <- N2@Nonce ; Q1:Prin <- Q1@Prin ;}
+:def csb9 = :ctf{ eq S#Nonce \in nonces(S#Sys) = true . }
+:apply (csb9)
+:apply (rd)
+:apply (rd)
+
+-- send2(S#Sys, S#Prin, S2#Prin, S#Nonce)
+:apply (tc)
+-- inv1
+:imp [inv1] by {N1:Nonce <- N1@Nonce ; }
+:def csb10 = :ctf{ eq enc1(S#Prin, S#Nonce, S2#Prin) \in nw(S#Sys) = true . }
+:apply (csb10)
+:def csb11 = :ctf { eq intr = S2#Prin . }
+:apply (csb11)
+:def csb12 = :ctf { eq N1@Nonce = n(S#Prin,S2#Prin,rand(S#Sys)) . }
+:apply (csb12)
+:apply (rd)
+:def csb13 = :ctf { eq N1@Nonce = S#Nonce . }
+:apply (csb13)
+:def csb14 = :ctf { eq p1(S#Nonce) = S2#Prin . }
+:apply (csb14)
+:apply (rd)
+:def csb15 = :ctf { eq p2(S#Nonce) = S2#Prin . }
+:apply (csb15)
+:apply (rd)
+:imp [inv2] by {N1:Nonce <- N1@Nonce ; Q1:Prin <- S#Prin ;}
+:apply (rd)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+-- inv2
+:imp [inv2] by {N1:Nonce <- N1@Nonce ; Q1:Prin <- Q1@Prin ;}
+:def csb16 = :ctf { eq enc1(S#Prin, S#Nonce, S2#Prin) \in nw(S#Sys) = true . }
+:apply (csb16)
+:def csb17 = :ctf { eq intr = S2#Prin . }
+:apply (csb17)
+:def csb18 = :ctf { eq N1@Nonce = n(S#Prin,intr,rand(S#Sys)) . }
+:apply (csb18)
+:apply (rd)
+:def csb19 = :ctf { eq N1@Nonce = S#Nonce . }
+:apply (csb19)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+-- inv3
+:imp [inv3] by {N1:Nonce <- N1@Nonce ; N2:Nonce <- N2@Nonce ; Q1:Prin <- Q1@Prin ;}
+:def csb20 = :ctf { eq enc1(S#Prin, S#Nonce, S2#Prin) \in nw(S#Sys) = true . }
+:apply (csb20)
+:def csb21 = :ctf { eq Q1@Prin = S2#Prin . }
+:apply (csb21)
+:def csb22 = :ctf { eq N1@Nonce = S#Nonce . }
+:apply (csb22)
+:def csb23 = :ctf { eq N2@Nonce = n(S#Prin,S2#Prin,rand(S#Sys)) . }
+:apply (csb23)
+:def csb24 = :ctf { eq S#Prin = intr . }
+:apply (csb24)
+:apply (rd)
+:def csb25 = :ctf { eq intr = S2#Prin . }
+:apply (csb25)
+:apply (rd)
+:apply (rd)
+:def csb26 = :ctf { eq intr = S2#Prin . }
+:apply (csb26)
+:apply (rd)
+:apply (rd)
+:def csb27 = :ctf { eq intr = S2#Prin . }
+:apply (csb27)
+:apply (rd)
+:apply (rd)
+:def csb28 = :ctf { eq intr = S2#Prin . }
+:apply (csb28)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+
+-- fake1(S#Sys, S#Prin, S2#Prin, S#Nonce)
+:apply (tc)
+-- inv1
+:imp [inv1] by {N1:Nonce <- N1@Nonce ; }
+:def csb29 = :ctf { eq S#Nonce \in nonces(S#Sys) = true . }
+:apply (csb29)
+:apply (rd)
+:apply (rd)
+-- inv2
+:imp [inv2] by {N1:Nonce <- N1@Nonce ; Q1:Prin <- Q1@Prin ;}
+:def csb30 = :ctf { eq S#Nonce \in nonces(S#Sys) = true . }
+:apply (csb30)
+:def csb31 = :ctf { eq Q1@Prin = S2#Prin . }
+:apply (csb31)
+:def csb32 = :ctf { eq N1@Nonce = S#Nonce . }
+:apply (csb32)
+:def csb33 = :ctf { eq S#Prin = intr . }
+:apply (csb33)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+-- inv3
+:imp [inv3] by {N1:Nonce <- N1@Nonce ; N2:Nonce <- N2@Nonce ; Q1:Prin <- Q1@Prin ;}
+:def csb34 = :ctf { eq S#Nonce \in nonces(S#Sys) = true . }
+:apply (csb34)
+:apply (rd)
+:apply (rd)
+
+-- send3(S#Sys, S#Prin, S2#Prin, S#Nonce, S2#Nonce)
+:apply (tc)
+-- inv1
+:imp [inv1] by {N1:Nonce <- N1@Nonce ; }
+:def csb35 = :ctf { eq enc1(S2#Prin,S#Nonce,S#Prin) \in nw(S#Sys) = true . }
+:apply (csb35)
+:def csb36 = :ctf { eq enc2(S#Prin,S#Nonce,S2#Nonce,S2#Prin) \in nw(S#Sys) = true . }
+:apply (csb36)
+:def csb37 = :ctf { eq intr = S2#Prin . }
+:apply (csb37)
+:def csb38 = :ctf { eq N1@Nonce = S2#Nonce . }
+:apply (csb38)
+:def csb39 = :ctf { eq p1(S2#Nonce) = S2#Prin . }
+:apply (csb39)
+:apply (rd)
+:def csb40 = :ctf { eq p2(S2#Nonce) = S2#Prin . }
+:apply (csb40)
+:apply (rd)
+:imp [inv3] by {N1:Nonce <- S#Nonce ; N2:Nonce <- S2#Nonce ; Q1:Prin <- S#Prin ;}
+:apply (rd)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+-- inv2
+:imp [inv2] by {N1:Nonce <- N1@Nonce ; Q1:Prin <- Q1@Prin ;}
+:def csb41 = :ctf { eq enc1(S2#Prin,S#Nonce,S#Prin) \in nw(S#Sys) = true . }
+:apply (csb41)
+:def csb42 = :ctf { eq enc2(S#Prin,S#Nonce,S2#Nonce,S2#Prin) \in nw(S#Sys) = true . }
+:apply (csb42)
+:def csb43 = :ctf { eq intr = S2#Prin . }
+:apply (csb43)
+:def csb44 = :ctf { eq N1@Nonce = S2#Nonce . }
+:apply (csb44)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+-- inv3
+:imp [inv3] by {N1:Nonce <- N1@Nonce ; N2:Nonce <- N2@Nonce ; Q1:Prin <- Q1@Prin ;}
+:def csb45 = :ctf { eq enc1(S2#Prin,S#Nonce,S#Prin) \in nw(S#Sys) = true . }
+:apply (csb45)
+:def csb46 = :ctf { eq enc2(S#Prin,S#Nonce,S2#Nonce,S2#Prin) \in nw(S#Sys) = true . }
+:apply (csb46)
+:def csb47 = :ctf { eq intr = S2#Prin . }
+:apply (csb47)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+
+-- fake2(S#Sys, S#Prin, S2#Prin, S#Nonce, S2#Nonce)
+:apply (tc)
+-- inv1
+:imp [inv1] by {N1:Nonce <- N1@Nonce ; }
+:def csb48 = :ctf { eq S#Nonce \in nonces(S#Sys) = true . }
+:apply (csb48)
+:def csb49 = :ctf { eq S2#Nonce \in nonces(S#Sys) = true . }
+:apply (csb49)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+-- inv2
+:imp [inv2] by {N1:Nonce <- N1@Nonce ; Q1:Prin <- Q1@Prin ;}
+:def csb50 = :ctf { eq S#Nonce \in nonces(S#Sys) = true . }
+:apply (csb50)
+:def csb51 = :ctf { eq S2#Nonce \in nonces(S#Sys) = true . }
+:apply (csb51)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+-- inv3
+:imp [inv3] by {N1:Nonce <- N1@Nonce ; N2:Nonce <- N2@Nonce ; Q1:Prin <- Q1@Prin ;}
+:def csb52 = :ctf { eq S#Nonce \in nonces(S#Sys) = true . }
+:apply (csb52)
+:def csb53 = :ctf { eq S2#Nonce \in nonces(S#Sys) = true . }
+:apply (csb53)
+:def csb54 = :ctf { eq Q1@Prin = S#Prin . }
+:apply (csb54)
+:def csb55 = :ctf { eq N1@Nonce = S#Nonce . }
+:apply (csb55)
+:def csb56 = :ctf { eq N2@Nonce = S2#Nonce . }
+:apply (csb56)
+:def csb57 = :ctf { eq S2#Prin = intr . }
+:apply (csb57)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+:apply (rd)
+
+eof
+
+:sh proof
+:desc proof

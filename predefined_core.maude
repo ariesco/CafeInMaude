@@ -1,5 +1,5 @@
 fmod EQL is
-  op _=_ : Universal Universal -> Bool [comm poly(1 2) prec 55] .
+  op _=_ : Universal Universal -> Bool [comm poly(1 2) prec 54] .
 
   eq (true = false) = false .
   eq (B:Bool = B:Bool) = true .

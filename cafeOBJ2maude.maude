@@ -4887,6 +4887,7 @@ the \verb"maps2maps" function shown above to the body:
                  then applyImp(P, Q)
                  else applyImp(P, Q, SB)
                  fi /\
+      B' := P == P' /\
       QIL := if SB == none
              then '\t ':imp ' '`[ Q '`] ' '. '\n '\n
              else '\t ':imp ' '`[ Q '`] ' 'by ' '`{ printSub(SB) '`} '\n '\n
@@ -4921,7 +4922,8 @@ the \verb"maps2maps" function shown above to the body:
       ((T2 == 'true.Bool) or (T2 == 'false.Bool)) /\
       not isEquality(T1) /\
       T3 := applyCS(T1, CS) /\
-      T4 := applyCS(T2, CS) /\
+      T4 := applyCS(T2, CS)/\
+      not eqDefinedFor(M'', T3) /\
       T5 := getTerm(metaReduce(M'', '_=_[T3, T4])) /\
       T5 =/= 'true.Bool /\
       T5 =/= 'false.Bool .
@@ -4936,11 +4938,14 @@ the \verb"maps2maps" function shown above to the body:
       eq T3 = T'' [AtS] . EqS := getEqs(M') /\
       isExec(AtS) /\
       eq T4 = T''' [AtS'] . EqS' := getEqs(M2) /\
+      isExec(AtS') /\
       T5 := applyCS(T3, CS) /\
       T5 := applyCS(T4, CS') /\
       T'' =/= T''' /\
-      isExec(AtS') /\
+      isCtor(M, T'') /\
+      isCtor(M1, T''') /\
       not isEquality(T3) /\
+      not isEquality(T4) /\
       ((T'' =/= 'true.Bool) and (T'' =/= 'false.Bool)) /\
       ((T''' =/= 'true.Bool) and (T''' =/= 'false.Bool)) /\
       not eqDefinedFor(M'', T5) .
@@ -4956,6 +4961,15 @@ the \verb"maps2maps" function shown above to the body:
    if eq T = T' [AtS] . EqS := getEqs(M) .
   eq eqDefinedFor(M, T) = false [owise] .
 
+  op eqDefinedFor : Module Term Term -> Bool .
+  ceq eqDefinedFor(M, T, T') = true
+   if eq T = T' [AtS] . EqS := getEqs(M) .
+  ceq eqDefinedFor(M, T, T') = true
+   if eq '_=_[T, T'] = T'' [AtS] . EqS := getEqs(M) .
+  ceq eqDefinedFor(M, T, 'false.Bool) = true
+   if eqDefinedFor(M, T, 'true.Bool) .
+  eq eqDefinedFor(M, T, T') = false [owise] .
+
   op ctfRequired : ScoreInfoSet Module Term -> EquationSet .
   ceq ctfRequired(SIS, M, T) = $ctfRequired(SIS1, SIS2, M, T, 2)
    if [SIS1, SIS2] := divideByExecEqs(SIS, 1) .
@@ -4966,14 +4980,13 @@ the \verb"maps2maps" function shown above to the body:
       *** Consistent premises
       consistentPremises(M', M'', CS) /\
       eq T1 = T2 [AtS] . EqS := getEqs(M') /\
+      T'' := getTerm(metaReduce(M, T2)) /\
       isExec(AtS) /\
       T3 := applyCS(T1, CS) /\
       T4 := applyCS(T2, CS) /\
-      T5 := getTerm(metaReduce(M'', '_=_[T3, T4])) /\
-      T5 =/= 'true.Bool /\
-      T5 =/= 'false.Bool /\
-      Eq := ctfEq(T3, T4) /\
-      not eqDefinedFor(M'', T3) .
+      not eqDefinedFor(M'', T3, T4) /\
+      not eqDefinedFor(M'', T3) /\
+      Eq := ctfEq(T3, T4) .
   eq $ctfRequired(SIS1, SIS2, M, T, N) =
       if SIS2 == noScoreInfo
       then none
@@ -4983,7 +4996,10 @@ the \verb"maps2maps" function shown above to the body:
 
   op ctfEq : Term Term -> Equation .
   eq ctfEq('_=_[T1, T2], 'false.Bool) = eq T1 = T2 [none] . .
-  eq ctfEq(T1, T2) = eq T1 = T2 [none] . [owise] .
+  eq ctfEq(T1, T2) = if T2 == 'false.Bool
+                     then eq T1 = 'true.Bool [none] .
+                     else eq T1 = T2 [none] .
+                     fi [owise] .
 
   op isExec : AttrSet -> Bool .
   eq isExec(nonexec AtS) = false .
@@ -5060,12 +5076,11 @@ the \verb"maps2maps" function shown above to the body:
   eq samePremises(M, M', M'', CS) = samePremises(M, getEqs(M'), M'', CS) .
 
   op samePremises : Module EquationSet Module ConsSub -> Bool .
-  ceq samePremises(M, eq T = T' [AtS] . EqS, M', CS) = (T3 == 'true.Bool) and
+  ceq samePremises(M, eq T = T' [AtS] . EqS, M', CS) = eqDefinedFor(M', T1, T2) and
                                                        samePremises(M, EqS, M', CS)
    if isExec(AtS) /\
       T1 := applyCS(T, CS) /\
-      T2 := applyCS(T', CS) /\
-      T3 := getTerm(metaReduce(M', '_=_[T1, T2])) .
+      T2 := applyCS(T', CS) .
   eq samePremises(M, EqS, M', CS) = true [owise] .
 
   *** Flat module

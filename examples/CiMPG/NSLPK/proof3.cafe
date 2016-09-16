@@ -1,0 +1,402 @@
+--> I) Base case
+open NSLPK .
+-- fresh constants
+  ops n1 n2 : -> Nonce .
+  op q1 : -> Prin .
+-- check
+  red inv3(init,n1,n2,q1) .
+close
+
+--> II) Induction cases
+--> 1. send1(s,p1,p2)
+--> p2 = intr
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+-- assumptions
+  eq p2 = intr .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(send1(s,p1,p2),n1,n2,q1) .
+close
+--> ~(p2 = intr)
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+-- assumptions
+  eq (p2 = intr) = false .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(send1(s,p1,p2),n1,n2,q1) .
+close
+
+--> 2. send2(s,p1,p2,m)
+--> enc1(p1,m,p2) \in nw(s), q1 = p2, n1 = m, n2 = n(p1,p2,rand(s)), p1 = intr
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  op m : -> Nonce .
+-- assumptions
+  eq enc1(p1,m,p2) \in nw(s) = true .
+  eq q1 = p2 .
+  eq n1 = m .
+  eq n2 = n(p1,p2,rand(s)) .
+  eq p1 = intr .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(send2(s,p1,p2,m),n1,n2,q1) .
+close
+--> enc1(p1,m,p2) \in nw(s), q1 = p2, n1 = m, n2 = n(p1,p2,rand(s)), ~(p1 = intr), intr = p2
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  op m : -> Nonce .
+-- assumptions
+  eq enc1(p1,m,p2) \in nw(s) = true .
+  eq q1 = p2 .
+  eq n1 = m .
+  eq n2 = n(p1,p2,rand(s)) .
+  eq (p1 = intr) = false .
+  eq intr = p2 .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(send2(s,p1,p2,m),n1,n2,q1) .
+close
+--> enc1(p1,m,p2) \in nw(s), q1 = p2, n1 = m, n2 = n(p1,p2,rand(s)), ~(p1 = intr), ~(intr = p2)
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  op m : -> Nonce .
+-- assumptions
+  eq enc1(p1,m,p2) \in nw(s) = true .
+  eq q1 = p2 .
+  eq n1 = m .
+  eq n2 = n(p1,p2,rand(s)) .
+  eq (p1 = intr) = false .
+  eq (intr = p2) = false .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(send2(s,p1,p2,m),n1,n2,q1) .
+close
+--> enc1(p1,m,p2) \in nw(s), q1 = p2, n1 = m, ~(n2 = n(p1,p2,rand(s))), intr = p2
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  op m : -> Nonce .
+-- assumptions
+  eq enc1(p1,m,p2) \in nw(s) = true .
+  eq q1 = p2 .
+  eq n1 = m .
+  eq (n2 = n(p1,p2,rand(s))) = false .
+  eq intr = p2 .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(send2(s,p1,p2,m),n1,n2,q1) .
+close
+--> enc1(p1,m,p2) \in nw(s), q1 = p2, n1 = m, ~(n2 = n(p1,p2,rand(s))), ~(intr = p2)
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  op m : -> Nonce .
+-- assumptions
+  eq enc1(p1,m,p2) \in nw(s) = true .
+  eq q1 = p2 .
+  eq n1 = m .
+  eq (n2 = n(p1,p2,rand(s))) = false .
+  eq (intr = p2) = false .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(send2(s,p1,p2,m),n1,n2,q1) .
+close
+--> enc1(p1,m,p2) \in nw(s), q1 = p2, ~(n1 = m), intr = p2
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  op m : -> Nonce .
+-- assumptions
+  eq enc1(p1,m,p2) \in nw(s) = true .
+  eq q1 = p2 .
+  eq (n1 = m) = false .
+  eq intr = p2 .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(send2(s,p1,p2,m),n1,n2,q1) .
+close
+--> enc1(p1,m,p2) \in nw(s), q1 = p2, ~(n1 = m), ~(intr = p2)
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  op m : -> Nonce .
+-- assumptions
+  eq enc1(p1,m,p2) \in nw(s) = true .
+  eq q1 = p2 .
+  eq (n1 = m) = false .
+  eq (intr = p2) = false .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(send2(s,p1,p2,m),n1,n2,q1) .
+close
+--> enc1(p1,m,p2) \in nw(s), ~(q1 = p2), intr = p2
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  op m : -> Nonce .
+-- assumptions
+  eq enc1(p1,m,p2) \in nw(s) = true .
+  eq (q1 = p2) = false .
+  eq intr = p2 .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(send2(s,p1,p2,m),n1,n2,q1) .
+close
+--> enc1(p1,m,p2) \in nw(s), ~(q1 = p2), ~(intr = p2)
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  op m : -> Nonce .
+-- assumptions
+  eq enc1(p1,m,p2) \in nw(s) = true .
+  eq (q1 = p2) = false .
+  eq (intr = p2) = false .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(send2(s,p1,p2,m),n1,n2,q1) .
+close
+--> ~(enc1(p1,m,p2) \in nw(s))
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  op m : -> Nonce .
+-- assumptions
+  eq enc1(p1,m,p2) \in nw(s) = false .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(send2(s,p1,p2,m),n1,n2,q1) .
+close
+
+--> 3. send3(s,p1,p2,m1,m2)
+--> enc2(p1,m1,m2,p2) \in nw(s), enc1(p2,m1,p1) \in nw(s), intr = p2
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  ops m1 m2 : -> Nonce .
+-- assumptions
+  eq enc2(p1,m1,m2,p2) \in nw(s) = true .
+  eq enc1(p2,m1,p1) \in nw(s) = true .
+  eq intr = p2 .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(send3(s,p1,p2,m1,m2),n1,n2,q1) .
+close
+--> enc2(p1,m1,m2,p2) \in nw(s), enc1(p2,m1,p1) \in nw(s), ~(intr = p2)
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  ops m1 m2 : -> Nonce .
+-- assumptions
+  eq enc2(p1,m1,m2,p2) \in nw(s) = true .
+  eq enc1(p2,m1,p1) \in nw(s) = true .
+  eq (intr = p2) = false .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(send3(s,p1,p2,m1,m2),n1,n2,q1) .
+close
+--> enc2(p1,m1,m2,p2) \in nw(s), ~enc1(p2,m1,p1) \in nw(s)
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  ops m1 m2 : -> Nonce .
+-- assumptions
+  eq enc2(p1,m1,m2,p2) \in nw(s) = true .
+  eq enc1(p2,m1,p1) \in nw(s) = false .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(send3(s,p1,p2,m1,m2),n1,n2,q1) .
+close
+--> ~enc2(p1,m1,m2,p2) \in nw(s)
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  ops m1 m2 : -> Nonce .
+-- assumptions
+  eq enc2(p1,m1,m2,p2) \in nw(s) = false .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(send3(s,p1,p2,m1,m2),n1,n2,q1) .
+close
+
+--> 4. fake1(s,p1,p2,m)
+--> m \in nonces(s)
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  op m : -> Nonce .
+-- assumptions
+  eq m \in nonces(s) = true .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(fake1(s,p1,p2,m),n1,n2,q1) .
+close
+--> ~m \in nonces(s)
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  op m : -> Nonce .
+-- assumptions
+  eq m \in nonces(s) = false .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(fake1(s,p1,p2,m),n1,n2,q1) .
+close
+
+--> 5. fake2(s,p1,p1,m1,m2)
+--> m1 \in nonces(s), m2 \in nonces(s), q1 = p1, n1 = m1, n2 = m2, p2 = intr
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  ops m1 m2 : -> Nonce .
+-- assumptions
+  eq m1 \in nonces(s) = true .
+  eq m2 \in nonces(s) = true .
+  eq q1 = p1 .
+  eq n1 = m1 .
+  eq n2 = m2 .
+  eq p2 = intr .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(fake2(s,p1,p2,m1,m2),n1,n2,q1) .
+close
+--> m1 \in nonces(s), m2 \in nonces(s), q1 = p1, n1 = m1, n2 = m2, ~(p2 = intr)
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  ops m1 m2 : -> Nonce .
+-- assumptions
+  eq m1 \in nonces(s) = true .
+  eq m2 \in nonces(s) = true .
+  eq q1 = p1 .
+  eq n1 = m1 .
+  eq n2 = m2 .
+  eq (p2 = intr) = false .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(fake2(s,p1,p2,m1,m2),n1,n2,q1) .
+close
+--> m1 \in nonces(s), m2 \in nonces(s), q1 = p1, n1 = m1, ~(n2 = m2)
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  ops m1 m2 : -> Nonce .
+-- assumptions
+  eq m1 \in nonces(s) = true .
+  eq m2 \in nonces(s) = true .
+  eq q1 = p1 .
+  eq n1 = m1 .
+  eq (n2 = m2) = false .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(fake2(s,p1,p2,m1,m2),n1,n2,q1) .
+close
+--> m1 \in nonces(s), m2 \in nonces(s), q1 = p1, ~(n1 = m1)
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  ops m1 m2 : -> Nonce .
+-- assumptions
+  eq m1 \in nonces(s) = true .
+  eq m2 \in nonces(s) = true .
+  eq q1 = p1 .
+  eq (n1 = m1) = false .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(fake2(s,p1,p2,m1,m2),n1,n2,q1) .
+close
+--> m1 \in nonces(s), m2 \in nonces(s), ~(q1 = p1)
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  ops m1 m2 : -> Nonce .
+-- assumptions
+  eq m1 \in nonces(s) = true .
+  eq m2 \in nonces(s) = true .
+  eq (q1 = p1) = false .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(fake2(s,p1,p2,m1,m2),n1,n2,q1) .
+close
+--> m1 \in nonces(s), ~m2 \in nonces(s)
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  ops m1 m2 : -> Nonce .
+-- assumptions
+  eq m1 \in nonces(s) = true .
+  eq m2 \in nonces(s) = false .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(fake2(s,p1,p2,m1,m2),n1,n2,q1) .
+close
+--> ~m1 \in nonces(s)
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 p2 q1 : -> Prin .
+  ops m1 m2 : -> Nonce .
+-- assumptions
+  eq m1 \in nonces(s) = false .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(fake2(s,p1,p2,m1,m2),n1,n2,q1) .
+close
+
+--> 6. fake3(s,p1,m)
+--> m \in nonces(s)
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 q1 : -> Prin .
+  op m : -> Nonce .
+-- assumptions
+  eq m \in nonces(s) = true .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(fake3(s,p1,m),n1,n2,q1) .
+close
+--> ~m \in nonces(s)
+open NSLPK .
+-- fresh constants
+  op s : -> Sys .
+  ops n1 n2 : -> Nonce .
+  ops p1 q1 : -> Prin .
+  op m : -> Nonce .
+-- assumptions
+  eq m \in nonces(s) = false .
+-- check
+  red inv3(s,n1,n2,q1) implies inv3(fake3(s,p1,m),n1,n2,q1) .
+close
+
+--> Q.E.D.

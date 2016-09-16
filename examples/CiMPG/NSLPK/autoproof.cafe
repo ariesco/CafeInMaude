@@ -1,0 +1,572 @@
+open NSLPK .
+	:goal{
+		eq [nslpk :nonexec] : inv1(S:Sys,N:Nonce) = true .
+		eq [nslpk1 :nonexec] : inv2(S:Sys,N:Nonce,P:Prin) = true .
+		eq [nslpk2 :nonexec] : inv3(S:Sys,N:Nonce,N0:Nonce,P:Prin) = true .
+	}
+
+	:ind on (S:Sys)
+
+	:apply(si)
+
+	:apply(tc)
+
+	:def csb1 = :ctf [N#Nonce \in nonces(S#Sys) .]
+
+	:apply(csb1)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:def csb2 = :ctf [N#Nonce \in nonces(S#Sys) .]
+
+	:apply(csb2)
+
+	:def csb3 = :ctf {eq P@Prin  = P0#Prin .}
+
+	:apply(csb3)
+
+	:def csb4 = :ctf {eq N@Nonce  = N#Nonce .}
+
+	:apply(csb4)
+
+	:def csb5 = :ctf {eq P#Prin  = intr .}
+
+	:apply(csb5)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:def csb6 = :ctf [N#Nonce \in nonces(S#Sys) .]
+
+	:apply(csb6)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:apply(tc)
+
+	:def csb7 = :ctf [N#Nonce \in nonces(S#Sys) .]
+
+	:apply(csb7)
+
+	:def csb8 = :ctf [N0#Nonce \in nonces(S#Sys) .]
+
+	:apply(csb8)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:def csb9 = :ctf [N#Nonce \in nonces(S#Sys) .]
+
+	:apply(csb9)
+
+	:def csb10 = :ctf [N0#Nonce \in nonces(S#Sys) .]
+
+	:apply(csb10)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:def csb11 = :ctf [N#Nonce \in nonces(S#Sys) .]
+
+	:apply(csb11)
+
+	:def csb12 = :ctf [N0#Nonce \in nonces(S#Sys) .]
+
+	:apply(csb12)
+
+	:def csb13 = :ctf {eq P@Prin  = P#Prin .}
+
+	:apply(csb13)
+
+	:def csb14 = :ctf {eq N@Nonce  = N#Nonce .}
+
+	:apply(csb14)
+
+	:def csb15 = :ctf {eq N0@Nonce  = N0#Nonce .}
+
+	:apply(csb15)
+
+	:def csb16 = :ctf {eq P0#Prin  = intr .}
+
+	:apply(csb16)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:apply(tc)
+
+	:def csb17 = :ctf [N#Nonce \in nonces(S#Sys) .]
+
+	:apply(csb17)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:def csb18 = :ctf [N#Nonce \in nonces(S#Sys) .]
+
+	:apply(csb18)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:def csb19 = :ctf [N#Nonce \in nonces(S#Sys) .]
+
+	:apply(csb19)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:apply(tc)
+
+	:apply (rd)
+
+	:apply (rd)
+
+	:apply (rd)
+
+	:apply(tc)
+
+	:def csb20 = :ctf {eq P0#Prin  = intr .}
+
+	:apply(csb20)
+
+	:def csb21 = :ctf {eq N@Nonce  = n(P#Prin,intr,rand(S#Sys)).}
+
+	:apply(csb21)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:def csb22 = :ctf {eq P0#Prin  = intr .}
+
+	:apply(csb22)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:def csb23 = :ctf {eq N@Nonce  = n(intr,P0#Prin,rand(S#Sys)).}
+
+	:apply(csb23)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:def csb24 = :ctf {eq N@Nonce  = n(P#Prin,P0#Prin,rand(S#Sys)).}
+
+	:apply(csb24)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:def csb25 = :ctf {eq P0#Prin  = intr .}
+
+	:apply(csb25)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:apply(tc)
+
+	:def csb26 = :ctf [enc1(P#Prin,N#Nonce,P0#Prin)\in nw(S#Sys) .]
+
+	:apply(csb26)
+
+	:def csb27 = :ctf {eq intr  = P0#Prin .}
+
+	:apply(csb27)
+
+	:def csb28 = :ctf {eq N@Nonce  = n(P#Prin,P0#Prin,rand(S#Sys)).}
+
+	:apply(csb28)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:def csb29 = :ctf {eq N@Nonce  = N#Nonce .}
+
+	:apply(csb29)
+
+	:def csb30 = :ctf {eq p1(N#Nonce) = P0#Prin .}
+
+	:apply(csb30)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:def csb31 = :ctf {eq p2(N#Nonce) = P0#Prin .}
+
+	:apply(csb31)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P#Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:def csb32 = :ctf [enc1(P#Prin,N#Nonce,P0#Prin)\in nw(S#Sys) .]
+
+	:apply(csb32)
+
+	:def csb33 = :ctf {eq intr  = P0#Prin .}
+
+	:apply(csb33)
+
+	:def csb34 = :ctf {eq N@Nonce  = n(P#Prin,P0#Prin,rand(S#Sys)).}
+
+	:apply(csb34)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:def csb35 = :ctf {eq N@Nonce  = N#Nonce .}
+
+	:apply(csb35)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:def csb36 = :ctf [enc1(P#Prin,N#Nonce,P0#Prin)\in nw(S#Sys) .]
+
+	:apply(csb36)
+
+	:def csb37 = :ctf {eq intr  = P0#Prin .}
+
+	:apply(csb37)
+
+	:def csb38 = :ctf {eq P@Prin  = P0#Prin .}
+
+	:apply(csb38)
+
+	:def csb39 = :ctf {eq N@Nonce  = N#Nonce .}
+
+	:apply(csb39)
+
+	:def csb40 = :ctf {eq N0@Nonce  = n(P#Prin,P0#Prin,rand(S#Sys)).}
+
+	:apply(csb40)
+
+	:def csb41 = :ctf {eq P#Prin  = intr .}
+
+	:apply(csb41)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:def csb42 = :ctf {eq P@Prin  = P0#Prin .}
+
+	:apply(csb42)
+
+	:def csb43 = :ctf {eq N@Nonce  = N#Nonce .}
+
+	:apply(csb43)
+
+	:def csb44 = :ctf {eq N0@Nonce  = n(P#Prin,P0#Prin,rand(S#Sys)).}
+
+	:apply(csb44)
+
+	:def csb45 = :ctf {eq P#Prin  = intr .}
+
+	:apply(csb45)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:apply(tc)
+
+	:def csb46 = :ctf [enc1(P0#Prin,N#Nonce,P#Prin)\in nw(S#Sys) .]
+
+	:apply(csb46)
+
+	:def csb47 = :ctf [enc2(P#Prin,N#Nonce,N0#Nonce,P0#Prin)\in nw(S#Sys) .]
+
+	:apply(csb47)
+
+	:def csb48 = :ctf {eq intr  = P0#Prin .}
+
+	:apply(csb48)
+
+	:def csb49 = :ctf {eq N@Nonce  = N0#Nonce .}
+
+	:apply(csb49)
+
+	:def csb50 = :ctf {eq p1(N0#Nonce) = P0#Prin .}
+
+	:apply(csb50)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:def csb51 = :ctf {eq p2(N0#Nonce) = P0#Prin .}
+
+	:apply(csb51)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:imp [nslpk2] by {N0:Nonce <- N0#Nonce ; N:Nonce <- N#Nonce ; P:Prin <- P#Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:imp [nslpk] by {N:Nonce <- N@Nonce ;}
+
+	:apply (rd)
+
+	:def csb52 = :ctf [enc2(P#Prin,N#Nonce,N0#Nonce,P0#Prin)\in nw(S#Sys) .]
+
+	:apply(csb52)
+
+	:def csb53 = :ctf [enc1(P0#Prin,N#Nonce,P#Prin)\in nw(S#Sys) .]
+
+	:apply(csb53)
+
+	:def csb54 = :ctf {eq intr  = P0#Prin .}
+
+	:apply(csb54)
+
+	:def csb55 = :ctf {eq N@Nonce  = N0#Nonce .}
+
+	:apply(csb55)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk1] by {N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:def csb56 = :ctf [enc2(P#Prin,N#Nonce,N0#Nonce,P0#Prin)\in nw(S#Sys) .]
+
+	:apply(csb56)
+
+	:def csb57 = :ctf [enc1(P0#Prin,N#Nonce,P#Prin)\in nw(S#Sys) .]
+
+	:apply(csb57)
+
+	:def csb58 = :ctf {eq intr  = P0#Prin .}
+
+	:apply(csb58)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+	:imp [nslpk2] by {N0:Nonce <- N0@Nonce ; N:Nonce <- N@Nonce ; P:Prin <- P@Prin ;}
+
+	:apply (rd)
+
+close
