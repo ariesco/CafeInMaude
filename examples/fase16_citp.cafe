@@ -1,0 +1,25 @@
+mod! CITP-LIST {
+  pr(NAT)
+  [List]
+
+  op nil : -> List {constr}
+  op __ : Nat List -> List {constr}
+
+  var  N : Nat
+  vars L L' : List
+
+  op _@_ : List List -> List
+  eq [c1] : nil @ L = L {metadata "CA-1"} .
+  eq [c2] : (N L) @ L' = N (L @ L') {metadata "CA-2"} .
+}
+
+
+
+eof
+
+(goal CITP-LIST |- eq L1:List @ (L2:List @ L3:List) = (L1:List @ L2:List) @ L3:List ;)
+
+(set ind on L1:List .)
+
+(apply SI TC CA .)
+

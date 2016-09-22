@@ -35,15 +35,6 @@ mod! SET {
   eq N in S = false {owise} .
 }
 
-mod! PROP-LIST {
-  pr(LIST)
-
-  var L : List
-
-  op prop : List -> Bool .
-  eq [p1] : prop(L) = reverse(reverse(L)) == L .
-}
-
 mod! MEP {
  pr(LIST)
  pr(SET)
@@ -92,37 +83,12 @@ mod! MEP-CHECK {
 open MEP-CHECK .
  red modelCheck(init, [] atMostOneInCS) .
  red modelCheck(init, [] (waiting(1) -> <> cs(1))) .
+ red modelCheck(init, <> cs(1)) .
 close
 
-mod! LIST-PROP {
-  pr(NAT)
-  [List]
-
-  op nil : -> List {constr}
-  op __ : Nat List -> List {constr}
-
-  var  N : Nat
-  vars L L' : List
-
-  op _@_ : List List -> List
-  eq [c1] : nil @ L = L {metadata "CA-1"} .
-  eq [c2] : (N L) @ L' = N (L @ L') {metadata "CA-2"} .
-}
-
-
-
 eof
 
-(goal LIST-PROP |- eq L1:List @ (L2:List @ L3:List) = (L1:List @ L2:List) @ L3:List ;)
+(test in LIST : reverse .)
 
-(set ind on L1:List .)
+(invoke debugger with user test case 1 .)
 
-(apply SI TC CA .)
-
-eof
-
-Maude> (red modelCheck(init, [] atMostOneInCS) .)
-reduce in MEP-CHECK :
-  modelCheck(init,[]~ twoinSC)
-result Bool :
-  true
