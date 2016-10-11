@@ -92,7 +92,7 @@ again until the rest of goals has been dealt with.
 * **:show proof**. This command displays the current goals (that is, the leaves of
 the proof tree). A goal is displayed with * if it has already been proved and with
 **>** if it is the current one.
-* **desc .**. This command displays de current goal.
+* **desc .**. This command displays the current goal.
 * **:desc proof**. This command depicts the complete proof tree.
 A goal is displayed with * if it has already been proved and with
 **>** if it is the current one.
