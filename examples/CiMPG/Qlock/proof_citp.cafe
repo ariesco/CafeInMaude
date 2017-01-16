@@ -1,4 +1,4 @@
-in qlock
+
 open QLOCK .
 
 :goal {
@@ -10,6 +10,8 @@ eq [inv2 :nonexec] : inv2(S:Sys,I:Pid) = true .
 
 :apply (si)
 
+:postpone .
+
 -- init
 :apply (tc)
 
@@ -17,6 +19,46 @@ eq [inv2 :nonexec] : inv2(S:Sys,I:Pid) = true .
 :apply (rd)
 -- inv2
 :apply (rd)
+
+-- try(S#Sys, S#Pid)
+:apply (tc)
+
+-- inv1
+:imp [inv1] by {I:Pid <- I@Pid ; J:Pid <- J@Pid ;}
+:def csb6 = :ctf{eq pc(S#Sys, P#Pid) = ws .}
+
+:apply(csb6)
+:def csb7 = :ctf{eq top(queue(S#Sys)) = P#Pid .}
+:apply(csb7)
+:def csb8 = :ctf{eq I@Pid = P#Pid .}
+:def csb9 = :ctf{eq J@Pid = P#Pid .}
+:apply(csb8 csb9)
+:apply(rd)
+:def csb10 = :ctf{ eq pc(S#Sys, J@Pid) = cs . }
+:apply(csb10)
+:imp [inv2] by {I:Pid <- J@Pid ;}
+:apply(rd)
+:apply(rd)
+:def csb11 = :ctf{ eq pc(S#Sys, I@Pid) = cs . }
+:apply(csb11)
+:imp [inv2] by {I:Pid <- I@Pid ;}
+:apply(rd)
+:apply(rd)
+:apply(rd)
+:apply(rd)
+:apply(rd)
+-- inv2
+:imp [inv2] by {I:Pid <- I@Pid ;}
+:def csb12 = :ctf{eq pc(S#Sys, P#Pid) = ws .}
+:apply(csb12)
+:def csb13 = :ctf{eq top(queue(S#Sys)) = P#Pid .}
+:apply(csb13)
+:def csb14 = :ctf{eq I@Pid = P#Pid .}
+:apply(csb14)
+:apply(rd)
+:apply(rd)
+:apply(rd)
+:apply(rd)
 
 -- want(S#Sys, S#Pid), J:Pid)
 :apply (tc)
@@ -44,44 +86,6 @@ eq [inv2 :nonexec] : inv2(S:Sys,I:Pid) = true .
 :apply (rd)
 :apply (rd)
 :apply (rd)
-
--- try(S#Sys, S#Pid)
-:apply (tc)
--- inv1
-:imp [inv1] by {I:Pid <- I@Pid ; J:Pid <- J@Pid ;}
-:def csb6 = :ctf{eq pc(S#Sys, S#Pid) = ws .}
-:apply(csb6)
-:def csb7 = :ctf{eq top(queue(S#Sys)) = S#Pid .}
-:apply(csb7)
-:def csb8 = :ctf{eq I@Pid = S#Pid .}
-:def csb9 = :ctf{eq J@Pid = S#Pid .}
-:apply(csb8 csb9)
-:apply(rd)
-:def csb10 = :ctf{ eq pc(S#Sys, J@Pid) = cs . }
-:apply(csb10)
-:imp [inv2] by {I:Pid <- J@Pid ;}
-:apply(rd)
-:apply(rd)
-:def csb11 = :ctf{ eq pc(S#Sys, I@Pid) = cs . }
-:apply(csb11)
-:imp [inv2] by {I:Pid <- I@Pid ;}
-:apply(rd)
-:apply(rd)
-:apply(rd)
-:apply(rd)
-:apply(rd)
--- inv2
-:imp [inv2] by {I:Pid <- I@Pid ;}
-:def csb12 = :ctf{eq pc(S#Sys, S#Pid) = ws .}
-:apply(csb12)
-:def csb13 = :ctf{eq top(queue(S#Sys)) = S#Pid .}
-:apply(csb13)
-:def csb14 = :ctf{eq I@Pid = S#Pid .}
-:apply(csb14)
-:apply(rd)
-:apply(rd)
-:apply(rd)
-:apply(rd)
 
 -- exit(S#Sys, S#Pid)
 :apply (tc)

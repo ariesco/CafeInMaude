@@ -1,0 +1,73 @@
+--
+-- A mutual exclusion protocol with test&set
+--
+-- Status lock = open;
+-- ...
+-- Loop: "Remainder Section"
+--  rs: repeat while test&set(lock) = close;
+--    "Critical Section"
+--  cs: lock := open;
+--
+-- where test&set(x) atomically does the following:
+-- x is set to close and the old value of x is returned.
+--
+-- Initially, lock is open and each process is in
+-- Remainder Section (or at label rs).
+--
+
+mod! LABEL {
+  [Label]
+  ops rs cs : -> Label {constr}
+  eq (rs = cs) = false .
+}
+
+mod* PID {
+  [Pid]
+}
+
+mod! STATUS {
+  [Status]
+  ops open close : -> Status {constr}
+  eq (open = close) = false .
+}
+
+mod* TAS {
+  pr(LABEL + PID + STATUS)
+  [Sys]
+-- any initial state
+  op init : -> Sys {constr}
+-- transitions
+  op enter : Sys Pid -> Sys {constr}
+  op leave : Sys Pid -> Sys {constr}
+-- observations
+  op pc   : Sys Pid -> Label
+  op lock : Sys -> Status
+-- CafeOBJ variables
+  var S : Sys
+  vars I J : Pid
+-- for any initial state
+  eq pc(init,I)  = rs .
+  eq lock(init) = open .
+-- enter
+  op c-enter : Sys Pid -> Bool
+  eq c-enter(S,I) = (pc(S,I) = rs and lock(S) = open) .
+  --
+  ceq pc(enter(S,I),J) = (if I = J then cs else pc(S,J) fi) if c-enter(S,I) .
+  ceq lock(enter(S,I)) = close                              if c-enter(S,I) .
+  ceq enter(S,I)       = S                                  if not c-enter(S,I) .
+-- leave
+  op c-leave : Sys Pid -> Bool
+  eq c-leave(S,I) = (pc(S,I) = cs) .
+  --
+  ceq pc(leave(S,I),J) = (if I = J then rs else pc(S,J) fi) if c-leave(S,I) .
+  ceq lock(leave(S,I)) = open                               if c-leave(S,I) .
+  ceq leave(S,I)       = S                                  if not c-leave(S,I) .
+--
+-- Properties to prove
+--
+  op inv1 : Sys Pid Pid -> Bool
+  op inv2 : Sys Pid -> Bool
+   eq inv1(S:Sys,I:Pid,J:Pid)
+     = ((pc(S,I) = cs and pc(S,J) = cs) implies I = J) .
+  eq inv2(S:Sys,I:Pid) = (pc(S,I) = cs implies lock(S) = close) .
+}

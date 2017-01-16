@@ -1,0 +1,206 @@
+-- init
+open CLOUD .
+  :id(cloud)
+
+  ops i k : -> Client .
+  red inv5(init,i) .
+close
+
+-- modval
+open CLOUD .
+  :id(cloud)
+
+  op s : -> Sys .
+  ops i j k : -> Client .
+  eq [inv1 :nonexec] : inv1(s,K:Client) = true .
+  eq [inv2 :nonexec] : inv2(s,K:Client) = true .
+  eq [inv3 :nonexec] : inv3(s,K1:Client,K2:Client) = true .
+  eq [inv4 :nonexec] : inv4(s,K1:Client,K2:Client) = true .
+  eq [inv5 :nonexec] : inv5(s,K1:Client) = true .
+  eq [inv6 :nonexec] : inv6(s,K1:Client) = true .
+  eq [inv7 :nonexec] : inv7(s,K1:Client,K2:Client) = true .
+  eq statusp(s,j) = idlep .
+  red inv5(s,i) implies inv5(modval(s,j),i) .
+close
+open CLOUD .
+  :id(cloud)
+
+  op s : -> Sys .
+  ops i j k : -> Client .
+  eq [inv1 :nonexec] : inv1(s,K:Client) = true .
+  eq [inv2 :nonexec] : inv2(s,K:Client) = true .
+  eq [inv3 :nonexec] : inv3(s,K1:Client,K2:Client) = true .
+  eq [inv4 :nonexec] : inv4(s,K1:Client,K2:Client) = true .
+  eq [inv5 :nonexec] : inv5(s,K1:Client) = true .
+  eq [inv6 :nonexec] : inv6(s,K1:Client) = true .
+  eq [inv7 :nonexec] : inv7(s,K1:Client,K2:Client) = true .
+  eq (statusp(s,j) = idlep) = false .
+  red inv5(s,i) implies inv5(modval(s,j),i) .
+close
+
+-- getval
+open CLOUD .
+  :id(cloud)
+
+  op s : -> Sys .
+  ops i j k : -> Client .
+  eq [inv1 :nonexec] : inv1(s,K:Client) = true .
+  eq [inv2 :nonexec] : inv2(s,K:Client) = true .
+  eq [inv3 :nonexec] : inv3(s,K1:Client,K2:Client) = true .
+  eq [inv4 :nonexec] : inv4(s,K1:Client,K2:Client) = true .
+  eq [inv5 :nonexec] : inv5(s,K1:Client) = true .
+  eq [inv6 :nonexec] : inv6(s,K1:Client) = true .
+  eq [inv7 :nonexec] : inv7(s,K1:Client,K2:Client) = true .
+  eq statusp(s,j) = idlep .
+  eq statusc(s) = idlec .
+  red inv5(s,i) implies inv5(getval(s,j),i) .
+close
+open CLOUD .
+  op s : -> Sys .
+  :id(cloud)
+
+  ops i j k : -> Client .
+  eq [inv1 :nonexec] : inv1(s,K:Client) = true .
+  eq [inv2 :nonexec] : inv2(s,K:Client) = true .
+  eq [inv3 :nonexec] : inv3(s,K1:Client,K2:Client) = true .
+  eq [inv4 :nonexec] : inv4(s,K1:Client,K2:Client) = true .
+  eq [inv5 :nonexec] : inv5(s,K1:Client) = true .
+  eq [inv6 :nonexec] : inv6(s,K1:Client) = true .
+  eq [inv7 :nonexec] : inv7(s,K1:Client,K2:Client) = true .
+  eq statusp(s,j) = idlep .
+  eq (statusc(s) = idlec) = false .
+  red inv5(s,i) implies inv5(getval(s,j),i) .
+close
+open CLOUD .
+  :id(cloud)
+
+  op s : -> Sys .
+  ops i j k : -> Client .
+  eq [inv1 :nonexec] : inv1(s,K:Client) = true .
+  eq [inv2 :nonexec] : inv2(s,K:Client) = true .
+  eq [inv3 :nonexec] : inv3(s,K1:Client,K2:Client) = true .
+  eq [inv4 :nonexec] : inv4(s,K1:Client,K2:Client) = true .
+  eq [inv5 :nonexec] : inv5(s,K1:Client) = true .
+  eq [inv6 :nonexec] : inv6(s,K1:Client) = true .
+  eq [inv7 :nonexec] : inv7(s,K1:Client,K2:Client) = true .
+  eq (statusp(s,j) = idlep) = false .
+  red inv5(s,i) implies inv5(getval(s,j),i) .
+close
+
+-- update
+open CLOUD .
+  :id(cloud)
+
+  op s : -> Sys .
+  ops i j k : -> Client .
+  eq [inv1 :nonexec] : inv1(s,K:Client) = true .
+  eq [inv2 :nonexec] : inv2(s,K:Client) = true .
+  eq [inv3 :nonexec] : inv3(s,K1:Client,K2:Client) = true .
+  eq [inv4 :nonexec] : inv4(s,K1:Client,K2:Client) = true .
+  eq [inv5 :nonexec] : inv5(s,K1:Client) = true .
+  eq [inv6 :nonexec] : inv6(s,K1:Client) = true .
+  eq [inv7 :nonexec] : inv7(s,K1:Client,K2:Client) = true .
+  eq statusc(s) = busy .
+  eq statusp(s,j) = gotval .
+  red inv5(s,i) implies inv5(update(s,j),i) .
+close
+open CLOUD .
+  :id(cloud)
+
+  op s : -> Sys .
+  ops i j k : -> Client .
+  eq [inv1 :nonexec] : inv1(s,K:Client) = true .
+  eq [inv2 :nonexec] : inv2(s,K:Client) = true .
+  eq [inv3 :nonexec] : inv3(s,K1:Client,K2:Client) = true .
+  eq [inv4 :nonexec] : inv4(s,K1:Client,K2:Client) = true .
+  eq [inv5 :nonexec] : inv5(s,K1:Client) = true .
+  eq [inv6 :nonexec] : inv6(s,K1:Client) = true .
+  eq [inv7 :nonexec] : inv7(s,K1:Client,K2:Client) = true .
+  eq statusc(s) = busy .
+  eq (statusp(s,j) = gotval) = false .
+  red inv5(s,i) implies inv5(update(s,j),i) .
+close
+open CLOUD .
+  :id(cloud)
+
+  op s : -> Sys .
+  ops i j k : -> Client .
+  eq [inv1 :nonexec] : inv1(s,K:Client) = true .
+  eq [inv2 :nonexec] : inv2(s,K:Client) = true .
+  eq [inv3 :nonexec] : inv3(s,K1:Client,K2:Client) = true .
+  eq [inv4 :nonexec] : inv4(s,K1:Client,K2:Client) = true .
+  eq [inv5 :nonexec] : inv5(s,K1:Client) = true .
+  eq [inv6 :nonexec] : inv6(s,K1:Client) = true .
+  eq [inv7 :nonexec] : inv7(s,K1:Client,K2:Client) = true .
+  eq (statusc(s) = busy) = false .
+  red inv5(s,i) implies inv5(update(s,j),i) .
+close
+
+-- gotoidle
+open CLOUD .
+  :id(cloud)
+
+  op s : -> Sys .
+  ops i j k : -> Client .
+  eq [inv1 :nonexec] : inv1(s,K:Client) = true .
+  eq [inv2 :nonexec] : inv2(s,K:Client) = true .
+  eq [inv3 :nonexec] : inv3(s,K1:Client,K2:Client) = true .
+  eq [inv4 :nonexec] : inv4(s,K1:Client,K2:Client) = true .
+  eq [inv5 :nonexec] : inv5(s,K1:Client) = true .
+  eq [inv6 :nonexec] : inv6(s,K1:Client) = true .
+  eq [inv7 :nonexec] : inv7(s,K1:Client,K2:Client) = true .
+  eq statusc(s) = busy .
+  eq statusp(s,j) = updated .
+  eq i = j .
+  red inv5(s,i) implies inv5(gotoidle(s,j),i) .
+close
+open CLOUD .
+  :id(cloud)
+
+  op s : -> Sys .
+  ops i j k : -> Client .
+  eq [inv1 :nonexec] : inv1(s,K:Client) = true .
+  eq [inv2 :nonexec] : inv2(s,K:Client) = true .
+  eq [inv3 :nonexec] : inv3(s,K1:Client,K2:Client) = true .
+  eq [inv4 :nonexec] : inv4(s,K1:Client,K2:Client) = true .
+  eq [inv5 :nonexec] : inv5(s,K1:Client) = true .
+  eq [inv6 :nonexec] : inv6(s,K1:Client) = true .
+  eq [inv7 :nonexec] : inv7(s,K1:Client,K2:Client) = true .
+  eq statusc(s) = busy .
+  eq statusp(s,j) = updated .
+  eq (i = j) = false .
+  red inv7(s,i,j) implies inv5(s,i) implies inv5(gotoidle(s,j),i) .
+close
+open CLOUD .
+  :id(cloud)
+
+  op s : -> Sys .
+  ops i j k : -> Client .
+  eq [inv1 :nonexec] : inv1(s,K:Client) = true .
+  eq [inv2 :nonexec] : inv2(s,K:Client) = true .
+  eq [inv3 :nonexec] : inv3(s,K1:Client,K2:Client) = true .
+  eq [inv4 :nonexec] : inv4(s,K1:Client,K2:Client) = true .
+  eq [inv5 :nonexec] : inv5(s,K1:Client) = true .
+  eq [inv6 :nonexec] : inv6(s,K1:Client) = true .
+  eq [inv7 :nonexec] : inv7(s,K1:Client,K2:Client) = true .
+  eq statusc(s) = busy .
+  eq (statusp(s,j) = updated) = false .
+  red inv5(s,i) implies inv5(gotoidle(s,j),i) .
+close
+open CLOUD .
+  :id(cloud)
+
+  op s : -> Sys .
+  ops i j k : -> Client .
+  eq [inv1 :nonexec] : inv1(s,K:Client) = true .
+  eq [inv2 :nonexec] : inv2(s,K:Client) = true .
+  eq [inv3 :nonexec] : inv3(s,K1:Client,K2:Client) = true .
+  eq [inv4 :nonexec] : inv4(s,K1:Client,K2:Client) = true .
+  eq [inv5 :nonexec] : inv5(s,K1:Client) = true .
+  eq [inv6 :nonexec] : inv6(s,K1:Client) = true .
+  eq [inv7 :nonexec] : inv7(s,K1:Client,K2:Client) = true .
+  eq (statusc(s) = busy) = false .
+  red inv5(s,i) implies inv5(gotoidle(s,j),i) .
+close
+
+-- QED

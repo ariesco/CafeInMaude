@@ -297,11 +297,6 @@ open QLOCK .
 -- |-
    red inv2(s,i) implies inv2(want(s,k),i) .
 close
-
-
-
-
-
 open QLOCK .
   :id(inv1)
 -- fresh constants
@@ -448,10 +443,6 @@ open QLOCK .
    red inv2(s,i) implies inv2(exit(s,k),i) .
 close
 --> Q.E.D
-
-
-
-
 
 open QLOCK .
   :proof(inv1)
