@@ -1,0 +1,25 @@
+#!/bin/sh
+declare -r TEMP=trans-temp-mod
+declare -r ALL=all-temp-mod.cafe
+declare -r CAFE2MAUDE=./cafeOBJ2maude.maude
+declare -r MAUDE=# Introduce Maude path
+declare -r PARSER=./parser.jar
+declare -r LOADTIME=# Introduce the time Full Maude requires to load
+rm -f $ALL
+rm -f $TEMP
+STARTTIME=$(gdate +%s%3N)
+for (( i=1; i<=$#; i++ ))
+do
+   eval arg=\$$i
+   java -jar $PARSER $arg $TEMP
+   cat $TEMP >> $ALL
+done
+echo "\nquit\n" >> $ALL
+ENDTIME1=$(gdate +%s%3N)
+$MAUDE full-maude.maude $CAFE2MAUDE $ALL
+ENDTIME2=$(gdate +%s%3N)
+echo "Java execution time $(($ENDTIME1 - $STARTTIME)) milliseconds."
+echo "Maude execution time $(($ENDTIME2 - ($ENDTIME1 + $LOADTIME))) milliseconds."
+echo "Total execution time $(($ENDTIME2 - ($STARTTIME + $LOADTIME))) milliseconds."
+rm -f $ALL
+rm -f $TEMP
