@@ -95,11 +95,14 @@ endfm
 fmod MACROS is
  pr META-LEVEL .
 
- sorts Macro Macros .
+ sorts Macro Macros MacroLabel .
  subsort Macro < Macros .
+
+ ops cvss cvvs cvsv cevss cevs cesv cesvs : -> MacroLabel [ctor] .
 
  op #_,_-_# : Module Qid Equation -> Macro [ctor] .
  op #_,_-_# : Module Qid Term -> Macro [ctor] .
+ op #_,_-_._# : Module Qid Term MacroLabel -> Macro [ctor] .
 
  op mtMacros : -> Macros [ctor] .
  op __ : Macros Macros -> Macros [ctor assoc comm id: mtMacros] .
@@ -689,6 +692,24 @@ declared or not:
   op :goal{_} : @CafeLDeclList@ -> @CafeInductiveComm@ [ctor] .
   op :def_=`:ctf{_} : @CafeToken@ @CafeEqDecl@ -> @CafeInductiveComm@ [ctor] .
   op :def_=`:ctf[_] : @CafeToken@ @CafeBubble@ -> @CafeInductiveComm@ [ctor] .
+  op :def_=`:cvss[_] : @CafeToken@ @CafeBubble@ -> @CafeInductiveComm@ [ctor] .
+  op :def_=`:cvvs[_] : @CafeToken@ @CafeBubble@ -> @CafeInductiveComm@ [ctor] .
+  op :def_=`:cvsv[_] : @CafeToken@ @CafeBubble@ -> @CafeInductiveComm@ [ctor] .
+  op :def_=`:cevss[_] : @CafeToken@ @CafeBubble@ -> @CafeInductiveComm@ [ctor] .
+  op :def_=`:cevs[_] : @CafeToken@ @CafeBubble@ -> @CafeInductiveComm@ [ctor] .
+  op :def_=`:cesv[_] : @CafeToken@ @CafeBubble@ -> @CafeInductiveComm@ [ctor] .
+  op :def_=`:cesvs[_] : @CafeToken@ @CafeBubble@ -> @CafeInductiveComm@ [ctor] .
+
+  ***(
+  :cs-vss: case splitting value (eq1) and seq seq (eq2)
+  :cs-vvs: case splitting value (eq1) and value seq (eq2)
+  :cs-vsv: case splitting value (eq1) and seq value (eq2)
+  :cs-evss: case splitting empty (eq1), value (eq2), and seq seq (eq3).
+  :cs-evs: case splitting empty (eq1) and value seq (eq2).
+  :cs-esv: case splitting empty (eq1) and seq value (eq2).
+  :cs-esvs: case splitting empty (eq1) and seq value seq (eq2).
+  )
+
   op :ind`on(_) : @CafeToken@ -> @CafeInductiveComm@ [ctor] .
   op :apply(_) : @NeCafeTokenList@ -> @CafeInductiveComm@ [ctor] .
   op :imp[_]. : @CafeToken@ -> @CafeInductiveComm@ [ctor] .
@@ -2998,6 +3019,27 @@ identifiers to extend the variable set with the variables defined on the fly in 
   ceq parseCafeDecl(':def_=`:ctf`[_`][T, T'], PU, U, VDS, PSM, TSM, DB) =
                                                                 < PDR, nil, none, DB >
    if PDR := < PU ; U ; VDS > .
+  ceq parseCafeDecl(':def_=`:cvss`[_`][T, T'], PU, U, VDS, PSM, TSM, DB) =
+                                                                < PDR, nil, none, DB >
+   if PDR := < PU ; U ; VDS > .
+  ceq parseCafeDecl(':def_=`:cvvs`[_`][T, T'], PU, U, VDS, PSM, TSM, DB) =
+                                                                < PDR, nil, none, DB >
+   if PDR := < PU ; U ; VDS > .
+  ceq parseCafeDecl(':def_=`:cvsv`[_`][T, T'], PU, U, VDS, PSM, TSM, DB) =
+                                                                < PDR, nil, none, DB >
+   if PDR := < PU ; U ; VDS > .
+  ceq parseCafeDecl(':def_=`:cevss`[_`][T, T'], PU, U, VDS, PSM, TSM, DB) =
+                                                                < PDR, nil, none, DB >
+   if PDR := < PU ; U ; VDS > .
+  ceq parseCafeDecl(':def_=`:cevs`[_`][T, T'], PU, U, VDS, PSM, TSM, DB) =
+                                                                < PDR, nil, none, DB >
+   if PDR := < PU ; U ; VDS > .
+  ceq parseCafeDecl(':def_=`:cesv`[_`][T, T'], PU, U, VDS, PSM, TSM, DB) =
+                                                                < PDR, nil, none, DB >
+   if PDR := < PU ; U ; VDS > .
+  ceq parseCafeDecl(':def_=`:cesvs`[_`][T, T'], PU, U, VDS, PSM, TSM, DB) =
+                                                                < PDR, nil, none, DB >
+   if PDR := < PU ; U ; VDS > .
   ceq parseCafeDecl(':show`proof.@CafeInductiveComm@, PU, U, VDS, PSM, TSM, DB) =
                                                                < PDR, nil, none, DB >
    if PDR := < PU ; U ; VDS > .
@@ -3095,7 +3137,7 @@ a list of quoted identifiers reporting the errors found during the parsing proce
   var  VDS : OpDeclSet .
   vars PDR PDR' : ParseDeclResult .
   vars PU PU' U U' M : Module .
-  var  Ty : Type .
+  vars Ty Ty1 Ty2 : Type .
   vars N N' N'' : Nat .
   **** PSM: Principal Sort Map
   vars PSM PSM' SM SM' : SortMap .
@@ -3133,6 +3175,7 @@ a list of quoted identifiers reporting the errors found during the parsing proce
   vars SIS SIS1 SIS2 : ScoreInfoSet .
   vars CS CS' : ConsSub .
   var  ML : MList .
+  var  MLb : MacroLabel .
   var  TrS : TermSet .
   var  SB : Substitution .
   var  SISP : SISPair .
@@ -3897,6 +3940,20 @@ the \verb"maps2maps" function shown above to the body:
                                                    ':def_=`:ctf`{_`}[T, T'] .
   eq getRedThCommand(':def_=`:ctf`[_`]['CafeToken[T], 'CafeBubble[T']]) =
                                                    ':def_=`:ctf`[_`][T, T'] .
+  eq getRedThCommand(':def_=`:cvss`[_`]['CafeToken[T], 'CafeBubble[T']]) =
+                                                   ':def_=`:cvss`[_`][T, T'] .
+  eq getRedThCommand(':def_=`:cvvs`[_`]['CafeToken[T], 'CafeBubble[T']]) =
+                                                   ':def_=`:cvvs`[_`][T, T'] .
+  eq getRedThCommand(':def_=`:cvsv`[_`]['CafeToken[T], 'CafeBubble[T']]) =
+                                                   ':def_=`:cvsv`[_`][T, T'] .
+  eq getRedThCommand(':def_=`:cevss`[_`]['CafeToken[T], 'CafeBubble[T']]) =
+                                                   ':def_=`:cevss`[_`][T, T'] .
+  eq getRedThCommand(':def_=`:cevs`[_`]['CafeToken[T], 'CafeBubble[T']]) =
+                                                   ':def_=`:cevs`[_`][T, T'] .
+  eq getRedThCommand(':def_=`:cesv`[_`]['CafeToken[T], 'CafeBubble[T']]) =
+                                                   ':def_=`:cesv`[_`][T, T'] .
+  eq getRedThCommand(':def_=`:cesvs`[_`]['CafeToken[T], 'CafeBubble[T']]) =
+                                                   ':def_=`:cesvs`[_`][T, T'] .
   eq getRedThCommand(':show`proof.@CafeInductiveComm@) = ':show`proof.@CafeInductiveComm@ .
   eq getRedThCommand(':desc`proof.@CafeInductiveComm@) = ':desc`proof.@CafeInductiveComm@ .
   eq getRedThCommand(':desc`..@CafeInductiveComm@) = ':desc`..@CafeInductiveComm@ .
@@ -3983,6 +4040,57 @@ the \verb"maps2maps" function shown above to the body:
    if Q := downQid(T) /\
       # M', Q - T2 # := parseTermMacro(P, Q, T') /\
       QIL := '\n Q 'defined 'as ':ctf ' '`[ ' metaPrettyPrint(M', T2, po) ' '`] '\n .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB,
+                          (':def_=`:cvss`[_`][T, T'], TL), T1, P, V, MACS, PO, SIM) =
+           QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,
+                                          MACS # M', Q - T2 . cvss #, PO, SIM)
+   if Q := downQid(T) /\
+      # M', Q - T2 # := parseTermMacro(P, Q, T') /\
+      subsortSingleBinaryOpConstraints(M', T2) /\
+      QIL := '\n Q 'defined 'as ':cvss ' '`[ ' metaPrettyPrint(M', T2, po) ' '`] '\n .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB,
+                          (':def_=`:cvvs`[_`][T, T'], TL), T1, P, V, MACS, PO, SIM) =
+           QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,
+                                          MACS # M', Q - T2 . cvvs #, PO, SIM)
+   if Q := downQid(T) /\
+      # M', Q - T2 # := parseTermMacro(P, Q, T') /\
+      QIL := '\n Q 'defined 'as ':cvvs ' '`[ ' metaPrettyPrint(M', T2, po) ' '`] '\n .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB,
+                          (':def_=`:cvsv`[_`][T, T'], TL), T1, P, V, MACS, PO, SIM) =
+           QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,
+                                          MACS # M', Q - T2 . cvsv #, PO, SIM)
+   if Q := downQid(T) /\
+      # M', Q - T2 # := parseTermMacro(P, Q, T') /\
+      QIL := '\n Q 'defined 'as ':cvsv ' '`[ ' metaPrettyPrint(M', T2, po) ' '`] '\n .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB,
+                          (':def_=`:cevss`[_`][T, T'], TL), T1, P, V, MACS, PO, SIM) =
+           QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,
+                                          MACS # M', Q - T2 . cevss #, PO, SIM)
+   if Q := downQid(T) /\
+      # M', Q - T2 # := parseTermMacro(P, Q, T') /\
+      QIL := '\n Q 'defined 'as ':cevss ' '`[ ' metaPrettyPrint(M', T2, po) ' '`] '\n .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB,
+                          (':def_=`:cevs`[_`][T, T'], TL), T1, P, V, MACS, PO, SIM) =
+           QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,
+                                          MACS # M', Q - T2 . cevs #, PO, SIM)
+   if Q := downQid(T) /\
+      # M', Q - T2 # := parseTermMacro(P, Q, T') /\
+      QIL := '\n Q 'defined 'as ':cevs ' '`[ ' metaPrettyPrint(M', T2, po) ' '`] '\n .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB,
+                          (':def_=`:cesv`[_`][T, T'], TL), T1, P, V, MACS, PO, SIM) =
+           QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,
+                                          MACS # M', Q - T2 . cesv #, PO, SIM)
+   if Q := downQid(T) /\
+      # M', Q - T2 # := parseTermMacro(P, Q, T') /\
+      subsortUnaryBinaryOpConstraints(M', T2) /\
+      QIL := '\n Q 'defined 'as ':cesv ' '`[ ' metaPrettyPrint(M', T2, po) ' '`] '\n .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB,
+                          (':def_=`:cesvs`[_`][T, T'], TL), T1, P, V, MACS, PO, SIM) =
+           QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,
+                                          MACS # M', Q - T2 . cesvs #, PO, SIM)
+   if Q := downQid(T) /\
+      # M', Q - T2 # := parseTermMacro(P, Q, T') /\
+      QIL := '\n Q 'defined 'as ':cesvs ' '`[ ' metaPrettyPrint(M', T2, po) ' '`] '\n .
   ceq processRedThCommands(M, PSM, HSM, TSM, DB,
                            (':show`proof.@CafeInductiveComm@, TL), T1, P, V, MACS, PO, SIM) =
            QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V, MACS, PO, SIM)
@@ -4120,6 +4228,16 @@ the \verb"maps2maps" function shown above to the body:
       [P', PO'] := applyTermMacro(P, PO, Q, T, Ty) /\
       QIL := '\n 'Generated 'new 'goals
              '\n printGoals(P') .
+  ceq evalApply(M, Q, P, V, # M', Q - T . cvss # MACS, PO) = [P', PO', QIL]
+   if Ty := getType(metaReduce(M', T)) /\
+      [P', PO'] := applyTermMacro(P, PO, Q, T, cvss, Ty) /\
+      QIL := '\n 'Generated 'new 'goals
+             '\n printGoals(P') .
+  ceq evalApply(M, Q, P, V, # M', Q - T . cevs # MACS, PO) = [P', PO', QIL]
+   if Ty := getType(metaReduce(M', T)) /\
+      [P', PO'] := applyTermMacro(P, PO, Q, T, cevs, Ty) /\
+      QIL := '\n 'Generated 'new 'goals
+             '\n printGoals(P') .
 
   op getCtors : Module Sort -> OpDeclSet .
   eq getCtors(M, Srt) = getCtors(M, getOps(M), Srt) .
@@ -4133,6 +4251,14 @@ the \verb"maps2maps" function shown above to the body:
       sameKind(M, Ty, Srt) /\
       sortLeq(M, Ty, Srt) .
   eq getCtors(M, ODS, Srt) = none [owise] .
+
+  op getExactCtors : Module Sort -> OpDeclSet .
+  eq getExactCtors(M, Srt) = getExactCtors(M, getOps(M), Srt) .
+
+  op getExactCtors : Module OpDeclSet Sort -> OpDeclSet .
+  eq getExactCtors(M, op Q : TyL -> Srt [ctor AtS] . ODS, Srt) = op Q : TyL -> Srt [ctor AtS] .
+                                                            getExactCtors(M, ODS, Srt) .
+  eq getExactCtors(M, ODS, Srt) = none [owise] .
 
   op buildTermsCtors : OpDeclSet String -> TermList .
   eq buildTermsCtors(none, STR) = empty .
@@ -4177,11 +4303,74 @@ the \verb"maps2maps" function shown above to the body:
       PrL' := createCTFTerm(ML, NL, Q, EqS) /\
       PO' := indProofOrder(fst(PO), size(TL)) y pop(PO) .
 
+  op applyTermMacro : ProofTree ProofOrder Qid Term MacroLabel Type -> IndResPair .
+  eq applyTermMacro(P, PO, Q, T, MLb, Ty) = $applyTermMacro(P, PO, Q, T, MLb, Ty) .
+  ceq $applyTermMacro(| M, [NL, CMD, EqS, false, PRVN], PrL, N' |, PO, Q, T, MLb, Ty) =
+                               [| M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, PO']
+   if [ PrL', PO' ] := $applyTermMacro*(PrL, PO, Q, T, MLb, Ty) .
+  *** Case selection cvss: value (eq1) + seq seq (eq2)
+  ceq $applyTermMacro(| M, [NL, CMD, EqS, true, PRVN], mtPT, N' |, PO, Q, T, cvss, Ty) =
+                               [| M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, PO']
+   if TL := buildVSS(M, Ty) /\
+      ML := createModules(M, T, TL) /\
+      PrL' := createCTFTerm(ML, NL, Q, EqS) /\
+      PO' := indProofOrder(fst(PO), size(TL)) y pop(PO) .
+  *** Case selection cevs: empty (eq1) + value seq (eq2)
+  ceq $applyTermMacro(| M, [NL, CMD, EqS, true, PRVN], mtPT, N' |, PO, Q, T, cevs, Ty) =
+                               [| M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, PO']
+   if TL := buildEVS(M, Ty) /\
+      ML := createModules(M, T, TL) /\
+      PrL' := createCTFTerm(ML, NL, Q, EqS) /\
+      PO' := indProofOrder(fst(PO), size(TL)) y pop(PO) [print TL] .
+
+  op buildVSS : Module Type -> TermList .
+  ceq buildVSS(M, Ty) = TL', TL
+   if ODS := getExactCtors(M, Ty) /\
+      TL := buildTermsCtors(ODS, "VSS") /\
+      SS := lesserSorts(M, Ty) /\
+      TL' := buildTermsOrFreshConst(M, SS) .
+
+  op buildEVS : Module Type -> TermList .
+  ceq buildEVS(M, Ty) = combineEVS(TL, TL')
+   if ODS := getExactCtors(M, Ty) /\
+      TL := buildTermsCtors(ODS, "VSS") /\
+      SS := lesserSorts(M, Ty) /\
+      TL' := buildTermsOrFreshConst(M, SS) .
+
+  op combineEVS : TermList TermList ~> TermList .
+  eq combineEVS((C, T), TL) = C, putTogether(T, TL) .
+  eq combineEVS((T, C), TL) = C, putTogether(T, TL) .
+
+  op putTogether : Term TermList -> TermList .
+  eq putTogether(T, empty) = empty .
+  eq putTogether(Q[T, T'], (T1, TL)) = Q[T1, T'], putTogether(Q[T, T'], TL) .
+
+  op buildTermsOrFreshConst : Module SortSet -> TermList .
+  eq buildTermsOrFreshConst(M, none) = empty .
+  ceq buildTermsOrFreshConst(M, Srt ; SS) = TL, buildTermsOrFreshConst(M, SS)
+   if ODS := getExactCtors(M, Srt) /\
+      ODS =/= none /\
+      TL := buildTermsCtors(ODS, "VSS") .
+  ceq buildTermsOrFreshConst(M, Srt ; SS) = T, buildTermsOrFreshConst(M, SS)
+   if getExactCtors(M, Srt) == none /\
+      T := qid("VSSVal" + string(Srt) + "." + string(Srt)) .
+
+
+
+  op $applyTermMacro : ProofTree ProofOrder Qid Term MacroLabel Type -> IndResPair .
+  eq $applyTermMacro(mtPT, PO, Q, T, MLb, Ty) = [mtPT, finished] .
+
   op $applyTermMacro* : ProofTreeList ProofOrder Qid Term Type -> IndResPair .
   eq $applyTermMacro*(mtPT, PO, Q, T, Ty) = [mtPT, finished] .
   ceq $applyTermMacro*(| M', G, PrL, N | PrL', PO, Q, T, Ty) = [PrL1 PrL2, PO' y PO'']
    if [PrL1, PO'] := $applyTermMacro(| M', G, PrL, N |, PO, Q, T, Ty) /\
       [PrL2, PO''] := $applyTermMacro*(PrL', PO, Q, T, Ty) .
+
+  op $applyTermMacro* : ProofTreeList ProofOrder Qid Term MacroLabel Type -> IndResPair .
+  eq $applyTermMacro*(mtPT, PO, Q, T, MLb, Ty) = [mtPT, finished] .
+  ceq $applyTermMacro*(| M', G, PrL, N | PrL', PO, Q, T, MLb, Ty) = [PrL1 PrL2, PO' y PO'']
+   if [PrL1, PO'] := $applyTermMacro(| M', G, PrL, N |, PO, Q, T, MLb, Ty) /\
+      [PrL2, PO''] := $applyTermMacro*(PrL', PO, Q, T, MLb, Ty) .
 
   sort MList .
   subsort Module < MList .
@@ -4340,7 +4529,9 @@ the \verb"maps2maps" function shown above to the body:
 
   *** We make sure not to add constant constructors by skipping them at first.
   op addCons : Module Term -> Module .
-  eq addCons(M, C) = M .
+  ceq addCons(M, C) = M
+   if Q := getName(C) /\
+      op Q : TyL -> Ty [AtS] . ODS := getOps(M) .
   eq addCons(M, T) = $addCons(M, T) [owise] .
 
   op $addCons : Module Term -> Module .
@@ -4399,20 +4590,20 @@ the \verb"maps2maps" function shown above to the body:
       TL' := buildArgs(TyL, (C, TL), STR) .
 
   op buildArg : Type TermList String -> TermList .
-  ceq buildArg(Ty, (TL, C, TL'), St) = $buildArg(Ty, (TL, TL'), 0)
+  ceq buildArg(Ty, (TL, C, TL'), St) = $buildArg(Ty, (TL, TL'), St, 0)
    if STR := string(Ty) /\
       C := qid(substr(STR, 0, 1) +  "#" + St + STR + "." + STR) .
   ceq buildArg(Ty, TL, St) = C
    if STR := string(Ty) /\
       C := qid(substr(STR, 0, 1) + "#" + St + STR + "." + STR) [owise] .
 
-  op $buildArg : Type TermList Nat -> TermList .
-  ceq $buildArg(Ty, (TL, C, TL'), N) = $buildArg(Ty, (TL, TL'), s(N))
+  op $buildArg : Type TermList String Nat -> TermList .
+  ceq $buildArg(Ty, (TL, C, TL'), St, N) = $buildArg(Ty, (TL, TL'), St, s(N))
    if STR := string(Ty) /\
-      C := qid(substr(STR, 0, 1) + string(N, 10) + "#" + STR + "." + STR) .
-  ceq $buildArg(Ty, TL, N) = C
+      C := qid(substr(STR, 0, 1) + string(N, 10) + "#" + St + STR + "." + STR) .
+  ceq $buildArg(Ty, TL, St, N) = C
    if STR := string(Ty) /\
-      C := qid(substr(STR, 0, 1) + string(N, 10) + "#" + STR + "." + STR) [owise] .
+      C := qid(substr(STR, 0, 1) + string(N, 10) + "#" + St + STR + "." + STR) [owise] .
 
   op indProofOrder : NatList Nat -> ProofOrder .
   eq indProofOrder(NL, s(N)) = indProofOrder(NL, N) y NL s(N) .
@@ -5263,8 +5454,8 @@ the \verb"maps2maps" function shown above to the body:
   eq numExecEqs(EqS) = 0 [owise] .
 
   ***********************************************************************************
-  ******************************* AUXILIARY FUNCTIONS *******************************
-  *********************************** hasVariables **********************************
+  ***                             AUXILIARY FUNCTIONS                             ***
+  ***                                 hasVariables                                ***
   ***********************************************************************************
 
   op hasVariables : Term -> Bool .
@@ -5277,8 +5468,56 @@ the \verb"maps2maps" function shown above to the body:
   eq hasVariables*((T, TL)) = hasVariables(T) or hasVariables*(TL) .
 
   ***********************************************************************************
-  ******************************* AUXILIARY FUNCTIONS *******************************
-  ************************************* getIndVar ***********************************
+  ***                             AUXILIARY FUNCTIONS                             ***
+  ***                            Case splitting: cvss                             ***
+  ***********************************************************************************
+
+  op subsortSingleBinaryOpConstraints : Module Term -> Bool .
+  ceq subsortSingleBinaryOpConstraints(M, T) = subsortSingleBinaryOpConstraints(M, Ty)
+   if Ty := getType(metaReduce(M, T)) .
+
+  op subsortSingleBinaryOpConstraints : Module Type -> Bool .
+  eq subsortSingleBinaryOpConstraints(M, Ty) = hasSingleBinaryCtor(getOps(M), Ty) and
+                                               hasSubsort(getSubsorts(M), Ty) .
+
+  op hasSingleBinaryCtor : OpDeclSet Type -> Bool .
+  eq hasSingleBinaryCtor(op Q : Ty1 Ty2 -> Ty [ctor AtS] . ODS, Ty) = hasNoOther(ODS, Ty) .
+  eq hasSingleBinaryCtor(ODS, Ty) = false [owise] .
+
+  op hasNoOther : OpDeclSet Type -> Bool .
+  eq hasNoOther(op Q : TyL -> Ty [ctor AtS] . ODS, Ty) = false .
+  eq hasNoOther(ODS, Ty) = true [owise] .
+
+  op hasSubsort : SubsortDeclSet Type -> Bool .
+  eq hasSubsort(subsort Ty1 < Ty . SSDS, Ty) = true .
+  eq hasSubsort(SSDS, Ty) = false [owise] .
+
+
+  ***********************************************************************************
+  ***                             AUXILIARY FUNCTIONS                             ***
+  ***                            Case splitting: cevs                             ***
+  ***********************************************************************************
+
+  op subsortUnaryBinaryOpConstraints : Module Term -> Bool .
+  ceq subsortUnaryBinaryOpConstraints(M, T) = subsortUnaryBinaryOpConstraints(M, Ty)
+   if Ty := getType(metaReduce(M, T)) .
+
+  op subsortUnaryBinaryOpConstraints : Module Type -> Bool .
+  eq subsortUnaryBinaryOpConstraints(M, Ty) = hasBinaryCtor(getOps(M), Ty) and
+                                              hasUnaryCtor(getOps(M), Ty) and
+                                              hasSubsort(getSubsorts(M), Ty) .
+
+  op hasBinaryCtor : OpDeclSet Type -> Bool .
+  eq hasBinaryCtor(op Q : Ty1 Ty2 -> Ty [ctor AtS] . ODS, Ty) = true .
+  eq hasBinaryCtor(ODS, Ty) = false [owise] .
+
+  op hasUnaryCtor : OpDeclSet Type -> Bool .
+  eq hasUnaryCtor(op Q : nil -> Ty [ctor AtS] . ODS, Ty) = true .
+  eq hasUnaryCtor(ODS, Ty) = false [owise] .
+
+  ***********************************************************************************
+  ***                             AUXILIARY FUNCTIONS                             ***
+  ***                                   getIndVar                                 ***
   ***********************************************************************************
 
   *** Variables
