@@ -4075,6 +4075,7 @@ the \verb"maps2maps" function shown above to the body:
                                           MACS # M', Q - T2 . cevs #, PO, SIM)
    if Q := downQid(T) /\
       # M', Q - T2 # := parseTermMacro(P, Q, T') /\
+      subsortUnaryBinaryOpConstraints(M', T2) /\
       QIL := '\n Q 'defined 'as ':cevs ' '`[ ' metaPrettyPrint(M', T2, po) ' '`] '\n .
   ceq processRedThCommands(M, PSM, HSM, TSM, DB,
                           (':def_=`:cesv`[_`][T, T'], TL), T1, P, V, MACS, PO, SIM) =
@@ -4238,6 +4239,10 @@ the \verb"maps2maps" function shown above to the body:
       [P', PO'] := applyTermMacro(P, PO, Q, T, cevs, Ty) /\
       QIL := '\n 'Generated 'new 'goals
              '\n printGoals(P') .
+  ceq evalApply(M, Q, P, V, # M', Q - T . cesv # MACS, PO) = [P', PO', QIL]
+   if Ty := getType(metaReduce(M', T)) /\
+      QIL := '\n 'Generated 'new 'goals
+             '\n printGoals(P') .
 
   op getCtors : Module Sort -> OpDeclSet .
   eq getCtors(M, Srt) = getCtors(M, getOps(M), Srt) .
@@ -4322,6 +4327,13 @@ the \verb"maps2maps" function shown above to the body:
       ML := createModules(M, T, TL) /\
       PrL' := createCTFTerm(ML, NL, Q, EqS) /\
       PO' := indProofOrder(fst(PO), size(TL)) y pop(PO) [print TL] .
+  *** Case selection cesv: empty (eq1) + seq value (eq2)
+  ceq $applyTermMacro(| M, [NL, CMD, EqS, true, PRVN], mtPT, N' |, PO, Q, T, cesv, Ty) =
+                               [| M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, PO']
+   if TL := buildESV(M, Ty) /\
+      ML := createModules(M, T, TL) /\
+      PrL' := createCTFTerm(ML, NL, Q, EqS) /\
+      PO' := indProofOrder(fst(PO), size(TL)) y pop(PO) [print TL] .
 
   op buildVSS : Module Type -> TermList .
   ceq buildVSS(M, Ty) = TL', TL
@@ -4338,12 +4350,27 @@ the \verb"maps2maps" function shown above to the body:
       TL' := buildTermsOrFreshConst(M, SS) .
 
   op combineEVS : TermList TermList ~> TermList .
-  eq combineEVS((C, T), TL) = C, putTogether(T, TL) .
-  eq combineEVS((T, C), TL) = C, putTogether(T, TL) .
+  eq combineEVS((C, T), TL) = C, putTogetherEVS(T, TL) .
+  eq combineEVS((T, C), TL) = C, putTogetherEVS(T, TL) .
 
-  op putTogether : Term TermList -> TermList .
-  eq putTogether(T, empty) = empty .
-  eq putTogether(Q[T, T'], (T1, TL)) = Q[T1, T'], putTogether(Q[T, T'], TL) .
+  op buildESV : Module Type -> TermList .
+  ceq buildESV(M, Ty) = combineEVS(TL, TL')
+   if ODS := getExactCtors(M, Ty) /\
+      TL := buildTermsCtors(ODS, "VSS") /\
+      SS := lesserSorts(M, Ty) /\
+      TL' := buildTermsOrFreshConst(M, SS) .
+
+  op combineESV : TermList TermList ~> TermList .
+  eq combineESV((C, T), TL) = C, putTogetherESV(T, TL) .
+  eq combineESV((T, C), TL) = C, putTogetherESV(T, TL) .
+
+  op putTogetherEVS : Term TermList -> TermList .
+  eq putTogetherEVS(T, empty) = empty .
+  eq putTogetherEVS(Q[T, T'], (T1, TL)) = Q[T1, T'], putTogetherEVS(Q[T, T'], TL) .
+
+  op putTogetherESV : Term TermList -> TermList .
+  eq putTogetherESV(T, empty) = empty .
+  eq putTogetherESV(Q[T, T'], (T1, TL)) = Q[T, T1], putTogetherESV(Q[T, T'], TL) .
 
   op buildTermsOrFreshConst : Module SortSet -> TermList .
   eq buildTermsOrFreshConst(M, none) = empty .
