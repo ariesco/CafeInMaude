@@ -4241,6 +4241,7 @@ the \verb"maps2maps" function shown above to the body:
              '\n printGoals(P') .
   ceq evalApply(M, Q, P, V, # M', Q - T . cesv # MACS, PO) = [P', PO', QIL]
    if Ty := getType(metaReduce(M', T)) /\
+      [P', PO'] := applyTermMacro(P, PO, Q, T, cesv, Ty) /\
       QIL := '\n 'Generated 'new 'goals
              '\n printGoals(P') .
 
