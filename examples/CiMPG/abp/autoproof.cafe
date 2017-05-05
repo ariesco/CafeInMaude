@@ -1,0 +1,29 @@
+open ABP .
+	:goal{
+		eq [proofABP :nonexec] : inv1(S:Sys) = true .
+		eq [proofABP1 :nonexec] : inv4(S:Sys,B:Bit) = true .
+	}
+
+	:ind on (S:Sys)
+
+	:apply(si)
+
+	:apply(tc)
+
+	:def csb1 = :cevs [dc(S#Sys) .]
+
+	:apply(csb1)
+
+	:imp [proofABP] .
+
+	:apply (rd)
+ :desc proof
+close
+
+eof
+
+ :def asd = :cevs [ac(S#Sys)]
+ :apply(asd)
+ :desc proof
+
+ :def asd = :cevs [dc(S#Sys)]

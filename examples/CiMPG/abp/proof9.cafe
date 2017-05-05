@@ -1,0 +1,1323 @@
+-- init
+open ABP .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  red inv9(init,b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+
+-- snd1(s)
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = prs1,< p1,b1 > .
+  eq sb(s) = b2 .
+  eq p2s(s) = p2 .
+  eq prs2 = e .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(snd1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op b10 : -> Bit .
+  op p10 : -> Packet .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = prs1,< p1,b1 > .
+  eq sb(s) = b2 .
+  eq p2s(s) = p2 .
+  eq prs2 = < p10,b10 >,prs10 .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(snd1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op b10 : -> Bit .
+  op p10 : -> Packet .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = prs1,< p1,b1 > .
+  eq sb(s) = b2 .
+  eq (p2s(s) = p2) = false .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(snd1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op b10 : -> Bit .
+  op p10 : -> Packet .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = prs1,< p1,b1 > .
+  eq (sb(s) = b2) = false .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(snd1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq (dc(s) = prs1,< p1,b1 >) = false .
+  eq prs2 = e .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(snd1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op b10 : -> Bit .
+  op p10 : -> Packet .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq (dc(s) = prs1,< p1,b1 >) = false .
+  eq prs2 = prs10,< p10,b10 > .
+  eq dc(s) = prs1,< p1,b1 >,< p2,b2 >,prs10 .
+  eq < p1,b1 > = < p2,b2 > .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(snd1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op b10 : -> Bit .
+  op p10 : -> Packet .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq (dc(s) = prs1,< p1,b1 >) = false .
+  eq prs2 = prs10,< p10,b10 > .
+  eq dc(s) = prs1,< p1,b1 >,< p2,b2 >,prs10 .
+  eq (< p1,b1 > = < p2,b2 >) = false .
+  eq < p2s(s),sb(s) > = < p10,b10 > .
+  eq < p10,b10 > = < p3,b3 > .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs10)
+      implies inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(snd1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op b10 : -> Bit .
+  op p10 : -> Packet .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq (dc(s) = prs1,< p1,b1 >) = false .
+  eq prs2 = prs10,< p10,b10 > .
+  eq dc(s) = prs1,< p1,b1 >,< p2,b2 >,prs10 .
+  eq (< p1,b1 > = < p2,b2 >) = false .
+  eq < p2s(s),sb(s) > = < p10,b10 > .
+  eq (< p10,b10 > = < p3,b3 >) = false .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs10)
+      implies (inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(snd1(s),b1,b2,b3,p1,p2,p3,prs1,prs2)) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op b10 : -> Bit .
+  op p10 : -> Packet .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq (dc(s) = prs1,< p1,b1 >) = false .
+  eq prs2 = prs10,< p10,b10 > .
+  eq dc(s) = prs1,< p1,b1 >,< p2,b2 >,prs10 .
+  eq (< p1,b1 > = < p2,b2 >) = false .
+  eq (< p2s(s),sb(s) > = < p10,b10 >) = false .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(snd1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op b10 : -> Bit .
+  op p10 : -> Packet .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq (dc(s) = prs1,< p1,b1 >) = false .
+  eq prs2 = prs10,< p10,b10 > .
+  eq (dc(s) = prs1,< p1,b1 >,< p2,b2 >,prs10) = false .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(snd1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+
+-- rec1(s)
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq ac(s) = e .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(rec1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op b10 : -> Bit .
+  op bs10 : -> BSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq ac(s) = b10,bs10 .
+  eq sb(s) = b10 .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(rec1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op b10 : -> Bit .
+  op bs10 : -> BSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq ac(s) = b10,bs10 .
+  eq (sb(s) = b10) = false .
+  eq dc(s) = prs1,< p1,b1 >,< p2,b2 >,prs2 .
+  eq p1 = p2s(s) .
+  eq b1 = sb(s) .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(rec1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op b10 : -> Bit .
+  op bs10 : -> BSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq ac(s) = b10,bs10 .
+  eq (sb(s) = b10) = false .
+  eq dc(s) = prs1,< p1,b1 >,< p2,b2 >,prs2 .
+  eq p1 = p2s(s) .
+  eq (b1 = sb(s)) = false .
+  eq rb(s) = b10 .
+  red inv11(s,b1,p1)
+      implies inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(rec1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op b10 : -> Bit .
+  op bs10 : -> BSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq ac(s) = b10,bs10 .
+  eq (sb(s) = b10) = false .
+  eq dc(s) = prs1,< p1,b1 >,< p2,b2 >,prs2 .
+  eq p1 = p2s(s) .
+  eq (b1 = sb(s)) = false .
+  eq (rb(s) = b10) = false .
+  red inv10(s,b10) implies inv11(s,b1,p1)
+      implies inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(rec1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op b10 : -> Bit .
+  op bs10 : -> BSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq ac(s) = b10,bs10 .
+  eq (sb(s) = b10) = false .
+  eq dc(s) = prs1,< p1,b1 >,< p2,b2 >,prs2 .
+  eq (p1 = p2s(s)) = false .
+  eq rb(s) = b10 .
+  red inv11(s,b1,p1)
+      implies inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(rec1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op b10 : -> Bit .
+  op bs10 : -> BSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq ac(s) = b10,bs10 .
+  eq (sb(s) = b10) = false .
+  eq dc(s) = prs1,< p1,b1 >,< p2,b2 >,prs2 .
+  eq (p1 = p2s(s)) = false .
+  eq (rb(s) = b10) = false .
+  red inv10(s,b10) implies inv11(s,b1,p1)
+      implies inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(rec1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op b10 : -> Bit .
+  op bs10 : -> BSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq ac(s) = b10,bs10 .
+  eq (sb(s) = b10) = false .
+  eq (dc(s) = prs1,< p1,b1 >,< p2,b2 >,prs2) = false .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(rec1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+
+-- snd2(s)
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(snd2(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+
+-- rec2(s)
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = e .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(rec2(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs10 = prs1,< p1,b1 >,< p2,b2 >,prs2 .
+  eq < p1,b1 > = < p2,b2 > .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(rec2(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs10 = prs1,< p1,b1 >,< p2,b2 >,prs2 .
+  eq (< p1,b1 > = < p2,b2 >) = false .
+  eq < p3,b3 > = < p2,b2 > .
+  eq < p2,b2 > \in prs2 = true .
+  eq < p2s(s),sb(s) > = < p2,b2 > .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(rec2(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs10 = prs1,< p1,b1 >,< p2,b2 >,prs2 .
+  eq (< p1,b1 > = < p2,b2 >) = false .
+  eq < p3,b3 > = < p2,b2 > .
+  eq < p2,b2 > \in prs2 = true .
+  eq (< p2s(s),sb(s) > = < p2,b2 >) = false .
+  red inv9(s,b1,b2,b3,p1,p2,p3,(< p10,b10 >,prs1),prs2)
+     implies inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(rec2(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs10 = prs1,< p1,b1 >,< p2,b2 >,prs2 .
+  eq (< p1,b1 > = < p2,b2 >) = false .
+  eq < p3,b3 > = < p2,b2 > .
+  eq < p2,b2 > \in prs2 = false .
+  eq < p2s(s),sb(s) > = < p2,b2 > .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(rec2(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs10 = prs1,< p1,b1 >,< p2,b2 >,prs2 .
+  eq (< p1,b1 > = < p2,b2 >) = false .
+  eq < p3,b3 > = < p2,b2 > .
+  eq < p2,b2 > \in prs2 = false .
+  eq (< p2s(s),sb(s) > = < p2,b2 >) = false .
+  red inv9(s,b1,b2,b3,p1,p2,p3,(< p10,b10 >,prs1),prs2)
+     implies inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(rec2(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs10 = prs1,< p1,b1 >,< p2,b2 >,prs2 .
+  eq (< p1,b1 > = < p2,b2 >) = false .
+  eq (< p3,b3 > = < p2,b2 >) = false .
+  eq < p3,b3 > \in prs2 = true .
+  red inv9(s,b1,b2,b3,p1,p2,p3,(< p10,b10 >,prs1),prs2)
+     implies inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(rec2(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs10 = prs1,< p1,b1 >,< p2,b2 >,prs2 .
+  eq (< p1,b1 > = < p2,b2 >) = false .
+  eq (< p3,b3 > = < p2,b2 >) = false .
+  eq < p3,b3 > \in prs2 = false .
+  eq < p2s(s),sb(s) > = < p2,b2 > .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(rec2(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs10 = prs1,< p1,b1 >,< p2,b2 >,prs2 .
+  eq (< p1,b1 > = < p2,b2 >) = false .
+  eq (< p3,b3 > = < p2,b2 >) = false .
+  eq < p3,b3 > \in prs2 = false .
+  eq (< p2s(s),sb(s) > = < p2,b2 >) = false .
+  red inv9(s,b1,b2,b3,p1,p2,p3,(< p10,b10 >,prs1),prs2)
+     implies inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(rec2(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq (prs10 = prs1,< p1,b1 >,< p2,b2 >,prs2) = false .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(rec2(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+
+-- dup1(s)
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = e .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(dup1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs1 = e .
+  eq < p1,b1 > = < p10,b10 > .
+  eq < p2,b2 > = < p10,b10 > .
+  eq prs2 = prs10 .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(dup1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs1 = e .
+  eq < p1,b1 > = < p10,b10 > .
+  eq < p2,b2 > = < p10,b10 > .
+  eq (prs2 = prs10) = false .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(dup1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs1 = e .
+  eq < p1,b1 > = < p10,b10 > .
+  eq (< p2,b2 > = < p10,b10 >) = false .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(dup1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs1 = e .
+  eq (< p1,b1 > = < p10,b10 >) = false .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(dup1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  op p20 : -> Packet .
+  op b20 : -> Bit .
+  op prs20 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs1 = < p20,b20 >,prs20 .
+  eq < p20,b20 > = < p10,b10 > .
+  eq prs20,< p1,b1 >,< p2,b2 >,prs2 = < p10,b10 >,prs10 .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs20,prs2)
+      implies inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(dup1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  op p20 : -> Packet .
+  op b20 : -> Bit .
+  op prs20 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs1 = < p20,b20 >,prs20 .
+  eq < p20,b20 > = < p10,b10 > .
+  eq (prs20,< p1,b1 >,< p2,b2 >,prs2 = < p10,b10 >,prs10) = false .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(dup1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  op p20 : -> Packet .
+  op b20 : -> Bit .
+  op prs20 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs1 = < p20,b20 >,prs20 .
+  eq (< p20,b20 > = < p10,b10 >) = false .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(dup1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+
+-- drp1(s)
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = e .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(drp1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs1 = e .
+  eq prs10 = < p1,b1 >,< p2,b2 >,prs2 .
+  red inv9(s,b1,b2,b3,p1,p2,p3,< p10,b10 >,prs2)
+      implies inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(drp1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs1 = e .
+  eq (prs10 = < p1,b1 >,< p2,b2 >,prs2) = false .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(drp1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  op p20 : -> Packet .
+  op b20 : -> Bit .
+  op prs20 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs1 = < p20,b20 >,prs20 .
+  eq prs10 = < p20,b20 >,prs20,< p1,b1 >,< p2,b2 >,prs2 .
+  eq < p1,b1 > = < p2,b2 > .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(drp1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  op p20 : -> Packet .
+  op b20 : -> Bit .
+  op prs20 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs1 = < p20,b20 >,prs20 .
+  eq prs10 = < p20,b20 >,prs20,< p1,b1 >,< p2,b2 >,prs2 .
+  eq (< p1,b1 > = < p2,b2 >) = false .
+  eq < p2s(s),sb(s) > = < p2,b2 > .
+  eq < p3,b3 > = < p2,b2 > .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(drp1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  op p20 : -> Packet .
+  op b20 : -> Bit .
+  op prs20 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs1 = < p20,b20 >,prs20 .
+  eq prs10 = < p20,b20 >,prs20,< p1,b1 >,< p2,b2 >,prs2 .
+  eq (< p1,b1 > = < p2,b2 >) = false .
+  eq < p2s(s),sb(s) > = < p2,b2 > .
+  eq (< p3,b3 > = < p2,b2 >) = false .
+  eq < p3,b3 > \in prs2 = true .
+  red inv9(s,b1,b2,b3,p1,p2,p3,(< p10,b10 >,prs1),prs2)
+      implies inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(drp1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  op p20 : -> Packet .
+  op b20 : -> Bit .
+  op prs20 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs1 = < p20,b20 >,prs20 .
+  eq prs10 = < p20,b20 >,prs20,< p1,b1 >,< p2,b2 >,prs2 .
+  eq (< p1,b1 > = < p2,b2 >) = false .
+  eq < p2s(s),sb(s) > = < p2,b2 > .
+  eq (< p3,b3 > = < p2,b2 >) = false .
+  eq < p3,b3 > \in prs2 = false .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(drp1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  op p20 : -> Packet .
+  op b20 : -> Bit .
+  op prs20 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs1 = < p20,b20 >,prs20 .
+  eq prs10 = < p20,b20 >,prs20,< p1,b1 >,< p2,b2 >,prs2 .
+  eq (< p1,b1 > = < p2,b2 >) = false .
+  eq (< p2s(s),sb(s) > = < p2,b2 >) = false .
+  red inv9(s,b1,b2,b3,p1,p2,p3,(< p10,b10 >,prs1),prs2)
+      implies inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(drp1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  op p20 : -> Packet .
+  op b20 : -> Bit .
+  op prs20 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs1 = < p20,b20 >,prs20 .
+  eq (prs10 = < p20,b20 >,prs20,< p1,b1 >,< p2,b2 >,prs2) = false .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(drp1(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+
+-- dup2(s)
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq ac(s) = e .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(dup2(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op b10 : -> Bit .
+  op bs10 : -> BSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq ac(s) = b10,bs10 .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(dup2(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+
+-- drp2(s)
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq ac(s) = e .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(drp2(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+open ABP .
+  op s : -> Sys .
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops prs1 prs2 : -> PBPSeq .
+  op b10 : -> Bit .
+  op bs10 : -> BSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq ac(s) = b10,bs10 .
+  red inv9(s,b1,b2,b3,p1,p2,p3,prs1,prs2)
+      implies inv9(drp2(s),b1,b2,b3,p1,p2,p3,prs1,prs2) .
+close
+
+--
+-- QED
+--

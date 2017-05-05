@@ -1,0 +1,60 @@
+-- init
+open ABP .
+  :id(proofABP)
+  red inv1(init) .
+close
+
+-- init
+open ABP .
+  :id(proofABP)
+  op b : -> Bit .
+  red inv4(init,b) .
+close
+
+-- drp1(s)
+open ABP .
+  :id(proofABP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq dc(s) = e .
+  red inv1(s) implies inv1(drp1(s)) .
+close
+open ABP .
+  :id(proofABP)
+  op s : -> Sys .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  red inv1(s) implies inv1(drp1(s)) .
+close
+
+-- drp1(s)
+open ABP .
+  :id(proofABP)
+  op s : -> Sys .
+  op b : -> Bit .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq dc(s) = e .
+  red inv4(s,b) implies inv4(drp1(s),b) .
+close
+open ABP .
+  :id(proofABP)
+  op s : -> Sys .
+  op b : -> Bit .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  red inv4(s,b) implies inv4(drp1(s),b) .
+close
+
+open ABP .
+  :proof(proofABP)
+close

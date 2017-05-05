@@ -3175,7 +3175,7 @@ a list of quoted identifiers reporting the errors found during the parsing proce
   vars SIS SIS1 SIS2 : ScoreInfoSet .
   vars CS CS' : ConsSub .
   var  ML : MList .
-  var  MLb : MacroLabel .
+  vars MLb MLb' : MacroLabel .
   var  TrS : TermSet .
   var  SB : Substitution .
   var  SISP : SISPair .
@@ -4327,14 +4327,14 @@ the \verb"maps2maps" function shown above to the body:
    if TL := buildEVS(M, Ty) /\
       ML := createModules(M, T, TL) /\
       PrL' := createCTFTerm(ML, NL, Q, EqS) /\
-      PO' := indProofOrder(fst(PO), size(TL)) y pop(PO) [print TL] .
+      PO' := indProofOrder(fst(PO), size(TL)) y pop(PO) .
   *** Case selection cesv: empty (eq1) + seq value (eq2)
   ceq $applyTermMacro(| M, [NL, CMD, EqS, true, PRVN], mtPT, N' |, PO, Q, T, cesv, Ty) =
                                [| M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, PO']
    if TL := buildESV(M, Ty) /\
       ML := createModules(M, T, TL) /\
       PrL' := createCTFTerm(ML, NL, Q, EqS) /\
-      PO' := indProofOrder(fst(PO), size(TL)) y pop(PO) [print TL] .
+      PO' := indProofOrder(fst(PO), size(TL)) y pop(PO) .
 
   op buildVSS : Module Type -> TermList .
   ceq buildVSS(M, Ty) = TL', TL
@@ -4559,18 +4559,29 @@ the \verb"maps2maps" function shown above to the body:
   op addCons : Module Term -> Module .
   ceq addCons(M, C) = M
    if Q := getName(C) /\
+      Ty := getType(C) /\
       op Q : TyL -> Ty [AtS] . ODS := getOps(M) .
   eq addCons(M, T) = $addCons(M, T) [owise] .
 
   op $addCons : Module Term -> Module .
   eq $addCons(M, V) = M .
+  ceq $addCons(M, C) = M
+   if definedConst(M, C) .
   ceq $addCons(M, C) = addOp(M, OD)
-   if OD := op getName(C) : nil -> getType(C) [metadata("generated-si")] . .
+   if not definedConst(M, C) /\
+      OD := op getName(C) : nil -> getType(C) [metadata("generated-si")] . .
   eq $addCons(M, Q[TL]) = $addCons*(M, TL) .
 
   op $addCons* : Module TermList -> Module .
   eq $addCons*(M, empty) = M .
   eq $addCons*(M, (T, TL)) = $addCons*($addCons(M, T), TL) .
+
+  op definedConst : Module Constant -> Bool .
+  ceq definedConst(M, C) = true
+   if Q := getName(C) /\
+      Ty := getType(C) /\
+      op Q : TyL -> Ty [AtS] . ODS := getOps(M) .
+  eq definedConst(M, C) = false [owise] .
 
   op makeSub : EquationSet Variable Term -> EquationSet .
   eq makeSub(none, V, T) = none .
@@ -4682,12 +4693,10 @@ the \verb"maps2maps" function shown above to the body:
 
   op applyImp : ProofTree Qid -> ProofBool .
   eq applyImp(mtPT, Q) = [mtPT, false] .
-  ceq applyImp(| M, [NL, CMD, Eq, false, PRVN], PrL, N' |, Q) =
-                           [| M, [NL, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |, B]
+  ceq applyImp(| M, [NL, CMD, EqS, false, PRVN], PrL, N' |, Q) =
+                           [| M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, B]
    if [PrL', B] := $applyImp*(PrL, Q) .
-  ceq applyImp(| M, [NL, CMD, Eq, true, PRVN], mtPT, N' |, Q) =
-                          *** [| M, [NL, CMD, Eq, false, PRVN], PrL', s(size*(PrL')) |, B]
-                          [PrL', B]
+  ceq applyImp(| M, [NL, CMD, Eq, true, PRVN], mtPT, N' |, Q) = [PrL', B]
    if [PrL', B] := applyImp(M, Eq, Q, NL) .
 
   op $applyImp* : ProofTreeList Qid -> ProofBool .
@@ -4700,7 +4709,7 @@ the \verb"maps2maps" function shown above to the body:
   ceq applyImp(M, Eq, Q, NL) = [| M, [NL, 'imp, Eq', true, false], mtPT, 1 |, true]
    if eq T = 'true.Bool [label(Q) AtS] . EqS := getEqs(M) /\
       Eq' := impEq(M, Eq, T) .
-  eq applyImp(M, Eq, Q, N) = [mtPT, false] [owise] .
+  eq applyImp(M, EqS, Q, N) = [mtPT, false] [owise] .
 
   op impEq : Module Equation Term -> Equation .
   ceq impEq(M, eq T = 'true.Bool [AtS] ., T') = eq '_implies_[T1, T] = 'true.Bool [AtS] .
@@ -5071,34 +5080,64 @@ the \verb"maps2maps" function shown above to the body:
              else P'
              fi /\
       QIL := '\t ':apply ' '`( 'rd '`) '\n '\n .
+
+  -----------------------------------------------------------------------------------
+  ---                          developProof -> cevs                               ---
+  -----------------------------------------------------------------------------------
   ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', PO', SIS, MACS')
    if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
       M := getMod(P, NL) /\
       indRequired(SIS, M, T) == empty /\
       not tcRequired(T) /\
       not redRequired(SIS, M, T) /\
+      T1 := cevsRequired(SIS, M, T) /\
+      Ty := getType(metaNormalize(M, T1)) /\
+      | MACS', Q | := addNewMac(MACS, M, T1, cevs) /\
+      [P', PO'] := applyTermMacro(P, NL y PO, Q, T1, cevs, Ty) /\
+      QIL := printCEVS(M, Q, T1) .
+
+  -----------------------------------------------------------------------------------
+  ---                       developProof -> ctfTerm                               ---
+  -----------------------------------------------------------------------------------
+  ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', PO', SIS, MACS')
+   if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
+      M := getMod(P, NL) /\
+      indRequired(SIS, M, T) == empty /\
+      not tcRequired(T) /\
+      not redRequired(SIS, M, T) /\
+      cevsRequired(SIS, M, T) == empty /\
       T1 := ctfTermRequired(SIS, M, T) /\
       Ty := getType(metaNormalize(M, T1)) /\
       | MACS', Q | := addNewMac(MACS, M, T1) /\
       [P', PO'] := applyTermMacro(P, NL y PO, Q, T1, Ty) /\
       QIL := printCtfTermComm(M, Q, T1) .
+
+  -----------------------------------------------------------------------------------
+  ---                          developProof -> ctf                                ---
+  -----------------------------------------------------------------------------------
   ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', PO', SIS, MACS')
    if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
       M := getMod(P, NL) /\
       indRequired(SIS, M, T) == empty /\
       not tcRequired(T) /\
       not redRequired(SIS, M, T) /\
+      cevsRequired(SIS, M, T) == empty /\
       ctfTermRequired(SIS, M, T) == empty /\
       Eq := ctfRequired(SIS, M, T) /\
       | MACS', Q | := addNewMac(MACS, M, Eq) /\
       P' := applyEquationMacro(P, Q, Eq) /\
       PO' := indProofOrder(NL, 2) y PO /\
       QIL := printCtfComm(M, Q, Eq) .
+
+  -----------------------------------------------------------------------------------
+  ---                          developProof -> imp                                ---
+  -----------------------------------------------------------------------------------
   ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', NL y PO, SIS, MACS)
    if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
       M := getMod(P, NL) /\
       indRequired(SIS, M, T) == empty /\
       not tcRequired(T) /\
+      cevsRequired(SIS, M, T) == empty /\
       ctfTermRequired(SIS, M, T) == empty /\
       ctfRequired(SIS, M, T) == none /\
       | Q, SB | := impRequired(SIS, M, T) /\
@@ -5116,7 +5155,7 @@ the \verb"maps2maps" function shown above to the body:
               then '\t ':postpone '. '\n '\n
                    developProof(selectGoal(P, fst(PO)), PO, SIS, MACS)
               else nil
-              fi [owise] .
+              fi .
 
   op indRequired : ScoreInfoSet Module Term -> TermList .
   ceq indRequired(SIS, M, T) = V
@@ -5126,6 +5165,49 @@ the \verb"maps2maps" function shown above to the body:
 
   op tcRequired : Term -> Bool .
   eq tcRequired(T) = hasVariables(T) .
+
+  -------------------------------------------------------------------------------------
+  ---                              cevsTermRequired                                 ---
+  -------------------------------------------------------------------------------------
+
+  op cevsRequired : ScoreInfoSet Module Term -> TermList .
+  ceq cevsRequired(SIS, M, T) = $cevsRequired(SIS1, SIS2, M, T, 2)
+   if [SIS1, SIS2] := divideByExecEqs(SIS, 1) .
+
+  op $cevsRequired : ScoreInfoSet ScoreInfoSet Module Term Nat -> TermList .
+  ceq $cevsRequired($ M, M', (TL, T, TL') $
+                       $ M1, M2, (TL1, T1, TL2) $ SIS, SIS2, M'', T', N) = T5
+   if CS := getSub(M, T, M'', T') /\
+      *** Consistent premises
+      consistentPremises(M', M'', CS) /\
+      eq T3 = T'' [AtS] . EqS := getEqs(M') /\
+      isExec(AtS) /\
+      T5 := applyCS(T3, CS) /\
+      isCEVS(M, T'') /\
+      not isEquality(T3) /\
+      ((T'' =/= 'true.Bool) and (T'' =/= 'false.Bool)) /\
+      not eqDefinedFor(M'', T5) .
+  eq $cevsRequired(SIS1, SIS2, M, T, N) =
+      if (SIS2 == noScoreInfo) or
+         (ctfTermRequired(SIS1, M, T) =/= none) or
+         (ctfRequired(SIS1, M, T) =/= none)
+      then empty
+      else $cevsRequired(fst(divideByExecEqs(SIS2, N)),
+                         snd(divideByExecEqs(SIS2, N)), M, T, s(N))
+      fi [owise] .
+
+  op isCEVS : Module Term -> Bool .
+  eq isCEVS(M, T) = subsortUnaryBinaryOpConstraints(M, T) .
+  eq isCEVS(M, T) = false [owise] .
+
+  op checkTermCEVS : Module Term -> Bool .
+  ceq checkTermCEVS(M, Q[T, C]) = isCtor(M, T)
+   if op Q : TyL -> Ty [ctor AtS] . ODS := getOps(M) .
+  eq checkTermCEVS(M, T) = false [owise] .
+
+  ------------------------------------------------------------------------------------
+  ---                              ctfTermRequired                                 ---
+  ------------------------------------------------------------------------------------
 
   op ctfTermRequired : ScoreInfoSet Module Term -> TermList .
   ceq ctfTermRequired(SIS, M, T) = $ctfTermRequired(SIS1, SIS2, M, T, 2)
@@ -5188,6 +5270,10 @@ the \verb"maps2maps" function shown above to the body:
   ceq eqDefinedFor(M, T, 'false.Bool) = true
    if eqDefinedFor(M, T, 'true.Bool) .
   eq eqDefinedFor(M, T, T') = false [owise] .
+
+  ------------------------------------------------------------------------------------
+  ---                                ctfRequired                                   ---
+  ------------------------------------------------------------------------------------
 
   op ctfRequired : ScoreInfoSet Module Term -> EquationSet .
   ceq ctfRequired(SIS, M, T) = $ctfRequired(SIS1, SIS2, M, T, 2)
@@ -5509,7 +5595,7 @@ the \verb"maps2maps" function shown above to the body:
                                                hasSubsort(getSubsorts(M), Ty) .
 
   op hasSingleBinaryCtor : OpDeclSet Type -> Bool .
-  eq hasSingleBinaryCtor(op Q : Ty1 Ty2 -> Ty [ctor AtS] . ODS, Ty) = hasNoOther(ODS, Ty) .
+  eq hasSingleBinaryCtor(op Q : Ty1 Ty2 -> Ty [ctor assoc AtS] . ODS, Ty) = hasNoOther(ODS, Ty) .
   eq hasSingleBinaryCtor(ODS, Ty) = false [owise] .
 
   op hasNoOther : OpDeclSet Type -> Bool .
@@ -5536,7 +5622,7 @@ the \verb"maps2maps" function shown above to the body:
                                               hasSubsort(getSubsorts(M), Ty) .
 
   op hasBinaryCtor : OpDeclSet Type -> Bool .
-  eq hasBinaryCtor(op Q : Ty1 Ty2 -> Ty [ctor AtS] . ODS, Ty) = true .
+  eq hasBinaryCtor(op Q : Ty1 Ty2 -> Ty [ctor assoc AtS] . ODS, Ty) = true .
   eq hasBinaryCtor(ODS, Ty) = false [owise] .
 
   op hasUnaryCtor : OpDeclSet Type -> Bool .
@@ -5639,8 +5725,13 @@ the \verb"maps2maps" function shown above to the body:
 
   op printCtfTermComm : Module Qid Term -> QidList .
   eq printCtfTermComm(M, Q, T) = '\t ':def Q '= ':ctf ' '`[
-                             metaPrettyPrint(M, T, po) ' '. '`] '\n '\n
-                             '\t ':apply '`( Q '`) '\n '\n .
+                                 metaPrettyPrint(M, T, po) ' '. '`] '\n '\n
+                                 '\t ':apply '`( Q '`) '\n '\n .
+
+  op printCEVS : Module Qid Term -> QidList .
+  eq printCEVS(M, Q, T) = '\t ':def Q '= ':cevs ' '`[
+                          metaPrettyPrint(M, T, po) ' '. '`] '\n '\n
+                          '\t ':apply '`( Q '`) '\n '\n .
 
   ***********************************************************************************
   ******************************* AUXILIARY FUNCTIONS *******************************
@@ -5658,6 +5749,8 @@ the \verb"maps2maps" function shown above to the body:
    if Q := qid("csb" + string(N, 10)) .
   ceq addNewMac(# M, Q - T # MACS, M', Eq', N) = addNewMac(# M, Q - T # MACS, M', Eq', s(N))
    if Q := qid("csb" + string(N, 10)) .
+  ceq addNewMac(# M, Q - T . MLb # MACS, M', Eq', N) = addNewMac(# M, Q - T . MLb # MACS, M', Eq', s(N))
+   if Q := qid("csb" + string(N, 10)) .
   ceq addNewMac(MACS, M, Eq, N) = | # M, Q - Eq # MACS, Q |
    if Q := qid("csb" + string(N, 10)) [owise] .
 
@@ -5669,7 +5762,23 @@ the \verb"maps2maps" function shown above to the body:
    if Q := qid("csb" + string(N, 10)) .
   ceq addNewMac(# M, Q - T # MACS, M', T', N) = addNewMac(# M, Q - T # MACS, M', T', s(N))
    if Q := qid("csb" + string(N, 10)) .
+  ceq addNewMac(# M, Q - T . MLb # MACS, M', T', N) = addNewMac(# M, Q - T . MLb # MACS, M', T', s(N))
+   if Q := qid("csb" + string(N, 10)) .
   ceq addNewMac(MACS, M, T, N) = | # M, Q - T # MACS, Q |
+   if Q := qid("csb" + string(N, 10)) [owise] .
+
+  op addNewMac : Macros Module Term MacroLabel -> NewMacPair .
+  eq addNewMac(MACS, M, T, MLb) = addNewMac(MACS, M, T, MLb, 1) .
+
+  op addNewMac : Macros Module Term MacroLabel Nat -> NewMacPair .
+  ceq addNewMac(# M, Q - Eq # MACS, M', T, MLb, N) = addNewMac(# M, Q - Eq # MACS, M', T, MLb, s(N))
+   if Q := qid("csb" + string(N, 10)) .
+  ceq addNewMac(# M, Q - T # MACS, M', T', MLb, N) = addNewMac(# M, Q - T # MACS, M', T', MLb, s(N))
+   if Q := qid("csb" + string(N, 10)) .
+  ceq addNewMac(# M, Q - T . MLb # MACS, M', T', MLb', N) =
+                                        addNewMac(# M, Q - T . MLb # MACS, M', T', MLb', s(N))
+   if Q := qid("csb" + string(N, 10)) .
+  ceq addNewMac(MACS, M, T, MLb, N) = | # M, Q - T . MLb # MACS, Q |
    if Q := qid("csb" + string(N, 10)) [owise] .
 
   ************************************************************************************

@@ -1,0 +1,177 @@
+-- init
+open ABP .
+  red invX(init) .
+close
+
+-- snd1(s)
+open ABP .
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B) = true .
+  eq [inv5 :nonexec] : inv5(s,B) = true .
+  red invX(s) implies invX(snd1(s)) .
+close
+
+-- rec1(s)
+open ABP .
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B) = true .
+  eq [inv5 :nonexec] : inv5(s,B) = true .
+  eq ac(s) = e .
+  red invX(s) implies invX(rec1(s)) .
+close
+open ABP .
+  op s : -> Sys .
+  op b10 : -> Bit .
+  op bs10 : -> BSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B) = true .
+  eq [inv5 :nonexec] : inv5(s,B) = true .
+  eq ac(s) = b10,bs10 .
+  red invX(s) implies invX(rec1(s)) .
+close
+
+-- snd2(s)
+open ABP .
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B) = true .
+  eq [inv5 :nonexec] : inv5(s,B) = true .
+  red invX(s) implies invX(snd2(s)) .
+close
+
+-- rec2(s)
+open ABP .
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B) = true .
+  eq [inv5 :nonexec] : inv5(s,B) = true .
+  eq dc(s) = e .
+  red invX(s) implies invX(rec2(s)) .
+close
+open ABP .
+  op s : -> Sys .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B) = true .
+  eq [inv5 :nonexec] : inv5(s,B) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  red invX(s) implies invX(rec2(s)) .
+close
+
+-- dup1(s)
+open ABP .
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B) = true .
+  eq [inv5 :nonexec] : inv5(s,B) = true .
+  eq dc(s) = e .
+  red invX(s) implies invX(dup1(s)) .
+close
+open ABP .
+  op s : -> Sys .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B) = true .
+  eq [inv5 :nonexec] : inv5(s,B) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  red invX(s) implies invX(dup1(s)) .
+close
+
+-- drp1(s)
+open ABP .
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B) = true .
+  eq [inv5 :nonexec] : inv5(s,B) = true .
+  eq dc(s) = e .
+  red invX(s) implies invX(drp1(s)) .
+close
+open ABP .
+  op s : -> Sys .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B) = true .
+  eq [inv5 :nonexec] : inv5(s,B) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  red invX(s) implies invX(drp1(s)) .
+close
+
+-- dup2(s)
+open ABP .
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B) = true .
+  eq [inv5 :nonexec] : inv5(s,B) = true .
+  eq ac(s) = e .
+  red invX(s) implies invX(dup2(s)) .
+close
+open ABP .
+  op s : -> Sys .
+  op b10 : -> Bit .
+  op bs10 : -> BSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B) = true .
+  eq [inv5 :nonexec] : inv5(s,B) = true .
+  eq ac(s) = b10,bs10 .
+  red invX(s) implies invX(dup2(s)) .
+close
+
+-- drp2(s)
+open ABP .
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B) = true .
+  eq [inv5 :nonexec] : inv5(s,B) = true .
+  eq ac(s) = e .
+  red invX(s) implies invX(drp2(s)) .
+close
+open ABP .
+  op s : -> Sys .
+  op b10 : -> Bit .
+  op bs10 : -> BSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B) = true .
+  eq [inv5 :nonexec] : inv5(s,B) = true .
+  eq ac(s) = b10,bs10 .
+  red invX(s) implies invX(drp2(s)) .
+close
+
+--
+-- QED
+--
