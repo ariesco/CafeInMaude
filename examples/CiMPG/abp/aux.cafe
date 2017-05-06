@@ -1,24 +1,27 @@
 -- init
 open ABP .
   :id(proofABP)
-  red inv1(init) .
+  red inv3(init) .
 close
 
--- init
-open ABP .
-  :id(proofABP)
-  op b : -> Bit .
-  red inv4(init,b) .
-close
 
 -- drp1(s)
 open ABP .
   :id(proofABP)
   op s : -> Sys .
   eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
   eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
   eq dc(s) = e .
-  red inv1(s) implies inv1(drp1(s)) .
+  red inv3(s) implies inv3(drp1(s)) .
 close
 open ABP .
   :id(proofABP)
@@ -27,9 +30,50 @@ open ABP .
   op b10 : -> Bit .
   op prs10 : -> PBPSeq .
   eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
   eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
   eq dc(s) = < p10,b10 >,prs10 .
-  red inv1(s) implies inv1(drp1(s)) .
+  eq prs10 = e .
+  red inv3(s) implies inv3(drp1(s)) .
+close
+open ABP .
+  :id(proofABP)
+  op s : -> Sys .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  op prs10 : -> PBPSeq .
+  op p20 : -> Packet .
+  op b20 : -> Bit .
+  op prs20 : -> PBPSeq .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq [inv4 :nonexec] : inv4(s,B:Bit) = true .
+  eq [inv5 :nonexec] : inv5(s,B:Bit) = true .
+  eq [inv6 :nonexec] : inv6(s,P:Packet,B:Bit) = true .
+  eq [inv7 :nonexec] : inv7(s,P:Packet,B:Bit) = true .
+  eq [inv8 :nonexec] : inv8(s,B1:Bit,B2:Bit,B3:Bit,BS1:BSeq,BS2:BSeq) = true .
+  eq [inv9 :nonexec] : inv9(s,B1:Bit,B2:Bit,B3:Bit,P1:Packet,P2:Packet,P3:Packet,PRS1:PBPSeq,PRS2:PBPSeq) = true .
+  eq [inv10 :nonexec] : inv10(s,B:Bit) = true .
+  eq [inv11 :nonexec] : inv11(s,B:Bit,P:Packet) = true .
+  eq dc(s) = < p10,b10 >,prs10 .
+  eq prs10 = < p20,b20 >,prs20 .
+  red inv7(s,p20,b20) implies inv3(s) implies inv3(drp1(s)) .
+close
+
+-- init
+open ABP .
+  :id(proofABP)
+  op b : -> Bit .
+  red inv4(init,b) .
 close
 
 -- drp1(s)
