@@ -5154,12 +5154,17 @@ the \verb"maps2maps" function shown above to the body:
              then '\t ':imp ' '`[ Q '`] ' '. '\n '\n
              else '\t ':imp ' '`[ Q '`] ' 'by ' '`{ printSub(SB) '`} '\n '\n
              fi .
-  eq developProof(P, NL y PO, SIS, MACS) =
+  ceq developProof(P, NL y PO, SIS, MACS) =
               if PO =/= finished
               then '\t ':postpone '. '\n '\n
                    *** developProof(selectGoal(P, fst(PO)), PO, SIS, MACS)
               else nil
-              fi [owise] .
+              fi
+   if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
+      M := getMod(P, NL) /\
+      cevsRequired(SIS, M, T) == empty /\
+      ctfTermRequired(SIS, M, T) == empty /\
+      EqS := ctfRequired(SIS, M, T) [print EqS owise] .
 
   op indRequired : ScoreInfoSet Module Term -> TermList .
   ceq indRequired(SIS, M, T) = V
@@ -5177,7 +5182,6 @@ the \verb"maps2maps" function shown above to the body:
   op cevsRequired : ScoreInfoSet Module Term -> TermList .
   ceq cevsRequired(SIS, M, T) = $cevsRequired(SIS1, SIS2, M, T, 2)
    if [SIS1, SIS2] := divideByExecEqs(SIS, 1) .
-
   op $cevsRequired : ScoreInfoSet ScoreInfoSet Module Term Nat -> TermList .
   ceq $cevsRequired($ M, M', (TL, T, TL') $ SIS, SIS2, M'', T', N) = T5
    if CS := getSub(M, T, M'', T') /\
@@ -5313,6 +5317,10 @@ the \verb"maps2maps" function shown above to the body:
   eq isExec(nonexec AtS) = false .
   eq isExec(AtS) = true [owise] .
 
+  ------------------------------------------------------------------------------------
+  ---                                impRequired                                   ---
+  ------------------------------------------------------------------------------------
+
   sort ImpRequiredPair .
   op noImpRequired : -> ImpRequiredPair [ctor] .
   op |_,_| : Qid Substitution -> ImpRequiredPair [ctor] .
@@ -5424,6 +5432,13 @@ the \verb"maps2maps" function shown above to the body:
       T2 := applyCS(T', CS) /\
       eqDefinedFor(M', T1) /\
       T3 := getTerm(metaReduce(M', '_=_[T1, T2])) .
+  ceq consistentPremises(eq T = T' [AtS] . EqS, M', CS) = eqDefButCons(M', T1, T2) and
+                                                          consistentPremises(EqS, M', CS)
+   if isExec(AtS) /\
+      T1 := applyCS(T, CS) /\
+      T2 := applyCS(T', CS) /\
+      eqDefinedFor(M', T1) /\
+      not (getTerm(metaReduce(M', '_=_[T1, T2])) :: Term) .
   eq consistentPremises(EqS, M', CS) = true [owise] .
 
   op getNameProofScore : ScoreInfoSet -> Qid .
