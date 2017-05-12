@@ -4317,7 +4317,7 @@ the \verb"maps2maps" function shown above to the body:
   *** Case selection cvss: value (eq1) + seq seq (eq2)
   ceq $applyTermMacro(| M, [NL, CMD, EqS, true, PRVN], mtPT, N' |, PO, Q, T, cvss, Ty) =
                                [| M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, PO']
-   if TL := buildVSS(M, Ty) /\
+   if TL := buildVSS(M, Ty, "VSS" + natlist2string(NL)) /\
       ML := createModules(M, T, TL) /\
       PrL' := createCTFTerm(ML, NL, Q, EqS) /\
       PO' := indProofOrder(fst(PO), size(TL)) y pop(PO) .
@@ -4331,7 +4331,7 @@ the \verb"maps2maps" function shown above to the body:
   *** Case selection cesv: empty (eq1) + seq value (eq2)
   ceq $applyTermMacro(| M, [NL, CMD, EqS, true, PRVN], mtPT, N' |, PO, Q, T, cesv, Ty) =
                                [| M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, PO']
-   if TL := buildESV(M, Ty) /\
+   if TL := buildESV(M, Ty, "ESV" + natlist2string(NL)) /\
       ML := createModules(M, T, TL) /\
       PrL' := createCTFTerm(ML, NL, Q, EqS) /\
       PO' := indProofOrder(fst(PO), size(TL)) y pop(PO) .
@@ -4340,30 +4340,30 @@ the \verb"maps2maps" function shown above to the body:
   eq natlist2string(nil) = "" .
   eq natlist2string(N NL) = string(N, 10) + natlist2string(NL) .
 
-  op buildVSS : Module Type -> TermList .
-  ceq buildVSS(M, Ty) = TL', TL
+  op buildVSS : Module Type String -> TermList .
+  ceq buildVSS(M, Ty, St) = TL', TL
    if ODS := getExactCtors(M, Ty) /\
       TL := buildTermsCtors(ODS, "VSS") /\
       SS := lesserSorts(M, Ty) /\
-      TL' := buildTermsOrFreshConst(M, SS) .
+      TL' := buildTermsOrFreshConst(M, SS, St + "Sub") .
 
   op buildEVS : Module Type String -> TermList .
   ceq buildEVS(M, Ty, St) = combineEVS(TL, TL')
    if ODS := getExactCtors(M, Ty) /\
       TL := buildTermsCtors(ODS, St) /\
       SS := lesserSorts(M, Ty) /\
-      TL' := buildTermsOrFreshConst(M, SS) .
+      TL' := buildTermsOrFreshConst(M, SS, St + "Sub") .
 
   op combineEVS : TermList TermList ~> TermList .
   eq combineEVS((C, T), TL) = C, putTogetherEVS(T, TL) .
   eq combineEVS((T, C), TL) = C, putTogetherEVS(T, TL) .
 
-  op buildESV : Module Type -> TermList .
-  ceq buildESV(M, Ty) = combineEVS(TL, TL')
+  op buildESV : Module Type String -> TermList .
+  ceq buildESV(M, Ty, St) = combineEVS(TL, TL')
    if ODS := getExactCtors(M, Ty) /\
-      TL := buildTermsCtors(ODS, "VSS") /\
+      TL := buildTermsCtors(ODS, St) /\
       SS := lesserSorts(M, Ty) /\
-      TL' := buildTermsOrFreshConst(M, SS) .
+      TL' := buildTermsOrFreshConst(M, SS, St + "Sub") .
 
   op combineESV : TermList TermList ~> TermList .
   eq combineESV((C, T), TL) = C, putTogetherESV(T, TL) .
@@ -4377,15 +4377,15 @@ the \verb"maps2maps" function shown above to the body:
   eq putTogetherESV(T, empty) = empty .
   eq putTogetherESV(Q[T, T'], (T1, TL)) = Q[T, T1], putTogetherESV(Q[T, T'], TL) .
 
-  op buildTermsOrFreshConst : Module SortSet -> TermList .
-  eq buildTermsOrFreshConst(M, none) = empty .
-  ceq buildTermsOrFreshConst(M, Srt ; SS) = TL, buildTermsOrFreshConst(M, SS)
+  op buildTermsOrFreshConst : Module SortSet String -> TermList .
+  eq buildTermsOrFreshConst(M, none, St) = empty .
+  ceq buildTermsOrFreshConst(M, Srt ; SS, St) = TL, buildTermsOrFreshConst(M, SS, St)
    if ODS := getExactCtors(M, Srt) /\
       ODS =/= none /\
-      TL := buildTermsCtors(ODS, "VSS") .
-  ceq buildTermsOrFreshConst(M, Srt ; SS) = T, buildTermsOrFreshConst(M, SS)
+      TL := buildTermsCtors(ODS, St) .
+  ceq buildTermsOrFreshConst(M, Srt ; SS, St) = T, buildTermsOrFreshConst(M, SS, St)
    if getExactCtors(M, Srt) == none /\
-      T := qid("VSSVal" + string(Srt) + "." + string(Srt)) .
+      T := qid(St + string(Srt) + "." + string(Srt)) .
 
 
 
@@ -5131,7 +5131,7 @@ the \verb"maps2maps" function shown above to the body:
       | MACS', Q | := addNewMac(MACS, M, Eq) /\
       P' := applyEquationMacro(P, Q, Eq) /\
       PO' := indProofOrder(NL, 2) y PO /\
-      QIL := printCtfComm(M, Q, Eq) .
+      QIL := printCtfComm(M, Q, Eq) [print "Case split by " Eq] .
 
   -----------------------------------------------------------------------------------
   ---                          developProof -> imp                                ---
@@ -5162,9 +5162,11 @@ the \verb"maps2maps" function shown above to the body:
               fi
    if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
       M := getMod(P, NL) /\
-      cevsRequired(SIS, M, T) == empty /\
-      ctfTermRequired(SIS, M, T) == empty /\
-      EqS := ctfRequired(SIS, M, T) [print EqS owise] .
+      indRequired(SIS, M, T) == empty /\
+      not tcRequired(T) /\
+      TL := cevsRequired(SIS, M, T) /\
+***      TL := ctfTermRequired(SIS, M, T) /\
+      EqS := ctfRequired(SIS, M, T) [print EqS " y " TL owise] .
 
   op indRequired : ScoreInfoSet Module Term -> TermList .
   ceq indRequired(SIS, M, T) = V
@@ -5183,7 +5185,7 @@ the \verb"maps2maps" function shown above to the body:
   ceq cevsRequired(SIS, M, T) = $cevsRequired(SIS1, SIS2, M, T, 2)
    if [SIS1, SIS2] := divideByExecEqs(SIS, 1) .
   op $cevsRequired : ScoreInfoSet ScoreInfoSet Module Term Nat -> TermList .
-  ceq $cevsRequired($ M, M', (TL, T, TL') $ SIS, SIS2, M'', T', N) = T5
+  ceq $cevsRequired($ M, M', (TL, T, TL') $ SIS, SIS2, M'', T', N) = T6
    if CS := getSub(M, T, M'', T') /\
       *** Consistent premises
       consistentPremises(M', M'', CS) /\
@@ -5193,10 +5195,31 @@ the \verb"maps2maps" function shown above to the body:
       isCEVS(M, T'') /\
       not isEquality(T3) /\
       ((T'' =/= 'true.Bool) and (T'' =/= 'false.Bool)) /\
-      not eqDefinedFor(M'', T5) .
+      T6 := instantiateVars(M, M'', T5, CS) /\
+      not eqDefinedFor(M'', T6) .
+  ceq $cevsRequired($ M, M', (TL, T, TL') $ SIS,
+                    $ M1, M2, (TL1, T1, TL2) $ SIS2, M'', T', N) = T6
+   if CS := getSub(M, T, M'', T') /\
+      CS' := getSub(M1, T1, M'', T') /\
+      *** Consistent premises
+      consistentPremises(M', M'', CS) /\
+      consistentPremises(M2, M'', CS) /\
+      *** Case distinction in the same term
+      eq T3 = T'' [AtS] . EqS := getEqs(M') /\
+      eq T3 = T''' [AtS'] . EqS' := getEqs(M2) /\
+      *** Both equations are executable
+      isExec(AtS) /\
+      isExec(AtS') /\
+      T5 := applyCS(T3, CS) /\
+      isCEVS(M, T''') /\
+      not isEquality(T3) /\
+      ((T'' =/= 'true.Bool) and (T'' =/= 'false.Bool)) /\
+      not eqDefinedFor(M'', T5) /\
+      T6 := instantiateVars(M, M'', T5, CS) /\
+      not eqDefinedFor(M'', T6) .
   eq $cevsRequired(SIS1, SIS2, M, T, N) =
       if (SIS2 == noScoreInfo) or
-         (ctfTermRequired(SIS1, M, T) =/= none) or
+         (ctfTermRequired(SIS1, M, T) =/= empty) or
          (ctfRequired(SIS1, M, T) =/= none)
       then empty
       else $cevsRequired(fst(divideByExecEqs(SIS2, N)),
@@ -5211,6 +5234,28 @@ the \verb"maps2maps" function shown above to the body:
   ceq checkTermCEVS(M, Q[T, C]) = (not (T :: Constant)) and isCtor(M, T)
    if op Q : TyL -> Ty [ctor AtS] . ODS := getOps(M) .
   eq checkTermCEVS(M, T) = false [owise] .
+
+  op instantiateVars : Module Module Term ConsSub -> Term .
+  ceq instantiateVars(M, M', T, CS) = T
+   if getTerm(metaReduce(M', T)) :: Term .
+  ceq instantiateVars(M, M', T, CS) = instantiateVars(EqS, M, M', applyCS(T, CS))
+   if EqS := applySubEqs(getEqs(M), CS) /\
+      EqS' := getEqs(M) .
+
+  op instantiateVars : EquationSet Module Module Term -> Term .
+  ceq instantiateVars(EqS, M, M', T) = T
+   if getTerm(metaReduce(M', T)) :: Term .
+  ceq instantiateVars(eq T1 = T2 [AtS] . EqS, M, M', T) =
+                      instantiateVars(applySubEqs(EqS, CS), M, M', applyCS(T, CS))
+   if not (getTerm(metaReduce(M', T)) :: Term) /\
+      eq T1 = T3 [AtS'] . EqS' := getEqs(M') /\
+      CS := getSub(M, T2, M', T3) .
+
+  op applySubEqs : EquationSet ConsSub -> EquationSet .
+  ceq applySubEqs(eq T = T' [AtS] . EqS, CS) = eq applyCS(T, CS) = applyCS(T', CS) [AtS] .
+                                               applySubEqs(EqS, CS)
+   if isExec(AtS) .
+  eq applySubEqs(EqS, CS) = none .
 
   ------------------------------------------------------------------------------------
   ---                              ctfTermRequired                                 ---
@@ -5267,6 +5312,9 @@ the \verb"maps2maps" function shown above to the body:
   op eqDefinedFor : Module Term -> Bool .
   ceq eqDefinedFor(M, T) = true
    if eq T = T' [AtS] . EqS := getEqs(M) .
+  ceq eqDefinedFor(M, T) = true
+   if eq '_=_[T, T'] = T'' [AtS] . EqS := getEqs(M) .
+  eq eqDefinedFor(M, '_=_[T, T']) = eqDefinedFor(M, T, T') .
   eq eqDefinedFor(M, T) = false [owise] .
 
   op eqDefinedFor : Module Term Term -> Bool .
@@ -5298,7 +5346,13 @@ the \verb"maps2maps" function shown above to the body:
       T4 := applyCS(T2, CS) /\
       not eqDefinedFor(M'', T3, T4) /\
       not eqDefinedFor(M'', T3) /\
-      Eq := ctfEq(T3, T4) .
+      T5 := instantiateVars(M, M'', T3, CS) /\
+      not eqDefinedFor(M'', T5) /\
+      T6 := instantiateVars(M, M'', T4, CS) /\
+      not eqDefinedFor(M'', T5, T6) /\
+      not eqDefinedFor(M'', T5) /\
+      Eq := ctfEq(T5, T6) . *** /\
+***       EqS' := getEqs(M'') [print EqS' " y el termino es\n" T5] .
   eq $ctfRequired(SIS1, SIS2, M, T, N) =
       if SIS2 == noScoreInfo
       then none
@@ -5330,25 +5384,26 @@ the \verb"maps2maps" function shown above to the body:
    if CS := getSub(M, T2, M'', T) /\
       *** Same premises
       samePremises(M, M', M'', CS) /\
-      T3 := getTermImplication('_implies_[T1, T2], T, CS) /\
+      T3 := getTermImplication(M, M'', '_implies_[T1, T2], T, CS) /\
       eq T3 = 'true.Bool [label(Q) AtS] . EqS := getEqs(M'') .
   ceq impRequired($ M, M', (TL, '_implies_[T1, T2], TL') $ SIS, M'', T) = | Q, SB |
    if CS := getSub(M, T2, M'', T) /\
       *** Same premises
       samePremises(M, M', M'', CS) /\
-      T3 := getTermImplication('_implies_[T1, T2], T, CS) /\
+      T3 := getTermImplication(M, M'', '_implies_[T1, T2], T, CS) /\
       eq T4 = 'true.Bool [label(Q) AtS] . EqS := getEqs(M'') /\
       T3 =/= T4 /\
       SB := computeSub(T4, T3) .
   eq impRequired(SIS, M, T) = noImpRequired [owise] .
 
-  op getTermImplication : Term Term ConsSub -> TermList .
-  ceq getTermImplication('_implies_[T1, T2], T, CS) = T3
+  op getTermImplication : Module Module Term Term ConsSub -> TermList .
+  ceq getTermImplication(M, M', '_implies_[T1, T2], T, CS) = T4
    if impLevels(T) == impLevels(T2) /\
-      T3 := applyCS(T1, CS) .
-  ceq getTermImplication('_implies_[T1, T2], T, CS) = getTermImplication(T2, T, CS)
+      T3 := applyCS(T1, CS) /\
+      T4 := instantiateVars(M, M', T3, CS) .
+  ceq getTermImplication(M, M', '_implies_[T1, T2], T, CS) = getTermImplication(M, M', T2, T, CS)
    if impLevels(T2) > impLevels(T) .
-  eq getTermImplication(T, T', CS) = empty [owise] .
+  eq getTermImplication(M, M', T, T', CS) = empty [owise] .
 
   *** Term with variables (premise)
   *** Ground term (term being reduced, once substituted)
@@ -5396,7 +5451,7 @@ the \verb"maps2maps" function shown above to the body:
                                                        eqDefButCons(M', T1, T2) and
                                                        samePremises(M, EqS, M', CS)
    if isExec(AtS) /\
-      T1 := applyCS(T, CS) /\
+      T1 := instantiateVars(M, M', applyCS(T, CS), CS) /\
       T2 := applyCS(T', CS) .
   eq samePremises(M, EqS, M', CS) = true [owise] .
 
@@ -5422,24 +5477,24 @@ the \verb"maps2maps" function shown above to the body:
   *** Top module
   *** Goal module
   op consistentPremises : Module Module ConsSub -> Bool .
-  eq consistentPremises(M, M', CS) = consistentPremises(getEqs(M), M', CS) .
+  eq consistentPremises(M, M', CS) = consistentPremises(getEqs(M), M, M', CS) .
 
-  op consistentPremises : EquationSet Module ConsSub -> Bool .
-  ceq consistentPremises(eq T = T' [AtS] . EqS, M', CS) = (T3 =/= 'false.Bool) and
-                                                          consistentPremises(EqS, M', CS)
+  op consistentPremises : EquationSet Module Module ConsSub -> Bool .
+  ceq consistentPremises(eq T = T' [AtS] . EqS, M, M', CS) = (T3 =/= 'false.Bool) and
+                                                          consistentPremises(EqS, M, M', CS)
    if isExec(AtS) /\
-      T1 := applyCS(T, CS) /\
+      T1 := instantiateVars(M, M', applyCS(T, CS), CS) /\
       T2 := applyCS(T', CS) /\
       eqDefinedFor(M', T1) /\
       T3 := getTerm(metaReduce(M', '_=_[T1, T2])) .
-  ceq consistentPremises(eq T = T' [AtS] . EqS, M', CS) = eqDefButCons(M', T1, T2) and
-                                                          consistentPremises(EqS, M', CS)
+  ceq consistentPremises(eq T = T' [AtS] . EqS, M, M', CS) = eqDefButCons(M', T1, T2) and
+                                                          consistentPremises(EqS, M, M', CS)
    if isExec(AtS) /\
-      T1 := applyCS(T, CS) /\
+      T1 := instantiateVars(M, M', applyCS(T, CS), CS) /\
       T2 := applyCS(T', CS) /\
       eqDefinedFor(M', T1) /\
       not (getTerm(metaReduce(M', '_=_[T1, T2])) :: Term) .
-  eq consistentPremises(EqS, M', CS) = true [owise] .
+  eq consistentPremises(EqS, M, M', CS) = true [owise] .
 
   op getNameProofScore : ScoreInfoSet -> Qid .
   eq getNameProofScore($ M, M', (T, TL)$ SIS) = getNameProofScore(getImports(M')) .
