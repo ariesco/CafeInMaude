@@ -4678,6 +4678,7 @@ the \verb"maps2maps" function shown above to the body:
   op applyImp : Module Equation Qid NatList Substitution -> ProofBool .
   ceq applyImp(M, Eq, Q, NL, SB) = [| M, [NL, 'imp, Eq', true, false], mtPT, 1 |, true]
    if eq T = 'true.Bool [label(Q) AtS] . EqS := getEqs(M) /\
+      ODS := getOps(M) /\
       Eq' := impEq(M, Eq, substitute(T, SB)) .
   eq applyImp(M, Eq, Q, N, SB) = [mtPT, false] [owise] .
 
@@ -4685,7 +4686,7 @@ the \verb"maps2maps" function shown above to the body:
   eq substitute(Q[TL], SB) = Q[substitute*(TL, SB)] .
   eq substitute(C, SB) = C .
   eq substitute(V, V <- T ; SB) = T .
-  eq substitute(V, SB) = V [owise] .
+  eq substitute(T, SB) = T [owise] .
 
   op substitute* : TermList Substitution -> TermList .
   eq substitute*(empty, SB) = empty .
@@ -4721,6 +4722,7 @@ the \verb"maps2maps" function shown above to the body:
   ceq impEq(M, eq T = T' [AtS] ., T'') = eq '_implies_[T1, '_=_[T', T]] =
                                         'true.Bool [AtS] .
    if T1 := getTerm(metaReduce(M, T'')) [owise] .
+
 
   ************************************************************************************
   ******************************* THEOREM OF CONSTANTS *******************************
@@ -5324,6 +5326,7 @@ the \verb"maps2maps" function shown above to the body:
    if eq '_=_[T, T'] = T'' [AtS] . EqS := getEqs(M) .
   ceq eqDefinedFor(M, T, 'false.Bool) = true
    if eqDefinedFor(M, T, 'true.Bool) .
+  eq eqDefinedFor(M, '_=_[T, T'], 'true.Bool) = eqDefinedFor(M, T, T') .
   eq eqDefinedFor(M, T, T') = false [owise] .
 
   ------------------------------------------------------------------------------------
@@ -5345,12 +5348,12 @@ the \verb"maps2maps" function shown above to the body:
       T3 := applyCS(T1, CS) /\
       T4 := applyCS(T2, CS) /\
       not eqDefinedFor(M'', T3, T4) /\
-      not eqDefinedFor(M'', T3) /\
+***      not eqDefinedFor(M'', T3) /\
       T5 := instantiateVars(M, M'', T3, CS) /\
       not eqDefinedFor(M'', T5) /\
       T6 := instantiateVars(M, M'', T4, CS) /\
       not eqDefinedFor(M'', T5, T6) /\
-      not eqDefinedFor(M'', T5) /\
+***      not eqDefinedFor(M'', T5) /\
       Eq := ctfEq(T5, T6) . *** /\
 ***       EqS' := getEqs(M'') [print EqS' " y el termino es\n" T5] .
   eq $ctfRequired(SIS1, SIS2, M, T, N) =
@@ -5481,17 +5484,17 @@ the \verb"maps2maps" function shown above to the body:
 
   op consistentPremises : EquationSet Module Module ConsSub -> Bool .
   ceq consistentPremises(eq T = T' [AtS] . EqS, M, M', CS) = (T3 =/= 'false.Bool) and
-                                                          consistentPremises(EqS, M, M', CS)
+                                                             consistentPremises(EqS, M, M', CS)
    if isExec(AtS) /\
       T1 := instantiateVars(M, M', applyCS(T, CS), CS) /\
-      T2 := applyCS(T', CS) /\
+      T2 := instantiateVars(M, M', applyCS(T', CS), CS) /\
       eqDefinedFor(M', T1) /\
       T3 := getTerm(metaReduce(M', '_=_[T1, T2])) .
   ceq consistentPremises(eq T = T' [AtS] . EqS, M, M', CS) = eqDefButCons(M', T1, T2) and
-                                                          consistentPremises(EqS, M, M', CS)
+                                                             consistentPremises(EqS, M, M', CS)
    if isExec(AtS) /\
       T1 := instantiateVars(M, M', applyCS(T, CS), CS) /\
-      T2 := applyCS(T', CS) /\
+      T2 := instantiateVars(M, M', applyCS(T', CS), CS) /\
       eqDefinedFor(M', T1) /\
       not (getTerm(metaReduce(M', '_=_[T1, T2])) :: Term) .
   eq consistentPremises(EqS, M, M', CS) = true [owise] .
