@@ -5277,7 +5277,7 @@ the \verb"maps2maps" function shown above to the body:
       ((T2 == 'true.Bool) or (T2 == 'false.Bool)) /\
       not isEquality(T1) /\
       T3 := applyCS(T1, CS) /\
-      T4 := applyCS(T2, CS)/\
+      T4 := applyCS(T2, CS) /\
       not eqDefinedFor(M'', T3) /\
       T5 := getTerm(metaReduce(M'', '_=_[T3, T4])) /\
       T5 =/= 'true.Bool /\
@@ -5310,6 +5310,7 @@ the \verb"maps2maps" function shown above to the body:
       else $ctfTermRequired(fst(divideByExecEqs(SIS2, N)),
                             snd(divideByExecEqs(SIS2, N)), M, T, s(N))
       fi [owise] .
+
 
   op eqDefinedFor : Module Term -> Bool .
   ceq eqDefinedFor(M, T) = true
@@ -5352,6 +5353,7 @@ the \verb"maps2maps" function shown above to the body:
       T5 := instantiateVars(M, M'', T3, CS) /\
       not eqDefinedFor(M'', T5) /\
       T6 := instantiateVars(M, M'', T4, CS) /\
+      eqDefinedInAll(SIS SIS2, M'', T', T5, T6) /\
       not eqDefinedFor(M'', T5, T6) /\
 ***      not eqDefinedFor(M'', T5) /\
       Eq := ctfEq(T5, T6) . *** /\
@@ -5362,6 +5364,26 @@ the \verb"maps2maps" function shown above to the body:
       else $ctfRequired(fst(divideByExecEqs(SIS2, N)),
                         snd(divideByExecEqs(SIS2, N)), M, T, s(N))
       fi [owise] .
+
+  *** Term in the goal and terms for the generated equation
+  op eqDefinedInAll : ScoreInfoSet Module Term Term Term -> Bool .
+  ceq eqDefinedInAll($ M, M', (TL, T, TL') $ SIS, M'', T', T1, T2) = false
+   if CS := getSub(M, T, M'', T') /\
+      *** Consistent premises
+      consistentPremises(M', M'', CS) /\
+      not hasEqDefined(M, M', M'', T1, T2, CS) .
+  eq eqDefinedInAll(SIS, M, T, T1, T2) = true [owise] .
+
+  op hasEqDefined : Module Module Module Term Term ConsSub -> Bool .
+  ceq hasEqDefined(M, M', M'', T, T', CS) = true
+   if eq T1 = T2 [AtS] . EqS := getEqs(M') /\
+      T := instantiateVars(M, M'', T1, CS) /\
+      T' := instantiateVars(M, M'', T2, CS) .
+  ceq hasEqDefined(M, M', M'', T, T', CS) = true
+   if eq '_=_[T1, T2] = 'false [AtS] . EqS := getEqs(M') /\
+      T := instantiateVars(M, M'', T1, CS) /\
+      T' := instantiateVars(M, M'', T2, CS) .
+  eq hasEqDefined(M, M', M'', T, T', CS) = false [owise] .
 
   op ctfEq : Term Term -> Equation .
   eq ctfEq('_=_[T1, T2], 'false.Bool) = eq T1 = T2 [none] . .
