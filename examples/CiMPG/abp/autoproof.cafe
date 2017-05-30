@@ -1,16 +1,8 @@
 open ABP .
 	:goal{
-		eq [proofABP :nonexec] : inv1(S:Sys) = true .
-		eq [proofABP1 :nonexec] : inv2(S:Sys) = true .
-		eq [proofABP2 :nonexec] : inv3(S:Sys) = true .
-		eq [proofABP3 :nonexec] : inv10(S:Sys,B:Bit) = true .
-		eq [proofABP4 :nonexec] : inv4(S:Sys,B:Bit) = true .
-		eq [proofABP5 :nonexec] : inv5(S:Sys,B:Bit) = true .
-		eq [proofABP6 :nonexec] : inv11(S:Sys,B:Bit,P:Packet) = true .
-		eq [proofABP7 :nonexec] : inv6(S:Sys,P:Packet,B:Bit) = true .
-		eq [proofABP8 :nonexec] : inv7(S:Sys,P:Packet,B:Bit) = true .
-		eq [proofABP9 :nonexec] : inv8(S:Sys,B:Bit,B1:Bit,B0:Bit,B:BSeq,B0:BSeq) = true .
-		eq [proofABP10 :nonexec] : inv9(S:Sys,B:Bit,B1:Bit,B0:Bit,P:Packet,P1:Packet,P0:Packet,P:PBPSeq,P0:PBPSeq) = true .
+		eq [proofABP :nonexec] : inv10(S:Sys,B:Bit) = true .
+		eq [proofABP1 :nonexec] : inv4(S:Sys,B:Bit) = true .
+		eq [proofABP2 :nonexec] : inv5(S:Sys,B:Bit) = true .
 	}
 
 	:ind on (S:Sys)
@@ -19,169 +11,73 @@ open ABP .
 
 	:apply(tc)
 
-	:def csb1 = :cevs [dc(S#Sys) .]
+	:apply (rd)
+
+	:apply (rd)
+
+	:apply (rd)
+
+	:apply(tc)
+
+	:def csb1 = :cevs [ac(S#Sys) .]
 
 	:apply(csb1)
 
-	:imp [proofABP] .
+	:imp [proofABP] by {B:Bit <- B@Bit ;}
 
 	:apply (rd)
 
-	:imp [proofABP] .
-
-	:apply (rd)
-
-	:def csb2 = :cevs [dc(S#Sys) .]
+	:def csb2 = :ctf {eq sb(S#Sys) = B@Bit .}
 
 	:apply(csb2)
 
-	:imp [proofABP3] by {B:Bit <- B@Bit ;}
-
-	:apply (rd)
-
-	:imp [proofABP3] by {B:Bit <- B@Bit ;}
-
-	:apply (rd)
-
-	:def csb3 = :cevs [dc(S#Sys) .]
+	:def csb3 = :ctf {eq B@Bit  = B0EVS21Bit .}
 
 	:apply(csb3)
 
-	:imp [proofABP6] by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+	:imp [proofABP] by {B:Bit <- B@Bit ;}
 
 	:apply (rd)
 
-	:imp [proofABP6] by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
-
-	:apply (rd)
-
-	:def csb4 = :cevs [dc(S#Sys) .]
+	:def csb4 = :ctf [B@Bit \in B0#EVS21BSeq  .]
 
 	:apply(csb4)
 
-	:imp [proofABP1] .
+	:imp [proofABP] by {B:Bit <- B@Bit ;}
+
+	:imp [proofABP1] by {B:Bit <- B@Bit ;}
 
 	:apply (rd)
 
-	:imp [proofABP1] .
+	:imp [proofABP] by {B:Bit <- B@Bit ;}
 
 	:apply (rd)
 
-	:def csb5 = :cevs [dc(S#Sys) .]
+	:def csb5 = :ctf [B@Bit \in B0#EVS21BSeq  .]
 
 	:apply(csb5)
 
-	:imp [proofABP2] .
-
-	:apply (rd)
-
-	:def csb6 = :cevs [P0#EVS15PBPSeq  .]
+	:def csb6 = :ctf {eq rb(S#Sys) = sb(S#Sys).}
 
 	:apply(csb6)
 
-	:imp [proofABP2] .
-
-	:apply (rd)
-
-	:imp [proofABP2] .
-
-	:imp [proofABP8] by {B:Bit <- B#EVS152SubBit ; P:Packet <- P#EVS152SubPacket ;}
-
-	:apply (rd)
-
-	:def csb7 = :cevs [dc(S#Sys) .]
+	:def csb7 = :ctf {eq sb(S#Sys) = B0EVS21Bit .}
 
 	:apply(csb7)
 
-	:imp [proofABP4] by {B:Bit <- B@Bit ;}
+	:imp [proofABP] by {B:Bit <- B@Bit ;}
 
 	:apply (rd)
 
-	:imp [proofABP4] by {B:Bit <- B@Bit ;}
+	:imp [proofABP] by {B:Bit <- B@Bit ;}
 
 	:apply (rd)
 
-	:def csb8 = :cevs [dc(S#Sys) .]
+	:def csb8 = :ctf {eq sb(S#Sys) = B0EVS21Bit .}
 
 	:apply(csb8)
 
-	:imp [proofABP5] by {B:Bit <- B@Bit ;}
 
-	:apply (rd)
-
-	:imp [proofABP5] by {B:Bit <- B@Bit ;}
-
-	:apply (rd)
-
-	:def csb9 = :cevs [dc(S#Sys) .]
-
-	:apply(csb9)
-
-	:imp [proofABP7] by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
-
-	:apply (rd)
-
-	:def csb10 = :cevs [P0#EVS18PBPSeq  .]
-
-	:apply(csb10)
-
-	:imp [proofABP7] by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
-
-	:apply (rd)
-
-	:def csb11 = :ctf {eq B#EVS182SubBit  = B@Bit .}
-
-	:apply(csb11)
-
-	:def csb12 = :ctf {eq P#EVS182SubPacket  = P@Packet .}
-
-	:apply(csb12)
-
-	:imp [proofABP7] by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
-
-	:apply (rd)
-
-	:def csb13 = :ctf {eq < P@Packet,B@Bit > \in P0#EVS182PBPSeq  = true .}
-
-	:apply(csb13)
-
-	:def csb14 = :ctf {eq P#EVS18SubPacket  = P@Packet .}
-
-	:apply(csb14)
-
-	:imp [proofABP7] by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
-
-	:imp [proofABP10] by {B0:Bit <- B@Bit ;
-	                      B1:Bit <- B#EVS182SubBit ;
-	                      B:Bit <- B#EVS18SubBit ;
-	                      P0:PBPSeq <- P0#EVS182PBPSeq ;
-	                      P0:Packet <- P@Packet ;
-	                      P1:Packet <- P#EVS182SubPacket ;
-	                      P:PBPSeq <- (e.PBPSeq) ;
-	                      P:Packet <- P#EVS18SubPacket ;}
-
-	:apply (rd)
-
-	:def csb15 = :ctf {eq rb(S#Sys) = B#EVS182SubBit .}
-
-	:apply(csb15)
-
-	:imp [proofABP7] by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
-
-	:imp [proofABP10] by {B0:Bit <- B@Bit ;
-	                      B1:Bit <- B#EVS182SubBit ;
-	                      B:Bit <- B#EVS18SubBit ;
-	                      P0:PBPSeq <- P0#EVS182PBPSeq ;
-	                      P0:Packet <- P@Packet ;
-	                      P1:Packet <- P#EVS182SubPacket ;
-	                      P:PBPSeq <- (e.PBPSeq) ;
-	                      P:Packet <- P#EVS18SubPacket ;}
-
-	:apply (rd)
-
-	:imp [proofABP7] by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
-
-	:apply (rd)
 
  :desc proof
 close
