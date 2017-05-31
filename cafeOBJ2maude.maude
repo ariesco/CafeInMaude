@@ -4388,7 +4388,7 @@ the \verb"maps2maps" function shown above to the body:
   eq combineEVS((T, C), TL) = C, putTogetherEVS(T, TL) .
 
   op buildESV : Module Type String -> TermList .
-  ceq buildESV(M, Ty, St) = combineEVS(TL, TL')
+  ceq buildESV(M, Ty, St) = combineESV(TL, TL')
    if ODS := getExactCtors(M, Ty) /\
       TL := buildTermsCtors(ODS, St) /\
       SS := lesserSorts(M, Ty) /\
@@ -5117,6 +5117,21 @@ the \verb"maps2maps" function shown above to the body:
       QIL := '\t ':apply ' '`( 'rd '`) '\n '\n [print "Red\n"] .
 
   -----------------------------------------------------------------------------------
+  ---                          developProof -> cesv                               ---
+  -----------------------------------------------------------------------------------
+  ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', PO', SIS, MACS')
+   if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
+      M := getMod(P, NL) /\
+      indRequired(SIS, M, T) == empty /\
+      not tcRequired(T) /\
+      [false, SIS] := redRequired(SIS, M, T) /\
+      T1 := cesvRequired(SIS, M, T) /\
+      Ty := getType(metaNormalize(M, T1)) /\
+      | MACS', Q | := addNewMac(MACS, M, T1, cesv) /\
+      [P', PO'] := applyTermMacro(P, NL y PO, Q, T1, cesv, Ty) /\
+      QIL := printCESV(M, Q, T1) [print NL " Termino cesv: " T1 "\n"] .
+
+  -----------------------------------------------------------------------------------
   ---                          developProof -> cevs                               ---
   -----------------------------------------------------------------------------------
   ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', PO', SIS, MACS')
@@ -5125,11 +5140,12 @@ the \verb"maps2maps" function shown above to the body:
       indRequired(SIS, M, T) == empty /\
       not tcRequired(T) /\
       [false, SIS] := redRequired(SIS, M, T) /\
+      cesvRequired(SIS, M, T) == empty /\
       T1 := cevsRequired(SIS, M, T) /\
       Ty := getType(metaNormalize(M, T1)) /\
       | MACS', Q | := addNewMac(MACS, M, T1, cevs) /\
       [P', PO'] := applyTermMacro(P, NL y PO, Q, T1, cevs, Ty) /\
-      QIL := printCEVS(M, Q, T1) [print NL " Termino: " T1 "\n"] .
+      QIL := printCEVS(M, Q, T1) [print NL " Termino cevs: " T1 "\n"] .
 
   -----------------------------------------------------------------------------------
   ---                       developProof -> ctfTerm                               ---
@@ -5140,6 +5156,7 @@ the \verb"maps2maps" function shown above to the body:
       indRequired(SIS, M, T) == empty /\
       not tcRequired(T) /\
       [false, SIS] := redRequired(SIS, M, T) /\
+      cesvRequired(SIS, M, T) == empty /\
       cevsRequired(SIS, M, T) == empty /\
       T1 := ctfTermRequired(SIS, M, T) /\
       Ty := getType(metaNormalize(M, T1)) /\
@@ -5156,6 +5173,7 @@ the \verb"maps2maps" function shown above to the body:
       indRequired(SIS, M, T) == empty /\
       not tcRequired(T) /\
       [false, SIS] := redRequired(SIS, M, T) /\
+      cesvRequired(SIS, M, T) == empty /\
       cevsRequired(SIS, M, T) == empty /\
       ctfTermRequired(SIS, M, T) == empty /\
       Eq := ctfRequired(SIS, M, T) /\
@@ -5173,6 +5191,7 @@ the \verb"maps2maps" function shown above to the body:
       indRequired(SIS, M, T) == empty /\
       not tcRequired(T) /\
       [false, SIS] := redRequired(SIS, M, T) /\
+      cesvRequired(SIS, M, T) == empty /\
       cevsRequired(SIS, M, T) == empty /\
       ctfTermRequired(SIS, M, T) == empty /\
       ctfRequired(SIS, M, T) == none /\
@@ -5250,20 +5269,93 @@ the \verb"maps2maps" function shown above to the body:
                          snd(divideByExecEqs(SIS2, N)), M, T, s(N))
       fi [owise] .
 
+  var Ty' : Type .
+
   op isCEVS : Module Term -> Bool .
+  *** TODO: Comprobar cevs
   eq isCEVS(M, T) = subsortUnaryBinaryOpConstraints(M, T) . *** and checkTermCEVS(M, T) .
   eq isCEVS(M, T) = false [owise] .
 
   op checkTermCEVS : Module Term -> Bool .
-  ceq checkTermCEVS(M, Q[T, C]) = (not (T :: Constant)) and isCtor(M, T)
-   if op Q : TyL -> Ty [ctor AtS] . ODS := getOps(M) .
+  ceq checkTermCEVS(M, Q[T, T']) = true
+   if op Q : Ty1 Ty2 -> Ty [ctor assoc AtS] . ODS := getOps(M) /\
+      Ty' := getType(metaReduce(M, T)) /\
+      Ty' =/= Ty1 /\
+      sortLeq(M, Ty', Ty1) /\
+      getType(metaReduce(M, T')) == Ty2 .
   eq checkTermCEVS(M, T) = false [owise] .
+
+  -------------------------------------------------------------------------------------
+  ---                              cesvTermRequired                                 ---
+  -------------------------------------------------------------------------------------
+
+  op cesvRequired : ScoreInfoSet Module Term -> TermList .
+  ceq cesvRequired(SIS, M, T) = $cesvRequired(SIS1, SIS2, M, T, 2)
+   if [SIS1, SIS2] := divideByExecEqs(SIS, 1) .
+
+  op $cesvRequired : ScoreInfoSet ScoreInfoSet Module Term Nat -> TermList .
+  ceq $cesvRequired($ M, M', (TL, T, TL') $ SIS, SIS2, M'', T', N) = T5
+   if CS := getSub(M, T, M'', T') /\
+      *** Consistent premises
+      consistentPremises(M', M'', CS) /\
+      eq T3 = T'' [AtS] . EqS := getEqs(M') /\
+      isExec(AtS) /\
+      T5 := instantiateVars(M, M'', T3, CS) /\
+      isCESV(M, T'') /\
+      not isEquality(T3) /\
+      ((T'' =/= 'true.Bool) and (T'' =/= 'false.Bool)) /\
+      not eqDefinedFor(M'', T5) /\
+      termDefinedInAll(SIS SIS2, M'', T', T5) .
+  ceq $cesvRequired($ M, M', (TL, T, TL') $ SIS,
+                    $ M1, M2, (TL1, T1, TL2) $ SIS2, M'', T', N) = T5
+   if CS := getSub(M, T, M'', T') /\
+      CS' := getSub(M1, T1, M'', T') /\
+      *** Consistent premises
+      consistentPremises(M', M'', CS) /\
+      consistentPremises(M2, M'', CS) /\
+      *** Case distinction in the same term
+      eq T3 = T'' [AtS] . EqS := getEqs(M') /\
+      eq T3 = T''' [AtS'] . EqS' := getEqs(M2) /\
+      *** Both equations are executable
+      isExec(AtS) /\
+      isExec(AtS') /\
+      T5 := instantiateVars(M, M'', T3, CS) /\
+      isCESV(M1, T''') /\
+      not isEquality(T3) /\
+      ((T'' =/= 'true.Bool) and (T'' =/= 'false.Bool)) /\
+      not eqDefinedFor(M'', T5) /\
+      termDefinedInAll(SIS SIS2, M'', T', T5) .
+  eq $cesvRequired(SIS1, SIS2, M, T, N) =
+      if (SIS2 == noScoreInfo) or
+         (ctfTermRequired(SIS1, M, T) =/= empty) or
+         (ctfRequired(SIS1, M, T) =/= none)
+      then empty
+      else $cesvRequired(fst(divideByExecEqs(SIS2, N)),
+                         snd(divideByExecEqs(SIS2, N)), M, T, s(N))
+      fi [owise] .
+
+  op isCESV : Module Term -> Bool .
+  eq isCESV(M, T) = subsortUnaryBinaryOpConstraints(M, T) and checkTermCESV(M, T) .
+  eq isCESV(M, T) = false [owise] .
+
+  op checkTermCESV : Module Term -> Bool .
+  ceq checkTermCESV(M, Q[T, T']) = true
+   if op Q : Ty1 Ty2 -> Ty [ctor assoc AtS] . ODS := getOps(M) /\
+      Ty1 == getType(metaReduce(M, T)) /\
+      Ty' := getType(metaReduce(M, T')) /\
+      Ty' =/= Ty2 /\
+      sortLeq(M, Ty', Ty2) .
+  eq checkTermCESV(M, T) = false [owise] .
+
+  -------------------------------------------------------------------------------------
+  ---                              instantiateVars                                  ---
+  -------------------------------------------------------------------------------------
 
   op instantiateVars : Module Module Term ConsSub -> Term .
   ceq instantiateVars(M, M', T, CS) = T
    if getTerm(metaReduce(M', T)) :: Term .
   ceq instantiateVars(M, M', T, CS) = instantiateVars(EqS, M, M', applyCS(T, CS))
-   if EqS := applySubEqs(getEqs(M), CS) .
+   if EqS := applySubEqs(getEqs(M), CS) [owise] .
 
   op instantiateVars : EquationSet Module Module Term -> Term .
   ceq instantiateVars(EqS, M, M', T) = T
@@ -5311,7 +5403,7 @@ the \verb"maps2maps" function shown above to the body:
       consistentPremises(M', M'', CS) /\
       CS' := getSub(M1, T1, M'', T') /\
       *** Consistent premises
-      consistentPremises(M1, M'', CS') /\
+      consistentPremises(M2, M'', CS') /\
       eq T3 = T'' [AtS] . EqS := getEqs(M') /\
       isExec(AtS) /\
       eq T4 = T''' [AtS'] . EqS' := getEqs(M2) /\
@@ -5384,7 +5476,6 @@ the \verb"maps2maps" function shown above to the body:
       isExec(AtS) /\
       T3 := instantiateVars(M, M'', T1, CS) /\
       T4 := instantiateVars(M, M'', T2, CS) /\
-***      not eqDefinedFor(M'', T3) /\
       not eqDefinedFor(M'', T3, T4) /\
       eq T5 = T6 [none] . := ctfEq(T3, T4) /\
       eqDefinedInAll(SIS SIS2, M'', T', T5, T6) .
@@ -5488,13 +5579,13 @@ the \verb"maps2maps" function shown above to the body:
 
   op redRequired : ScoreInfoSet Module Term -> RedReqRes .
   ceq redRequired($ M, M', (TL, T, TL') $ SIS, M'', T') = [true, SIS2]
-   if impLevels(T) == impLevels(T') /\
-      CS := getSub(M, T, M'', T') /\
+   if CS := getSub(M, T, M'', T') /\
+      *** Same premises
+      samePremises(M, M', M'', CS) /\
+      impLevels(T) == impLevels(T') /\
       T1 := applyCS(T, CS) /\
       T2 := getTerm(metaReduce(M, T)) /\
       T3 := getTerm(metaReduce(M'', T')) /\
-      *** Same premises
-      samePremises(M, M', M'', CS) /\
       T2 == T3 /\
       SIS2 := if (TL == empty) and (TL' == empty)
               then SIS
@@ -5531,13 +5622,13 @@ the \verb"maps2maps" function shown above to the body:
   op consistentPremises : Module Module ConsSub -> Bool .
   eq consistentPremises(M, M', CS) = consistentPremises(getEqs(M), M, M', CS) .
 
-  op consistentPremises : EquationSet Module Module ConsSub -> Bool .
+  op consistentPremises : EquationSet Module Module ConsSub -> Bool [memo] .
   ceq consistentPremises(eq T = T' [AtS] . EqS, M, M', CS) = (T3 =/= 'false.Bool) and
                                                              *** exactEq(M', T1, T2) and
                                                              consistentPremises(EqS, M, M', CS)
    if isExec(AtS) /\
-      T1 := instantiateVars(M, M', applyCS(T, CS), CS) /\
-      T2 := instantiateVars(M, M', applyCS(T', CS), CS) /\
+      T1 := instantiateVars(M, M', T, CS) /\
+      T2 := instantiateVars(M, M', T', CS) /\
       eqDefinedFor(M', T1) /\
       T3 := getTerm(metaReduce(M', '_=_[T1, T2])) .
   ceq consistentPremises(eq T = T' [AtS] . EqS, M, M', CS) = exactEq(M', T1, T2) and
@@ -5552,7 +5643,7 @@ the \verb"maps2maps" function shown above to the body:
   *** Flat module
   *** Top module
   *** Goal module
-  op consistentPremisesEq : Module Module Module ConsSub -> Bool .
+  op consistentPremisesEq : Module Module Module ConsSub -> Bool [memo] .
   eq consistentPremisesEq(M, M', M'', CS) = consistentPremisesEq(getEqs(M'), M, M', M'', CS) .
 
   op consistentPremisesEq : EquationSet Module Module Module ConsSub -> Bool .
@@ -5582,7 +5673,7 @@ the \verb"maps2maps" function shown above to the body:
   ceq definedForOther(M, eq T = T2 [AtS] . EqS, T, T') = true
    if not isCtor(M, T') /\
       not isCtor(M, T2) /\
-      T' =/=  T2 .
+      T' =/= T2 .
   ceq definedForOther(M, eq '_=_[T, T1] = 'false.Bool [AtS] . EqS, T, T') = true
    if not isCtor(M, T') /\
       T1 =/= T' .
@@ -5924,6 +6015,11 @@ the \verb"maps2maps" function shown above to the body:
 
   op printCEVS : Module Qid Term -> QidList .
   eq printCEVS(M, Q, T) = '\t ':def Q '= ':cevs ' '`[
+                          metaPrettyPrint(M, T, po) ' '. '`] '\n '\n
+                          '\t ':apply '`( Q '`) '\n '\n .
+
+  op printCESV : Module Qid Term -> QidList .
+  eq printCESV(M, Q, T) = '\t ':def Q '= ':cesv ' '`[
                           metaPrettyPrint(M, T, po) ' '. '`] '\n '\n
                           '\t ':apply '`( Q '`) '\n '\n .
 
