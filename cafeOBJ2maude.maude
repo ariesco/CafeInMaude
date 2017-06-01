@@ -4354,16 +4354,26 @@ the \verb"maps2maps" function shown above to the body:
   ceq $applyTermMacro(| M, [NL, CMD, EqS, true, PRVN], mtPT, N' |, PO, Q, T, cesv, Ty) =
                                [| M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, PO']
    if TL := buildESV(M, Ty, "ESV" + natlist2string(NL)) /\
-      ML := createModules(M, T, TL) /\
+      TL' := joinConstantsESV(TL, "ESV" + natlist2string(NL), 0) /\
+      ML := createModules(M, T, TL') /\
       PrL' := createCTFTerm(ML, NL, Q, EqS) /\
-      PO' := indProofOrder(fst(PO), size(TL)) y pop(PO) .
+      PO' := indProofOrder(fst(PO), size(TL')) y pop(PO) .
 
   op joinConstantsEVS : TermList String Nat -> TermList .
   ceq joinConstantsEVS((TL, Q[C, T'], TL', Q[C', T'], TL''), St, N) =
                                             joinConstantsEVS((TL, Q[T'', T'], TL''), St, s(N))
    if Ty := getType(C) /\
+   *** TODO: Mismo tipo constantes
       T'' := qid(substr(string(Ty), 0, 1) + string(N, 10) + St + string(Ty) + "." + string(Ty)) .
   eq joinConstantsEVS(TL, St, N) = TL [owise] .
+
+  op joinConstantsESV : TermList String Nat -> TermList .
+  ceq joinConstantsESV((TL, Q[T', C], TL', Q[T', C'], TL''), St, N) =
+                                            joinConstantsESV((TL, Q[T', T''], TL''), St, s(N))
+   if Ty := getType(C) /\
+   *** TODO: Mismo tipo constantes
+      T'' := qid(substr(string(Ty), 0, 1) + string(N, 10) + St + string(Ty) + "." + string(Ty)) .
+  eq joinConstantsESV(TL, St, N) = TL [owise] .
 
   op natlist2string : NatList -> String .
   eq natlist2string(nil) = "" .
