@@ -5218,7 +5218,7 @@ the \verb"maps2maps" function shown above to the body:
   eq developProof(P, NL y PO, SIS, MACS) =
               if PO =/= finished
               then '\t ':postpone '. '\n '\n
-                   *** developProof(selectGoal(P, fst(PO)), PO, SIS, MACS)
+                   developProof(selectGoal(P, fst(PO)), PO, SIS, MACS)
               else nil
               fi [print "Imp\b" owise] .
 

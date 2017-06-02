@@ -387,13 +387,25 @@ open SCP .
 
 	:apply (rd)
 
+	:def csb33 = :ctf [ac(S#Sys) .]
 
+	:apply(csb33)
 
+	:imp [proofSCP1] .
 
+	:apply (rd)
 
+	:imp [proofSCP1] .
 
+	:apply (rd)
 
-	:desc proof
+	:imp [proofSCP1] .
+
+	:apply (rd)
+
+	:imp [proofSCP2] .
+
+	:apply (rd)
 
 
 close
