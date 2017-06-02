@@ -4251,7 +4251,7 @@ the \verb"maps2maps" function shown above to the body:
   op getCtors : Module OpDeclSet Sort -> OpDeclSet .
   eq getCtors(M, op Q : TyL -> Srt [ctor AtS] . ODS, Srt) = op Q : TyL -> Srt [ctor AtS] .
                                                             getCtors(M, ODS, Srt) .
-  ceq getCtors(M, op Q : TyL -> Ty [ctor AtS] . ODS, Srt) = op Q : TyL -> Srt [ctor AtS] .
+  ceq getCtors(M, op Q : TyL -> Ty [ctor AtS] . ODS, Srt) = op Q : TyL -> Ty [ctor AtS] .
                                                             getCtors(M, ODS, Srt)
    if Ty =/= 'Universal /\
       sameKind(M, Ty, Srt) /\
@@ -5105,7 +5105,7 @@ the \verb"maps2maps" function shown above to the body:
    if eq T = 'true.Bool [AtS] . EqS := getGoal(P, NL) /\
       M := getMod(P, NL) /\
       indRequired(SIS, M, T) == empty /\
-      tcRequired(T) /\
+      (tcRequired(T) or EqS =/= none) /\
       [P', PO'] := applyTC(P, NL y PO) /\
       QIL := '\t ':apply '`( 'tc '`) '\n '\n [print "Theorem of constants"] .
   ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P'', PO', SIS2, MACS)
@@ -5265,7 +5265,7 @@ the \verb"maps2maps" function shown above to the body:
       isExec(AtS) /\
       isExec(AtS') /\
       T5 := instantiateVars(M, M'', T3, CS) /\
-      isCEVS(M, T''') /\
+      isCEVS(M1, T''') /\
       not isEquality(T3) /\
       ((T'' =/= 'true.Bool) and (T'' =/= 'false.Bool)) /\
       not eqDefinedFor(M'', T5) /\
@@ -5283,7 +5283,7 @@ the \verb"maps2maps" function shown above to the body:
 
   op isCEVS : Module Term -> Bool .
   *** TODO: Comprobar cevs
-  eq isCEVS(M, T) = subsortUnaryBinaryOpConstraints(M, T) . *** and checkTermCEVS(M, T) .
+  eq isCEVS(M, T) = subsortUnaryBinaryOpConstraints(M, T) and checkTermCEVS(M, T) .
   eq isCEVS(M, T) = false [owise] .
 
   op checkTermCEVS : Module Term -> Bool .
@@ -5406,11 +5406,12 @@ the \verb"maps2maps" function shown above to the body:
       T5 =/= 'true.Bool /\
       T5 =/= 'false.Bool /\
       termDefinedInAll(SIS SIS2, M'', T', T3) .
-  ceq $ctfTermRequired($ M, M', (TL, T, TL') $
-                       $ M1, M2, (TL1, T1, TL2) $ SIS, SIS2, M'', T', N) = T5
+  ceq $ctfTermRequired($ M, M', (TL, T, TL') $ SIS, SIS2, M'', T', N) = T5
    if CS := getSub(M, T, M'', T') /\
       *** Consistent premises
       consistentPremises(M', M'', CS) /\
+      *** Any level
+      $ M1, M2, (TL1, T1, TL2) $ SIS1 := SIS SIS2 /\
       CS' := getSub(M1, T1, M'', T') /\
       *** Consistent premises
       consistentPremises(M2, M'', CS') /\
