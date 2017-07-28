@@ -4171,8 +4171,7 @@ the \verb"maps2maps" function shown above to the body:
 
   op evalApply : Module Qid ProofTree Variable Macros ProofOrder -> GoalRes .
   ceq evalApply(M, 'si, P, V, MACS, PO) = [P', PO', QIL]
-   if ODS := getCtors(M, getType(V)) /\
-      [P', PO'] := applyInduction(P, V, PO) /\
+   if [P', PO'] := applyInduction(P, V, PO) /\
       QIL := '\n 'Induction 'applied 'on metaPrettyPrint(M, V, po) ':
              '\n 'New 'goal: printGoals(P') '\n .
   ceq evalApply(M, 'tc, P, V, MACS, PO) = [P', PO', QIL]
@@ -4576,12 +4575,8 @@ the \verb"maps2maps" function shown above to the body:
    if ODS := getCtors(M, getType(V)) /\
       TL := buildTermsCtors(ODS, "") /\
       Ty := getType(V) /\
-      C := qid(substr(string(Ty), 0, 1) + "#" + string(Ty) + "." + string(Ty)) /\
-      EqS' := createHI(EqS, V, C) /\
-      OD := op getName(C) : nil -> getType(C) [metadata("generated-si")] . /\
-      M' := addHyp(addOp(M, OD), EqS') /\
       PO' := indProofOrder(fst(PO), size(TL)) y pop(PO) /\
-      PrL' := subGoal*(M', [NL, CMD, EqS, true, PRVN], V, TL, NL, 1) .
+      PrL' := subGoal*(M, [NL, CMD, EqS, true, PRVN], V, Ty, TL, NL, 1) .
 
   op applyInduction* : ProofTreeList Variable ProofOrder -> IndResPair .
   eq applyInduction*(mtPT, V, PO) = [mtPT, finished] .
@@ -4589,14 +4584,34 @@ the \verb"maps2maps" function shown above to the body:
    if [P', PO'] := applyInduction(| M', G, PrL, N |, V, PO) /\
       [P'', PO''] := applyInduction*(PrL', V, PO) .
 
-  op subGoal* : Module Goal Variable TermList NatList Nat -> ProofTreeList .
-  eq subGoal*(M, G, V, empty, NL, N) = mtPT .
-  eq subGoal*(M, G, V, (T, TL), NL, N) = subGoal(M, getEq(G), V, T, NL, N)
-                                         subGoal*(M, G, V, TL, NL, s(N)) .
+  op subGoal* : Module Goal Variable Type TermList NatList Nat -> ProofTreeList .
+  eq subGoal*(M, G, V, Ty, empty, NL, N) = mtPT .
+  eq subGoal*(M, G, V, Ty, (T, TL), NL, N) = subGoal(M, getEq(G), V, Ty, T, NL, N)
+                                             subGoal*(M, G, V, Ty, TL, NL, s(N)) .
 
-  op subGoal : Module EquationSet Variable Term NatList Nat -> ProofTree .
-  eq subGoal(M, EqS, V, T, NL, N) =
-            | addCons(M, T), [NL N, 'SI, makeSub(EqS, V, T), N == 1, false], mtPT, 1 | .
+  op subGoal : Module EquationSet Variable Type Term NatList Nat -> ProofTree .
+  ceq subGoal(M, EqS, V, Ty, T, NL, N) =
+            | addCons(M', T), [NL N, 'SI, makeSub(EqS, V, T), N == 1, false], mtPT, 1 |
+   if TL := getConstsOfSort(M, T, Ty) /\
+      EqS' := createHI(EqS, V, TL) /\
+      M' := addHyp(M, EqS') .
+
+  op getConstsOfSort : Module Term Type -> TermList .
+  eq getConstsOfSort(M, Q[TL], Ty) = getConstsOfSort*(M, TL, Ty) .
+  eq getConstsOfSort(M, T, Ty) = empty [owise] .
+
+  op $getConstsOfSort : Module Term Type -> TermList .
+  eq $getConstsOfSort(M, Q[TL], Ty) = getConstsOfSort*(M, TL, Ty) .
+  ceq $getConstsOfSort(M, C, Ty) = C
+   if Ty' := getType(C) /\
+      sameKind(M, Ty', Ty) /\
+      sortLeq(M, Ty', Ty) .
+  eq $getConstsOfSort(M, T, Ty) = empty [owise] .
+
+  op getConstsOfSort* : Module TermList Type -> TermList .
+  eq getConstsOfSort*(M, empty, Ty) = empty .
+  eq getConstsOfSort*(M, (T, TL), Ty) = $getConstsOfSort(M, T, Ty),
+                                        getConstsOfSort*(M, TL, Ty) .
 
   *** We make sure not to add constant constructors by skipping them at first.
   op addCons : Module Term -> Module .
@@ -4635,15 +4650,20 @@ the \verb"maps2maps" function shown above to the body:
          ceq subTerm(T, V, T1) = subTerm(T', V, T1) if subCond(COND, V, T1) [AtS] .
          makeSub(EqS, V, T1) .
 
-  op createHI : EquationSet Variable Term -> EquationSet .
-  eq createHI(none, V, T) = none .
-  eq createHI(eq T = T' [AtS] . EqS, V, T1) =
-         eq subTerm(T, V, T1) = subTerm(T', V, T1) [metadata("HI") AtS] .
-         createHI(EqS, V, T1) .
-  eq createHI(ceq T = T' if COND [AtS] . EqS, V, T1) =
+  op createHI : EquationSet Variable TermList -> EquationSet .
+  eq createHI(none, V, TL) = none .
+  eq createHI(Eq EqS, V, TL) = $createHI(Eq, V, TL)
+                               createHI(EqS, V, TL) .
+
+  op $createHI : Equation Variable TermList -> EquationSet .
+  eq $createHI(Eq, V, empty) = none .
+  eq $createHI(eq T = T' [AtS] ., V, (T1, TL)) =
+        eq subTerm(T, V, T1) = subTerm(T', V, T1) [metadata("HI") AtS] .
+        $createHI(eq T = T' [AtS] ., V, TL) .
+  eq $createHI(ceq T = T' if COND [AtS] ., V, (T1, TL)) =
          ceq subTerm(T, V, T1) = subTerm(T', V, T1)
           if subCond(COND, V, T1) [metadata("HI") AtS] .
-         createHI(EqS, V, T1) .
+        $createHI(ceq T = T' if COND [AtS] ., V, TL) .
 
   op subTerm : Term Variable Term -> Term .
   eq subTerm(Q[TL], V, T) = Q[subTermList(TL, V, T)] .
