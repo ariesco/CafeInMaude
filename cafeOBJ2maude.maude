@@ -98,7 +98,7 @@ fmod MACROS is
  sorts Macro Macros MacroLabel .
  subsort Macro < Macros .
 
- ops cvss cvvs cvsv cevss cevs cesv cesvs : -> MacroLabel [ctor] .
+ ops cvss cvvs cvsv cevss cvs csv csvs : -> MacroLabel [ctor] .
 
  op #_,_-_# : Module Qid Equation -> Macro [ctor] .
  op #_,_-_# : Module Qid Term -> Macro [ctor] .
@@ -696,9 +696,9 @@ declared or not:
   op :def_=`:cvvs[_] : @CafeToken@ @CafeBubble@ -> @CafeInductiveComm@ [ctor] .
   op :def_=`:cvsv[_] : @CafeToken@ @CafeBubble@ -> @CafeInductiveComm@ [ctor] .
   op :def_=`:cevss[_] : @CafeToken@ @CafeBubble@ -> @CafeInductiveComm@ [ctor] .
-  op :def_=`:cevs[_] : @CafeToken@ @CafeBubble@ -> @CafeInductiveComm@ [ctor] .
-  op :def_=`:cesv[_] : @CafeToken@ @CafeBubble@ -> @CafeInductiveComm@ [ctor] .
-  op :def_=`:cesvs[_] : @CafeToken@ @CafeBubble@ -> @CafeInductiveComm@ [ctor] .
+  op :def_=`:cvs[_] : @CafeToken@ @CafeBubble@ -> @CafeInductiveComm@ [ctor] .
+  op :def_=`:csv[_] : @CafeToken@ @CafeBubble@ -> @CafeInductiveComm@ [ctor] .
+  op :def_=`:csvs[_] : @CafeToken@ @CafeBubble@ -> @CafeInductiveComm@ [ctor] .
 
   ***(
   :cs-vss: case splitting value (eq1) and seq seq (eq2)
@@ -3031,13 +3031,13 @@ identifiers to extend the variable set with the variables defined on the fly in 
   ceq parseCafeDecl(':def_=`:cevss`[_`][T, T'], PU, U, VDS, PSM, TSM, DB) =
                                                                 < PDR, nil, none, DB >
    if PDR := < PU ; U ; VDS > .
-  ceq parseCafeDecl(':def_=`:cevs`[_`][T, T'], PU, U, VDS, PSM, TSM, DB) =
+  ceq parseCafeDecl(':def_=`:cvs`[_`][T, T'], PU, U, VDS, PSM, TSM, DB) =
                                                                 < PDR, nil, none, DB >
    if PDR := < PU ; U ; VDS > .
-  ceq parseCafeDecl(':def_=`:cesv`[_`][T, T'], PU, U, VDS, PSM, TSM, DB) =
+  ceq parseCafeDecl(':def_=`:csv`[_`][T, T'], PU, U, VDS, PSM, TSM, DB) =
                                                                 < PDR, nil, none, DB >
    if PDR := < PU ; U ; VDS > .
-  ceq parseCafeDecl(':def_=`:cesvs`[_`][T, T'], PU, U, VDS, PSM, TSM, DB) =
+  ceq parseCafeDecl(':def_=`:csvs`[_`][T, T'], PU, U, VDS, PSM, TSM, DB) =
                                                                 < PDR, nil, none, DB >
    if PDR := < PU ; U ; VDS > .
   ceq parseCafeDecl(':show`proof.@CafeInductiveComm@, PU, U, VDS, PSM, TSM, DB) =
@@ -3948,12 +3948,12 @@ the \verb"maps2maps" function shown above to the body:
                                                    ':def_=`:cvsv`[_`][T, T'] .
   eq getRedThCommand(':def_=`:cevss`[_`]['CafeToken[T], 'CafeBubble[T']]) =
                                                    ':def_=`:cevss`[_`][T, T'] .
-  eq getRedThCommand(':def_=`:cevs`[_`]['CafeToken[T], 'CafeBubble[T']]) =
-                                                   ':def_=`:cevs`[_`][T, T'] .
-  eq getRedThCommand(':def_=`:cesv`[_`]['CafeToken[T], 'CafeBubble[T']]) =
-                                                   ':def_=`:cesv`[_`][T, T'] .
-  eq getRedThCommand(':def_=`:cesvs`[_`]['CafeToken[T], 'CafeBubble[T']]) =
-                                                   ':def_=`:cesvs`[_`][T, T'] .
+  eq getRedThCommand(':def_=`:cvs`[_`]['CafeToken[T], 'CafeBubble[T']]) =
+                                                   ':def_=`:cvs`[_`][T, T'] .
+  eq getRedThCommand(':def_=`:csv`[_`]['CafeToken[T], 'CafeBubble[T']]) =
+                                                   ':def_=`:csv`[_`][T, T'] .
+  eq getRedThCommand(':def_=`:csvs`[_`]['CafeToken[T], 'CafeBubble[T']]) =
+                                                   ':def_=`:csvs`[_`][T, T'] .
   eq getRedThCommand(':show`proof.@CafeInductiveComm@) = ':show`proof.@CafeInductiveComm@ .
   eq getRedThCommand(':desc`proof.@CafeInductiveComm@) = ':desc`proof.@CafeInductiveComm@ .
   eq getRedThCommand(':desc`..@CafeInductiveComm@) = ':desc`..@CafeInductiveComm@ .
@@ -4070,28 +4070,29 @@ the \verb"maps2maps" function shown above to the body:
       # M', Q - T2 # := parseTermMacro(P, Q, T') /\
       QIL := '\n Q 'defined 'as ':cevss ' '`[ ' metaPrettyPrint(M', T2, po) ' '`] '\n .
   ceq processRedThCommands(M, PSM, HSM, TSM, DB,
-                          (':def_=`:cevs`[_`][T, T'], TL), T1, P, V, MACS, PO, SIM) =
+                          (':def_=`:cvs`[_`][T, T'], TL), T1, P, V, MACS, PO, SIM) =
            QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,
-                                          MACS # M', Q - T2 . cevs #, PO, SIM)
+                                          MACS # M', Q - T2 . cvs #, PO, SIM)
    if Q := downQid(T) /\
       # M', Q - T2 # := parseTermMacro(P, Q, T') /\
       subsortUnaryBinaryOpConstraints(M', T2) /\
-      QIL := '\n Q 'defined 'as ':cevs ' '`[ ' metaPrettyPrint(M', T2, po) ' '`] '\n .
+      QIL := '\n Q 'defined 'as ':cvs ' '`[ ' metaPrettyPrint(M', T2, po) ' '`] '\n .
   ceq processRedThCommands(M, PSM, HSM, TSM, DB,
-                          (':def_=`:cesv`[_`][T, T'], TL), T1, P, V, MACS, PO, SIM) =
+                          (':def_=`:csv`[_`][T, T'], TL), T1, P, V, MACS, PO, SIM) =
            QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,
-                                          MACS # M', Q - T2 . cesv #, PO, SIM)
+                                          MACS # M', Q - T2 . csv #, PO, SIM)
    if Q := downQid(T) /\
       # M', Q - T2 # := parseTermMacro(P, Q, T') /\
       subsortUnaryBinaryOpConstraints(M', T2) /\
-      QIL := '\n Q 'defined 'as ':cesv ' '`[ ' metaPrettyPrint(M', T2, po) ' '`] '\n .
+      QIL := '\n Q 'defined 'as ':csv ' '`[ ' metaPrettyPrint(M', T2, po) ' '`] '\n .
   ceq processRedThCommands(M, PSM, HSM, TSM, DB,
-                          (':def_=`:cesvs`[_`][T, T'], TL), T1, P, V, MACS, PO, SIM) =
+                          (':def_=`:csvs`[_`][T, T'], TL), T1, P, V, MACS, PO, SIM) =
            QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,
-                                          MACS # M', Q - T2 . cesvs #, PO, SIM)
+                                          MACS # M', Q - T2 . csvs #, PO, SIM)
    if Q := downQid(T) /\
       # M', Q - T2 # := parseTermMacro(P, Q, T') /\
-      QIL := '\n Q 'defined 'as ':cesvs ' '`[ ' metaPrettyPrint(M', T2, po) ' '`] '\n .
+      subsortUnaryBinaryOpConstraints(M', T2) /\
+      QIL := '\n Q 'defined 'as ':csvs ' '`[ ' metaPrettyPrint(M', T2, po) ' '`] '\n .
   ceq processRedThCommands(M, PSM, HSM, TSM, DB,
                            (':show`proof.@CafeInductiveComm@, TL), T1, P, V, MACS, PO, SIM) =
            QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V, MACS, PO, SIM)
@@ -4233,14 +4234,19 @@ the \verb"maps2maps" function shown above to the body:
       [P', PO'] := applyTermMacro(P, PO, Q, T, cvss, Ty) /\
       QIL := '\n 'Generated 'new 'goals
              '\n printGoals(P') .
-  ceq evalApply(M, Q, P, V, # M', Q - T . cevs # MACS, PO) = [P', PO', QIL]
+  ceq evalApply(M, Q, P, V, # M', Q - T . cvs # MACS, PO) = [P', PO', QIL]
    if Ty := getType(metaReduce(M', T)) /\
-      [P', PO'] := applyTermMacro(P, PO, Q, T, cevs, Ty) /\
+      [P', PO'] := applyTermMacro(P, PO, Q, T, cvs, Ty) /\
       QIL := '\n 'Generated 'new 'goals
              '\n printGoals(P') .
-  ceq evalApply(M, Q, P, V, # M', Q - T . cesv # MACS, PO) = [P', PO', QIL]
+  ceq evalApply(M, Q, P, V, # M', Q - T . csv # MACS, PO) = [P', PO', QIL]
    if Ty := getType(metaReduce(M', T)) /\
-      [P', PO'] := applyTermMacro(P, PO, Q, T, cesv, Ty) /\
+      [P', PO'] := applyTermMacro(P, PO, Q, T, csv, Ty) /\
+      QIL := '\n 'Generated 'new 'goals
+             '\n printGoals(P') .
+  ceq evalApply(M, Q, P, V, # M', Q - T . csvs # MACS, PO) = [P', PO', QIL]
+   if Ty := getType(metaReduce(M', T)) /\
+      [P', PO'] := applyTermMacro(P, PO, Q, T, csvs, Ty) /\
       QIL := '\n 'Generated 'new 'goals
              '\n printGoals(P') .
 
@@ -4341,19 +4347,27 @@ the \verb"maps2maps" function shown above to the body:
       ML := createModules(M, T, TL) /\
       PrL' := createCTFTerm(ML, NL, Q, EqS) /\
       PO' := indProofOrder(fst(PO), size(TL)) y pop(PO) .
-  *** Case selection cevs: empty (eq1) + value seq (eq2)
-  ceq $applyTermMacro(| M, [NL, CMD, EqS, true, PRVN], mtPT, N' |, PO, Q, T, cevs, Ty) =
+  *** Case selection cvs: empty (eq1) + value seq (eq2)
+  ceq $applyTermMacro(| M, [NL, CMD, EqS, true, PRVN], mtPT, N' |, PO, Q, T, cvs, Ty) =
                                [| M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, PO']
    if TL := buildEVS(M, Ty, "EVS" + natlist2string(NL)) /\
       TL' := joinConstantsEVS(TL, "EVS" + natlist2string(NL), 0) /\
       ML := createModules(M, T, TL') /\
       PrL' := createCTFTerm(ML, NL, Q, EqS) /\
       PO' := indProofOrder(fst(PO), size(TL')) y pop(PO) .
-  *** Case selection cesv: empty (eq1) + seq value (eq2)
-  ceq $applyTermMacro(| M, [NL, CMD, EqS, true, PRVN], mtPT, N' |, PO, Q, T, cesv, Ty) =
+  *** Case selection csv: empty (eq1) + seq value (eq2)
+  ceq $applyTermMacro(| M, [NL, CMD, EqS, true, PRVN], mtPT, N' |, PO, Q, T, csv, Ty) =
                                [| M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, PO']
    if TL := buildESV(M, Ty, "ESV" + natlist2string(NL)) /\
       TL' := joinConstantsESV(TL, "ESV" + natlist2string(NL), 0) /\
+      ML := createModules(M, T, TL') /\
+      PrL' := createCTFTerm(ML, NL, Q, EqS) /\
+      PO' := indProofOrder(fst(PO), size(TL')) y pop(PO) .
+  *** Case selection csvs: empty (eq1) + seq value seq (eq2)
+  ceq $applyTermMacro(| M, [NL, CMD, EqS, true, PRVN], mtPT, N' |, PO, Q, T, csvs, Ty) =
+                               [| M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, PO']
+   if TL := buildSVS(M, Ty, "ESVS" + natlist2string(NL)) /\
+      TL' := joinConstantsESV(TL, "ESVS" + natlist2string(NL), 0) /\
       ML := createModules(M, T, TL') /\
       PrL' := createCTFTerm(ML, NL, Q, EqS) /\
       PO' := indProofOrder(fst(PO), size(TL')) y pop(PO) .
@@ -4362,7 +4376,7 @@ the \verb"maps2maps" function shown above to the body:
   ceq joinConstantsEVS((TL, Q[C, T'], TL', Q[C', T'], TL''), St, N) =
                                             joinConstantsEVS((TL, Q[T'', T'], TL''), St, s(N))
    if Ty := getType(C) /\
-   *** TODO: Mismo tipo constantes
+      Ty := getType(C') /\
       T'' := qid(substr(string(Ty), 0, 1) + string(N, 10) + St + string(Ty) + "." + string(Ty)) .
   eq joinConstantsEVS(TL, St, N) = TL [owise] .
 
@@ -4370,7 +4384,7 @@ the \verb"maps2maps" function shown above to the body:
   ceq joinConstantsESV((TL, Q[T', C], TL', Q[T', C'], TL''), St, N) =
                                             joinConstantsESV((TL, Q[T', T''], TL''), St, s(N))
    if Ty := getType(C) /\
-   *** TODO: Mismo tipo constantes
+      Ty := getType(C') /\
       T'' := qid(substr(string(Ty), 0, 1) + string(N, 10) + St + string(Ty) + "." + string(Ty)) .
   eq joinConstantsESV(TL, St, N) = TL [owise] .
 
@@ -4407,6 +4421,18 @@ the \verb"maps2maps" function shown above to the body:
   eq combineESV((C, T), TL) = C, putTogetherESV(T, TL) .
   eq combineESV((T, C), TL) = C, putTogetherESV(T, TL) .
 
+  op buildSVS : Module Type String -> TermList .
+  ceq buildSVS(M, Ty, St) = combineSVS(TL, TL'', TL')
+   if ODS := getExactCtors(M, Ty) /\
+      TL := buildTermsCtors(ODS, St + "L") /\
+      TL' := buildTermsCtors(ODS, St + "R") /\
+      SS := lesserSorts(M, Ty) /\
+      TL'' := buildTermsOrFreshConst(M, SS, St + "Sub") .
+
+  op combineSVS : TermList TermList TermList ~> TermList .
+  eq combineSVS(TL, (C, T), TL') = C, putTogetherESV(T, TL) .
+  eq combineSVS(TL, (T, C), TL') = C, putTogetherESV(T, TL) .
+
   op putTogetherEVS : Term TermList -> TermList .
   eq putTogetherEVS(T, empty) = empty .
   eq putTogetherEVS(Q[T, T'], (T1, TL)) = Q[T1, T'], putTogetherEVS(Q[T, T'], TL) .
@@ -4414,6 +4440,11 @@ the \verb"maps2maps" function shown above to the body:
   op putTogetherESV : Term TermList -> TermList .
   eq putTogetherESV(T, empty) = empty .
   eq putTogetherESV(Q[T, T'], (T1, TL)) = Q[T, T1], putTogetherESV(Q[T, T'], TL) .
+
+  op putTogetherSVS : TermList Term TermList -> TermList .
+  eq putTogetherSVS(empty, T, empty) = empty .
+  eq putTogetherSVS((T1, TL), Q[T, T'], (T2, TL')) = Q[T1, T, T2],
+                                                     putTogetherSVS(TL, Q[T, T'], TL') .
 
   op buildTermsOrFreshConst : Module SortSet String -> TermList .
   eq buildTermsOrFreshConst(M, none, St) = empty .
@@ -5147,7 +5178,7 @@ the \verb"maps2maps" function shown above to the body:
       QIL := '\t ':apply ' '`( 'rd '`) '\n '\n [print "Red\n"] .
 
   -----------------------------------------------------------------------------------
-  ---                          developProof -> cesv                               ---
+  ---                          developProof -> csv                                ---
   -----------------------------------------------------------------------------------
   ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', PO', SIS, MACS')
    if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
@@ -5157,12 +5188,12 @@ the \verb"maps2maps" function shown above to the body:
       [false, SIS] := redRequired(SIS, M, T) /\
       T1 := cesvRequired(SIS, M, T) /\
       Ty := getType(metaNormalize(M, T1)) /\
-      | MACS', Q | := addNewMac(MACS, M, T1, cesv) /\
-      [P', PO'] := applyTermMacro(P, NL y PO, Q, T1, cesv, Ty) /\
-      QIL := printCESV(M, Q, T1) [print NL " Termino cesv: " T1 "\n"] .
+      | MACS', Q | := addNewMac(MACS, M, T1, csv) /\
+      [P', PO'] := applyTermMacro(P, NL y PO, Q, T1, csv, Ty) /\
+      QIL := printCESV(M, Q, T1) [print NL " Termino csv: " T1 "\n"] .
 
   -----------------------------------------------------------------------------------
-  ---                          developProof -> cevs                               ---
+  ---                          developProof -> cvs                                ---
   -----------------------------------------------------------------------------------
   ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', PO', SIS, MACS')
    if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
@@ -5173,9 +5204,26 @@ the \verb"maps2maps" function shown above to the body:
       cesvRequired(SIS, M, T) == empty /\
       T1 := cevsRequired(SIS, M, T) /\
       Ty := getType(metaNormalize(M, T1)) /\
-      | MACS', Q | := addNewMac(MACS, M, T1, cevs) /\
-      [P', PO'] := applyTermMacro(P, NL y PO, Q, T1, cevs, Ty) /\
-      QIL := printCEVS(M, Q, T1) [print NL " Termino cevs: " T1 "\n"] .
+      | MACS', Q | := addNewMac(MACS, M, T1, cvs) /\
+      [P', PO'] := applyTermMacro(P, NL y PO, Q, T1, cvs, Ty) /\
+      QIL := printCEVS(M, Q, T1) [print NL " Termino cvs: " T1 "\n"] .
+
+  -----------------------------------------------------------------------------------
+  ---                          developProof -> csvs                                ---
+  -----------------------------------------------------------------------------------
+  ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', PO', SIS, MACS')
+   if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
+      M := getMod(P, NL) /\
+      indRequired(SIS, M, T) == empty /\
+      not tcRequired(T) /\
+      [false, SIS] := redRequired(SIS, M, T) /\
+      cesvRequired(SIS, M, T) == empty /\
+      cevsRequired(SIS, M, T) == empty /\
+      T1 := csvsRequired(SIS, M, T) /\
+      Ty := getType(metaNormalize(M, T1)) /\
+      | MACS', Q | := addNewMac(MACS, M, T1, cvs) /\
+      [P', PO'] := applyTermMacro(P, NL y PO, Q, T1, cvs, Ty) /\
+      QIL := printCEVS(M, Q, T1) [print NL " Termino cvs: " T1 "\n"] .
 
   -----------------------------------------------------------------------------------
   ---                       developProof -> ctfTerm                               ---
@@ -5188,6 +5236,7 @@ the \verb"maps2maps" function shown above to the body:
       [false, SIS] := redRequired(SIS, M, T) /\
       cesvRequired(SIS, M, T) == empty /\
       cevsRequired(SIS, M, T) == empty /\
+      csvsRequired(SIS, M, T) == empty /\
       T1 := ctfTermRequired(SIS, M, T) /\
       Ty := getType(metaNormalize(M, T1)) /\
       | MACS', Q | := addNewMac(MACS, M, T1) /\
@@ -5205,6 +5254,7 @@ the \verb"maps2maps" function shown above to the body:
       [false, SIS] := redRequired(SIS, M, T) /\
       cesvRequired(SIS, M, T) == empty /\
       cevsRequired(SIS, M, T) == empty /\
+      csvsRequired(SIS, M, T) == empty /\
       ctfTermRequired(SIS, M, T) == empty /\
       Eq := ctfRequired(SIS, M, T) /\
       | MACS', Q | := addNewMac(MACS, M, Eq) /\
@@ -5223,6 +5273,7 @@ the \verb"maps2maps" function shown above to the body:
       [false, SIS] := redRequired(SIS, M, T) /\
       cesvRequired(SIS, M, T) == empty /\
       cevsRequired(SIS, M, T) == empty /\
+      csvsRequired(SIS, M, T) == empty /\
       ctfTermRequired(SIS, M, T) == empty /\
       ctfRequired(SIS, M, T) == none /\
       | Q, SB | := impRequired(SIS, M, T) /\
@@ -5302,7 +5353,6 @@ the \verb"maps2maps" function shown above to the body:
   var Ty' : Type .
 
   op isCEVS : Module Term -> Bool .
-  *** TODO: Comprobar cevs
   eq isCEVS(M, T) = subsortUnaryBinaryOpConstraints(M, T) and checkTermCEVS(M, T) .
   eq isCEVS(M, T) = false [owise] .
 
@@ -5314,6 +5364,68 @@ the \verb"maps2maps" function shown above to the body:
       sortLeq(M, Ty', Ty1) /\
       getType(metaReduce(M, T')) == Ty2 .
   eq checkTermCEVS(M, T) = false [owise] .
+
+  -------------------------------------------------------------------------------------
+  ---                              csvsTermRequired                                 ---
+  -------------------------------------------------------------------------------------
+
+  op csvsRequired : ScoreInfoSet Module Term -> TermList .
+  ceq csvsRequired(SIS, M, T) = $csvsRequired(SIS1, SIS2, M, T, 2)
+   if [SIS1, SIS2] := divideByExecEqs(SIS, 1) .
+  op $csvsRequired : ScoreInfoSet ScoreInfoSet Module Term Nat -> TermList .
+  ceq $csvsRequired($ M, M', (TL, T, TL') $ SIS, SIS2, M'', T', N) = T5
+   if CS := getSub(M, T, M'', T') /\
+      *** Consistent premises
+      consistentPremises(M', M'', CS) /\
+      eq T3 = T'' [AtS] . EqS := getEqs(M') /\
+      isExec(AtS) /\
+      T5 := instantiateVars(M, M'', T3, CS) /\
+      isCSVS(M, T'') /\
+      not isEquality(T3) /\
+      ((T'' =/= 'true.Bool) and (T'' =/= 'false.Bool)) /\
+      not eqDefinedFor(M'', T5) /\
+      termDefinedInAll(SIS SIS2, M'', T', T5) .
+  ceq $csvsRequired($ M, M', (TL, T, TL') $ SIS,
+                    $ M1, M2, (TL1, T1, TL2) $ SIS2, M'', T', N) = T5
+   if CS := getSub(M, T, M'', T') /\
+      CS' := getSub(M1, T1, M'', T') /\
+      *** Consistent premises
+      consistentPremises(M', M'', CS) /\
+      consistentPremises(M2, M'', CS) /\
+      *** Case distinction in the same term
+      eq T3 = T'' [AtS] . EqS := getEqs(M') /\
+      eq T3 = T''' [AtS'] . EqS' := getEqs(M2) /\
+      *** Both equations are executable
+      isExec(AtS) /\
+      isExec(AtS') /\
+      T5 := instantiateVars(M, M'', T3, CS) /\
+      isCSVS(M1, T''') /\
+      not isEquality(T3) /\
+      ((T'' =/= 'true.Bool) and (T'' =/= 'false.Bool)) /\
+      not eqDefinedFor(M'', T5) /\
+      termDefinedInAll(SIS SIS2, M'', T', T5) .
+  eq $csvsRequired(SIS1, SIS2, M, T, N) =
+      if (SIS2 == noScoreInfo) or
+         (ctfTermRequired(SIS1, M, T) =/= empty) or
+         (ctfRequired(SIS1, M, T) =/= none)
+      then empty
+      else $csvsRequired(fst(divideByExecEqs(SIS2, N)),
+                         snd(divideByExecEqs(SIS2, N)), M, T, s(N))
+      fi [owise] .
+
+  op isCSVS : Module Term -> Bool .
+  eq isCSVS(M, T) = subsortUnaryBinaryOpConstraints(M, T) and checkTermCSVS(M, T) .
+  eq isCSVS(M, T) = false [owise] .
+
+  op checkTermCSVS : Module Term -> Bool .
+  ceq checkTermCSVS(M, Q[T, T', T'']) = true
+   if op Q : Ty1 Ty2 -> Ty [ctor assoc AtS] . ODS := getOps(M) /\
+      Ty' := getType(metaReduce(M, T')) /\
+      Ty' =/= Ty1 /\
+      sortLeq(M, Ty', Ty1) /\
+      getType(metaReduce(M, T)) == Ty2 /\
+      getType(metaReduce(M, T'')) == Ty2 .
+  eq checkTermCSVS(M, T) = false [owise] .
 
   -------------------------------------------------------------------------------------
   ---                              cesvTermRequired                                 ---
@@ -5925,7 +6037,7 @@ the \verb"maps2maps" function shown above to the body:
 
   ***********************************************************************************
   ***                             AUXILIARY FUNCTIONS                             ***
-  ***                            Case splitting: cevs                             ***
+  ***                            Case splitting: cvs                              ***
   ***********************************************************************************
 
   op subsortUnaryBinaryOpConstraints : Module Term -> Bool .
@@ -5934,7 +6046,7 @@ the \verb"maps2maps" function shown above to the body:
 
   op subsortUnaryBinaryOpConstraints : Module Type -> Bool .
   eq subsortUnaryBinaryOpConstraints(M, Ty) = hasBinaryCtor(getOps(M), Ty) and
-                                              hasUnaryCtor(getOps(M), Ty) and
+                                              *** hasUnaryCtor(getOps(M), Ty) and
                                               hasSubsort(getSubsorts(M), Ty) .
 
   op hasBinaryCtor : OpDeclSet Type -> Bool .
@@ -6045,12 +6157,12 @@ the \verb"maps2maps" function shown above to the body:
                                  '\t ':apply '`( Q '`) '\n '\n .
 
   op printCEVS : Module Qid Term -> QidList .
-  eq printCEVS(M, Q, T) = '\t ':def Q '= ':cevs ' '`[
+  eq printCEVS(M, Q, T) = '\t ':def Q '= ':cvs ' '`[
                           metaPrettyPrint(M, T, po) ' '. '`] '\n '\n
                           '\t ':apply '`( Q '`) '\n '\n .
 
   op printCESV : Module Qid Term -> QidList .
-  eq printCESV(M, Q, T) = '\t ':def Q '= ':cesv ' '`[
+  eq printCESV(M, Q, T) = '\t ':def Q '= ':csv ' '`[
                           metaPrettyPrint(M, T, po) ' '. '`] '\n '\n
                           '\t ':apply '`( Q '`) '\n '\n .
 
@@ -8310,7 +8422,7 @@ set show loop stats off .
 set show loop timing off .
 
 *** for debugging purposes
-set print attribute on .
+set print attribute off .
 
 set show advisories off .
 
