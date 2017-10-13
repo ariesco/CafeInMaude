@@ -132,3 +132,11 @@ The code here includes the last version of the Maude Declarative Debugger and
 Test-Case Generator. More details are available
 [here](http://maude.sip.ucm.es/debugging/) for the declarative debugger and
 [here](http://maude.sip.ucm.es/testing/) for the test-case generator.
+
+Acknowledgments
+---------------
+
+Research partially supported by Japanese project Kakenhi 23220002,
+MICINN Spanish project StrongSoft (TIN2012-39391-C04-04),
+Comunidad de Madrid project N-Greens Software-CM (S2013/ICE-2731),
+and UCM-Santander grant GR3/14.
