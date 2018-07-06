@@ -1,7 +1,7 @@
 Cafe4Maude: A translation from CafeOBJ into Maude
 =================================================
 
-Cafe4Maude is a tool to introduce CafeOBJ specifications into the Maude system.
+CafeInMaude is a tool to introduce CafeOBJ specifications into the Maude system.
 This tool has the following features:
 * Supports operators, predicates, equations, and transitions, and all their related
 attributes.
@@ -20,14 +20,20 @@ those supported by Maude.
 Getting the tool
 ----------------
 
-The code of 'Cafe4Maude' is contained in a GIT repository on GitHub, whose URL is
-https://github.com/ariesco/cafe4Maude. To get a copy of the repository you only
+The code of 'CafeInMaude' is contained in a GIT repository on GitHub, whose URL is
+https://github.com/ariesco/CafeInMaude. To get a copy of the repository you only
 have to write in your Linux/MacOS console:
 
-    $ git clone https://github.com/ariesco/cafe4Maude
+    $ git clone https://github.com/ariesco/CafeInMaude
 
-This will create a cafe4Maude folder containing the source code of the tool as well as
+This will create a CafeInMaude folder containing the source code of the tool as well as
 several examples.
+
+The latest release of CafeInMaude is CafeInMaude 2.0, which corresponds to the
+**cafeOBJ2maude20.maude** file. This version implements the features in the paper
+*Prove it! Inferring Formal Proof Scripts from CafeOBJ Proof Scores*.
+The **cafeOBJ2maude.maude** file is experimental, so we recommend to replace this file with
+**cafeOBJ2maude20.maude** if no new features are required.
 
 Using the tool
 --------------
