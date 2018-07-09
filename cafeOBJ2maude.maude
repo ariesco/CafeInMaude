@@ -4142,7 +4142,7 @@ the \verb"maps2maps" function shown above to the body:
    if T1 := getTerm(metaParse(M, downQidList(T), anyType)) /\
       T'' := addComments(T1) /\
       QIL := evalRedCommandFinal(M, T'', T1) .
-      *** TODO: Simplificar si mismo argumento
+      *** TODO: Simplify if same argument
 )
 
   op evalRedCommandFinal : Module Term Term -> QidList .
@@ -5293,11 +5293,37 @@ the \verb"maps2maps" function shown above to the body:
               else nil
               fi [print "Imp\b" owise] .
 
+  -------------------------------------------------------------------------------------
+  -------------------------------------------------------------------------------------
+  ---                               inferNewProof                                   ---
+  ---                                                                               ---
+  --- This function tries to generate proofs that are not given by the proof        ---
+  --- scores. It first tries to infer "forgotten" nodes, that is, those proof       ---
+  --- scores that are implicitly required because of the rest of scores (e.g. in    ---
+  --- case splitting the rest of cases are given).                                  ---
+  ---                                                                               ---
+  -------------------------------------------------------------------------------------
+  -------------------------------------------------------------------------------------
+  op inferNewProof : ProofTree ProofOrder ScoreInfoSet Macros -> QidList .
+  ceq inferNewProof(P, NL y PO, SIS, MACS) = nil *** QIL developProof(P', PO', SIS, MACS')
+   if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
+      M := getMod(P, NL) /\
+      indRequired(SIS, M, T) == empty /\
+      not tcRequired(T) .
+
+  -------------------------------------------------------------------------------------
+  ---                                 indRequired                                   ---
+  -------------------------------------------------------------------------------------
+
   op indRequired : ScoreInfoSet Module Term -> TermList .
   ceq indRequired(SIS, M, T) = V
    if TrS := getVars(T) /\
       V := getIndVar(T, TrS, SIS) .
   eq indRequired(SIS, M, T) = empty [owise] .
+
+  -------------------------------------------------------------------------------------
+  ---                                 tcRequired                                    ---
+  -------------------------------------------------------------------------------------
 
   op tcRequired : Term -> Bool .
   eq tcRequired(T) = hasVariables(T) .
@@ -8351,7 +8377,7 @@ set to \verb"false":
   rl [init] :
      cafe4maude-init
   => [nil, < o : CafeDatabase | db : initialDatabase, input : nilTermList,
-                                output : ('\n '\t '\b 'CafeInMaude '2.0 (July 6, 2018)
+                                output : ('\n '\t '\b 'CafeInMaude '2.0 '`('July '6'`, '2018'`)
                                           '\o 'started. '\n),
                                 default : 'CONVERSION, initCafeAttS >,
                                 nil] .

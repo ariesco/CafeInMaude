@@ -1,0 +1,18 @@
+#!/bin/sh
+declare -r TEMP=trans-temp-mod
+declare -r ALL=all-temp-mod.cafe
+declare -r CAFE=/Applications/cafeobj/bin/cafeobj
+rm -f $ALL
+rm -f $TEMP
+for (( i=1; i<=$#; i++ ))
+do
+   eval arg=\$$i
+   cat $arg >> $ALL
+done
+echo "\n quit \n" >> $ALL
+STARTTIME=$(gdate +%s%3N)
+$CAFE $ALL
+ENDTIME=$(gdate +%s%3N)
+echo "Cafe execution time $(($ENDTIME - $STARTTIME)) milliseconds."
+rm -f $ALL
+rm -f $TEMP
