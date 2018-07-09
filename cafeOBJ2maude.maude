@@ -8377,8 +8377,9 @@ set to \verb"false":
   rl [init] :
      cafe4maude-init
   => [nil, < o : CafeDatabase | db : initialDatabase, input : nilTermList,
-                                output : ('\n '\t '\b 'CafeInMaude '2.0 '`('July '6'`, '2018'`)
-                                          '\o 'started. '\n),
+                                output : ('\n '\t '\b 'CafeInMaude '2.0 '
+                                          '`( 'July '6 '`, '2018 '`)
+                                          '\o ' 'started. '\n),
                                 default : 'CONVERSION, initCafeAttS >,
                                 nil] .
 
