@@ -3123,7 +3123,7 @@ a list of quoted identifiers reporting the errors found during the parsing proce
 
   vars T T' T'' T''' T1 T2 T3 T4 T5 T6 TP TI : Term .
   var  T? : [Term] .
-  vars TL TL' TL'' PL PL' TLR TL1 TL2 : TermList .
+  vars TL TL' TL'' PL PL' TLR TL1 TL2 TL3 : TermList .
   vars V V' : Variable .
   vars C C' : Constant .
   vars DB DB' : Database .
@@ -3131,14 +3131,14 @@ a list of quoted identifiers reporting the errors found during the parsing proce
   vars F Q Q' Q'' QI QI' TN ID : Qid .
   *** TS: TheorySort
   var  TS : Sort .
-  vars QIL QIL' QIL'' : QidList .
+  vars QIL QIL' QIL'' QILR : QidList .
   vars S S' S'' S''' St St' St'' St''' : String .
   vars CafeM CafeM' : CafeModule .
   var  VDS : OpDeclSet .
   vars PDR PDR' : ParseDeclResult .
   vars PU PU' U U' M : Module .
   vars Ty Ty1 Ty2 : Type .
-  vars N N' N'' : Nat .
+  vars N N' N'' INDENT : Nat .
   **** PSM: Principal Sort Map
   vars PSM PSM' SM SM' : SortMap .
   vars TSM TSM' HSM HSM' : TheorySortMap .
@@ -3172,13 +3172,14 @@ a list of quoted identifiers reporting the errors found during the parsing proce
   vars NL NL' : NatList .
   vars PO PO' PO'' : ProofOrder .
   vars SIM SIM' : ScoreInfoMap .
-  vars SIS SIS1 SIS2 : ScoreInfoSet .
+  vars SIS SIS' SIS1 SIS2 : ScoreInfoSet .
   vars CS CS' : ConsSub .
   var  ML : MList .
   vars MLb MLb' : MacroLabel .
   var  TrS : TermSet .
   var  SB : Substitution .
   var  SISP : SISPair .
+  var  IPL : ImpPairList .
 
 ***(%
 \end{comment}
@@ -5223,7 +5224,7 @@ the \verb"maps2maps" function shown above to the body:
       Ty := getType(metaNormalize(M, T1)) /\
       | MACS', Q | := addNewMac(MACS, M, T1, cvs) /\
       [P', PO'] := applyTermMacro(P, NL y PO, Q, T1, cvs, Ty) /\
-      QIL := printCEVS(M, Q, T1) [print NL " Termino cvs: " T1 "\n"] .
+      QIL := printCEVS(M, Q, T1) [print NL " Termino cevs: " T1 "\n"] .
 
   -----------------------------------------------------------------------------------
   ---                       developProof -> ctfTerm                               ---
@@ -5285,13 +5286,10 @@ the \verb"maps2maps" function shown above to the body:
       QIL := if SB == none
              then '\t ':imp ' '`[ Q '`] ' '. '\n '\n
              else '\t ':imp ' '`[ Q '`] ' 'by ' '`{ printSub(SB) '`} '\n '\n
-             fi .
+             fi [print "Imp"] .
   eq developProof(P, NL y PO, SIS, MACS) =
-              if PO =/= finished
-              then '\t ':postpone '. '\n '\n
-                   developProof(selectGoal(P, fst(PO)), PO, SIS, MACS)
-              else nil
-              fi [print "Imp\b" owise] .
+              inferNewProof(P, NL y PO, SIS, MACS)
+              [owise print "Try reduction and implication for " NL] .
 
   -------------------------------------------------------------------------------------
   -------------------------------------------------------------------------------------
@@ -5304,12 +5302,529 @@ the \verb"maps2maps" function shown above to the body:
   ---                                                                               ---
   -------------------------------------------------------------------------------------
   -------------------------------------------------------------------------------------
+
+  -------------------------------------------------------------------------------------
+  ---                        inferNewProof -> red                                   ---
+  --- We take into account that induction and TC are forced in the previous step.   ---
+  -------------------------------------------------------------------------------------
   op inferNewProof : ProofTree ProofOrder ScoreInfoSet Macros -> QidList .
-  ceq inferNewProof(P, NL y PO, SIS, MACS) = nil *** QIL developProof(P', PO', SIS, MACS')
+  ceq inferNewProof(P, NL y PO, SIS, MACS) = QIL developProof(P'', PO, SIS, MACS)
    if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
       M := getMod(P, NL) /\
-      indRequired(SIS, M, T) == empty /\
-      not tcRequired(T) .
+      redForgotten(M, T) /\
+      [P', true] := applyRed(P) /\
+      B' := PO == finished /\
+      P'' := if not B'
+             then selectGoal(P', fst(PO))
+             else P'
+             fi /\
+      QIL := '\t '*** 'The 'corresponding 'proof 'score 'was 'not 'present. '\n
+             '\t ':apply ' '`( 'rd '`) '\n '\n [print "Red forgotten\n"] .
+  ceq inferNewProof(P, NL y PO, SIS, MACS) = QIL developProof(P', PO, SIS, MACS)
+   if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
+      M := getMod(P, NL) /\
+      not redForgotten(M, T) /\
+      TL := getHypotheses(M) /\
+      [IPL, true] := tryImplication(M, T, TL) /\
+      QIL := printImpCom(IPL) /\
+      B := PO == finished /\
+      P' := if not B
+            then selectGoal(P, fst(PO))
+            else P
+            fi [print "Imp forgotten\n"] .
+  eq inferNewProof(P, NL y PO, SIS, MACS) =
+                 createNewProof(P, NL y PO, SIS, MACS, 5) [owise print "Infer proof for " NL] .
+
+  ---------------------------------------------------------------------------------------
+  ---                                createNewProof                                   ---
+  --- The last argument indicates the maximum depth available when trying.            ---
+  --- It returns either a proof or nil when the proof is not possible.                ---
+  ---------------------------------------------------------------------------------------
+  op createNewProof : ProofTree ProofOrder ScoreInfoSet Macros Nat -> QidList .
+  eq createNewProof(P, PO, SIS, MACS, 0) = nil .
+  eq createNewProof(P, finished, SIS, MACS, N) = nil .
+  -------------------------------------------------------------------------------------
+  ---                                reduction                                      ---
+  -------------------------------------------------------------------------------------
+  ceq createNewProof(P, NL y PO, SIS, MACS, s(N)) = QIL''
+   if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
+      M := getMod(P, NL) /\
+      redForgotten(M, T) /\
+      [P', true] := applyRed(P) /\
+      B' := PO == finished /\
+      P'' := if not B'
+             then selectGoal(P', fst(PO))
+             else P'
+             fi /\
+      QIL   := '\t '*** 'The 'corresponding 'proof 'score 'was 'not 'present. '\n
+               '\t ':apply ' '`( 'rd '`) '\n '\n /\
+      QIL'  := createNewProof(P'', PO, SIS, MACS, s(N)) /\
+      QIL'' := if B' or QIL' =/= nil
+               then QIL QIL'
+               else nil
+               fi [print "Red created\n"] .
+  -------------------------------------------------------------------------------------
+  ---                                implication                                    ---
+  -------------------------------------------------------------------------------------
+  ceq createNewProof(P, NL y PO, SIS, MACS, s(N)) = QIL''
+   if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
+      M := getMod(P, NL) /\
+      not redForgotten(M, T) /\
+      TL := getHypotheses(M) /\
+      [IPL, true] := tryImplication(M, T, TL) /\
+      QIL := printImpCom(IPL) /\
+      B := PO == finished /\
+      P' := if not B
+             then selectGoal(P, fst(PO))
+             else P
+             fi /\
+      QIL'  := createNewProof(P', PO, SIS, MACS, s(N)) /\
+      QIL'' := if B or QIL' =/= nil
+               then QIL QIL'
+               else nil
+               fi .
+  ----------------------------------------------------------------------------------------
+  ---                                case-splitting                                    ---
+  ----------------------------------------------------------------------------------------
+  ceq createNewProof(P, NL y PO, SIS, MACS, s(N)) =
+            QIL
+            if PO =/= finished
+            then developProof(selectGoal(P, fst(PO)), PO, SIS, MACS')
+            else nil
+            fi
+   if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
+      M := getMod(P, NL) /\
+      not redForgotten(M, T) /\
+      TL := getHypotheses(M) /\
+      [IPL, false] := tryImplication(M, T, TL) /\
+      [QIL, MACS', true] := tryCaseSplitting([M, T, s(N)], MACS, nil, "Goal " + list2str(NL), 1)
+        [print "Inference correct "] .
+
+  op list2str : NatList -> String .
+  eq list2str(nil) = "" .
+  eq list2str(N NL) = string(N, 10) + list2str(NL) .
+
+  ceq createNewProof(P, NL y PO, SIS, MACS, s(N)) =
+            if PO =/= finished
+            then QIL
+                 '\t ':postpone '. '\n '\n
+                 developProof(selectGoal(P, fst(PO)), PO, SIS, MACS)
+            else nil
+            fi
+   if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
+      M := getMod(P, NL) /\
+      not redForgotten(M, T) /\
+      TL := getHypotheses(M) /\
+      [IPL, false] := tryImplication(M, T, TL) /\
+      [QIL, MACS', false] := tryCaseSplitting([M, T, s(N)], MACS, nil, "Goal 1", 1)
+        [owise print "Inference failure "] .
+
+  eq createNewProof(P, NL y PO, SIS, MACS, N) =
+            if PO =/= finished
+            then '\t ':postpone '. '\n '\n
+                 developProof(selectGoal(P, fst(PO)), PO, SIS, MACS)
+            else nil
+            fi [owise print "Final postpone"] .
+
+*** TODO: Check case splitting not used for that term?
+
+  *** Goal to prove
+  *** Current SIS
+  *** Success QidList
+  *** Failure QidList
+  *** Indentation
+  op tryCaseSplitting : IT Macros QidList String Nat -> IR .
+  ceq tryCaseSplitting([M, T, N], MACS, QILR, S, INDENT) = [QILR QIL, MACS, true]
+   if redForgotten(M, T) /\
+      QIL := indent(INDENT) '*** qid(S) 'Success 'by 'reduction '\n
+             indent(INDENT) ':apply ' '`( 'rd '`) '\n '\n .
+  ceq tryCaseSplitting([M, T, N], MACS, QILR, S, INDENT) = [QILR QIL, MACS, true]
+   if not redForgotten(M, T) /\
+      TL := getHypotheses(M) /\
+      [IPL, true] := tryImplication(M, T, TL) /\
+      QIL := printImpCom(IPL, S, INDENT) .
+  ceq tryCaseSplitting([M, T, 0], MACS, QILR, S, INDENT) = [QILR QIL, MACS, false]
+   if not redForgotten(M, T) /\
+      TL := getHypotheses(M) /\
+      [IPL, false] := tryImplication(M, T, TL) /\
+      QIL := indent(INDENT) '*** qid(S) 'cannot 'be 'discharged.
+                            'Maximum 'depth 'reached. '\n '\n [print " asfds"] .
+  ceq tryCaseSplitting([M, T, s(N)], MACS, QILR, S, INDENT) =
+                 $tryCaseSplitting([M, T, s(N)], MACS, QILR, TPS, S, INDENT, 1)
+   if not redForgotten(M, T) /\
+      [IPL, false] := tryImplication(M, T, getHypotheses(M)) /\
+      TrS := getEqualityTerms(M, T) /\
+      TPS := processEqualityTerm*(M, TrS) .
+
+  var  MACS'' : Macros .
+  var  IT : IT .
+  var  ITL : ITL .
+  vars TPS TPS' : TrialPairSet .
+  var  TPair : TrialPair .
+  var  CTXT : Context .
+  var  IR : IR .
+
+  op $tryCaseSplitting : IT Macros QidList TrialPairSet String Nat Nat -> IR .
+  eq $tryCaseSplitting([M, T, 0], MACS, QILR, TPS, S, INDENT, N') =
+                                                               [QILR, MACS, false] .
+  eq $tryCaseSplitting([M, T, N], MACS, QILR, mtTPS, S, INDENT, N') =
+                                                               [QILR, MACS, false] .
+  ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, ([T', ctf] TPS), S, INDENT, N') =
+             if B
+             then [QIL'', MACS'', true]
+             else $tryCaseSplitting([M, T, s(N)], MACS, QILR, TPS, S, INDENT, s(N'))
+             fi
+   if Eq := getEq(T') /\
+      | MACS', Q | := addNewMac(MACS, M, Eq) /\
+      M' := createCTFmodTrue(M, Eq) /\
+      M'' := createCTFmodFalse(M, Eq) /\
+      QIL := printCtfComm(M, Q, Eq) /\
+      [QIL', MACS'', B] := tryCaseSplitting*([M', T, N] [M'', T, N],
+                                              MACS', S, s(INDENT), 1) /\
+      QIL'' := indent(INDENT) QILR
+               if B
+               then '*** qid(S) ' '- ' 'Success '\n
+               else '*** qid(S) '`, 'Try qid(string(N', 10)) '- ' 'Failure '\n
+               fi
+               QIL QIL' [print "Case splitting true-false applied " Eq] .
+  ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, ([T', term] TPS), S, INDENT, N') =
+             if B
+             then [QIL'', MACS'', true]
+             else $tryCaseSplitting([M, T, s(N)], MACS, QILR, TPS, S, INDENT, s(N'))
+             fi
+   if | MACS', Q | := addNewMac(MACS, M, T') /\
+      Ty := getType(metaReduce(M, T')) /\
+      ODS := getCtors(M, Ty) /\
+      TL := ordTrueFalse(buildTermsCtors(ODS, "CS")) /\
+      ML := createModules(M, T', TL) /\
+      ITL := createITL(ML, T, N) /\
+      QIL := printCtfTermComm(M, Q, T') /\
+      [QIL', MACS'', B] := tryCaseSplitting*(ITL, MACS', S, s(INDENT), 1) /\
+      QIL'' := indent(INDENT) QILR
+               if B
+               then '*** qid(S) ' '- ' 'Success '\n
+               else '*** qid(S) '`, 'Try qid(string(N', 10)) '- ' 'Failure '\n
+               fi
+               QIL QIL' [print "Case splitting term applied " T'] .
+
+  op createITL : MList Term Nat -> ITL .
+  eq createITL(mtML, T, N) = nilITL .
+  eq createITL(M . ML, T, N) = [M, T, N] createITL(ML, T, N) .
+
+  op getEq : Term ~> Equation .
+  eq getEq('_=_[T, 'false.Bool]) = getEq(T) .
+  eq getEq('_=_[T, T']) = eq T = T' [none] . .
+
+  op tryCaseSplitting* : ITL Macros String Nat Nat -> IR .
+  ceq tryCaseSplitting*(IT ITL, MACS, S, INDENT, N) = [QIL QIL', MACS'', B and B']
+   if [QIL, MACS', B] := tryCaseSplitting(IT, MACS, nil, S + "-" + string(N, 10), INDENT) /\
+      [QIL', MACS'', B'] := tryCaseSplitting*(ITL, MACS', S, INDENT, s(N)) .
+  eq tryCaseSplitting*(nilITL, MACS, S, INDENT, N) = [nil, MACS, true] .
+
+  sorts TrialType TrialPair TrialPairSet .
+  subsort TrialPair < TrialPairSet .
+
+  ops ctf term : -> TrialType [ctor] .
+
+  op [_,_] : Term TrialType -> TrialPair [ctor] .
+
+  op mtTPS : -> TrialPairSet [ctor] .
+  op __ : TrialPairSet TrialPairSet -> TrialPairSet [ctor comm assoc id: mtTPS] .
+  eq TPair TPair TPS = TPair TPS [metadata "idempotency"] .
+
+  op processEqualityTerm : Module Term -> TrialPairSet .
+  ceq processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T1, T2], ctf]
+   if allCtor(M, T1) /\
+      allCtor(M, T2) .
+  ceq processEqualityTerm(M, '_=_[T1, T2]) = processEqualityTerm(M, T1)
+   if not allCtor(M, T1) /\
+      allCtor(M, T2) .
+  ceq processEqualityTerm(M, '_=_[T1, T2]) = processEqualityTerm(M, T2)
+   if allCtor(M, T1) /\
+      not allCtor(M, T2) .
+  ceq processEqualityTerm(M, '_=_[T1, T2]) = processEqualityTerm*(M, T1 | T2)
+   if not allCtor(M, T1) /\
+      not allCtor(M, T2) .
+  ceq processEqualityTerm(M, Q[T, T']) = processEqualityTerm*(M, T | T')
+   if (Q == '_or_) or (Q == '_and_) or (Q == '_xor_) .
+  eq processEqualityTerm(M, 'not_[T]) = processEqualityTerm(M, T) .
+  eq processEqualityTerm(M, 'if_then_else_fi[T, TL]) = processEqualityTerm(M, T) .
+  ceq processEqualityTerm(M, T) = processEqualityTerm(M, T1)
+   if T1 := reduce(M, T) /\
+      T =/= T1 .
+  ceq processEqualityTerm(M, T) = mtTPS
+   if allCtor(M, T) .
+  eq processEqualityTerm(M, T) = $processEqualityTerm(M, T, getEqs(M)) [owise] .
+
+  op $processEqualityTerm : Module Term EquationSet -> TrialPairSet .
+  ceq $processEqualityTerm(M, T, EqS) = if TPS == mtTPS
+                                        then if allCtor(M, T)
+                                             then mtTPS
+                                             else [T, term]
+                                             fi
+                                        else TPS
+                                        fi
+   if TPS := processEq*(M, T, EqS) .
+
+  op processEq* : Module Term EquationSet -> TrialPairSet .
+  eq processEq*(M, T, EqS) = processEq*(M, T, EqS, mtTPS) .
+
+  op processEq* : Module Term EquationSet TrialPairSet -> TrialPairSet .
+  ceq processEq*(M, T, Eq EqS, TPS) = processEq*(M, T, EqS, TPS TPS')
+   if ceq T1 = T2 if COND [AtS] . := Eq /\
+      TPS' := processEq(M, T, Eq, 0) /\
+      TPS' =/= mtTPS .
+  eq processEq*(M, T, EqS, TPS) = if TPS == mtTPS
+                                  then if allCtor(M, T)
+                                       then mtTPS
+                                       else [T, term]
+                                       fi
+                                  else TPS
+                                  fi [owise] .
+
+
+  op processEq : Module Term Equation Nat -> TrialPairSet .
+  ceq processEq(M, T, ceq T1 = T2 if COND [AtS] ., N) = mtTPS
+   if metaXmatch(M, T1, T, nil, 0, unbounded, N) == noMatch .
+  ceq processEq(M, T, Eq, N) = processCond(M, COND, SB)
+                               processEq(M, T, Eq, s(N))
+   if ceq T1 = T2 if COND [AtS] . := Eq /\
+      {SB, CTXT} := metaXmatch(M, T1, T, nil, 0, unbounded, N) /\
+      checkCond(M, COND, SB) .
+  ceq processEq(M, T, Eq, N) = processEq(M, T, Eq, s(N))
+   if ceq T1 = T2 if COND [AtS] . := Eq /\
+      {SB, CTXT} := metaXmatch(M, T1, T, nil, 0, unbounded, N) /\
+      not checkCond(M, COND, SB) .
+
+  *** We assume only equalities are possible, since we are using CafeOBJ modules
+  op checkCond : Module Condition Substitution -> Bool .
+  eq checkCond(M, nil, SB) = true .
+  ceq checkCond(M, T = T' /\ COND, SB) = ((T1 == T2) or
+                                          (not allCtor(M, T1)) or
+                                          (not allCtor(M, T2))) and-then
+                                         checkCond(M, COND, SB)
+   if T1 := substitute(T, SB) /\
+      T2 := substitute(T', SB) .
+
+  op processCond : Module Condition Substitution -> TrialPairSet .
+  eq processCond(M, nil, SB) = mtTPS .
+  ceq processCond(M, T = T' /\ COND, SB) =
+                             processEqualityTerm(M, '_=_[T1, T2])
+                             processCond(M, COND, SB)
+   if T1 := substitute(T, SB) /\
+      T2 := substitute(T', SB) .
+
+  op processEqualityTerm* : Module TermSet -> TrialPairSet .
+  eq processEqualityTerm*(M, emptyTermSet) = mtTPS .
+  eq processEqualityTerm*(M, T | TrS) = processEqualityTerm(M, T)
+                                        processEqualityTerm*(M, TrS) .
+
+  op allCtor : Module Term -> Bool .
+  eq allCtor(M, T) = allCtor(getOps(M), T) .
+
+  op allCtor : OpDeclSet Term -> Bool .
+  eq allCtor(ODS, V) = false .
+  ceq allCtor(op Q : nil -> Ty [ctor AtS] . ODS, C) = true
+   if Q := getName(C) .
+  eq allCtor(op Q : TyL -> Ty [ctor AtS] . ODS, Q[TL]) =
+            allCtor*(op Q : TyL -> Ty [ctor AtS] . ODS, TL) .
+  eq allCtor(ODS, T) = false [owise] .
+
+  op allCtor* : OpDeclSet TermList -> Bool .
+  eq allCtor*(ODS, empty) = true .
+  eq allCtor*(ODS, (T, TL)) = allCtor(ODS, T) and allCtor*(ODS, TL) .
+
+  *** Inference tuple
+  sort IT ITL .
+  subsort IT < ITL .
+
+  op [_,_,_] : Module Term Nat -> IT [ctor] .
+
+  op nilITL : -> IT [ctor] .
+  op __ : ITL ITL -> ITL [ctor assoc id: nilITL] .
+
+  sort IR .
+  *** Command list
+  *** Updated ScoreInfoSet
+  *** Successful or not
+  op [_,_,_] : QidList Macros Bool -> IR [ctor] .
+
+  op indent : Nat -> QidList .
+  eq indent(0) = nil .
+  eq indent(s(N)) = '\t indent(N) .
+
+  ---------------------------------------------------------------------------------------
+  ---                               getEqualityTerms                                  ---
+  ---------------------------------------------------------------------------------------
+
+  op getEqualityTerms : Module Term -> TermSet .
+  eq getEqualityTerms(M, T) = getEqualityTerms(reduce(M, T)) .
+
+  op getEqualityTerms : Term -> TermSet .
+  eq getEqualityTerms('_=_[T1, T2]) = '_=_[T1, T2] .
+  eq getEqualityTerms('not_[T]) = T .
+  ceq getEqualityTerms(Q[TL]) = getEqualityTerms*(TL)
+   if (Q == '_or_) or (Q == '_xor_) or (Q == '_and_) .
+  eq getEqualityTerms('if_then_else_fi[T, T', T'']) = getEqualityTerms(T) .
+  eq getEqualityTerms(T) = emptyTermSet [owise] .
+
+  op getEqualityTerms* : TermList -> TermSet .
+  eq getEqualityTerms*(empty) = emptyTermSet .
+  eq getEqualityTerms*((T, TL)) = getEqualityTerms(T) | getEqualityTerms*(TL) .
+
+
+  ---------------------------------------------------------------------------------------
+  ---                                tryImplication                                   ---
+  ---------------------------------------------------------------------------------------
+
+  sort ImpPair ImpPairList ImpTryRes .
+  subsort ImpPair < ImpPairList .
+
+  op [_,_,_] : Term Qid Substitution -> ImpPair [ctor] .
+
+  op nilIPL : -> ImpPairList [ctor] .
+  op __ : ImpPairList ImpPairList -> ImpPairList [ctor assoc id: nilIPL] .
+
+  op [_,_] : ImpPairList Bool -> ImpTryRes [ctor] .
+
+  op tryImplication : Module Term TermList -> ImpTryRes .
+  eq tryImplication(M, T, TL) = $tryImplication(M, T, TL, empty, nilIPL) .
+
+  op $tryImplication : Module Term TermList TermList ImpPairList -> ImpTryRes .
+  eq $tryImplication(M, T, empty, TL, IPL) = [nilIPL, false] .
+  ceq $tryImplication(M, T, (T', TL), TL', IPL) = [IPL [T', getLabel(M, T'), none], true]
+   if not hasVars(T') /\
+      T'' := '_implies_[T', T] /\
+      reduce(M, T'') == 'true.Bool .
+  ceq $tryImplication(M, T, (T', TL), TL', IPL) = [IPL [T', getLabel(M, T'), SB], true]
+   if hasVars(T') /\
+      SB := getImpSubs(M, T', T) /\
+      T'' := '_implies_[applyImpSub(T', SB), T] /\
+      reduce(M, T'') == 'true.Bool .
+  ceq $tryImplication(M, T, (T', TL), TL', IPL) =
+                      if B
+                      then [IPL, B]
+                      else $tryImplication(M, T, TL, (TL', T'), IPL)
+                      fi
+   if not hasVars(T') /\
+      T'' := '_implies_[T', T] /\
+      reduce(M, T'') =/= 'true.Bool /\
+      [IPL, B] := $tryImplication(M, T, (TL', TL), empty, (IPL [T', getLabel(M, T'), none])) .
+  ceq $tryImplication(M, T, (T', TL), TL', IPL) =
+                      if B
+                      then [IPL, B]
+                      else $tryImplication(M, T, TL, (TL', T'), IPL)
+                      fi
+   if hasVars(T') /\
+      SB := getImpSubs(M, T', T) /\
+      T'' := '_implies_[applyImpSub(T', SB), T] /\
+      reduce(M, T'') =/= 'true.Bool /\
+      [IPL, B] := $tryImplication(M, T, (TL', TL), empty, (IPL [T', getLabel(M, T'), SB])) .
+  eq $tryImplication(M, T, (T', TL), TL', IPL) = $tryImplication(M, T, TL, TL', IPL) .
+
+  op getLabel : Module Term ~> Qid [memo] .
+  eq getLabel(M, T) = getLabel(getEqs(M), T) .
+
+  op getLabel : EquationSet Term ~> Qid [memo] .
+  eq getLabel(eq T = 'true.Bool [label(Q) AtS] . EqS, T) = Q .
+
+  *** Term in premise
+  *** Term in goal
+  *** We assume the first term has vars
+  op getImpSubs : Module Term Term -> Substitution [memo] .
+  ceq getImpSubs(M, T, T') = getImpSubs(T1, T2)
+   if T1 := reduce(M, T) /\
+      T2 := reduce(M, T') [print T1 " y " T2] .
+
+  op getImpSubs : Term Term -> Substitution .
+  ceq getImpSubs(Q[TL], T) = getImpSubs*(TL, T)
+   if tryMatch(Q[TL], T) == none or
+      not (tryMatch(Q[TL], T) :: Substitution) .
+  ceq getImpSubs(Q[TL], T) = SB
+   if SB := tryMatch(Q[TL], T) /\
+      SB =/= none .
+  eq getImpSubs(T, T') = none [owise] .
+
+  op getImpSubs* : TermList Term -> Substitution .
+  eq getImpSubs*(empty, T) = none .
+  eq getImpSubs*((T, TL), T') = getImpSubs(T, T') ; getImpSubs*(TL, T') .
+
+  op tryMatch : Term Term ~> Substitution .
+  eq tryMatch(Q[TL], Q[TL']) = tryMatch*(TL, TL') .
+  ceq tryMatch(Q[TL], Q'[TL']) = traverseRest(Q[TL], TL')
+   if Q =/= Q' [print "Llamada " Q' "[" TL' "]"] .
+
+  op traverseRest : Term TermList ~> Substitution .
+  ceq traverseRest(T, (T', TL)) = SB
+   if SB := tryMatch(T, T') /\ SB =/= none .
+  ceq traverseRest(T, (T', TL)) = traverseRest(T, TL)
+   if not (tryMatch(T, T') :: Substitution) or
+      tryMatch(T, T') == none .
+  eq traverseRest(T, empty) = none .
+
+  op tryMatch* : TermList TermList ~> Substitution .
+  eq tryMatch*(empty, empty) = none .
+  eq tryMatch*((V, TL), (C, TL')) = V <- C ; tryMatch*(TL, TL') .
+  eq tryMatch*((T, TL), (T', TL')) = tryMatch*(TL, TL') [owise] .
+
+  op hasVars : Term -> Bool [memo] .
+  eq hasVars(Q[TL]) = hasVars*(TL) .
+  eq hasVars(V) = true .
+  eq hasVars(C) = false .
+
+  op hasVars* : TermList -> Bool .
+  eq hasVars*(empty) = false .
+  eq hasVars*((T, TL)) = hasVars(T) or-else hasVars*(TL) .
+
+  op applyImpSub : Term Substitution -> Term .
+  eq applyImpSub(Q[TL], SB) = Q[applyImpSub*(TL, SB)] .
+  eq applyImpSub(C, SB) = C .
+  eq applyImpSub(V, V <- T ; SB) = T .
+  eq applyImpSub(V, SB) = V [owise] .
+
+  op applyImpSub* : TermList Substitution -> TermList .
+  eq applyImpSub*((T, TL), SB) = applyImpSub(T, SB), applyImpSub*(TL, SB) .
+  eq applyImpSub*(empty, SB) = empty .
+
+  ------------------------------------------------------------------------------------
+  ---                                printImpCom                                   ---
+  ------------------------------------------------------------------------------------
+
+  *** We assume it reduces the term to true, so the last command is a reduction.
+  op printImpCom : ImpPairList -> QidList .
+  eq printImpCom(nilIPL) =
+             '\t '*** 'The 'corresponding 'proof 'score 'was 'not 'present. '\n
+             '\t ':apply ' '`( 'rd '`) '\n '\n .
+  eq printImpCom([T, Q, SB] IPL) =
+             '\t '*** 'The 'corresponding 'proof 'score 'was 'not 'present. '\n
+             if SB == none
+             then '\t ':imp ' '`[ Q '`] ' '. '\n '\n
+             else '\t ':imp ' '`[ Q '`] ' 'by ' '`{ printSub(SB) '`} '\n '\n
+             fi
+             printImpCom(IPL) .
+
+  *** We assume it reduces the term to true, so the last command is a reduction.
+  op printImpCom : ImpPairList String Nat -> QidList .
+  eq printImpCom(IPL, S, INDENT) =
+             indent(INDENT) '*** qid(S) 'Success 'by 'implication 'and 'reduction. '\n
+             printImpCom(IPL, INDENT) .
+
+  op printImpCom : ImpPairList Nat -> QidList .
+  eq printImpCom(nilIPL, INDENT) =
+             indent(INDENT) ':apply ' '`( 'rd '`) '\n '\n .
+  eq printImpCom([T, Q, SB] IPL, INDENT) =
+             if SB == none
+             then indent(INDENT) ':imp ' '`[ Q '`] ' '. '\n '\n
+             else indent(INDENT) ':imp ' '`[ Q '`] ' 'by ' '`{ printSub(SB) '`} '\n '\n
+             fi
+             printImpCom(IPL, INDENT) .
+
+  -------------------------------------------------------------------------------------
+  ---                                redForgotten                                   ---
+  -------------------------------------------------------------------------------------
+
+  op redForgotten : Module Term -> Bool .
+  eq redForgotten(M, T) = getTerm(metaReduce(M, T)) == 'true.Bool .
 
   -------------------------------------------------------------------------------------
   ---                                 indRequired                                   ---
@@ -6319,6 +6834,22 @@ the \verb"maps2maps" function shown above to the body:
   eq printRedRes(M, T, T', Ty) = '\n 'reduce metaPrettyPrint(M, T, po) '. '\n
                                  '\g '\! 'Result: '\o metaPrettyPrint(M, T', po) ': Ty
                                  '\n .
+
+  op getHypotheses : Module -> TermList [memo] .
+  eq getHypotheses(M) = getHypotheses(getEqs(M)) .
+
+  op getHypotheses : EquationSet -> TermList .
+  eq getHypotheses(eq T = 'true.Bool [metadata("HI") AtS] . EqS) = T, getHypotheses(EqS) .
+  eq getHypotheses(EqS) = empty [owise] .
+
+  op hasVars : Term -> Bool [memo] .
+  eq hasVars(Q[TL]) = hasVars*(TL) .
+  eq hasVars(V) = true .
+  eq hasVars(C) = false .
+
+  op hasVars* : TermList -> Bool .
+  eq hasVars*(empty) = false .
+  eq hasVars*((T, TL)) = hasVars(T) or-else hasVars*(TL) .
 
 ***(%
 \end{comment}
@@ -8435,6 +8966,7 @@ endm
 \begin{comment}
 %)
 
+
 set print conceal on .
 
 print conceal mod_is_sorts_._____endm .
@@ -8447,7 +8979,7 @@ set show loop stats off .
 set show loop timing off .
 
 *** for debugging purposes
-set print attribute off .
+set print attribute on .
 
 set show advisories off .
 

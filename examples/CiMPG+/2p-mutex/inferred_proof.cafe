@@ -1,0 +1,62 @@
+open 2P-MUTEX .
+	:goal{
+		eq [inv1 :nonexec] : inv1(S:Sys) = true .
+	}
+
+	:ind on (S:Sys)
+
+	:apply(si)
+
+	*** Goal`1  -  Success
+	:def csb1 = :ctf [pc2(S#Sys) .]
+
+	:apply(csb1)
+
+		*** Goal`1-1 Success by implication and reduction.
+		:imp [inv1] .
+
+		:apply (rd)
+
+		*** Goal`1-2 Success by reduction
+		:apply (rd)
+
+	*** Goal`2  -  Success
+	:def csb2 = :ctf [pc1(S#Sys) .]
+
+	:apply(csb2)
+
+		*** Goal`2-1 Success by implication and reduction.
+		:imp [inv1] .
+
+		:apply (rd)
+
+		*** Goal`2-2 Success by reduction
+		:apply (rd)
+
+	*** The corresponding proof score was not present.
+	:apply (rd)
+
+	*** Goal`4  -  Success
+	:def csb3 = :ctf [pc1(S#Sys) .]
+
+	:apply(csb3)
+
+		*** Goal`4-1 Success by reduction
+		:apply (rd)
+
+		*** Goal`4-2 Success by reduction
+		:apply (rd)
+
+	*** Goal`5  -  Success
+	:def csb4 = :ctf [pc2(S#Sys) .]
+
+	:apply(csb4)
+
+		*** Goal`5-1 Success by reduction
+		:apply (rd)
+
+		*** Goal`5-2 Success by reduction
+		:apply (rd)
+
+
+close
