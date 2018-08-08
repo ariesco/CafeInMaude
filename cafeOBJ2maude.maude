@@ -4389,9 +4389,11 @@ the \verb"maps2maps" function shown above to the body:
       T'' := qid(substr(string(Ty), 0, 1) + string(N, 10) + St + string(Ty) + "." + string(Ty)) .
   eq joinConstantsESV(TL, St, N) = TL [owise] .
 
+***(
   op natlist2string : NatList -> String .
   eq natlist2string(nil) = "" .
   eq natlist2string(N NL) = string(N, 10) + natlist2string(NL) .
+  )
 
   op buildVSS : Module Type String -> TermList .
   ceq buildVSS(M, Ty, St) = TL', TL
@@ -4865,7 +4867,7 @@ the \verb"maps2maps" function shown above to the body:
   ceq vars2cons(V, M) = [C, M']
    if STR := string(getType(V)) /\
       C := qid(string(getName(V)) + "@" + STR + "." + STR) /\
-      OD := op getName(C) : nil -> getType(V) [none] . /\
+      OD := op getName(C) : nil -> getType(V) [metadata("tc")] . /\
       M' := addOp(M, OD) .
   ceq vars2cons(Q[TL], M) = [Q[TL'], M']
    if [TL', M'] := vars2cons*(TL, M) .
@@ -5132,7 +5134,7 @@ the \verb"maps2maps" function shown above to the body:
       TL := inferGoal(SIS) /\
       EqS := goalEqS(TL, Q, 0) /\
       P := | M, [nil, 'root, EqS, true, false], mtPT, 1 | /\
-      QIL := developProof(P, nil, SIS, MACS) .
+      QIL := developProof(P, nil, SIS, MACS) [print "Goal inferred " TL] .
   eq inferProof(M, Q, SIS, MACS) = '\n '\! '\r 'Error 'while 'generating 'proof '\o '\n [owise] .
 
   op goalEqS : TermList Qid Nat -> EquationSet .
@@ -5287,9 +5289,10 @@ the \verb"maps2maps" function shown above to the body:
              then '\t ':imp ' '`[ Q '`] ' '. '\n '\n
              else '\t ':imp ' '`[ Q '`] ' 'by ' '`{ printSub(SB) '`} '\n '\n
              fi [print "Imp"] .
-  eq developProof(P, NL y PO, SIS, MACS) =
+  ceq developProof(P, NL y PO, SIS, MACS) =
               inferNewProof(P, NL y PO, SIS, MACS)
-              [owise print "Try reduction and implication for " NL] .
+   if eq T = 'true.Bool [AtS] . := getGoal(P, NL)
+              [owise print "Try reduction and implication for " NL " - " T] .
 
   -------------------------------------------------------------------------------------
   -------------------------------------------------------------------------------------
@@ -5397,19 +5400,19 @@ the \verb"maps2maps" function shown above to the body:
       not redForgotten(M, T) /\
       TL := getHypotheses(M) /\
       [IPL, false] := tryImplication(M, T, TL) /\
-      [QIL, MACS', true] := tryCaseSplitting([M, T, s(N)], MACS, nil, "Goal " + list2str(NL), 1)
+      [QIL, MACS', true] := tryCaseSplitting([M, T, s(N)], MACS, nil, "Goal " + natlist2stringNoDot(NL), 1)
         [print "Inference correct "] .
 
-  op list2str : NatList -> String .
-  eq list2str(nil) = "" .
-  eq list2str(N NL) = string(N, 10) + list2str(NL) .
+  op natlist2stringNoDot : NatList -> String .
+  eq natlist2stringNoDot(nil) = "" .
+  eq natlist2stringNoDot(N) = string(N, 10) .
+  eq natlist2stringNoDot(N NL) = string(N, 10) + "-" + natlist2stringNoDot(NL) [owise] .
 
   ceq createNewProof(P, NL y PO, SIS, MACS, s(N)) =
             if PO =/= finished
-            then QIL
-                 '\t ':postpone '. '\n '\n
+            then QIL '\t ':postpone '. '\n '\n
                  developProof(selectGoal(P, fst(PO)), PO, SIS, MACS)
-            else nil
+            else QIL '\t ':postpone '. '\n '\n
             fi
    if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
       M := getMod(P, NL) /\
@@ -5417,14 +5420,14 @@ the \verb"maps2maps" function shown above to the body:
       TL := getHypotheses(M) /\
       [IPL, false] := tryImplication(M, T, TL) /\
       [QIL, MACS', false] := tryCaseSplitting([M, T, s(N)], MACS, nil, "Goal 1", 1)
-        [owise print "Inference failure "] .
+        [owise print "Inference failure " NL] .
 
   eq createNewProof(P, NL y PO, SIS, MACS, N) =
             if PO =/= finished
             then '\t ':postpone '. '\n '\n
                  developProof(selectGoal(P, fst(PO)), PO, SIS, MACS)
-            else nil
-            fi [owise print "Final postpone"] .
+            else '\t ':postpone '. '\n '\n
+            fi [owise print "Final postpone " NL] .
 
 *** TODO: Check case splitting not used for that term?
 
@@ -5448,13 +5451,13 @@ the \verb"maps2maps" function shown above to the body:
       TL := getHypotheses(M) /\
       [IPL, false] := tryImplication(M, T, TL) /\
       QIL := indent(INDENT) '*** qid(S) 'cannot 'be 'discharged.
-                            'Maximum 'depth 'reached. '\n '\n [print " asfds"] .
+                            'Maximum 'depth 'reached. '\n '\n [print "Max depth"] .
   ceq tryCaseSplitting([M, T, s(N)], MACS, QILR, S, INDENT) =
                  $tryCaseSplitting([M, T, s(N)], MACS, QILR, TPS, S, INDENT, 1)
    if not redForgotten(M, T) /\
       [IPL, false] := tryImplication(M, T, getHypotheses(M)) /\
       TrS := getEqualityTerms(M, T) /\
-      TPS := processEqualityTerm*(M, TrS) .
+      TPS := processEqualityTerm*(M, TrS) [print TPS] .
 
   var  MACS'' : Macros .
   var  IT : IT .
@@ -5466,46 +5469,47 @@ the \verb"maps2maps" function shown above to the body:
 
   op $tryCaseSplitting : IT Macros QidList TrialPairSet String Nat Nat -> IR .
   eq $tryCaseSplitting([M, T, 0], MACS, QILR, TPS, S, INDENT, N') =
-                                                               [QILR, MACS, false] .
+                                                 [QILR, MACS, false] [print "Maximum depth"] .
   eq $tryCaseSplitting([M, T, N], MACS, QILR, mtTPS, S, INDENT, N') =
-                                                               [QILR, MACS, false] .
+                                                 [QILR, MACS, false] [print "No more cs available"] .
   ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, ([T', ctf] TPS), S, INDENT, N') =
              if B
              then [QIL'', MACS'', true]
-             else $tryCaseSplitting([M, T, s(N)], MACS, QILR, TPS, S, INDENT, s(N'))
+             else $tryCaseSplitting([M, T, s(N)], MACS, QIL'', TPS, S, INDENT, s(N'))
              fi
    if Eq := getEq(T') /\
       | MACS', Q | := addNewMac(MACS, M, Eq) /\
       M' := createCTFmodTrue(M, Eq) /\
       M'' := createCTFmodFalse(M, Eq) /\
-      QIL := printCtfComm(M, Q, Eq) /\
+      QIL := printCtfComm(M, Q, Eq, INDENT) /\
       [QIL', MACS'', B] := tryCaseSplitting*([M', T, N] [M'', T, N],
                                               MACS', S, s(INDENT), 1) /\
-      QIL'' := indent(INDENT) QILR
+      QIL'' := indent(INDENT)
                if B
                then '*** qid(S) ' '- ' 'Success '\n
-               else '*** qid(S) '`, 'Try qid(string(N', 10)) '- ' 'Failure '\n
+               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- ' 'Failure '\n
                fi
                QIL QIL' [print "Case splitting true-false applied " Eq] .
   ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, ([T', term] TPS), S, INDENT, N') =
              if B
              then [QIL'', MACS'', true]
-             else $tryCaseSplitting([M, T, s(N)], MACS, QILR, TPS, S, INDENT, s(N'))
+             else $tryCaseSplitting([M, T, s(N)], MACS, QIL'', TPS, S, INDENT, s(N'))
              fi
    if | MACS', Q | := addNewMac(MACS, M, T') /\
       Ty := getType(metaReduce(M, T')) /\
       ODS := getCtors(M, Ty) /\
       TL := ordTrueFalse(buildTermsCtors(ODS, "CS")) /\
+      TL =/= empty /\
       ML := createModules(M, T', TL) /\
       ITL := createITL(ML, T, N) /\
-      QIL := printCtfTermComm(M, Q, T') /\
+      QIL := printCtfTermComm(M, Q, T', INDENT) /\
       [QIL', MACS'', B] := tryCaseSplitting*(ITL, MACS', S, s(INDENT), 1) /\
-      QIL'' := indent(INDENT) QILR
+      QIL'' := indent(INDENT)
                if B
                then '*** qid(S) ' '- ' 'Success '\n
-               else '*** qid(S) '`, 'Try qid(string(N', 10)) '- ' 'Failure '\n
+               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- ' 'Failure '\n
                fi
-               QIL QIL' [print "Case splitting term applied " T'] .
+               QIL QIL' [print "Case splitting term applied " T' " - " B] .
 
   op createITL : MList Term Nat -> ITL .
   eq createITL(mtML, T, N) = nilITL .
@@ -5534,17 +5538,18 @@ the \verb"maps2maps" function shown above to the body:
 
   op processEqualityTerm : Module Term -> TrialPairSet .
   ceq processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T1, T2], ctf]
-   if allCtor(M, T1) /\
-      allCtor(M, T2) .
+   if (allCtor(M, T1) or isFreshCons(M, T1)) /\
+      (allCtor(M, T2) or isFreshCons(M, T2)) .
   ceq processEqualityTerm(M, '_=_[T1, T2]) = processEqualityTerm(M, T1)
-   if not allCtor(M, T1) /\
-      allCtor(M, T2) .
+   if not (allCtor(M, T1) or isFreshCons(M, T1)) /\
+      (allCtor(M, T2) or isFreshCons(M, T2)) .
   ceq processEqualityTerm(M, '_=_[T1, T2]) = processEqualityTerm(M, T2)
-   if allCtor(M, T1) /\
-      not allCtor(M, T2) .
+   if (allCtor(M, T1) or isFreshCons(M, T1)) /\
+      not (allCtor(M, T2) or isFreshCons(M, T2)) .
   ceq processEqualityTerm(M, '_=_[T1, T2]) = processEqualityTerm*(M, T1 | T2)
-   if not allCtor(M, T1) /\
-      not allCtor(M, T2) .
+   if not (allCtor(M, T1) or isFreshCons(M, T1)) /\
+      not (allCtor(M, T2) or isFreshCons(M, T2)) /\
+      ODS := getOps(M) .
   ceq processEqualityTerm(M, Q[T, T']) = processEqualityTerm*(M, T | T')
    if (Q == '_or_) or (Q == '_and_) or (Q == '_xor_) .
   eq processEqualityTerm(M, 'not_[T]) = processEqualityTerm(M, T) .
@@ -5688,7 +5693,12 @@ the \verb"maps2maps" function shown above to the body:
   op [_,_] : ImpPairList Bool -> ImpTryRes [ctor] .
 
   op tryImplication : Module Term TermList -> ImpTryRes .
-  eq tryImplication(M, T, TL) = $tryImplication(M, T, TL, empty, nilIPL) .
+  ceq tryImplication(M, T, TL) = [IPL, true]
+   if reduce(M, T) =/= 'false.Bool /\
+      [IPL, true] := $tryImplication(M, T, TL, empty, nilIPL) .
+  ceq tryImplication(M, T, TL) = contrPrem*(M, TL)
+   if reduce(M, T) == 'false.Bool .
+  eq tryImplication(M, T, TL) = [nilIPL, false] [owise] .
 
   op $tryImplication : Module Term TermList TermList ImpPairList -> ImpTryRes .
   eq $tryImplication(M, T, empty, TL, IPL) = [nilIPL, false] .
@@ -5722,6 +5732,29 @@ the \verb"maps2maps" function shown above to the body:
       [IPL, B] := $tryImplication(M, T, (TL', TL), empty, (IPL [T', getLabel(M, T'), SB])) .
   eq $tryImplication(M, T, (T', TL), TL', IPL) = $tryImplication(M, T, TL, TL', IPL) .
 
+  op contrPrem* : Module TermList -> ImpTryRes .
+  eq contrPrem*(M, empty) = [nilIPL, false] .
+  ceq contrPrem*(M, (T, TL)) = if B
+                               then [IPL, B]
+                               else contrPrem*(M, TL)
+                               fi
+   if [IPL, B] := contrPrem(M, getOps(M), T, getLabel(M, T)) [print "Contradiction imp " T] .
+
+  op contrPrem : Module OpDeclSet Term Qid -> ImpTryRes .
+  ceq contrPrem(M, ODS, T, Q) = [[T, Q, SB], true]
+   if SB := subContr(M, ODS, T) .
+  eq contrPrem(M, ODS, T, Q) = [nilIPL, false] [owise] .
+
+  op subContr : Module OpDeclSet Term ~> Substitution .
+  ceq subContr(M, ODS, T) = none
+   if not hasVars(T) /\
+      reduce(M, T) == 'false.Bool .
+  ceq subContr(M, ODS, Q[TL, V, TL']) = V <- C ; SB
+   if op Q' : nil -> Ty [metadata(S) AtS] . ODS' := ODS /\
+      (S == "generated-si" or S == "tc") /\
+      C := qid(string(Q') + "." + string(Ty)) /\
+      SB := subContr(M, ODS, Q[TL, C, TL']) [print "trying " C] .
+
   op getLabel : Module Term ~> Qid [memo] .
   eq getLabel(M, T) = getLabel(getEqs(M), T) .
 
@@ -5734,7 +5767,7 @@ the \verb"maps2maps" function shown above to the body:
   op getImpSubs : Module Term Term -> Substitution [memo] .
   ceq getImpSubs(M, T, T') = getImpSubs(T1, T2)
    if T1 := reduce(M, T) /\
-      T2 := reduce(M, T') [print T1 " y " T2] .
+      T2 := reduce(M, T') .
 
   op getImpSubs : Term Term -> Substitution .
   ceq getImpSubs(Q[TL], T) = getImpSubs*(TL, T)
@@ -5752,7 +5785,7 @@ the \verb"maps2maps" function shown above to the body:
   op tryMatch : Term Term ~> Substitution .
   eq tryMatch(Q[TL], Q[TL']) = tryMatch*(TL, TL') .
   ceq tryMatch(Q[TL], Q'[TL']) = traverseRest(Q[TL], TL')
-   if Q =/= Q' [print "Llamada " Q' "[" TL' "]"] .
+   if Q =/= Q' .
 
   op traverseRest : Term TermList ~> Substitution .
   ceq traverseRest(T, (T', TL)) = SB
@@ -5767,15 +5800,6 @@ the \verb"maps2maps" function shown above to the body:
   eq tryMatch*((V, TL), (C, TL')) = V <- C ; tryMatch*(TL, TL') .
   eq tryMatch*((T, TL), (T', TL')) = tryMatch*(TL, TL') [owise] .
 
-  op hasVars : Term -> Bool [memo] .
-  eq hasVars(Q[TL]) = hasVars*(TL) .
-  eq hasVars(V) = true .
-  eq hasVars(C) = false .
-
-  op hasVars* : TermList -> Bool .
-  eq hasVars*(empty) = false .
-  eq hasVars*((T, TL)) = hasVars(T) or-else hasVars*(TL) .
-
   op applyImpSub : Term Substitution -> Term .
   eq applyImpSub(Q[TL], SB) = Q[applyImpSub*(TL, SB)] .
   eq applyImpSub(C, SB) = C .
@@ -5785,6 +5809,18 @@ the \verb"maps2maps" function shown above to the body:
   op applyImpSub* : TermList Substitution -> TermList .
   eq applyImpSub*((T, TL), SB) = applyImpSub(T, SB), applyImpSub*(TL, SB) .
   eq applyImpSub*(empty, SB) = empty .
+
+  op isFreshCons : Module Term -> Bool .
+  ceq isFreshCons(M, C) = true
+   if Q := getName(C) /\
+      Ty := getType(C) /\
+      op Q : nil -> Ty [metadata("generated-si") AtS] . ODS := getOps(M) .
+  ceq isFreshCons(M, C) = true
+   if Q := getName(C) /\
+      Ty := getType(C) /\
+      op Q : nil -> Ty [metadata("tc") AtS] . ODS := getOps(M) .
+  eq isFreshCons(M, T) = false [owise] .
+
 
   ------------------------------------------------------------------------------------
   ---                                printImpCom                                   ---
@@ -5841,7 +5877,7 @@ the \verb"maps2maps" function shown above to the body:
   -------------------------------------------------------------------------------------
 
   op tcRequired : Term -> Bool .
-  eq tcRequired(T) = hasVariables(T) .
+  eq tcRequired(T) = hasVars(T) .
 
   -------------------------------------------------------------------------------------
   ---                              cevsTermRequired                                 ---
@@ -6538,17 +6574,17 @@ the \verb"maps2maps" function shown above to the body:
 
   ***********************************************************************************
   ***                             AUXILIARY FUNCTIONS                             ***
-  ***                                 hasVariables                                ***
+  ***                                 hasVars                                     ***
   ***********************************************************************************
 
-  op hasVariables : Term -> Bool .
-  eq hasVariables(C) = false .
-  eq hasVariables(V) = true .
-  eq hasVariables(Q[TL]) = hasVariables*(TL) .
+  op hasVars : Term -> Bool [memo] .
+  eq hasVars(Q[TL]) = hasVars*(TL) .
+  eq hasVars(V) = true .
+  eq hasVars(C) = false .
 
-  op hasVariables* : TermList -> Bool .
-  eq hasVariables*(empty) = false .
-  eq hasVariables*((T, TL)) = hasVariables(T) or hasVariables*(TL) .
+  op hasVars* : TermList -> Bool .
+  eq hasVars*(empty) = false .
+  eq hasVars*((T, TL)) = hasVars(T) or-else hasVars*(TL) .
 
   ***********************************************************************************
   ***                             AUXILIARY FUNCTIONS                             ***
@@ -6697,6 +6733,19 @@ the \verb"maps2maps" function shown above to the body:
                                  metaPrettyPrint(M, T, po) ' '. '`] '\n '\n
                                  '\t ':apply '`( Q '`) '\n '\n .
 
+  op printCtfComm : Module Qid Equation Nat -> QidList .
+  eq printCtfComm(M, Q, eq T = T' [AtS] ., INDENT) =
+                                 indent(INDENT) ':def Q '= ':ctf ' '`{ 'eq
+                                 metaPrettyPrint(M, T, po) ' '=
+                                 metaPrettyPrint(M, T', po) '. '`} '\n '\n
+                                 indent(INDENT) ':apply '`( Q '`) '\n '\n .
+
+  op printCtfTermComm : Module Qid Term Nat -> QidList .
+  eq printCtfTermComm(M, Q, T, INDENT) =
+                                 indent(INDENT) ':def Q '= ':ctf ' '`[
+                                 metaPrettyPrint(M, T, po) ' '. '`] '\n '\n
+                                 indent(INDENT) ':apply '`( Q '`) '\n '\n .
+
   op printCEVS : Module Qid Term -> QidList .
   eq printCEVS(M, Q, T) = '\t ':def Q '= ':cvs ' '`[
                           metaPrettyPrint(M, T, po) ' '. '`] '\n '\n
@@ -6841,15 +6890,6 @@ the \verb"maps2maps" function shown above to the body:
   op getHypotheses : EquationSet -> TermList .
   eq getHypotheses(eq T = 'true.Bool [metadata("HI") AtS] . EqS) = T, getHypotheses(EqS) .
   eq getHypotheses(EqS) = empty [owise] .
-
-  op hasVars : Term -> Bool [memo] .
-  eq hasVars(Q[TL]) = hasVars*(TL) .
-  eq hasVars(V) = true .
-  eq hasVars(C) = false .
-
-  op hasVars* : TermList -> Bool .
-  eq hasVars*(empty) = false .
-  eq hasVars*((T, TL)) = hasVars(T) or-else hasVars*(TL) .
 
 ***(%
 \end{comment}
@@ -8979,7 +9019,7 @@ set show loop stats off .
 set show loop timing off .
 
 *** for debugging purposes
-set print attribute on .
+set print attribute off .
 
 set show advisories off .
 
