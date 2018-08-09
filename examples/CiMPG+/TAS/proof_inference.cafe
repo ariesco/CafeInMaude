@@ -1,14 +1,12 @@
 open TAS .
  :id(tas)
 -- fresh constants
-  ops i j k : -> Pid .
+  ops i j : -> Pid .
 -- |-
   red inv1(S:Sys,i,j) .
-  red inv1(init,i,j) .
-  red inv2(S:Sys,k) .
-  red inv2(init,k) .
+  red inv2(S:Sys,i) .
 close
 
 open TAS .
- :proof(tas)
+ :infer(tas)
 close

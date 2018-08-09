@@ -1,7 +1,7 @@
 open TAS .
 	:goal{
-		eq [tas :nonexec] : inv2(S:Sys,P:Pid) = true .
-		eq [tas1 :nonexec] : inv1(S:Sys,i:Pid,j:Pid) = true .
+		eq [tas :nonexec] : inv1(S:Sys,i:Pid,j:Pid) = true .
+		eq [tas1 :nonexec] : inv2(S:Sys,k:Pid) = true .
 	}
 
 	:ind on (S:Sys)
@@ -34,7 +34,7 @@ open TAS .
 				:apply(csb4)
 
 					*** Goal`1-1-2-1-1-1 Success by implication and reduction.
-					:imp [tas1] by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+					:imp [tas] by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
 
 					:apply (rd)
 
@@ -50,7 +50,7 @@ open TAS .
 			:apply(csb5)
 
 				*** Goal`1-1-2-2-1 Success by implication and reduction.
-				:imp [tas] by {P:Pid <- i@Pid ;}
+				:imp [tas1] by {k:Pid <- i@Pid ;}
 
 				:apply (rd)
 
@@ -65,17 +65,17 @@ open TAS .
 					:apply(csb7)
 
 						*** Goal`1-1-2-2-2-1-1 Success by implication and reduction.
-						:imp [tas] by {P:Pid <- j@Pid ;}
+						:imp [tas1] by {k:Pid <- j@Pid ;}
 
 						:apply (rd)
 
 						*** Goal`1-1-2-2-2-1-2 Success by implication and reduction.
-						:imp [tas] by {P:Pid <- j@Pid ;}
+						:imp [tas1] by {k:Pid <- j@Pid ;}
 
 						:apply (rd)
 
 					*** Goal`1-1-2-2-2-2 Success by implication and reduction.
-					:imp [tas] by {P:Pid <- i@Pid ;}
+					:imp [tas1] by {k:Pid <- i@Pid ;}
 
 					:apply (rd)
 
@@ -93,7 +93,7 @@ open TAS .
 		:apply(csb9)
 
 			*** Goal`1-2-2-1 Success by implication and reduction.
-			:imp [tas] by {P:Pid <- P@Pid ;}
+			:imp [tas1] by {k:Pid <- k@Pid ;}
 
 			:apply (rd)
 
@@ -102,8 +102,10 @@ open TAS .
 
 	:apply(tc)
 
+	*** The corresponding proof score was not present.
 	:apply (rd)
 
+	*** The corresponding proof score was not present.
 	:apply (rd)
 
 	:apply(tc)
@@ -167,7 +169,7 @@ open TAS .
 				:apply(csb17)
 
 					*** Goal`3-1-1-2-2-1 Success by implication and reduction.
-					:imp [tas1] by {i:Pid <- i@Pid ; i:Pid <- j@Pid ; j:Pid <- j@Pid ;}
+					:imp [tas] by {i:Pid <- i@Pid ; i:Pid <- j@Pid ; j:Pid <- j@Pid ;}
 
 					:apply (rd)
 
@@ -193,7 +195,7 @@ open TAS .
 				:apply(csb20)
 
 					*** Goal`3-1-2-2-1-1 Success by implication and reduction.
-					:imp [tas1] by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+					:imp [tas] by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
 
 					:apply (rd)
 
@@ -209,12 +211,12 @@ open TAS .
 	:apply(csb21)
 
 		*** Goal`3-2-1  -  Success
-		:def csb22 = :ctf {eq P#Pid  = P@Pid .}
+		:def csb22 = :ctf {eq P#Pid  = k@Pid .}
 
 		:apply(csb22)
 
 			*** Goal`3-2-1-1  -  Success
-			:def csb23 = :ctf [pc(S#Sys,P@Pid) .]
+			:def csb23 = :ctf [pc(S#Sys,k@Pid) .]
 
 			:apply(csb23)
 
@@ -225,12 +227,12 @@ open TAS .
 				:apply (rd)
 
 			*** Goal`3-2-1-2  -  Success
-			:def csb24 = :ctf [pc(S#Sys,P@Pid) .]
+			:def csb24 = :ctf [pc(S#Sys,k@Pid) .]
 
 			:apply(csb24)
 
 				*** Goal`3-2-1-2-1 Success by implication and reduction.
-				:imp [tas1] by {i:Pid <- P#Pid ; j:Pid <- P@Pid ;}
+				:imp [tas] by {i:Pid <- P#Pid ; j:Pid <- k@Pid ;}
 
 				:apply (rd)
 
@@ -238,7 +240,7 @@ open TAS .
 				:apply (rd)
 
 		*** Goal`3-2-2 Success by implication and reduction.
-		:imp [tas] by {P:Pid <- P@Pid ;}
+		:imp [tas1] by {k:Pid <- k@Pid ;}
 
 		:apply (rd)
 

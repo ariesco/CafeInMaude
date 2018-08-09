@@ -722,6 +722,7 @@ declared or not:
 
   op :id(_) : @CafeToken@ -> @CafeInductiveComm@ [ctor] .
   op :proof(_) : @CafeToken@ -> @CafeInductiveComm@ [ctor] .
+  op :infer(_) : @CafeToken@ -> @CafeInductiveComm@ [ctor] .
 
 ***(%
 \end{comment}
@@ -3053,6 +3054,8 @@ identifiers to extend the variable set with the variables defined on the fly in 
    if PDR := < PU ; U ; VDS > .
   ceq parseCafeDecl(':proof`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
    if PDR := < PU ; U ; VDS > .
+  ceq parseCafeDecl(':infer`(_`)[T], PU, U, VDS, PSM, TSM, DB) = < PDR, nil, none, DB >
+   if PDR := < PU ; U ; VDS > .
 
 ***(%
 \end{comment}
@@ -3937,6 +3940,7 @@ the \verb"maps2maps" function shown above to the body:
                                                     ':imp`[_`]by`{_`}[T, T'] .
   eq getRedThCommand(':id`(_`)['CafeToken[T]]) = empty .
   eq getRedThCommand(':proof`(_`)['CafeToken[T]]) = ':proof`(_`)[T] .
+  eq getRedThCommand(':infer`(_`)['CafeToken[T]]) = ':infer`(_`)[T] .
   eq getRedThCommand(':def_=`:ctf`{_`}['CafeToken[T], T']) =
                                                    ':def_=`:ctf`{_`}[T, T'] .
   eq getRedThCommand(':def_=`:ctf`[_`]['CafeToken[T], 'CafeBubble[T']]) =
@@ -4118,6 +4122,11 @@ the \verb"maps2maps" function shown above to the body:
            QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V, MACS, PO, SIM)
    if Q := downQid(T) /\
       QIL := inferProof(M, Q, SIM[Q], mtMacros) .
+  ceq processRedThCommands(M, PSM, HSM, TSM, DB, (':infer`(_`)[T], TL), T1, P, V, MACS,
+                           PO, SIM) =
+           QIL processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V, MACS, PO, SIM)
+   if Q := downQid(T) /\
+      QIL := inferWithGoalProof(M, Q, SIM[Q], mtMacros) .
   eq processRedThCommands(M, PSM, HSM, TSM, DB, (T, TL), T1, P, V, MACS, PO, SIM) =
            '\n 'Error 'in 'command.
            processRedThCommands(M, PSM, HSM, TSM, DB, TL, T1, P, V,MACS, PO, SIM) [owise] .
@@ -5134,8 +5143,41 @@ the \verb"maps2maps" function shown above to the body:
       TL := inferGoal(SIS) /\
       EqS := goalEqS(TL, Q, 0) /\
       P := | M, [nil, 'root, EqS, true, false], mtPT, 1 | /\
-      QIL := developProof(P, nil, SIS, MACS) [print "Goal inferred " TL] .
-  eq inferProof(M, Q, SIS, MACS) = '\n '\! '\r 'Error 'while 'generating 'proof '\o '\n [owise] .
+      QIL := developProof(P, nil, SIS, MACS) .
+  eq inferProof(M, Q, SIS, MACS) = '\n '\! '\r 'Error 'while
+                                   'generating 'proof '\o '\n [owise] .
+
+  op inferWithGoalProof : Module Qid ScoreInfoSet Macros -> QidList .
+  ceq inferWithGoalProof(M, Q, SIS, MACS) = printProof(M, Q, Q', TL, QIL)
+   if Q' := getNameProofScore(SIS) /\
+      (V, TL) := getGoal(SIS) /\
+      EqS := goalEqS(TL, Q, 0) /\
+      P := | M, [nil, 'root, EqS, true, false], mtPT, 1 | /\
+      [P', PO] := applyInduction(P, V, nil) /\
+      QIL := '\t ':ind 'on ' '`( metaPrettyPrint(M, V, po) '`) '\n '\n
+             '\t ':apply '`( 'si '`) '\n '\n
+             developProof(P', PO, noScoreInfo, MACS) .
+  eq inferWithGoalProof(M, Q, SIS, MACS) = '\n '\! '\r 'Error 'while
+                                   'generating 'proof '\o '\n [owise] .
+
+  op getGoal : ScoreInfoSet -> TermList .
+  ceq getGoal($ M, M', (T, TL)$ SIS) = V, $getGoal($ M, M', (T, TL)$ SIS)
+   if V := getVars(T) .
+
+  op $getGoal : ScoreInfoSet -> TermList .
+  eq $getGoal(noScoreInfo) = empty .
+  eq $getGoal($ M, M', empty $ SIS) = $getGoal(SIS) .
+  eq $getGoal($ M, M', (T, TL)$ SIS) = getGoal(T),
+                                       $getGoal($ M, M', TL $ SIS) .
+
+  op getGoal : Term -> Term .
+  eq getGoal(V) = V .
+  eq getGoal(C) = qid(string(getName(C)) + ":" + string(getType(C))) .
+  eq getGoal(Q[TL]) = Q[getGoal*(TL)] .
+
+  op getGoal* : TermList -> TermList .
+  eq getGoal*(empty) = empty .
+  eq getGoal*((T, TL)) = getGoal(T), getGoal*(TL) .
 
   op goalEqS : TermList Qid Nat -> EquationSet .
   eq goalEqS(empty, Q, N) = none .
@@ -5289,10 +5331,8 @@ the \verb"maps2maps" function shown above to the body:
              then '\t ':imp ' '`[ Q '`] ' '. '\n '\n
              else '\t ':imp ' '`[ Q '`] ' 'by ' '`{ printSub(SB) '`} '\n '\n
              fi [print "Imp"] .
-  ceq developProof(P, NL y PO, SIS, MACS) =
-              inferNewProof(P, NL y PO, SIS, MACS)
-   if eq T = 'true.Bool [AtS] . := getGoal(P, NL)
-              [owise print "Try reduction and implication for " NL " - " T] .
+  eq developProof(P, NL y PO, SIS, MACS) = inferNewProof(P, NL y PO, SIS, MACS)
+                           [owise print "Try reduction and implication for " NL] .
 
   -------------------------------------------------------------------------------------
   -------------------------------------------------------------------------------------
@@ -5738,7 +5778,7 @@ the \verb"maps2maps" function shown above to the body:
                                then [IPL, B]
                                else contrPrem*(M, TL)
                                fi
-   if [IPL, B] := contrPrem(M, getOps(M), T, getLabel(M, T)) [print "Contradiction imp " T] .
+   if [IPL, B] := contrPrem(M, getOps(M), T, getLabel(M, T)) .
 
   op contrPrem : Module OpDeclSet Term Qid -> ImpTryRes .
   ceq contrPrem(M, ODS, T, Q) = [[T, Q, SB], true]
@@ -5753,7 +5793,7 @@ the \verb"maps2maps" function shown above to the body:
    if op Q' : nil -> Ty [metadata(S) AtS] . ODS' := ODS /\
       (S == "generated-si" or S == "tc") /\
       C := qid(string(Q') + "." + string(Ty)) /\
-      SB := subContr(M, ODS, Q[TL, C, TL']) [print "trying " C] .
+      SB := subContr(M, ODS, Q[TL, C, TL']) .
 
   op getLabel : Module Term ~> Qid [memo] .
   eq getLabel(M, T) = getLabel(getEqs(M), T) .
@@ -5868,7 +5908,8 @@ the \verb"maps2maps" function shown above to the body:
 
   op indRequired : ScoreInfoSet Module Term -> TermList .
   ceq indRequired(SIS, M, T) = V
-   if TrS := getVars(T) /\
+   if SIS =/= noScoreInfo /\
+      TrS := getVars(T) /\
       V := getIndVar(T, TrS, SIS) .
   eq indRequired(SIS, M, T) = empty [owise] .
 
