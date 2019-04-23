@@ -5143,7 +5143,7 @@ the \verb"maps2maps" function shown above to the body:
       TL := inferGoal(SIS) /\
       EqS := goalEqS(TL, Q, 0) /\
       P := | M, [nil, 'root, EqS, true, false], mtPT, 1 | /\
-      QIL := developProof(P, nil, SIS, MACS) .
+      QIL := developProof(P, nil, SIS, MACS) [print "Generate proof without goal"] .
   eq inferProof(M, Q, SIS, MACS) = '\n '\! '\r 'Error 'while
                                    'generating 'proof '\o '\n [owise] .
 
@@ -5156,9 +5156,9 @@ the \verb"maps2maps" function shown above to the body:
       [P', PO] := applyInduction(P, V, nil) /\
       QIL := '\t ':ind 'on ' '`( metaPrettyPrint(M, V, po) '`) '\n '\n
              '\t ':apply '`( 'si '`) '\n '\n
-             developProof(P', PO, noScoreInfo, MACS) .
+             developProof(P', PO, noScoreInfo, MACS) [print "Induction " V " Terms\n" TL] .
   eq inferWithGoalProof(M, Q, SIS, MACS) = '\n '\! '\r 'Error 'while
-                                   'generating 'proof '\o '\n [owise] .
+                                   'generating 'proof '\o '\n [print owise] .
 
   op getGoal : ScoreInfoSet -> TermList .
   ceq getGoal($ M, M', (T, TL)$ SIS) = V, $getGoal($ M, M', (T, TL)$ SIS)
@@ -5268,7 +5268,7 @@ the \verb"maps2maps" function shown above to the body:
       Ty := getType(metaNormalize(M, T1)) /\
       | MACS', Q | := addNewMac(MACS, M, T1, cvs) /\
       [P', PO'] := applyTermMacro(P, NL y PO, Q, T1, cvs, Ty) /\
-      QIL := printCEVS(M, Q, T1) [print NL " Termino cevs: " T1 "\n"] .
+      QIL := printCEVS(M, Q, T1) [print NL " Termino csvs: " T1 "\n"] .
 
   -----------------------------------------------------------------------------------
   ---                       developProof -> ctfTerm                               ---
@@ -5497,7 +5497,7 @@ the \verb"maps2maps" function shown above to the body:
    if not redForgotten(M, T) /\
       [IPL, false] := tryImplication(M, T, getHypotheses(M)) /\
       TrS := getEqualityTerms(M, T) /\
-      TPS := processEqualityTerm*(M, TrS) [print "TPS " TrS] .
+      TPS := processEqualityTerm*(M, TrS) [print "TPS " TPS] .
 
   var  MACS'' : Macros .
   var  IT : IT .
@@ -5526,8 +5526,9 @@ the \verb"maps2maps" function shown above to the body:
                                               MACS', S, s(INDENT), 1) /\
       QIL'' := indent(INDENT)
                if B
-               then '*** qid(S) ' '- ' 'Success '\n
-               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- ' 'Failure '\n
+               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
+               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
+                    metaPrettyPrint(M, T, po) ' '- 'Failure '\n
                fi
                QIL QIL' [print "Case splitting true-false applied " Eq] .
   ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, ([T', term] TPS), S, INDENT, N') =
@@ -5546,8 +5547,9 @@ the \verb"maps2maps" function shown above to the body:
       [QIL', MACS'', B] := tryCaseSplitting*(ITL, MACS', S, s(INDENT), 1) /\
       QIL'' := indent(INDENT)
                if B
-               then '*** qid(S) ' '- ' 'Success '\n
-               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- ' 'Failure '\n
+               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
+               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
+                    metaPrettyPrint(M, T, po) ' '- 'Failure '\n
                fi
                QIL QIL' [print "Case splitting term applied " T' " - " B] .
 
@@ -5577,44 +5579,87 @@ the \verb"maps2maps" function shown above to the body:
   eq TPair TPair TPS = TPair TPS [metadata "idempotency"] .
 
   op processEqualityTerm : Module Term -> TrialPairSet .
-  ceq processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T1, T2], ctf]
+  ceq processEqualityTerm(M, Q[TL]) = processEqualityTerm*(M, tl2ts(TL))
+   if containsBoolOps*(TL) .
+  eq processEqualityTerm(M, '_=_[T, T]) = mtTPS .
+  *** Estrategias para secuencias
+  ceq processEqualityTerm(M, '_=_[T, T']) = seqEqualities(M, T, T')
+   if sameSeqCtor(M, T, T') .
+  eq processEqualityTerm(M, T) = $processEqualityTerm(M, T) [owise] .
+
+  op $processEqualityTerm : Module Term -> TrialPairSet .
+  ceq $processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T1, T2], ctf]
    if (allCtor(M, T1) or isFreshCons(M, T1)) /\
       (allCtor(M, T2) or isFreshCons(M, T2)) .
-  ceq processEqualityTerm(M, '_=_[T1, T2]) =  processEqualityTerm(M, T1)
+  ceq $processEqualityTerm(M, '_=_[T1, T2]) =  $processEqualityTerm(M, T1)
    if not (allCtor(M, T1) or isFreshCons(M, T1)) /\
       allCtor(M, T2) .
-  ceq processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T1, T2], ctf]
-                                             processEqualityTerm(M, T1)
+  ceq $processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T1, T2], ctf]
+                                             $processEqualityTerm(M, T1)
    if not (allCtor(M, T1) or isFreshCons(M, T1)) /\
       isFreshCons(M, T2) .
-  ceq processEqualityTerm(M, '_=_[T1, T2]) = processEqualityTerm(M, T2)
+  ceq $processEqualityTerm(M, '_=_[T1, T2]) = $processEqualityTerm(M, T2)
    if allCtor(M, T1) /\
       not (allCtor(M, T2) or isFreshCons(M, T2)) .
-  ceq processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T2, T1], ctf]
-                                             processEqualityTerm(M, T2)
+  ceq $processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T2, T1], ctf]
+                                             $processEqualityTerm(M, T2)
    if isFreshCons(M, T1) /\
       not (allCtor(M, T2) or isFreshCons(M, T2)) .
-  ceq processEqualityTerm(M, '_=_[T1, T2]) = processEqualityTerm*(M, T1 | T2)
+  ceq $processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T1, T2], ctf] *** !!! Seq
+                                              processEqualityTerm*(M, T1 | T2)
    if not (allCtor(M, T1) or isFreshCons(M, T1)) /\
       not (allCtor(M, T2) or isFreshCons(M, T2)) /\
-      ODS := getOps(M) .
-  ceq processEqualityTerm(M, Q[T, T']) = processEqualityTerm*(M, T | T')
+      noneCtor(M, T1) /\ noneCtor(M, T2) .
+  ceq $processEqualityTerm(M, '_=_[T1, T2]) = processEqualityTerm*(M, T1 | T2)
+   if not (allCtor(M, T1) or isFreshCons(M, T1)) /\
+      not (allCtor(M, T2) or isFreshCons(M, T2)) /\
+      not (noneCtor(M, T1) and noneCtor(M, T2)) .
+  ceq $processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T1, T2], ctf] *** !!! Seq
+                                              processEqualityTerm*(M, T1 | T2)
+   if noneCtor(M, T1) /\ noneCtor(M, T2) .
+  ceq $processEqualityTerm(M, Q[T, T']) = processEqualityTerm*(M, T | T')
    if (Q == '_or_) or (Q == '_and_) or (Q == '_xor_) .
-  eq processEqualityTerm(M, 'not_[T]) = processEqualityTerm(M, T) .
-  eq processEqualityTerm(M, 'if_then_else_fi[T, TL]) = processEqualityTerm(M, T) .
-  ceq processEqualityTerm(M, T) = processEqualityTerm(M, T1)
+  eq $processEqualityTerm(M, 'not_[T]) = $processEqualityTerm(M, T) .
+  eq $processEqualityTerm(M, 'if_then_else_fi[T, TL]) = $processEqualityTerm(M, T) .
+  ceq $processEqualityTerm(M, T) = $processEqualityTerm(M, T1)
    if T1 := reduce(M, T) /\
       T =/= T1 .
-  ceq processEqualityTerm(M, T) = mtTPS
+  ceq $processEqualityTerm(M, T) = mtTPS
    if allCtor(M, T) .
-  eq processEqualityTerm(M, T) = $processEqualityTerm(M, T, getEqs(M)) [owise] .
+  eq $processEqualityTerm(M, T) = $$processEqualityTerm(M, T, getEqs(M)) [owise] .
 
-  op $processEqualityTerm : Module Term EquationSet -> TrialPairSet .
-  ceq $processEqualityTerm(M, T, EqS) = if TPS == mtTPS
+  op $$processEqualityTerm : Module Term EquationSet -> TrialPairSet .
+  ceq $$processEqualityTerm(M, T, EqS) = if TPS == mtTPS
                                         then decomposeTerm(M, T)
                                         else TPS
                                         fi
    if TPS := processEq*(M, T, EqS) .
+
+  op sameSeqCtor : Module Term Term -> Bool .
+  eq sameSeqCtor(M, Q[TL], Q[TL']) = seqCtor(getOps(M), Q) and-then
+                                     sizeTL(TL) == sizeTL(TL') .
+  eq sameSeqCtor(M, T, T') = false [owise] .
+
+  op seqCtor : OpDeclSet Qid -> Bool .
+  eq seqCtor(op Q : TyL -> Ty [ctor assoc AtS] . ODS, Q) = true .
+  eq seqCtor(ODS, Q) = false [owise] .
+
+  *** TODO: With different sizes it would be possible to make different equalities.
+  op seqEqualities : Module Term Term ~> TrialPairSet .
+  eq seqEqualities(M, Q[TL], Q[TL']) = seqEqualities*(M, TL, TL') .
+
+  op seqEqualities* : Module TermList TermList -> TrialPairSet .
+  eq seqEqualities*(M, empty, empty) = mtTPS .
+  eq seqEqualities*(M, (T, TL), (T', TL')) = processEqualityTerm(M, '_=_[T, T'])
+                                             seqEqualities*(M, TL, TL') [print "Sequence inference " T " = " T'] .
+
+  op divideEqSeq : Module Term Term ~> TrialPairSet .
+  eq divideEqSeq(M, Q[TL], Q[TL']) = divideEqSeq*(M, TL, TL') .
+
+  op divideEqSeq* : Module TermList TermList ~> TrialPairSet .
+  eq divideEqSeq*(M, empty, empty) = mtTPS .
+  eq divideEqSeq*(M, (T, TL), (T', TL')) = processEqualityTerm(M, '_=_[T, T'])
+                                           divideEqSeq*(M, TL, TL') .
 
   op decomposeTerm : Module Term -> TrialPairSet .
   eq decomposeTerm(M, V) = mtTPS .
@@ -5638,6 +5683,17 @@ the \verb"maps2maps" function shown above to the body:
   op isCtor : OpDeclSet Qid -> Bool .
   eq isCtor(op Q : TyL -> Ty [ctor AtS] . ODS, Q) = true .
   eq isCtor(ODS, Q) = false [owise] .
+
+  op containsBoolOps : Term -> Bool .
+  eq containsBoolOps(V) = false .
+  eq containsBoolOps(C) = false .
+  ceq containsBoolOps(Q[TL]) = true
+   if (Q == '_or_) or (Q == '_and_) or (Q == '_xor_) or (Q == 'if_then_else_fi) .
+  eq containsBoolOps(Q[TL]) = containsBoolOps*(TL) [owise] .
+
+  op containsBoolOps* : TermList -> Bool .
+  eq containsBoolOps*(empty) = false .
+  eq containsBoolOps*((T, TL)) = containsBoolOps(T) or-else containsBoolOps*(TL) .
 
   op processEq* : Module Term EquationSet -> TrialPairSet .
   eq processEq*(M, T, EqS) = processEq*(M, T, EqS, mtTPS) .
@@ -5704,6 +5760,27 @@ the \verb"maps2maps" function shown above to the body:
   eq allCtor*(ODS, empty) = true .
   eq allCtor*(ODS, (T, TL)) = allCtor(ODS, T) and allCtor*(ODS, TL) .
 
+  op noneCtor : Module Term -> Bool .
+  eq noneCtor(M, T) = noneCtor(getOps(M), T) .
+
+  op noneCtor : OpDeclSet Term -> Bool .
+  eq noneCtor(ODS, V) = true .
+  ceq noneCtor(op Q : nil -> Ty [ctor AtS] . ODS, C) = false
+   if Q := getName(C) .
+  ceq noneCtor(op Q : nil -> Ty [AtS] . ODS, C) = true
+   if Q := getName(C) [owise] .
+  eq noneCtor(op Q : TyL -> Ty [ctor AtS] . ODS, Q[TL]) = false .
+  eq noneCtor(op Q : TyL -> Ty [AtS] . ODS, Q[TL]) =
+            noneCtor*(op Q : TyL -> Ty [ctor AtS] . ODS, TL) [owise] .
+
+  op noneCtor* : OpDeclSet TermList -> Bool .
+  eq noneCtor*(ODS, empty) = true .
+  eq noneCtor*(ODS, (T, TL)) = noneCtor(ODS, T) and noneCtor*(ODS, TL) .
+
+  op tl2ts : TermList -> TermSet .
+  eq tl2ts(empty) = emptyTermSet .
+  eq tl2ts((T, TL)) = T | tl2ts(TL) .
+
   *** Inference tuple
   sort IT ITL .
   subsort IT < ITL .
@@ -5722,6 +5799,21 @@ the \verb"maps2maps" function shown above to the body:
   op indent : Nat -> QidList .
   eq indent(0) = nil .
   eq indent(s(N)) = '\t indent(N) .
+
+***(%
+\end{verbatim}
+}
+
+\noindent
+and \verb"sizeTL" just computes the size of a list of terms:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op sizeTL : TermList -> Nat .
+  eq sizeTL(empty) = 0 .
+  eq sizeTL((T, TL)) = s(sizeTL(TL)) .
 
   ---------------------------------------------------------------------------------------
   ---                               getEqualityTerms                                  ---
@@ -8157,21 +8249,6 @@ where \verb"removeEqAts*" removes the \verb"nonexec" and \verb"metadata" attribu
 \end{verbatim}
 }
 
-\noindent
-and \verb"sizeTL" just computes the size of a list of terms:
-
-{\codesize
-\begin{verbatim}
-%)
-
-  op sizeTL : TermList -> Nat .
-  eq sizeTL(empty) = 0 .
-  eq sizeTL((T, TL)) = s(sizeTL(TL)) .
-
-***(%
-\end{verbatim}
-}
-
 \item
 Analogously, \verb"getEqAtS" returns the terms standing for the attributes:
 
@@ -9087,7 +9164,7 @@ set show loop stats off .
 set show loop timing off .
 
 *** for debugging purposes
-set print attribute off .
+set print attribute on .
 
 set show advisories off .
 
