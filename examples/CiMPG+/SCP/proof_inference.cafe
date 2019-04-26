@@ -1,0 +1,11 @@
+open SCP .
+  :id(proofSCP)
+
+  red inv1(S:Sys) .
+  red inv2(S:Sys) .
+  red inv3(S:Sys) .
+close
+
+open SCP .
+  :infer(proofSCP)
+close

@@ -3124,9 +3124,14 @@ a list of quoted identifiers reporting the errors found during the parsing proce
 \begin{comment}
 %)
 
-  vars T T' T'' T''' T1 T2 T3 T4 T5 T6 TP TI : Term .
-  var  T? : [Term] .
   vars TL TL' TL'' PL PL' TLR TL1 TL2 TL3 : TermList .
+  vars T T' T'' T''' T1 T2 T3 T4 T5 T6 TP TI : Term .
+  vars PrL PrL' PrL'' PrL1 PrL2 : ProofTreeList .
+  vars S S' S'' S''' St St' St'' St''' : String .
+  vars SIS SIS' SIS1 SIS2 : ScoreInfoSet .
+  vars TSM TSM' HSM HSM' : TheorySortMap .
+  vars QIL QIL' QIL'' QILR : QidList .
+  var  T? : [Term] .
   vars V V' : Variable .
   vars C C' : Constant .
   vars DB DB' : Database .
@@ -3134,8 +3139,6 @@ a list of quoted identifiers reporting the errors found during the parsing proce
   vars F Q Q' Q'' QI QI' TN ID : Qid .
   *** TS: TheorySort
   var  TS : Sort .
-  vars QIL QIL' QIL'' QILR : QidList .
-  vars S S' S'' S''' St St' St'' St''' : String .
   vars CafeM CafeM' : CafeModule .
   var  VDS : OpDeclSet .
   vars PDR PDR' : ParseDeclResult .
@@ -3144,7 +3147,6 @@ a list of quoted identifiers reporting the errors found during the parsing proce
   vars N N' N'' INDENT : Nat .
   **** PSM: Principal Sort Map
   vars PSM PSM' SM SM' : SortMap .
-  vars TSM TSM' HSM HSM' : TheorySortMap .
   vars QS QS' : QidSet .
   vars MACS MACS' : Macros .
   var  H : Header .
@@ -3169,17 +3171,15 @@ a list of quoted identifiers reporting the errors found during the parsing proce
   vars Eq Eq' : Equation .
   var  CMD : Qid .
   vars P P' P'' : ProofTree .
-  vars PrL PrL' PrL'' PrL1 PrL2 : ProofTreeList .
   vars B B' : Bool .
   var  SR : SearchRes .
   vars NL NL' : NatList .
   vars PO PO' PO'' : ProofOrder .
   vars SIM SIM' : ScoreInfoMap .
-  vars SIS SIS' SIS1 SIS2 : ScoreInfoSet .
   vars CS CS' : ConsSub .
   var  ML : MList .
   vars MLb MLb' : MacroLabel .
-  var  TrS : TermSet .
+  vars TrS TrS' : TermSet .
   var  SB : Substitution .
   var  SISP : SISPair .
   var  IPL : ImpPairList .
@@ -5376,7 +5376,7 @@ the \verb"maps2maps" function shown above to the body:
             else P
             fi [print "Imp forgotten\n"] .
   eq inferNewProof(P, NL y PO, SIS, MACS) =
-                 createNewProof(P, NL y PO, SIS, MACS, 7) [owise print "Infer proof for " NL] .
+                 createNewProof(P, NL y PO, SIS, MACS, 5) [owise print "Infer proof for " NL] .
 
   ---------------------------------------------------------------------------------------
   ---                                createNewProof                                   ---
@@ -5493,11 +5493,13 @@ the \verb"maps2maps" function shown above to the body:
       QIL := indent(INDENT) '*** qid(S) 'cannot 'be 'discharged.
                             'Maximum 'depth 'reached. '\n '\n [print "Max depth"] .
   ceq tryCaseSplitting([M, T, s(N)], MACS, QILR, S, INDENT) =
-                 $tryCaseSplitting([M, T, s(N)], MACS, QILR, TPS, S, INDENT, 1)
+                 $tryCaseSplitting([M, T, s(N)], MACS, QILR, TPS, TPS', S, INDENT, 1)
    if not redForgotten(M, T) /\
       [IPL, false] := tryImplication(M, T, getHypotheses(M)) /\
       TrS := getEqualityTerms(M, T) /\
-      TPS := processEqualityTerm*(M, TrS) [print "TPS " TPS] .
+      TrS' := getEqTermsWithImps(M, T) /\
+      TPS := processEqualityTerm*(M, TrS) /\
+      TPS' := processEqualityTerm*(M, TrS' - TrS) [print "TPS " TPS] .
 
   var  MACS'' : Macros .
   var  IT : IT .
@@ -5507,15 +5509,19 @@ the \verb"maps2maps" function shown above to the body:
   var  CTXT : Context .
   var  IR : IR .
 
-  op $tryCaseSplitting : IT Macros QidList TrialPairSet String Nat Nat -> IR .
-  eq $tryCaseSplitting([M, T, 0], MACS, QILR, TPS, S, INDENT, N') =
+  op _-_ : TermSet TermSet -> TermSet .
+  eq (T | TrS) - (T | TrS') = TrS - TrS' .
+  eq TrS - TrS' = TrS [owise] .
+
+  op $tryCaseSplitting : IT Macros QidList TrialPairSet TrialPairSet String Nat Nat -> IR .
+  eq $tryCaseSplitting([M, T, 0], MACS, QILR, TPS, TPS', S, INDENT, N') =
                                                  [QILR, MACS, false] [print "Maximum depth"] .
-  eq $tryCaseSplitting([M, T, N], MACS, QILR, mtTPS, S, INDENT, N') =
+  eq $tryCaseSplitting([M, T, N], MACS, QILR, mtTPS, mtTPS, S, INDENT, N') =
                                                  [QILR, MACS, false] [print "No more cs available"] .
-  ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, ([T', ctf] TPS), S, INDENT, N') =
+  ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, ([T', ctf] TPS), TPS', S, INDENT, N') =
              if B
              then [QIL'', MACS'', true]
-             else $tryCaseSplitting([M, T, s(N)], MACS, QIL'', TPS, S, INDENT, s(N'))
+             else $tryCaseSplitting([M, T, s(N)], MACS, QIL'', TPS, TPS', S, INDENT, s(N'))
              fi
    if Eq := getEq(T') /\
       | MACS', Q | := addNewMac(MACS, M, Eq) /\
@@ -5531,10 +5537,10 @@ the \verb"maps2maps" function shown above to the body:
                     metaPrettyPrint(M, T, po) ' '- 'Failure '\n
                fi
                QIL QIL' [print "Case splitting true-false applied " Eq] .
-  ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, ([T', term] TPS), S, INDENT, N') =
+  ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, ([T', term] TPS), TPS', S, INDENT, N') =
              if B
              then [QIL'', MACS'', true]
-             else $tryCaseSplitting([M, T, s(N)], MACS, QIL'', TPS, S, INDENT, s(N'))
+             else $tryCaseSplitting([M, T, s(N)], MACS, QIL'', TPS, TPS', S, INDENT, s(N'))
              fi
    if | MACS', Q | := addNewMac(MACS, M, T') /\
       Ty := getType(metaReduce(M, T')) /\
@@ -5552,6 +5558,48 @@ the \verb"maps2maps" function shown above to the body:
                     metaPrettyPrint(M, T, po) ' '- 'Failure '\n
                fi
                QIL QIL' [print "Case splitting term applied " T' " - " B] .
+  ***********
+  ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, mtTPS, ([T', ctf] TPS), S, INDENT, N') =
+             if B
+             then [QIL'', MACS'', true]
+             else $tryCaseSplitting([M, T, s(N)], MACS, QIL'', mtTPS, TPS, S, INDENT, s(N'))
+             fi
+   if Eq := getEq(T') /\
+      | MACS', Q | := addNewMac(MACS, M, Eq) /\
+      M' := createCTFmodTrue(M, Eq) /\
+      M'' := createCTFmodFalse(M, Eq) /\
+      QIL := printCtfComm(M, Q, Eq, INDENT) /\
+      [QIL', MACS'', B] := tryCaseSplitting*([M', T, N] [M'', T, N],
+                                              MACS', S, s(INDENT), 1) /\
+      QIL'' := indent(INDENT)
+               if B
+               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
+               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
+                    metaPrettyPrint(M, T, po) ' '- 'Failure '\n
+               fi
+               QIL QIL' [print "Case splitting true-false applied " Eq] .
+  ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, mtTPS, ([T', term] TPS), S, INDENT, N') =
+             if B
+             then [QIL'', MACS'', true]
+             else $tryCaseSplitting([M, T, s(N)], MACS, QIL'', mtTPS, TPS, S, INDENT, s(N'))
+             fi
+   if | MACS', Q | := addNewMac(MACS, M, T') /\
+      Ty := getType(metaReduce(M, T')) /\
+      ODS := getCtors(M, Ty) /\
+      TL := ordTrueFalse(buildTermsCtors(ODS, "CS")) /\
+      TL =/= empty /\
+      ML := createModules(M, T', TL) /\
+      ITL := createITL(ML, T, N) /\
+      QIL := printCtfTermComm(M, Q, T', INDENT) /\
+      [QIL', MACS'', B] := tryCaseSplitting*(ITL, MACS', S, s(INDENT), 1) /\
+      QIL'' := indent(INDENT)
+               if B
+               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
+               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
+                    metaPrettyPrint(M, T, po) ' '- 'Failure '\n
+               fi
+               QIL QIL' [print "Case splitting term applied " T' " - " B] .
+
 
   op createITL : MList Term Nat -> ITL .
   eq createITL(mtML, T, N) = nilITL .
@@ -5582,7 +5630,7 @@ the \verb"maps2maps" function shown above to the body:
   ceq processEqualityTerm(M, Q[TL]) = processEqualityTerm*(M, tl2ts(TL))
    if containsBoolOps*(TL) .
   eq processEqualityTerm(M, '_=_[T, T]) = mtTPS .
-  *** Estrategias para secuencias
+  *** Built-in strategies for sequences
   ceq processEqualityTerm(M, '_=_[T, T']) = seqEqualities(M, T, T')
    if sameSeqCtor(M, T, T') .
   eq processEqualityTerm(M, T) = $processEqualityTerm(M, T) [owise] .
@@ -5614,9 +5662,6 @@ the \verb"maps2maps" function shown above to the body:
    if not (allCtor(M, T1) or isFreshCons(M, T1)) /\
       not (allCtor(M, T2) or isFreshCons(M, T2)) /\
       not (noneCtor(M, T1) and noneCtor(M, T2)) .
-  ceq $processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T1, T2], ctf] *** !!! Seq
-                                              processEqualityTerm*(M, T1 | T2)
-   if noneCtor(M, T1) /\ noneCtor(M, T2) .
   ceq $processEqualityTerm(M, Q[T, T']) = processEqualityTerm*(M, T | T')
    if (Q == '_or_) or (Q == '_and_) or (Q == '_xor_) .
   eq $processEqualityTerm(M, 'not_[T]) = $processEqualityTerm(M, T) .
@@ -5814,6 +5859,19 @@ and \verb"sizeTL" just computes the size of a list of terms:
   op sizeTL : TermList -> Nat .
   eq sizeTL(empty) = 0 .
   eq sizeTL((T, TL)) = s(sizeTL(TL)) .
+
+  ---------------------------------------------------------------------------------------
+  ---                              getEqTermsWithImps                                 ---
+  ---------------------------------------------------------------------------------------
+
+  op getEqTermsWithImps : Module Term -> TermSet .
+  ceq getEqTermsWithImps(M, T) = getEqTermsWithImps*(M, T, TL)
+   if TL := getHypotheses(M) .
+
+  op getEqTermsWithImps* : Module Term TermList -> TermSet .
+  eq getEqTermsWithImps*(M, T, empty) = emptyTermSet .
+  eq getEqTermsWithImps*(M, T, (T', TL)) = getEqualityTerms(reduce(M, '_implies_[T', T])) |
+                                           getEqTermsWithImps*(M, T, TL).
 
   ---------------------------------------------------------------------------------------
   ---                               getEqualityTerms                                  ---
