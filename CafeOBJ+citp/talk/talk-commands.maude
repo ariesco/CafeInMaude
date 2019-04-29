@@ -1,0 +1,52 @@
+
+*** Basic Maude commands
+
+(show module NSET .)
+
+(original CafeOBJ module NSET .)
+
+(red in NSET : | 2, 4, 6, 12 | .)
+
+(red in NSET : isEmpty?(empty) .)
+
+(red in NSET : isEmpty?(2, 4, 6, 12) .)
+
+(rew in BLACKBOARD : 2, 4, 6, 12 .)
+
+(search in BLACKBOARD : 2, 4, 6, 12 =>* N:Nat s.t. N:Nat =/= 8 .)
+
+*** Declarative debugging and testing
+
+(correct test module CORRECT-PROP-LIST .)
+
+(set test bound 30 .)
+
+(test in PROP-LIST : prop .)
+
+(show 10 incorrect .)
+
+(invoke debugger with incorrect test case 1 .)
+
+(show tree .)
+
+*** CITP
+
+(cafeOBJ language .)
+
+(goal LISTS |- eq L1:List @ (L2:List @ L3:List) = (L1 @ L2) @ L3 ;)
+
+(set ind on L1:List .)
+
+(apply SI TC CA IP RD .)
+
+(set module on .)
+
+(goal LISTS |- trans mix(L1:List, nil) => L1 ;)
+
+(auto .)
+
+(goal LISTS |- eq L1:List @ (L2:List @ L3:List) = (L1 @ L2) @ L3 ; trans mix(L1:List, nil) => L1 ;)
+
+(set ind on L1:List .)
+
+(apply SI TC CA IP RD .)

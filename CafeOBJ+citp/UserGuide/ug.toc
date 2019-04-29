@@ -1,0 +1,14 @@
+\select@language {english}
+\contentsline {section}{\numberline {1}Introducing CafeOBJ modules into the Full Maude database}{3}{section.1}
+\contentsline {subsection}{\numberline {1.1}Configuring the tool}{3}{subsection.1.1}
+\contentsline {subsection}{\numberline {1.2}Using the tool}{3}{subsection.1.2}
+\contentsline {section}{\numberline {2}Using the Constructor-based Inductive Theorem Prover }{5}{section.2}
+\contentsline {section}{\numberline {A}Translation}{7}{appendix.A}
+\contentsline {subsection}{\numberline {A.1}Built-in modules}{7}{subsection.A.1}
+\contentsline {subsection}{\numberline {A.2}Types of modules}{7}{subsection.A.2}
+\contentsline {subsection}{\numberline {A.3}Parameterized modules and views}{7}{subsection.A.3}
+\contentsline {subsection}{\numberline {A.4}Importations}{9}{subsection.A.4}
+\contentsline {subsection}{\numberline {A.5}Operators}{10}{subsection.A.5}
+\contentsline {subsection}{\numberline {A.6}Equations}{10}{subsection.A.6}
+\contentsline {subsection}{\numberline {A.7}Rules}{10}{subsection.A.7}
+\contentsline {section}{\numberline {B}Transforming CafeOBJ files to meet Full Maude requirements}{10}{appendix.B}

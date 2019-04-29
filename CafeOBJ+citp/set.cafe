@@ -1,0 +1,30 @@
+--
+-- P --> q : {n_p,p}_{pubk(q)}
+-- p <-- q : {n_p,n_q}_{pubk(p)}
+-- p --> q : {n_q}_{pubk(q)}
+--
+-- p, q : principals
+-- n_x : a nonce made by a principal x
+-- pubk(x) : a public key owned by a pricipal x
+-- {...}_{k} : a cipher encrypted with a key k
+--
+
+mod! SET(X :: TRIV) {
+  [Elt.X < Set]
+  op emp : -> Set {constr}
+  op __ : Set Set -> Set {constr assoc comm id: emp}
+  op _\in_ : Elt.X Set -> Bool
+  op _=<_ : Set Set -> Bool
+  vars E E' : Elt.X
+  vars S S' : Set
+  eq E E = E .
+  eq E \in emp = false .
+  eq E \in E S' = true .
+  ceq E \in E' S' = E \in S' if not(E = E') .
+  eq emp =< S' = true .
+  eq (E S =< S') = (E \in S') and (S =< S') .
+  ceq (S = S') = (S =< S') and (S' =< S)
+   if not((S :: Elt.X) and (S' :: Elt.X)) .
+}
+
+

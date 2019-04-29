@@ -1,0 +1,97 @@
+%!TEX root = ug.tex
+
+Hence, in order to make CafeOBJ specifications~\cite{cafe-report} compatible with Full Maude it
+is necessary to perform some modifications. Namely, we have to:
+\begin{itemize}
+\item
+Enclose every module into parentheses.
+
+\item
+Introduce the symbol \verb"`" before the scape characters, such as parentheses, commas,
+or curly braces, when defining operators.
+
+\item
+Transform CafeOBJ comments into Maude comments.
+\end{itemize}
+
+Moreover, we consider that the \texttt{metadata} attribute might be quite useful in some cases, and it
+is used by several Maude tools, like the prover in Section~\ref{sec:using:citp}. Thus, it
+is possible to write metadata information following equations and transitions as CafeOBJ
+comments (hence being valid CafeOBJ specifications). These comments must be introduced later
+into the statements to work.
+
+We have implemented a Java application that, given a CafeOBJ specification (possibly with
+commented metadata annotations), generates a new file performing the modifications explained
+above. In this way, if we have a file \verb"test.cafe" with the following CafeOBJ specification
+
+{\codesize
+\begin{verbatim}
+mod! TEST {
+ [Foo]
+ op a : -> Foo
+ op b : -> Foo
+ op {_,_} : Foo Foo -> Bool {comm}
+ --> We just check whether the values are equal
+ eq [l1] : {a, a} = true .
+ eq [l2] : {b, b} = true .
+ eq [l3] : {a, b} = false . **> {metadata "different"}
+}
+\end{verbatim}
+}
+
+We can download the application \verb"parser.jar", available at \url{http://maude.sip.ucm.es/cafe/},
+and use the command
+
+{\codesize
+\begin{verbatim}
+$ java -jar parser.jar test.cafe test-trans.cafe
+\end{verbatim}
+}
+
+\noindent
+where \verb"test-trans.cafe" is the name of the target file to be created, we obtain the following
+transformed module:
+
+{\codesize
+\begin{verbatim}
+(mod! TEST {
+ [Foo]
+ op a : -> Foo
+ op b : -> Foo
+ op `{_`,_`} : Foo Foo -> Bool {comm}
+ --- We just check whether the values are equal
+ eq [l1] : {a, a} = true .
+ eq [l2] : {b, b} = true .
+ eq [l3] : {a, b} = false {metadata "different"} .
+}
+)
+\end{verbatim}
+}
+
+Note that the module is now enclosed in parentheses, the scape characters in the third
+operator declaration are now preceded by \verb"`", while the rest of scape characters
+remain unchanged, the comment has been transformed into a Maude comment and the metadata
+attribute has been introduced into the equation.
+
+Once the files we want to load have been transformed with this application, we have to load
+Full Maude and \verb"cafeOBJ2maude.maude", available at \url{http://maude.sip.ucm.es/cafe/}:
+
+{\codesize
+\begin{verbatim}
+Maude> loop cafe2maude-init .
+
+     CafeOBJ2Maude 1.0 started.
+ CafeOBJ specifications can be introduced now into the Full Maude database.
+\end{verbatim}
+}
+
+This command starts an input/output loop where the modules previously obtained can be
+introduced. Now we can use the standard Maude commands to load modules:
+
+{\codesize
+\begin{verbatim}
+Maude> in test-trans.cafe
+Introduced Tight Cafe Module: TEST
+\end{verbatim}
+}
+

@@ -1,0 +1,22 @@
+load ui
+
+(fmod PNAT is 
+ sorts PNat PNzNat PZero .
+ subsorts PZero PNzNat < PNat .
+---
+ op 0 : -> PZero [ctor] .
+ op s_ : PNat -> PNzNat [ctor].
+ op _+_ : PNat PNat -> PNat .
+--- 
+ var M : PNat .
+ var N : PNat .
+--- 
+ eq 0 + N = N .
+ eq s M + N = s(M + N) .
+endfm)
+
+
+
+
+
+

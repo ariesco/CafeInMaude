@@ -1,0 +1,24 @@
+load pnat
+
+(fmod PNAT-L is
+ inc PNAT .
+ vars M N : PNat .
+ eq [lemma-1]: N + 0 = N .
+ eq [lemma-2]: M + s N = s(M + N). 
+endfm)
+
+*** commutativity ***
+
+(goal PNAT-L |- eq M:PNat + N:PNat = N:PNat + M:PNat .)
+
+(set ind on M:PNat .)
+
+(auto  .)
+
+*** associativity ***
+
+(goal PNAT-L |- eq (M:PNat + N:PNat) + P:PNat  = N:PNat + (M:PNat + P:PNat) .)
+
+(set ind on M:PNat .)
+
+(auto  .)

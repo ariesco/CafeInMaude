@@ -1,0 +1,22 @@
+\begin{thebibliography}{1}
+
+\bibitem{maude-book}
+M.~Clavel, F.~Dur{\'a}n, S.~Eker, P.~Lincoln, N.~Mart{\'\i}-Oliet, J.~Meseguer,
+  and C.~Talcott.
+\newblock {\em All About Maude: A High-Performance Logical Framework}, volume
+  4350 of {\em Lecture Notes in Computer Science}.
+\newblock Springer, 2007.
+
+\bibitem{cafe-report}
+K.~Futatsugi and R.~Diaconescu.
+\newblock {\em {CafeOBJ} Report}.
+\newblock World Scientific, AMAST Series, 1998.
+
+\bibitem{cafeOBJ2maudeUG}
+A.~Riesco.
+\newblock {\em Introducing CafeOBJ specifications in the Full Maude database.
+  Integrating CafeOBJ with the Constructor-based Inductive Theorem
+  Prover---User Guide}.
+\newblock Universidad Complutense de Madrid, August 2013.
+
+\end{thebibliography}

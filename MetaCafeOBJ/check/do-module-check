@@ -1,0 +1,5 @@
+#!/bin/bash
+source /etc/profile
+shopt -s expand_aliases
+/Applications/maude-darwin/maude.intelDarwin ../ui.maude module_check.maude > resultado
+diff -a modules_result.txt resultado

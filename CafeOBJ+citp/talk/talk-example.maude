@@ -1,0 +1,28 @@
+fmod NSET is
+ pr NAT .
+ sort Set .
+ subsort Nat < Set .
+
+ op empty : -> Set [ctor] .
+ op _,_ : Set Set -> Set [ctor comm assoc id: empty] .
+
+ var N : Nat .
+ var S : Set .
+
+ op |_| : Set -> Nat .
+ eq [s1] : | empty | = 0 .
+ eq [s2] : | N, S | = s(| S |) .
+
+ op isEmpty? : Set -> Bool .
+ eq [e1] : isEmpty?(empty) = true .
+ eq [e2] : isEmpty?((N, S)) = false .
+endfm
+
+mod BLACKBOARD is
+ pr NSET .
+
+ vars N N' : Nat .
+ var  S : Set .
+
+ rl [add] : N, N', S => ((N + N') quo 2), S .
+endm

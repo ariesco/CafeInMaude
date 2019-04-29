@@ -1,0 +1,56 @@
+mod! NSET {
+ pr(NAT)
+ [Nat < Set]
+
+ op empty : -> Set {constr}
+ op _,_ : Set Set -> Set {constr comm assoc id: (empty)}
+
+ var N : Nat
+ var S : Set
+
+ op |_| : Set -> Nat
+ eq [s1] : | empty | = 0 .
+ eq [s2] : | N, S | = s(| S |) .
+
+ pred isEmpty? : Set
+ eq [e1] : isEmpty?(empty) = true .
+ eq [e2] : isEmpty?((N, S)) = false .
+}
+
+mod! BLACKBOARD {
+ pr(NSET)
+
+ vars N N' : Nat
+ var  S : Set
+
+ trans [add] : N, N', S => ((N + N') quo 2), S .
+}
+
+mod! TALK {
+  [Foo]
+
+  op a : -> Foo {constr}
+  var F : Foo
+
+  op f : Foo -> Foo
+  eq f(F) = a .
+}
+
+mod* TRIV-TH{
+  [Elt]
+}
+
+mod! PARAM-LIST(X :: TRIV-TH) {
+   [Elt.X < List]
+
+   op nil : -> List {constr}
+   op _._ : List List -> List {constr assoc id:(nil)}
+}
+
+view VINT from TRIV-TH to INT {
+  sort Elt -> Int
+}
+
+mod! INT-LIST{
+ pr(PARAM-LIST(VINT))
+}

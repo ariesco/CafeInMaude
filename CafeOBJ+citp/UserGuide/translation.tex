@@ -1,0 +1,252 @@
+%!TEX root = ug.tex
+
+We present here the details and limitations of the translation from CafeOBJ specifications
+to Maude modules performed to introduce the former into the Full Maude database.
+
+\subsection{Built-in modules}
+
+CafeOBJ predefined modules are automatically mapped to the predefined Maude modules with
+the same name. As said in the introduction, one of the benefits of CafeOBJ and Maude
+being sister languages is that their share part of their syntax. This is quite convenient
+in this case, since it allows us to reuse the Maude code. In other case, specific modules
+defining the behavior of CafeOBJ modules should be used.
+
+Note that some tools, as the Maude Formal Environment~\cite{mfe11}, does not allow the use
+of predefined modules, so the user cannot import them if he want to use those tools.
+
+%\subsection{Structured specifications\label{subsec:flat}}
+%
+%An important characteristic of this translation is that it considers \emph{flat specifications}, that is,
+%every CafeOBJ specification is managed by the MFE as a set of equations and rules. This allows
+%us to add some flexibility to the importations and the relations between modules and theories, as
+%we will see in the next sections.
+
+\subsection{Types of modules}
+
+CafeOBJ allows the definition of two different kinds of module: modules with tight semantics,
+introduced by the keyword \texttt{mod!}, and modules with loose semantics, introduced by
+\texttt{mod*}. We translate the former to Maude modules (which will be functional modules
+if not rules are specified, and system modules otherwise) and the latter to Maude theories (which
+will be again translated as functional or system theories depending on the existence of rules).
+%
+CafeOBJ views will be always translated as Maude views.
+
+\subsection{Parameterized modules and views}
+
+As explained above, modules defined with syntax \verb"mod*"
+have loose semantics and are thus translated as Maude theories. Since the current
+version of Maude does not support parameterized theories, one of the main
+limitations of the translation is that \emph{modules with loose semantics cannot
+be parameterized}.
+%
+Regarding views, CafeOBJ syntax is richer than the one in Maude:
+\begin{itemize}
+\item
+Views can be declared ``on the fly'' when instantiating a parameterized module.
+
+\item
+The views assigned to each parameter during the instantiation can be identified by the
+parameter name, instead of introducing the views in the order given by the parameterized
+module.
+
+\item
+Moreover, in CafeOBJ the syntax \verb"SortId.ParamId" is used for qualifying sorts, while in Maude
+the syntax \verb"ParamId$SortId" is used.
+
+\end{itemize}
+
+Although the translation of each of these features is intuitive, is worth presenting a 
+a small example. We start by translating the module \verb"M1", which requires
+the existence of a sort \verb"A":
+
+{\codesize
+\begin{verbatim}
+ (mod* M1 {
+   [A]
+ })
+\end{verbatim}
+}
+
+This module is translated into a Maude theory as follows:
+
+{\codesize
+\begin{verbatim}
+ (fth M1 is
+   sort A .
+ endfth)
+\end{verbatim}
+}
+
+Now, we define a parameterized CafeOBJ module \verb"M2" with tight semantics, that receives
+two parameters fulfilling the theory \verb"M1", \verb"X" and \verb"Y", and states that the sort
+\verb"A" from \verb"X" is a subsort of a new sort \verb"B" declared in this module:
+
+{\codesize
+\begin{verbatim}
+ (mod! M2(X :: M1, Y :: M1){
+   [A.X < B]
+ })
+\end{verbatim}
+}
+
+This module is translated into Maude as follows:
+
+{\codesize
+\begin{verbatim}
+ (fmod M2{X :: M1, Y :: M1} is
+   sort B .
+   subsort X$A < B .
+ endfm)
+\end{verbatim}
+}
+
+Now we define another module with tight semantics \verb"M3" that will be used to declare a
+view \verb"V" from \verb"M1", mapping the sort \verb"A" from \verb"M1" to the sort
+\verb"C" declared in \verb"M3":
+
+{\codesize
+\begin{verbatim}
+ (mod! M3 {
+   [C]
+ })
+
+ (view V from M1 to M3 {
+   sort A -> C
+ })
+\end{verbatim}
+}
+
+These modules are translated into Maude in a straightforward way:
+
+{\codesize
+\begin{verbatim}
+ (fmod M3 is
+   sort C .
+ endfm)
+
+ (view V from M1 to M3 is
+   sort A to C .
+ endv)
+\end{verbatim}
+}
+
+It is important to note that
+the target module in a view \emph{cannot be a theory}. This is due to the fact that in Maude
+this kind of view is still not instantiated and hence it requires the module where the instantiation
+takes place to be also parameterized and use some of these parameters in the instantiation,
+which is not required in CafeOBJ and would lead to illegal specifications.
+%
+We explain at the end of the section a way to overcome this problem.
+
+Finally, we define a module \verb"M4" that instantiates \verb"M2" by using the view \verb"V" with
+the parameter \verb"Y" and an on-the-fly view to instantiate \verb"X":
+
+{\codesize
+\begin{verbatim}
+ (mod! M4 {
+   pr(M2(Y <= V, X <= view to M3 {sort A -> C}))
+ })
+\end{verbatim}
+}
+
+The translation into Maude first requires the creation of a new view \verb"OTF-VIEW0",
+where the prefix \verb"OTF" stands for \emph{on the fly} and the index is generated for each
+new view. Once this view has been introduced in the Maude database, the views in the
+instantiation are sorted to match the parameters in \verb"M2", and then the importation is
+accepted:
+
+{\codesize
+\begin{verbatim}
+ (view OTF-VIEW0 is
+   sort A to C .
+ endv)
+
+ (fmod M4 is
+   pr M1{OTF-VIEW0, V} .
+ endfm)
+\end{verbatim}
+}
+
+It is worth noting that, 
+to allow a more flexible translation, we introduce an equivalent Maude module for each
+theory introduced into the database. If it is required to use this module instead of the theory
+to obtain a valid Maude specification, the system will use it and show a warning message to the
+user. This feature can be turned off with the command:
+
+{\codesize
+\begin{verbatim}
+ Maude> (strict translation on .)
+ The modules will be introduced as originally written.
+\end{verbatim}
+}
+
+\noindent
+and used again by typing:
+
+{\codesize
+\begin{verbatim}
+ Maude> (strict translation off .)
+ The translation will adapt CafeOBJ specifications to meet Maude requirements when 
+possible.
+\end{verbatim}
+}
+
+\subsection{Importations}
+
+Maude importation features present some limitations:
+
+\begin{itemize}
+\item
+Theories can only be imported by other theories, and only in \verb"including" mode.
+
+\item
+Modules can be imported by theories. Note that this importation indicates that, if the
+theory is used as the source of a view the target module must also import the module.
+
+\item
+Modules cannot import theories, only modules.
+\end{itemize}
+
+Some of the specifications thus
+obtained are not valid Maude specifications from the executability point of view, and hence
+commands like \texttt{red}, \texttt{rew}, or \texttt{search} cannot be used on them.
+%
+Under these conditions, the importations allowed by our translation are, in addition to all the
+already available in Maude:
+\begin{itemize}
+\item
+We allow the importation of theories by other theories in any mode, since they will be
+just introduced into the theory assuming \verb"including" mode.
+
+\item
+Modules can be imported by theories, but the conditions presented above must hold.
+
+\item
+importing a \verb"mod*" within a \verb"mod!" is allowed, and the tools will use the equations
+and rules in these theories in the standard way.
+\end{itemize}
+
+As explained above, we can use the commands \verb"(strict translation on .)" and
+\texttt{(strict translation off .)} to force the system to accept the exact CafeOBJ
+specification.
+
+%Also note that equations (respec.\ rules) that are not expected to be used by the MFE can
+%be declared with the \texttt{nonexec} attribute, that indicates that the equations (respec.\ rules)
+%are not expected to be executed.
+
+\subsection{Operators}
+
+Both CafeOBJ operators and behavioral operators are straightforwardly mapped to
+Maude operators. In the case of the CafeOBJ operator attributes \verb"l-assoc"
+and \verb"r-assoc" attributes, which are not available in Maude, they are
+translated by using \verb"gather".
+
+\subsection{Equations}
+
+CafeOBJ equations are directly translated into Maude equations.
+
+\subsection{Rules}
+
+\verb"trans" and \verb"btrans" (as well as \verb"ctrans" and \verb"cbtrans") declarations are
+straightforwardly translated into Maude rules.
+

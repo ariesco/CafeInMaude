@@ -1,0 +1,43 @@
+load abp
+
+(th FIN is
+ inc ABP .
+ var S : Sys .
+ vars C1 C2 : Channel1 .
+ vars D1 D2 : Channel2 .
+ var B : Bit .
+ var P : Packet .
+ ---
+ ceq [lemma-inv5]:  pac(next(S))= P   if C1,< B,P >,C2 := channel1(S) /\ B = bit1(S).
+ crl [lemma-inv2] : B  => bit1(S)     if C1,< B,P >,C2 := channel1(S) /\ bit2(S) = bit1(S)[nonexec] .
+ ceq [lemma-inv3] : bit2(S) = bit1(S) if D1,B,D2 := channel2(S)       /\ B = bit1(S).
+ crl [lemma-inc1]: true => false if bit1(S) => not bit1(S) [nonexec].
+ crl [lemma-inc2]: true => false if not bit1(S) => bit1(S) [nonexec].
+endth)
+
+
+(goal
+ FIN |- crl mk(next(S:Sys)) => list(S:Sys) if bit2(S:Sys) = bit1(S:Sys) ;
+        crl mk(next(S:Sys)) => pac(next(S:Sys)),list(S:Sys) if not bit2(S:Sys) = bit1(S:Sys) ; )
+
+(set ind on S:Sys .)
+(apply SI .)
+--- init ---
+(auto .)
+--- drop1 ---
+(auto .)
+--- drop2 ---
+(auto .)
+--- rec1 ---
+(auto .)
+--- rec2 ---
+(init lemma-inv2 by S <- x#1 .)
+(init lemma-inv3 by S <- x#1 .)
+(init lemma-inv5 by S <- x#1 .)
+(init lemma-inc1 by S <- x#1 .)
+(init lemma-inc2 by S <- x#1 .)
+(auto .)
+--- send1 ---
+(auto .)
+--- send2 ---
+(auto .)

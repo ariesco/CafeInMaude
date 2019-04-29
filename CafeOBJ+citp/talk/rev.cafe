@@ -1,0 +1,32 @@
+mod! LIST {
+  pr(NAT)
+  [Nat < List]
+
+  op nil : -> List {constr}
+  op __ : List List -> List {constr assoc id: (nil)}
+
+  var N : Nat
+  var L : List
+
+  op reverse : List -> List
+  eq [r1] : reverse(nil) = 0 .
+  eq [r2] : reverse(N L) = reverse(L) N .
+}
+
+mod! PROP-LIST {
+  pr(LIST)
+
+  var L : List
+
+  op prop : List -> Bool .
+  eq [p1] : prop(L) = reverse(reverse(L)) == L .
+}
+
+mod! CORRECT-PROP-LIST {
+  pr(LIST)
+
+  var L : List
+
+  op prop : List -> Bool .
+  eq prop(L) = true .
+}

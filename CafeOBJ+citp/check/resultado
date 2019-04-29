@@ -1,0 +1,120 @@
+		     \||||||||||||||||||/
+		   --- Welcome to Maude ---
+		     /||||||||||||||||||\
+	    Maude 2.7 built: Feb  7 2014 15:12:51
+	    Copyright 1997-2014 SRI International
+		   Tue Jun 24 14:05:25 2014
+
+	    Full Maude 2.7 March 13th 2013
+
+     --- A Constructor-based Theorem Prover(2013.06.12)! ---
+Command lists:
+	load *.maude .			-- load modules into database
+
+	(goal ModuleName |- Equations/Rules/Memberships)
+	(set ind on Vars .)		-- specify the variables for induction
+	(init LEMMA by V <- c .)	-- initialize a lemma by substitution.
+	(auto goal GoalID .)		-- prove a subgoal
+	(auto .)			-- try to prove the current goal
+	(roll back .)			-- go back to the previous goal
+	(apply RuleName .)		-- apply a given rule to default goal
+	(apply RuleName to GoalId .)	-- apply a rule to a goal
+	(cp EQ >< EQ)			-- check critical pairs
+	(cp Label >< Label .)		-- check critical pairs
+	(rule .)			-- add a critical pair as a rule
+	(backward rule .)		-- rule in inverse direction
+	(equation .)			-- add a critical pair as an equation
+	(backward equation .)		-- equation in inverse direction
+	(show unproved goals .)		-- show all unproved goals
+	(show goal GoalID .)		-- show a goal and set it as default
+	(show goal .)			-- show the current goal
+	(show tactics .)		-- show all tactics
+	(set tactic PROOF STRATEGY .)	-- specify customized proof strategy
+	(select tactic NAT .)		-- to use customized proof strategy
+	(set module off .)		-- only show added contents in module
+	(set module on .)		-- display all content in modules
+set include BOOL off
+
+Introduced Tight Cafe Module: BASIC-INT
+Warning:(p s X:Int)=(X)
+Error: no parse for eq p s X:Int ~ X
+Warning:(s p X:Int)=(X:Int)
+Error: no parse for eq s p X:Int ~ X:Int
+Warning:(p s X:Int)=(X)
+Error: no parse for eq p s X:Int ~ X
+Warning:(s p X:Int)=(X:Int)
+Error: no parse for eq s p X:Int ~ X:Int
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bye.

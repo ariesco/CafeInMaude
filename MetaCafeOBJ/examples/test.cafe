@@ -1,0 +1,25 @@
+mod! TEST {
+ [Foo]
+ op a : -> Foo
+ op b : -> Foo
+ op {_,_} : Foo Foo -> Bool {comm}
+ --> We just check whether the values are equal
+ eq [l1] : {a, a} = true .
+ eq [l2] : {b, b} = true .
+ eq [l3] : {a, b} = false . --> {metadata "different"}
+}
+
+mod! BASIC-NAT {
+  [Nat]
+  op 0 : -> Nat {constr}
+  op s_ : Nat -> Nat {constr}
+  pred equal : Nat Nat {comm}
+
+  vars N M : Nat
+
+  eq [e1] : equal(0, 0) = true .
+  eq [e2] : equal(0, s(N)) = false .
+  eq [e3] : equal(s(N), s(M)) = equal(N, M) .
+
+  trans [tr1] : s(N:Nat) => s(0) .
+}

@@ -1,0 +1,5 @@
+#!/bin/bash
+source /etc/profile
+shopt -s expand_aliases
+maude ../ui.maude tool_test.cafe > resultado_generado_tool
+diff -a tool_saved_result.txt resultado_generado_tool

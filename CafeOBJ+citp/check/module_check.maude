@@ -1,0 +1,309 @@
+set show advisories off .
+set show loop stats off .
+set show loop timing off .
+
+(set include BOOL off .)
+
+(mod! BASIC-INT{
+  [Zero < Int]
+  op 0 : -> Zero {constr}
+  ops s_ p_ : Int -> Int
+  eq s p X:Int = X:Int .
+  eq p s X:Int = X .
+})
+
+(original CafeOBJ module BASIC-INT .)
+
+(mod* MY-BOOL{
+  [Bool]
+  ops true false : -> Bool
+  op _and_ : Bool Bool -> Bool
+  op not_ : Bool -> Bool
+})
+
+(original CafeOBJ module MY-BOOL .)
+
+(mod* GROUP{
+ [G]
+ op 0 : -> G
+ op _+_ : G G -> G {comm id: 0}
+ op -_ : G -> G
+ vars X Y Z : G
+ eq (X + Y) + Z = X + (Y + Z) .
+ eq 0 + X = X .
+ eq (- X) + X = 0 .
+})
+
+(original CafeOBJ module GROUP .)
+
+(mod! SIG-INT+{
+  pr(BASIC-INT)
+  op _+_ : Int Int -> Int
+})
+
+(original CafeOBJ module SIG-INT+ .)
+
+(mod! INT+{
+  pr(SIG-INT+)
+  vars X Y : Int
+  eq 0 + X = X .
+  eq (s X) + Y = s(X + Y) .
+  eq (p X) + Y = p(X + Y) .
+})
+
+(original CafeOBJ module INT+ .)
+
+(mod! INToo{
+  ex(BASIC-INT)
+  op oo : -> Int {constr}
+  eq s oo = oo .
+  eq p oo = oo .
+})
+
+(original CafeOBJ module INToo .)
+
+(mod! INT3{
+  us(BASIC-INT)
+  eq s s s X:Int = X .
+  eq p p p X:Int = X .
+})
+
+(original CafeOBJ module INT3 .)
+
+(mod! INT{
+  pr(BASIC-INT)
+  pr(MY-BOOL)
+  op _<=_ : Int Int -> Bool
+  op _>=_ : Int Int -> Bool
+  op _>_ : Int Int -> Bool
+  ops _-_ _*_ : Int Int -> Int
+  op 1 : -> Int {constr}
+})
+
+(original CafeOBJ module INT .)
+
+(mod! EQL-INT{
+ pr(INT)
+ pred _==_ : Int Int .
+ vars X Y : Int .
+ eq [equals] : (X == Y) = (X <= Y) and (Y <= X) {metadata "equality"} .
+})
+
+(original CafeOBJ module EQL-INT .)
+
+(mod! FACT{
+  pr(INT)
+  op fact : Int -> Int
+  var X : Int
+  ceq fact(X) = X * fact(X - 1) if X > 0 .
+  ceq fact(X) = 1 if not (X > 0) {nonexec} .
+})
+
+(original CafeOBJ module FACT .)
+
+(mod* EQL-Elt{
+  inc(MY-BOOL)
+  [Elt]
+  op _==_ : Elt Elt -> Bool {comm}
+  eq (E:Elt == E) = true .
+})
+
+(original CafeOBJ module FACT .)
+
+(mod! INT-STRING{
+  pr(INT)
+  [Int < Str]
+  op _ _ : Str Str -> Str {assoc}
+})
+
+(original CafeOBJ module INT-STRING .)
+
+(mod! INT-BAG{
+  pr(INT)
+  [Int < Bag]
+  op _ _ :  Bag Bag -> Bag {assoc comm}
+})
+
+(original CafeOBJ module INT-BAG .)
+
+(mod! INT-BAG-IN{
+  pr(INT-BAG)
+  op _in_ : Int Bag -> Bool
+  var X : Int
+  var B : Bag
+  eq (X in X B) = true .
+})
+
+(original CafeOBJ module INT-BAG-IN .)
+
+(mod! BASIC-NAT{
+  [Zero NzNat < Nat]
+  op 0 : -> Zero
+  op s_ : Nat -> NzNat
+})
+
+(original CafeOBJ module BASIC-NAT .)
+
+(mod! NAT-P{
+  pr(BASIC-NAT)
+  op p_ : NzNat -> Nat
+  eq p s N:Nat = N .
+})
+
+(original CafeOBJ module NAT-P .)
+
+(mod! EQL-Elt-err{
+  pr(EQL-Elt)
+  op err : -> ?Elt
+  eq (E:Elt == err) = false .
+})
+
+(original CafeOBJ module EQL-Elt-err .)
+
+(mod! ARRAY{
+ pr(EQL-INT + EQL-Elt-err)
+ *[Sys]*
+ bop val : Sys Int -> Elt
+ bop set : Sys Int Elt -> Sys
+ op init : -> Sys
+ var S : Sys
+ var A : Elt
+ vars X Y : Int
+ eq val(init, X) = err .
+ ceq val(set(S, X, A), Y) = A
+  if X == Y .
+ ceq val(set(S, X, A), Y) = val(S, Y)
+  if not (X == Y) .
+})
+
+(original CafeOBJ module ARRAY .)
+
+(mod! FOO(X :: MY-BOOL, Y :: MY-BOOL, Z :: MY-BOOL){
+  [Foo]
+})
+
+(original CafeOBJ module FOO .)
+
+(mod! A{
+  [A]
+})
+
+(original CafeOBJ module A .)
+
+(mod* B{
+  [B]
+})
+
+(original CafeOBJ module B .)
+
+(view C from B to A {
+  sort B -> A
+})
+
+(view C2 from B to A {
+  sort B -> A
+})
+
+(view C3 from B to A {
+  sort B -> A
+})
+
+(mod! D(X :: B){
+  [Foo]
+})
+
+(original CafeOBJ module D .)
+
+(mod* D2(X :: B, Y :: B){
+  [Foo]
+})
+
+(original CafeOBJ module D2 .)
+
+(mod! D3(X :: B, Y :: B, Z :: B){
+  [Foo]
+})
+
+(original CafeOBJ module D3 .)
+
+(mod! E {
+  pr(D(X <= C))
+})
+
+(original CafeOBJ module E .)
+
+(mod! E2 {
+  pr(D2(Y <= C2, X <= C))
+})
+
+(original CafeOBJ module E2 .)
+
+(mod! E3 {
+  pr(D3(Y <= C2, Z <= C3, X <= C))
+})
+
+(original CafeOBJ module E3 .)
+
+(mod! E4 {
+  pr(D(X <= view to A {sort B -> A}))
+})
+
+(original CafeOBJ module E4 .)
+
+(mod! E5 {
+  pr(D2(Y <= view to A {sort B -> A}, X <= view to A {sort B -> A}))
+})
+
+(original CafeOBJ module E5 .)
+
+(mod! E6 {
+  pr(D3(Y <= view to A {sort B -> A}, Z <= C3, X <= view to A {sort B -> A}))
+})
+
+(original CafeOBJ module E6 .)
+
+(mod! E7 {
+  pr(D3(Y <= A {sort B -> A}, Z <= C3, X <= view to A {sort B -> A}))
+})
+
+(original CafeOBJ module E7 .)
+
+(mod! BAG(D :: EQL-Elt) {
+  pr(MY-BOOL)
+  [Elt.D < Bag]
+  op _ _ : Bag Bag -> Bag {assoc comm}
+  pred _in_ : Elt.D Bag
+  vars X Y : Elt.D
+  var B : Bag
+})
+
+(original CafeOBJ module BAG .)
+
+(view EQL-Elt2INT from EQL-Elt to INT {
+  sort Elt -> Int,
+  vars X Y : Elt,
+  op (X == Y) -> (X >= Y) and (X <= Y)
+})
+
+(mod! F {
+  pr (MY-BOOL * {sort Bool -> Boola})
+})
+
+(original CafeOBJ module F .)
+
+(mod! RULES{
+  pr(BOOL)
+  [A]
+
+  pred d : A A .
+  ops a b c : -> A
+  trans [a] : a => b {metadata "a rule" nonexec} .
+  ctrns b => c if d(a,c) .
+  eq d(a,c) = true .
+})
+
+(show module RULES .)
+
+(original CafeOBJ module RULES .)
+
+q

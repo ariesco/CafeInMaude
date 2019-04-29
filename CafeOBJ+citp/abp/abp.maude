@@ -1,0 +1,196 @@
+
+load ui
+
+***( Note : Since Maude doesn't allow importation of theories in protecting mode,
+all modules wil be imported with "including" but the intended semantics is that of protecting)
+
+--- ---------------------------------------------
+--- ---------------------------------------------
+(fmod SEQUENCE{X :: TRIV} is
+ sort Sequence .
+ subsorts X$Elt < Sequence .
+--- constructors
+ op empty : -> Sequence [ctor] .
+ op _`,_ : Sequence Sequence -> Sequence [ctor id: empty assoc] .
+---
+ vars E F : X$Elt .
+ vars Sq Se Sn : Sequence .
+--- proof rule
+ ceq true = false if Sq,E,Se := empty .
+--- equality predicate
+ op _~_ : Sequence Sequence -> Bool .
+ eq Sq ~ Sq = true .
+ eq E,Sq ~ F,Se = (E == F) and (Sq ~ Se) .
+--- matching predicate Se,E,Sn := Sq
+ op match : Sequence Sequence Sequence -> Bool .
+ eq match(empty,Se,Sn) = false .
+ eq match((E,Sq),empty,Sn) = Sq ~ Sn .
+ eq match((E,Sq),(F,Se),Sn) = (E == F)and match(Sq,Se,Sn) .
+endfm)
+--- ---------------------------------------------
+--- ---------------------------------------------
+(fmod PAIR{X :: TRIV, Y :: TRIV} is
+ sort Pair .
+ ---
+ op <_`,_> : X$Elt Y$Elt -> Pair [ctor] .
+ op fst : Pair -> X$Elt .
+ op snd : Pair -> Y$Elt .
+ ---
+ vars A A' : X$Elt .
+ vars B B' : Y$Elt .
+ ---
+ eq fst(< A,B >) = A .
+ eq snd(< A,B >) = B .
+endfm)
+--- ---------------------------------------------
+--- ---------------------------------------------
+(fmod PACKET is inc NAT .
+ sort Packet .
+ op pac : Nat -> Packet [ctor] .
+endfm)
+--- ---------------------------------------------
+--- ---------------------------------------------
+(fmod BIT is
+ sort Bit .
+ op t : -> Bit [ctor] .
+ op f : -> Bit [ctor] .
+ op not_ : Bit -> Bit .
+ eq not f = t .
+ eq not t = f .
+---
+ var B : Bit .
+ eq  not not B = B .
+--- proof rule --- discharges goal1(init) ---
+ ceq true = false if t = f .
+endfm)
+--- ---------------------------------------------
+--- ---------------------------------------------
+(view TRIV2BIT from TRIV to BIT is
+ sort Elt to Bit .
+endv)
+
+(view TRIV2PACKET from TRIV to PACKET is
+ sort Elt to Packet .
+endv)
+
+(fmod BIT-PACKET-PAIR is
+ inc PAIR{TRIV2BIT, TRIV2PACKET} * (sort Pair to BPPair) .
+endfm)
+
+(view TRIV2BIT-PACKET-PAIR from TRIV to BIT-PACKET-PAIR is
+ sort Elt to BPPair .
+endv)
+
+(fmod CHANNEL1 is
+ inc SEQUENCE{TRIV2BIT-PACKET-PAIR} * (sort Sequence to Channel1) .
+endfm)
+--- ---------------------------------------------
+--- ---------------------------------------------
+(fmod CHANNEL2 is
+ inc SEQUENCE{TRIV2BIT} * (sort Sequence to Channel2) .
+endfm)
+--- ---------------------------------------------
+--- ---------------------------------------------
+(fmod PACKET-LIST is
+ inc SEQUENCE{TRIV2PACKET} *
+  (sort Sequence to List,
+   op empty to nil) .
+ op mk : Nat -> List .
+ var N : Nat .
+ eq mk(0) = pac(0),nil .
+ eq mk(s N) = pac(s N), mk(N) .
+endfm)
+--- ---------------------------------------------
+--- ---------------------------------------------
+(fth ABP is inc CHANNEL1 . inc CHANNEL2 . inc PACKET-LIST .
+ sort Sys .
+ ops x1 y1 : Sys -> Channel1 .
+ ops x2 y2 : Sys -> Channel2 .
+ --- initial states
+  op init : -> Sys [ctor].
+--- constructors
+  op rec1  : Sys -> Sys [ctor] . --- Sender's receiving bits
+  op rec2  : Sys -> Sys [ctor] . --- Receiver's receiving pairs of bits&packets
+  op send1 : Sys -> Sys [ctor] . --- Sender's sending pairs of bits&packets
+  op send2 : Sys -> Sys [ctor] . --- Receiver's sending bits
+  op drop1 : Sys -> Sys [ctor] . --- dropping one element of channel1
+  op drop2 : Sys -> Sys [ctor] . --- dropping one element of channel2
+--- observations
+  op channel1 : Sys -> Channel1 .  --- Sender-to-Receiver channel
+  op channel2 : Sys -> Channel2 .  --- Receiver-to-Sender channel
+  op bit1  : Sys -> Bit  .         --- Sender's bit
+  op bit2  : Sys -> Bit  .         --- Receiver's bit
+  op next  : Sys -> Nat  .         --- the packet number sent next by Sender
+  op list  : Sys -> List  .        --- the packets received by Receiver
+--- variables
+  var S : Sys .
+  vars B : Bit .
+  vars C2 C2' : Channel2 .
+  vars C1 C1' : Channel1 .
+  var N : Nat .
+  vars P : Packet .
+--- init -----------------------------------------------------------------
+  eq channel1(init) = empty .
+  eq channel2(init) = empty .
+  eq bit1(init)  = f .
+  eq bit2(init)  = t .
+  eq next(init)  = 0 .
+  eq list(init)  = nil .
+--- rec1 -----------------------------------------------------------------
+ eq channel1(rec1(S)) = channel1(S) .
+ ceq channel2(rec1(S)) = channel2(S) if channel2(S) = empty [metadata "CA-c2a"].
+ ceq channel2(rec1(S)) = C2          if B,C2 := channel2(S) [metadata "CA-c2b"].
+ ceq bit1(rec1(S)) = bit1(S)     if channel2(S) = empty                    [metadata "CA-b1a"].
+ ceq bit1(rec1(S)) = bit1(S)     if B,C2 := channel2(S) /\ B = not bit1(S) [metadata "CA-b1b"].
+ ceq bit1(rec1(S)) = not bit1(S) if B,C2 := channel2(S) /\ B = bit1(S)     [metadata "CA-b1c"].
+ eq bit2(rec1(S))  = bit2(S) .
+ ceq next(rec1(S)) = next(S)   if channel2(S) = empty                    [metadata "CA-na"].
+ ceq next(rec1(S)) = next(S)   if B,C2 := channel2(S) /\ B = not bit1(S) [metadata "CA-nb"].
+ ceq next(rec1(S)) = s next(S) if B,C2 := channel2(S) /\ B = bit1(S)     [metadata "CA-nc"].
+ eq list(rec1(S)) = list(S) .
+--- rec2 -----------------------------------------------------------------
+ ceq channel1(rec2(S)) = channel1(S) if channel1(S) = empty       [metadata "CA-c1a"].
+ ceq channel1(rec2(S)) = C1          if < B,P >,C1 := channel1(S) [metadata "CA-c1b"].
+ eq  channel2(rec2(S)) = channel2(S) .
+ eq  bit1(rec2(S))  = bit1(S) .
+ ceq bit2(rec2(S))  = bit2(S)     if channel1(S) = empty                          [metadata "CA-b2a"].
+ ceq bit2(rec2(S))  = bit2(S)     if < B,P >,C1 := channel1(S) /\ B = bit2(S)     [metadata "CA-b2b"].
+ ceq bit2(rec2(S))  = not bit2(S) if < B,P >,C1 := channel1(S) /\ B = not bit2(S) [metadata "CA-b2c"].
+--- lemma
+ ceq bit2(rec2(S)) = B if < B,P >,C1 := channel1(S) [owise].
+---
+ eq next(rec2(S))  = next(S) .
+ ceq list(rec2(S)) = list(S)   if channel1(S) = empty                          [metadata "CA-la"].
+ ceq list(rec2(S)) = list(S)   if < B,P >,C1 := channel1(S) /\ B = bit2(S)     [metadata "CA-lb"].
+ ceq list(rec2(S)) = P,list(S) if < B,P >,C1 := channel1(S) /\ B = not bit2(S) [metadata "CA-lc"].
+--- send1 -----------------------------------------------------------------
+  eq channel1(send1(S)) = channel1(S),< bit1(S),pac(next(S)) > .
+  eq channel2(send1(S)) = channel2(S) .
+  eq bit1(send1(S))  = bit1(S) .
+  eq bit2(send1(S))  = bit2(S) .
+  eq next(send1(S))  = next(S) .
+  eq list(send1(S))  = list(S) .
+--- send2 -----------------------------------------------------------------
+ eq channel1(send2(S)) = channel1(S) .
+ eq channel2(send2(S)) = channel2(S),bit2(S) .
+ eq bit1(send2(S))  = bit1(S) .
+ eq bit2(send2(S))  = bit2(S) .
+ eq next(send2(S))  = next(S) .
+ eq list(send2(S))  = list(S) .
+--- drop1 -----------------------------------------------------------------
+  ceq channel1(drop1(S)) = x1(S),y1(S) if x1(S),< B,P >,y1(S) := channel1(S)     [metadata "CA-d1a"].
+  ceq channel1(drop1(S)) = channel1(S) if match(channel1(S),x1(S),y1(S)) = false [metadata "CA-d1b"].
+  eq channel2(drop1(S)) = channel2(S) .
+  eq bit1(drop1(S))  = bit1(S) .
+  eq bit2(drop1(S))  = bit2(S) .
+  eq next(drop1(S))  = next(S) .
+  eq list(drop1(S))  = list(S) .
+--- drop2 -----------------------------------------------------------------
+ eq channel1(drop2(S)) = channel1(S) .
+ ceq channel2(drop2(S)) = x2(S),y2(S) if x2(S),B,y2(S) := channel2(S)           [metadata "CA-d2a"].
+ ceq channel2(drop2(S)) = channel2(S) if match(channel2(S),x2(S),y2(S)) = false [metadata "CA-d2b"].
+ eq bit1(drop2(S))  = bit1(S) .
+ eq bit2(drop2(S))  = bit2(S) .
+ eq next(drop2(S))  = next(S) .
+ eq list(drop2(S))  = list(S) .
+endfth)

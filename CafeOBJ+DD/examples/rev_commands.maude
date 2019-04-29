@@ -1,0 +1,33 @@
+(correct test module CORRECT-PROP-LIST .)
+
+(test in PROP-LIST : prop .)
+
+(show 5 incorrect .)
+
+(invoke debugger with incorrect test case 1 .)
+
+***
+
+(function coverage .)
+
+(test in NAT-LIST : reverse .)
+
+(invoke debugger with user test case 1 .)
+
+*** Narrowing
+
+(search [1] mix(L:List, 1 nil) ~>! 0 (1 (2 nil)) .)
+
+*** CITP
+
+(cafeOBJ language .)
+
+(goal NAT-LIST |- eq L1:List @ (L2:List @ L3:List) = (L1:List @ L2:List) @ L3:List ;)
+
+(set ind on L1:List .)
+
+(apply SI TC .)
+
+(goal NAT-LIST |- trans mix(L:List, nil) => L ;)
+
+(auto .)

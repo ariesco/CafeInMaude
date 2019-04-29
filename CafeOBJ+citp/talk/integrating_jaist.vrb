@@ -1,0 +1,17 @@
+\frametitle {Integration with other tools}
+\begin{itemize}
+\item
+Then we can use the standard commands to prove it:
+
+{\codesize
+\begin{verbatim}
+Maude> (auto .)
+
+INFO: Goal 1-1 was successfully proved
+by applying tactic: SI CA CS TC IP
+
+INFO: PROOF COMPLETED
+\end{verbatim}
+}
+
+\end{itemize}

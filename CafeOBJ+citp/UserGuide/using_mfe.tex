@@ -1,0 +1,81 @@
+%!TEX root = ug.tex
+
+We briefly present in this section how to use the Maude Formal Environment (MFE) with
+CafeOBJ specifications. An exhaustive description of the system is available in~\cite{mfe11}.
+
+First, it is important to note that some of the tools in the MFE do not support built-in operators,
+so it cannot prove properties on specifications containing this kind of functions.
+%
+Hence, programmers cannot import modules using built-in functions into their specifications,
+which includes standard modules such as \texttt{BOOL} or \texttt{NAT}.
+%
+In the \texttt{BOOL} case, the user is encouraged to use the \texttt{TRUTH-VALUE} module,
+which defines the sort \texttt{Bool} and the constants \texttt{true} and \texttt{false}. This module
+allows us to use conditional equations and rules, that require Boolean values in the conditions.
+The rest of operations, including equalities, must be defined manually by the user.
+
+The MFE must be downloaded and installed following the instructions
+in~\url{http://maude.lcc.uma.es/MFE/}. Then the \texttt{cafeOBJ2maude.maude} file must
+be added to the main folder (called \texttt{mfe}), while the \texttt{mfe.maude} file must be
+replaced by its extended version supporting CafeOBJ specifications.
+These files are available at \url{http://maude.sip.ucm.es/cafe}.
+
+Once the tool is installed, it is started by loading the \verb"mfe.maude" file into the Maude system:
+
+{\codesize
+\begin{verbatim}
+$ maude 
+		     \||||||||||||||||||/
+		   --- Welcome to Maude ---
+		     /||||||||||||||||||\
+	    Maude 2.6 built: Dec 10 2010 11:12:39
+	    Copyright 1997-2010 SRI International
+		   Thu Aug  9 13:41:39 2012
+
+Maude> load mfe.maude
+	    Full Maude 2.6.1d July 7th 2012
+
+The Maude Formal Environment 1.0
+    Inductive Theorem Prover - July 20th 2010
+    Sufficient Completeness Checker 2a - August 2010
+    Church-Rosser Checker 3m - July 7th 2012
+    Coherence Checker 3l - November 24th 2010
+    Maude Termination Tool 1.5i - July 7th 2012
+\end{verbatim}
+}
+
+Once the MFE is loaded we can directly load our CafeOBJ specifications by enclosing each module or
+view in parenthesis. If we introduce the appropriate parenthesis in the example presented in
+Section~\ref{subsec:cafe}, assuming it is saved in a file called \texttt{example.cafe}, it is loaded as
+follows:
+
+{\codesize
+\begin{verbatim}
+Maude> load example.cafe
+\end{verbatim}
+}
+
+It is important to note that this tool will use \emph{flat} modules, so the specifics
+semantics required by the importations will not be taken into account.
+This follows the approach used for Maude specifications, where these constraints are also
+skipped. This is possible because the tools work on \emph{sets} of axioms, equations, and
+rewrite rules.
+
+We can use now all the tools in the MFE to analyze our CafeOBJ specifications.
+We can start by checking
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

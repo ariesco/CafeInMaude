@@ -1,0 +1,148 @@
+%!TEX root = pg.tex
+
+We present here the modifications that must be performed into the tool to support
+CafeOBJ specifications, as well as to add the new commands defined in the previous
+sections. We present here the modifications for the Constructor-based Inductive
+Theorem Prover, but they are general and can be applied to any other tool.
+%
+Moreover, note that this modifications are performed \emph{in the interface},
+while the tool itself remains unchanged.
+
+First, we need to distinguish the language we are working with. Hence, we require:
+\begin{itemize}
+\item
+A sort \verb"Language", that will be used by all the languages.
+
+\item
+Constants of sort \verb"Language" for each language. In our case we have defined,
+in the module in charge of handling the database (\verb"THM-DATABASE-HANDLING")
+the following:
+
+{\codesize
+\begin{verbatim}
+  sort Language .
+  ops maude cafeobj : -> Language [ctor] .
+\end{verbatim}
+}
+
+\item
+An attribute to store the selected language. We have added, also in
+\texttt{THM-DATABASE-HANDLING}, the following attribute:
+
+{\codesize
+\begin{verbatim}
+  op language`:_ : Language -> Attribute [ctor] .
+\end{verbatim}
+}
+
+\item
+Commands to deal with this attribute. In this case, we have to add two new
+commands into the syntax (in \texttt{PROVE-COMMANDS}):
+
+{\codesize
+\begin{verbatim}
+  op maude`language`. : -> @Command@ .
+  op cafeOBJ`language`. : -> @Command@ .
+\end{verbatim}
+}
+
+\item
+Rules for dealing with these commands. In our case we require the following two
+rules to be added to \texttt{THM-DATABASE-HANDLING}:
+
+{\codesize
+\begin{verbatim}
+  rl [maude-specs] :
+     < O : X@Database | input : ('maude`language`..@Command@), output : nil ,
+                        language : L, Atts >
+  => < O : X@Database | input : nilTermList, output : ('\n '\b 'Maude 'selected
+                                                      'as 'current 'specification
+                                                      'language. '\o '\n),
+                        language : maude, Atts > .
+
+  rl [cafe-specs] :
+     < O : X@Database | input : ('cafeOBJ`language`..@Command@), output : nil ,
+                        language : L, Atts >
+  => < O : X@Database | input : nilTermList, output : ('\n '\b 'CafeOBJ 'selected 
+                                                      'as 'current 'specification
+                                                      'language. '\o '\n),
+                        language : cafeobj, Atts > .
+\end{verbatim}
+}
+
+\item
+Every rule in charge of commands must use the \verb"maude" value. Note that the
+rules in Section~\ref{subsec:ext} used the \verb"cafeobj" value.
+
+\item
+The attributes must be initialized when creating the initial system with a default
+value (in general the language must be \verb"maude", since it is the original
+language). We can just add the constant \verb"initCafeAttS" defined in the previous
+section to the initial state:
+
+{\codesize
+\begin{verbatim}
+  rl [init] : init 
+  => [nil, < o : CITPDatabase | db : initialDatabase, input : nilTermList,
+                                output : nil, default : 'CONVERSION,
+                                pTree : null, currentGoal : 'nil,
+                                showMod : false, tactic : 0,
+                                tacticRec : ('SI 'CA 'CS 'TC 'IP),
+                                language : maude, initCafeAttS >,
+     ('\s '\s '\s '\s '\s '\b string2qidList(thm-banner) '\o '\n help-list)] .
+\end{verbatim}
+}
+
+\end{itemize}
+
+Notice that these indications are quite general and most of them are only required
+the first time a new language is integrated.
+
+Second, we have to merge our syntax with the tool syntax. This is achieved by:
+\begin{itemize}
+\item
+Adding the new syntax if any command is modified. In our case the \verb"goal"
+command has extra syntax, since it supports transitions, so we add: 
+
+{\codesize
+\begin{verbatim}
+  op trans_=>_; : @Bubble@ @Bubble@ -> @SentenceSet@ .
+  op ctrans_=>_if_; : @Bubble@ @Bubble@ @Bubble@ -> @SentenceSet@ .
+  op trns_=>_; : @Bubble@ @Bubble@ -> @SentenceSet@ .
+  op ctrns_=>_if_; : @Bubble@ @Bubble@ @Bubble@ -> @SentenceSet@ .
+\end{verbatim}
+}
+
+\item
+Merging the modules containing the syntax for each tool. Since the syntax is
+stored into the metarepresented module \texttt{thm-Grammar}, we can use the
+following equation:
+
+{\codesize
+\begin{verbatim}
+  eq thm-Grammar = addImports((including 'PROVE-COMMANDS .), CafeGRAMMAR) .
+\end{verbatim}
+}
+
+In this way \verb"thm-Grammar" contains Full Maude syntax (that was already contained
+in \texttt{CafeGRAMMAR}), the syntax to support CafeOBJ specifications and the
+syntax for the CITP.
+\end{itemize}
+
+Third, we have to combine the behavior of both modules, so all the rules can be applied.
+Since the rules dealing with CITP commands are executed by an object of class
+\verb"CITPDatabaseClass", a subsort of \texttt{DatabaseClass}, we can add a new
+subsort to merge both databases:
+
+{\codesize
+\begin{verbatim}
+  subsort CITPDatabaseClass < CafeDatabaseClass .
+\end{verbatim}
+}
+
+After applying this modifications, the languages are integrated and both of them can
+be used independently.
+
+
+
+

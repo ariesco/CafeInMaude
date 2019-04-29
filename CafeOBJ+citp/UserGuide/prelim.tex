@@ -1,0 +1,60 @@
+%!TEX root = ug.tex
+
+We present in this section the main features of CafeOBJ and Maude.
+
+\subsection{CafeOBJ\label{subsec:cafe}}
+
+CafeOBJ~\cite{cafe-report}
+
+As an example of CafeOBJ specification we will use a modified version of the example presented
+in~\cite{mfe11}. We first describe natural numbers in the
+\texttt{MNAT} module. This module is defined with syntax \texttt{mod!}, which indicates that
+the module has tight semantics, and includes the \texttt{TRUTH-VALUE} module in protecting
+mode, denoting that no junk and no confusion can be added to the predefined sort \texttt{Bool}
+defined there:
+
+\subsection{Maude\label{subsec:maude}}
+
+%Maude~\cite{maude-book} is a high-level language and high-performance system,
+%supporting both equational and rewriting logic computation.
+Maude modules are executable rewriting logic specifications.
+Rewriting logic~\cite{Meseguer92-tcs} is a logic of change very suitable
+for the specification of concurrent systems that is parameterized by an
+underlying equational logic, for which Maude uses membership
+equational logic (\emph{MEL})~\cite{BouhoulaJouannaudMeseguer00},
+which, in addition to
+equations, allows one to state membership axioms characterizing
+the elements of a sort. Rewriting logic extends \emph{MEL} by adding rewrite rules.
+
+Maude modules are executable
+rewriting logic specifications.
+%
+Maude functional modules \cite[Chap.~4]{maude-book}, introduced
+with syntax \texttt{fmod ...\ endfm}, are executable membership
+equational specifications 
+that allow the definition of
+sorts (by means of keyword
+\texttt{sort}(\texttt{s})); subsort relations between sorts
+(\texttt{subsort}); operators (\texttt{op}) for building values of these
+sorts, giving the sorts of their arguments and result, and which may have
+attributes such as being associative (\texttt{assoc}) or commutative
+(\texttt{comm}), for example; memberships (\texttt{mb}) asserting that a term
+has a sort; and equations (\texttt{eq}) identifying terms.
+Both memberships and equations can be conditional (\texttt{cmb} and \texttt{ceq}).
+%
+Maude system modules \cite[Chap.~6]{maude-book}, introduced with syntax \texttt{mod ...\ endm},
+are executable rewrite theories. A system module can contain all the
+declarations of a functional module and, in addition, declarations for rules (\texttt{rl})
+and conditional rules (\texttt{crl}).
+
+
+Full Maude is an extension of Maude written in Maude itself~\cite[Part II]{maude-book}. Besides
+providing an even more powerful module algebra than the one available in Core Maude,
+Full Maude has been traditionally used as a basis for further extensions. It is possible
+to change the syntax of existing features and add new kinds of modules and commands.
+Moreover, it is possible to build interactive tools because Full Maude is built on top
+of the Loop Mode~\cite[Chapter~17]{maude-book}, which provides a mechanism to parse the
+modules and commands introduced by the user \emph{enclosed in parentheses}. The specific
+features required by Full Maude syntax are shown in Appendix~\ref{app:java}.
+
+

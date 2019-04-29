@@ -1,0 +1,150 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{geometry}
+\geometry{a4paper}
+\geometry{margin=2.5cm,nohead}
+\usepackage{amsfonts}
+\usepackage[leqno]{amsmath}
+\usepackage{rotating}
+\usepackage[english]{babel}
+\usepackage{url}
+\usepackage{proof}
+\usepackage{alltt}
+\usepackage{hyperref}
+\usepackage{verbatim}
+\usepackage{amssymb}
+
+\usepackage{graphicx}
+
+\usepackage{makeidx}
+
+\newtheorem{definition}{Definition} %[chapter]
+\newtheorem{proposition}{Proposition} %[chapter]
+\newtheorem{property}{Property} %[chapter]
+\newtheorem{lemma}{Lemma} %[chapter]
+\newtheorem{theorem}{Theorem} %[chapter]
+\newenvironment{proof}{\par\addvspace{\bigskipamount}%
+\noindent\textit{Proof.}\ }{\qed\par\addvspace{\bigskipamount}}
+
+\def\squareforqed{\hbox{\rlap{$\sqcap$}$\sqcup$}}
+\def\qed{\ifmmode\squareforqed\else{\unskip\nobreak\hfil
+\penalty50\hskip1em\null\nobreak\hfil\squareforqed
+\parfillskip=0pt\finalhyphendemerits=0\endgraf}\fi}
+
+
+\newcommand{\codesize}{\small}
+\newcommand{\field}[1]{\mathbb{#1}}
+\newcommand{\vertex}[1]{\|\,#1\,\|}
+\newcommand{\mt}{{\small$\blacktriangle$}}
+\newcommand{\leaf}[1]{{\small$\blacktriangle\;$}#1{\small$\;\blacktriangle$}}
+
+\newcommand{\model}{\mathcal{A}} % use: $\model$
+\newcommand{\stepRule}[1]{\scriptstyle{ #1}}
+\newcommand{\den}[1]{[\![#1]\!]_\model}  % use: $\den{e}$
+
+\graphicspath{{images/}}
+
+\title{Introducing CafeOBJ specifications in the Full Maude database.
+Integrating CafeOBJ with the Constructor-based Inductive Theorem Prover%
+%and the Maude Formal Environment
+---User Guide%
+%\thanks{Research supported by MEC Spanish projects
+%\emph{DESAFIOS} (TIN2006-15660-C02-01) and \emph{STAMP}
+%(TIN2008-06622-C03-01), and Comunidad de Madrid program
+%\emph{PROMESAS} (SÐ0505/TIC/0407).}
+}
+
+\author{Adri\'an Riesco\\[.7cm]
+% \normalsize Technical Report SIC-7-09\\[1ex]
+  \normalsize\textit{Departamento de Sistemas Inform\'aticos y Computaci\'on}\\
+  \normalsize\textit{Universidad Complutense de Madrid}\\[.4cm]
+  August 2013\\
+  (Revised \today)
+  }
+
+\date{}
+%\institute{}
+%\makeindex
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+%
+\maketitle
+
+\thispagestyle{empty}
+\newpage
+\thispagestyle{empty}
+\mbox{}\vfill
+
+\begin{abstract}
+CafeOBJ and Maude are sister languages of the OBJ language, and two of the most
+advanced formal specification languages for systems verification. Although both
+of them have a similar syntax and semantics, different usages and applications
+have been developed for them. Hence, a tool combining both languages would be very
+useful for exploiting the specific features of each of them.
+
+We present here how to load CafeOBJ specifications into the Full Maude. This is
+achieved by defining the CafeOBJ syntax and the rules for parsing these modules.
+Since this is the basis of all the applications built on top of Full Maude, an
+extra advantage of this process is that we can easily extend other tools to work
+with CafeOBJ specifications. 
+%
+We also present example of such an integration,
+namely the Maude Declarative Debugger and the
+Constructor-based Inductive Theorem Prover (CITP).
+While the Declarative Debugger works with its usual interface,
+we have extended the CITP to work specifically with CafeOBJ specifications, so the
+underlying Maude infrastructure remains hidden.
+%
+%We show here two examples of such an integration,
+%namely the Constructor-based Inductive Theorem Prover (CITP)
+%and the Maude Formal Environment (MFE). While we have extended the former to
+%specifically work with CafeOBJ, the latter just uses the Maude modules obtained from
+%CafeOBJ specifications.
+
+\smallskip
+
+%\noindent\textbf{Keywords:} declarative debugging,
+%rewriting logic, Maude, metalevel implementation
+\end{abstract}
+
+\vfill
+
+\begin{small}
+\tableofcontents
+\end{small}
+
+\vfill
+\mbox{}
+\newpage
+%\setcounter{page}{1}
+
+\section{Introducing CafeOBJ modules into the Full Maude
+database\label{sec:intro}}
+\input{intro}
+
+\section{Using the Constructor-based Inductive Theorem Prover
+\label{sec:using:citp}}
+\input{using_citp}
+
+%\section{Using the Maude Formal Environment
+%\label{sec:using:mfe}}
+%\input{using_mfe}
+
+%\newpage
+
+%\printindex
+
+{\small
+\bibliographystyle{abbrv}
+\bibliography{../alberto}
+}
+
+\appendix
+
+\section{Translation\label{sec:trans}}
+\input{translation}
+
+\section{Transforming CafeOBJ files to meet Full Maude requirements\label{app:java}}
+\input{app_java}
+
+\end{document}

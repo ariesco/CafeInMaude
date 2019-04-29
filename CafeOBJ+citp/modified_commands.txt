@@ -1,0 +1,16 @@
+d	(goal ModuleName |- Equations/Rules/Memberships)
+n	(set ind on Vars .)			-- specify the variables for induction
+d	(init LEMMA by V <- c .)		-- initialize a lemma by substitution.
+n	(auto goal GoalID .)			-- prove a subgoal
+n	(auto .)				-- try to prove the current goal
+n	(roll back .)				-- go back to the previous goal
+d	(apply RuleName .)			-- apply a given rule to default goal
+n	(apply RuleName to GoalId .)		-- apply a rule to a goal
+d	(show unproved goals .)			-- show all unproved goals
+d	(show goal GoalID .)			-- show a goal and set it as default
+d	(show goal .)				-- show the current goal
+n	(show tactics .)			-- show all tactics
+n	(set tactic PROOF STRATEGY .)		-- specify customized proof strategy
+n	(select tactic NAT .)			-- to use customized proof strategy
+n	(set module off .)			-- only show added contents in module
+n	(set module on .)			-- display all content in modules

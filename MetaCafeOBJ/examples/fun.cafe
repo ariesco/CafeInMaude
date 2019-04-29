@@ -1,0 +1,10 @@
+mod! FUN {
+ pr(NAT)
+ op F : Nat -> Nat
+ op G : Nat -> Nat
+ vars X Y : Nat
+ ceq F(X) = 5 if X <= 7 . --> {metadata "CA-A"} .
+ ceq F(X) = 1 if 8 <= X . --> {metadata "CA-B"} .
+ ceq G(Y) = 2 if Y <= 4 . --> {metadata "CA-1"} .
+ ceq G(Y) = 7 if 5 <= Y . --> {metadata "CA-2"} .
+}

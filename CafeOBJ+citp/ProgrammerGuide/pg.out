@@ -1,0 +1,8 @@
+\BOOKMARK [1][-]{section.1}{Introducing CafeOBJ modules into the Full Maude database}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{Syntax}{section.1}% 2
+\BOOKMARK [2][-]{subsection.1.2}{Parsing}{section.1}% 3
+\BOOKMARK [2][-]{subsection.1.3}{Pretty printing}{section.1}% 4
+\BOOKMARK [2][-]{subsection.1.4}{Defining commands for CafeOBJ specifications}{section.1}% 5
+\BOOKMARK [1][-]{section.2}{Integrating CafeOBJ with the Constructor-based Inductive Theorem Prover}{}% 6
+\BOOKMARK [2][-]{subsection.2.1}{Extending the tool}{section.2}% 7
+\BOOKMARK [2][-]{subsection.2.2}{Modifications required in the CITP}{section.2}% 8

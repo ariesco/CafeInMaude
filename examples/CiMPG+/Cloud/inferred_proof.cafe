@@ -1,0 +1,1706 @@
+open CLOUD .
+	:goal{
+		eq [proofCLOUD :nonexec] : inv1(S:Sys,i:Client) = true .
+		eq [proofCLOUD1 :nonexec] : inv2(S:Sys,i:Client) = true .
+		eq [proofCLOUD2 :nonexec] : inv3(S:Sys,i:Client,j:Client) = true .
+		eq [proofCLOUD3 :nonexec] : inv4(S:Sys,i:Client,j:Client) = true .
+		eq [proofCLOUD4 :nonexec] : inv5(S:Sys,i:Client) = true .
+		eq [proofCLOUD5 :nonexec] : inv6(S:Sys,i:Client) = true .
+		eq [proofCLOUD6 :nonexec] : inv7(S:Sys,i:Client,j:Client) = true .
+	}
+
+	:ind on (S:Sys)
+
+	:apply(si)
+
+	:apply(tc)
+
+	*** Goal`1-1  -  inv1(getval(S#Sys,C#Client),i@Client) - Success
+	:def csb1 = :ctf {eq valc(S#Sys) = valp(S#Sys,i@Client).}
+
+	:apply(csb1)
+
+		*** Goal`1-1-1 Success by reduction
+		:apply (rd)
+
+		*** Goal`1-1-2  -  inv1(getval(S#Sys,C#Client),i@Client) - Success
+		:def csb2 = :ctf [statusc(S#Sys) .]
+
+		:apply(csb2)
+
+			*** Goal`1-1-2-1 Success by implication and reduction.
+			:imp [proofCLOUD] by {i:Client <- i@Client ;}
+
+			:apply (rd)
+
+			*** Goal`1-1-2-2  -  inv1(getval(S#Sys,C#Client),i@Client) - Success
+			:def csb3 = :ctf [statusp(S#Sys,C#Client) .]
+
+			:apply(csb3)
+
+				*** Goal`1-1-2-2-1 Success by implication and reduction.
+				:imp [proofCLOUD] by {i:Client <- i@Client ;}
+
+				:apply (rd)
+
+				*** Goal`1-1-2-2-2  -  inv1(getval(S#Sys,C#Client),i@Client) - Success
+				:def csb4 = :ctf {eq C#Client  = i@Client .}
+
+				:apply(csb4)
+
+					*** Goal`1-1-2-2-2-1  -  inv1(getval(S#Sys,C#Client),i@Client) - Success
+					:def csb5 = :ctf [statusp(S#Sys,i@Client) .]
+
+					:apply(csb5)
+
+						*** Goal`1-1-2-2-2-1-1 Success by reduction
+						:apply (rd)
+
+						*** Goal`1-1-2-2-2-1-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`1-1-2-2-2-1-3 Success by implication and reduction.
+						:imp [proofCLOUD] by {i:Client <- C#Client ;}
+
+						:apply (rd)
+
+					*** Goal`1-1-2-2-2-2 Success by implication and reduction.
+					:imp [proofCLOUD] by {i:Client <- i@Client ;}
+
+					:apply (rd)
+
+				*** Goal`1-1-2-2-3 Success by implication and reduction.
+				:imp [proofCLOUD] by {i:Client <- i@Client ;}
+
+				:apply (rd)
+
+	*** Goal`1-2  -  inv2(getval(S#Sys,C#Client),i@Client) - Success
+	:def csb6 = :ctf [statusc(S#Sys) .]
+
+	:apply(csb6)
+
+		*** Goal`1-2-1 Success by implication and reduction.
+		:imp [proofCLOUD1] by {i:Client <- i@Client ;}
+
+		:apply (rd)
+
+		*** Goal`1-2-2  -  inv2(getval(S#Sys,C#Client),i@Client) - Success
+		:def csb7 = :ctf [statusp(S#Sys,C#Client) .]
+
+		:apply(csb7)
+
+			*** Goal`1-2-2-1 Success by implication and reduction.
+			:imp [proofCLOUD1] by {i:Client <- i@Client ;}
+
+			:apply (rd)
+
+			*** Goal`1-2-2-2  -  inv2(getval(S#Sys,C#Client),i@Client) - Success
+			:def csb8 = :ctf {eq C#Client  = i@Client .}
+
+			:apply(csb8)
+
+				*** Goal`1-2-2-2-1  -  inv2(getval(S#Sys,C#Client),i@Client) - Success
+				:def csb9 = :ctf [statusp(S#Sys,i@Client) .]
+
+				:apply(csb9)
+
+					*** Goal`1-2-2-2-1-1 Success by implication and reduction.
+					:imp [proofCLOUD1] by {i:Client <- i@Client ;}
+
+					:apply (rd)
+
+					*** Goal`1-2-2-2-1-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`1-2-2-2-1-3 Success by reduction
+					:apply (rd)
+
+				*** Goal`1-2-2-2-2 Success by implication and reduction.
+				:imp [proofCLOUD1] by {i:Client <- i@Client ;}
+
+				:apply (rd)
+
+			*** Goal`1-2-2-3 Success by implication and reduction.
+			:imp [proofCLOUD1] by {i:Client <- i@Client ;}
+
+			:apply (rd)
+
+	*** Goal`1-3  -  inv3(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+	:def csb10 = :ctf {eq i@Client  = j@Client .}
+
+	:apply(csb10)
+
+		*** Goal`1-3-1 Success by reduction
+		:apply (rd)
+
+		*** Goal`1-3-2  -  inv3(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+		:def csb11 = :ctf [statusc(S#Sys) .]
+
+		:apply(csb11)
+
+			*** Goal`1-3-2-1  -  inv3(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+			:def csb12 = :ctf [statusp(S#Sys,i@Client) .]
+
+			:apply(csb12)
+
+				*** Goal`1-3-2-1-1 Success by reduction
+				:apply (rd)
+
+				*** Goal`1-3-2-1-2 Success by reduction
+				:apply (rd)
+
+				*** Goal`1-3-2-1-3  -  inv3(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb13 = :ctf [statusp(S#Sys,j@Client) .]
+
+				:apply(csb13)
+
+					*** Goal`1-3-2-1-3-1 Success by implication and reduction.
+					:imp [proofCLOUD2] by {i:Client <- i@Client ; j:Client <- j@Client ;}
+
+					:apply (rd)
+
+					*** Goal`1-3-2-1-3-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`1-3-2-1-3-3 Success by reduction
+					:apply (rd)
+
+			*** Goal`1-3-2-2  -  inv3(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+			:def csb14 = :ctf [statusp(S#Sys,C#Client) .]
+
+			:apply(csb14)
+
+				*** Goal`1-3-2-2-1 Success by implication and reduction.
+				:imp [proofCLOUD5] by {i:Client <- j@Client ;}
+
+				:apply (rd)
+
+				*** Goal`1-3-2-2-2  -  inv3(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb15 = :ctf {eq C#Client  = i@Client .}
+
+				:apply(csb15)
+
+					*** Goal`1-3-2-2-2-1  -  inv3(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb16 = :ctf [statusp(S#Sys,i@Client) .]
+
+					:apply(csb16)
+
+						*** Goal`1-3-2-2-2-1-1 Success by reduction
+						:apply (rd)
+
+						*** Goal`1-3-2-2-2-1-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`1-3-2-2-2-1-3 Success by implication and reduction.
+						:imp [proofCLOUD5] by {i:Client <- j@Client ;}
+
+						:apply (rd)
+
+					*** Goal`1-3-2-2-2-2  -  inv3(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb17 = :ctf [statusp(S#Sys,i@Client) .]
+
+					:apply(csb17)
+
+						*** Goal`1-3-2-2-2-2-1 Success by reduction
+						:apply (rd)
+
+						*** Goal`1-3-2-2-2-2-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`1-3-2-2-2-2-3 Success by implication and reduction.
+						:imp [proofCLOUD4] by {i:Client <- i@Client ;}
+
+						:apply (rd)
+
+				*** Goal`1-3-2-2-3 Success by implication and reduction.
+				:imp [proofCLOUD5] by {i:Client <- j@Client ;}
+
+				:apply (rd)
+
+	*** Goal`1-4  -  inv4(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+	:def csb18 = :ctf {eq i@Client  = j@Client .}
+
+	:apply(csb18)
+
+		*** Goal`1-4-1 Success by reduction
+		:apply (rd)
+
+		*** Goal`1-4-2  -  inv4(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+		:def csb19 = :ctf [statusc(S#Sys) .]
+
+		:apply(csb19)
+
+			*** Goal`1-4-2-1  -  inv4(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+			:def csb20 = :ctf [statusp(S#Sys,i@Client) .]
+
+			:apply(csb20)
+
+				*** Goal`1-4-2-1-1  -  inv4(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb21 = :ctf [statusp(S#Sys,j@Client) .]
+
+				:apply(csb21)
+
+					*** Goal`1-4-2-1-1-1 Success by implication and reduction.
+					:imp [proofCLOUD3] by {i:Client <- i@Client ; j:Client <- j@Client ;}
+
+					:apply (rd)
+
+					*** Goal`1-4-2-1-1-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`1-4-2-1-1-3 Success by reduction
+					:apply (rd)
+
+				*** Goal`1-4-2-1-2 Success by reduction
+				:apply (rd)
+
+				*** Goal`1-4-2-1-3 Success by reduction
+				:apply (rd)
+
+			*** Goal`1-4-2-2  -  inv4(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+			:def csb22 = :ctf [statusp(S#Sys,C#Client) .]
+
+			:apply(csb22)
+
+				*** Goal`1-4-2-2-1 Success by implication and reduction.
+				:imp [proofCLOUD5] by {i:Client <- i@Client ;}
+
+				:apply (rd)
+
+				*** Goal`1-4-2-2-2  -  inv4(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb23 = :ctf {eq C#Client  = i@Client .}
+
+				:apply(csb23)
+
+					*** Goal`1-4-2-2-2-1  -  inv4(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb24 = :ctf [statusp(S#Sys,i@Client) .]
+
+					:apply(csb24)
+
+						*** Goal`1-4-2-2-2-1-1 Success by implication and reduction.
+						:imp [proofCLOUD5] by {i:Client <- j@Client ;}
+
+						:apply (rd)
+
+						*** Goal`1-4-2-2-2-1-2 Success by implication and reduction.
+						:imp [proofCLOUD5] by {i:Client <- j@Client ;}
+
+						:apply (rd)
+
+						*** Goal`1-4-2-2-2-1-3 Success by reduction
+						:apply (rd)
+
+					*** Goal`1-4-2-2-2-2 Success by implication and reduction.
+					:imp [proofCLOUD5] by {i:Client <- i@Client ;}
+
+					:apply (rd)
+
+				*** Goal`1-4-2-2-3 Success by implication and reduction.
+				:imp [proofCLOUD5] by {i:Client <- i@Client ;}
+
+				:apply (rd)
+
+	*** Goal`1-5  -  inv5(getval(S#Sys,C#Client),i@Client) - Success
+	:def csb25 = :ctf [statusc(S#Sys) .]
+
+	:apply(csb25)
+
+		*** Goal`1-5-1 Success by reduction
+		:apply (rd)
+
+		*** Goal`1-5-2  -  inv5(getval(S#Sys,C#Client),i@Client) - Success
+		:def csb26 = :ctf [statusp(S#Sys,C#Client) .]
+
+		:apply(csb26)
+
+			*** Goal`1-5-2-1 Success by implication and reduction.
+			:imp [proofCLOUD4] by {i:Client <- i@Client ;}
+
+			:apply (rd)
+
+			*** Goal`1-5-2-2 Success by reduction
+			:apply (rd)
+
+			*** Goal`1-5-2-3 Success by implication and reduction.
+			:imp [proofCLOUD4] by {i:Client <- i@Client ;}
+
+			:apply (rd)
+
+	*** Goal`1-6  -  inv6(getval(S#Sys,C#Client),i@Client) - Success
+	:def csb27 = :ctf [statusc(S#Sys) .]
+
+	:apply(csb27)
+
+		*** Goal`1-6-1 Success by reduction
+		:apply (rd)
+
+		*** Goal`1-6-2  -  inv6(getval(S#Sys,C#Client),i@Client) - Success
+		:def csb28 = :ctf [statusp(S#Sys,C#Client) .]
+
+		:apply(csb28)
+
+			*** Goal`1-6-2-1 Success by implication and reduction.
+			:imp [proofCLOUD5] by {i:Client <- i@Client ;}
+
+			:apply (rd)
+
+			*** Goal`1-6-2-2 Success by reduction
+			:apply (rd)
+
+			*** Goal`1-6-2-3 Success by implication and reduction.
+			:imp [proofCLOUD5] by {i:Client <- i@Client ;}
+
+			:apply (rd)
+
+	*** Goal`1-7  -  inv7(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+	:def csb29 = :ctf {eq i@Client  = j@Client .}
+
+	:apply(csb29)
+
+		*** Goal`1-7-1 Success by reduction
+		:apply (rd)
+
+		*** Goal`1-7-2  -  inv7(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+		:def csb30 = :ctf [statusc(S#Sys) .]
+
+		:apply(csb30)
+
+			*** Goal`1-7-2-1  -  inv7(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+			:def csb31 = :ctf [statusp(S#Sys,i@Client) .]
+
+			:apply(csb31)
+
+				*** Goal`1-7-2-1-1 Success by reduction
+				:apply (rd)
+
+				*** Goal`1-7-2-1-2 Success by reduction
+				:apply (rd)
+
+				*** Goal`1-7-2-1-3  -  inv7(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb32 = :ctf [statusp(S#Sys,j@Client) .]
+
+				:apply(csb32)
+
+					*** Goal`1-7-2-1-3-1 Success by reduction
+					:apply (rd)
+
+					*** Goal`1-7-2-1-3-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`1-7-2-1-3-3 Success by implication and reduction.
+					:imp [proofCLOUD6] by {i:Client <- i@Client ; j:Client <- j@Client ;}
+
+					:apply (rd)
+
+			*** Goal`1-7-2-2  -  inv7(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+			:def csb33 = :ctf [statusp(S#Sys,C#Client) .]
+
+			:apply(csb33)
+
+				*** Goal`1-7-2-2-1 Success by implication and reduction.
+				:imp [proofCLOUD4] by {i:Client <- i@Client ;}
+
+				:apply (rd)
+
+				*** Goal`1-7-2-2-2  -  inv7(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb34 = :ctf {eq C#Client  = i@Client .}
+
+				:apply(csb34)
+
+					*** Goal`1-7-2-2-2-1  -  inv7(getval(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb35 = :ctf [statusp(S#Sys,i@Client) .]
+
+					:apply(csb35)
+
+						*** Goal`1-7-2-2-2-1-1 Success by reduction
+						:apply (rd)
+
+						*** Goal`1-7-2-2-2-1-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`1-7-2-2-2-1-3 Success by implication and reduction.
+						:imp [proofCLOUD4] by {i:Client <- j@Client ;}
+
+						:apply (rd)
+
+					*** Goal`1-7-2-2-2-2 Success by implication and reduction.
+					:imp [proofCLOUD4] by {i:Client <- i@Client ;}
+
+					:apply (rd)
+
+				*** Goal`1-7-2-2-3 Success by implication and reduction.
+				:imp [proofCLOUD4] by {i:Client <- i@Client ;}
+
+				:apply (rd)
+
+	:apply(tc)
+
+	*** Goal`2-1  -  inv1(gotoidle(S#Sys,C#Client),i@Client) - Success
+	:def csb36 = :ctf {eq valc(S#Sys) = valp(S#Sys,i@Client).}
+
+	:apply(csb36)
+
+		*** Goal`2-1-1 Success by reduction
+		:apply (rd)
+
+		*** Goal`2-1-2  -  inv1(gotoidle(S#Sys,C#Client),i@Client) - Success
+		:def csb37 = :ctf [statusc(S#Sys) .]
+
+		:apply(csb37)
+
+			*** Goal`2-1-2-1  -  inv1(gotoidle(S#Sys,C#Client),i@Client) - Success
+			:def csb38 = :ctf [statusp(S#Sys,C#Client) .]
+
+			:apply(csb38)
+
+				*** Goal`2-1-2-1-1 Success by implication and reduction.
+				:imp [proofCLOUD] by {i:Client <- i@Client ;}
+
+				:apply (rd)
+
+				*** Goal`2-1-2-1-2 Success by implication and reduction.
+				:imp [proofCLOUD] by {i:Client <- i@Client ;}
+
+				:apply (rd)
+
+				*** Goal`2-1-2-1-3  -  inv1(gotoidle(S#Sys,C#Client),i@Client) - Success
+				:def csb39 = :ctf {eq C#Client  = i@Client .}
+
+				:apply(csb39)
+
+					*** Goal`2-1-2-1-3-1  -  inv1(gotoidle(S#Sys,C#Client),i@Client) - Success
+					:def csb40 = :ctf [statusp(S#Sys,i@Client) .]
+
+					:apply(csb40)
+
+						*** Goal`2-1-2-1-3-1-1 Success by reduction
+						:apply (rd)
+
+						*** Goal`2-1-2-1-3-1-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`2-1-2-1-3-1-3 Success by reduction
+						:apply (rd)
+
+					*** Goal`2-1-2-1-3-2 Success by implication and reduction.
+					:imp [proofCLOUD] by {i:Client <- i@Client ;}
+
+					:apply (rd)
+
+			*** Goal`2-1-2-2 Success by implication and reduction.
+			:imp [proofCLOUD] by {i:Client <- i@Client ;}
+
+			:apply (rd)
+
+	*** Goal`2-2  -  inv2(gotoidle(S#Sys,C#Client),i@Client) - Success
+	:def csb41 = :ctf [statusc(S#Sys) .]
+
+	:apply(csb41)
+
+		*** Goal`2-2-1  -  inv2(gotoidle(S#Sys,C#Client),i@Client) - Success
+		:def csb42 = :ctf [statusp(S#Sys,C#Client) .]
+
+		:apply(csb42)
+
+			*** Goal`2-2-1-1 Success by implication and reduction.
+			:imp [proofCLOUD1] by {i:Client <- i@Client ;}
+
+			:apply (rd)
+
+			*** Goal`2-2-1-2 Success by implication and reduction.
+			:imp [proofCLOUD1] by {i:Client <- i@Client ;}
+
+			:apply (rd)
+
+			*** Goal`2-2-1-3  -  inv2(gotoidle(S#Sys,C#Client),i@Client) - Success
+			:def csb43 = :ctf {eq C#Client  = i@Client .}
+
+			:apply(csb43)
+
+				*** Goal`2-2-1-3-1  -  inv2(gotoidle(S#Sys,C#Client),i@Client) - Success
+				:def csb44 = :ctf [statusp(S#Sys,i@Client) .]
+
+				:apply(csb44)
+
+					*** Goal`2-2-1-3-1-1 Success by implication and reduction.
+					:imp [proofCLOUD1] by {i:Client <- i@Client ;}
+
+					:apply (rd)
+
+					*** Goal`2-2-1-3-1-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`2-2-1-3-1-3 Success by reduction
+					:apply (rd)
+
+				*** Goal`2-2-1-3-2 Success by implication and reduction.
+				:imp [proofCLOUD1] by {i:Client <- i@Client ;}
+
+				:apply (rd)
+
+		*** Goal`2-2-2 Success by implication and reduction.
+		:imp [proofCLOUD1] by {i:Client <- i@Client ;}
+
+		:apply (rd)
+
+	*** Goal`2-3  -  inv3(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+	:def csb45 = :ctf {eq i@Client  = j@Client .}
+
+	:apply(csb45)
+
+		*** Goal`2-3-1 Success by reduction
+		:apply (rd)
+
+		*** Goal`2-3-2  -  inv3(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+		:def csb46 = :ctf [statusc(S#Sys) .]
+
+		:apply(csb46)
+
+			*** Goal`2-3-2-1  -  inv3(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+			:def csb47 = :ctf [statusp(S#Sys,C#Client) .]
+
+			:apply(csb47)
+
+				*** Goal`2-3-2-1-1  -  inv3(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb48 = :ctf [statusp(S#Sys,i@Client) .]
+
+				:apply(csb48)
+
+					*** Goal`2-3-2-1-1-1 Success by reduction
+					:apply (rd)
+
+					*** Goal`2-3-2-1-1-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`2-3-2-1-1-3  -  inv3(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb49 = :ctf [statusp(S#Sys,j@Client) .]
+
+					:apply(csb49)
+
+						*** Goal`2-3-2-1-1-3-1 Success by implication and reduction.
+						:imp [proofCLOUD2] by {i:Client <- i@Client ; j:Client <- j@Client ;}
+
+						:apply (rd)
+
+						*** Goal`2-3-2-1-1-3-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`2-3-2-1-1-3-3 Success by reduction
+						:apply (rd)
+
+				*** Goal`2-3-2-1-2  -  inv3(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb50 = :ctf [statusp(S#Sys,i@Client) .]
+
+				:apply(csb50)
+
+					*** Goal`2-3-2-1-2-1 Success by reduction
+					:apply (rd)
+
+					*** Goal`2-3-2-1-2-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`2-3-2-1-2-3  -  inv3(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb51 = :ctf [statusp(S#Sys,j@Client) .]
+
+					:apply(csb51)
+
+						*** Goal`2-3-2-1-2-3-1 Success by implication and reduction.
+						:imp [proofCLOUD2] by {i:Client <- i@Client ; j:Client <- j@Client ;}
+
+						:apply (rd)
+
+						*** Goal`2-3-2-1-2-3-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`2-3-2-1-2-3-3 Success by reduction
+						:apply (rd)
+
+				*** Goal`2-3-2-1-3  -  inv3(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb52 = :ctf {eq C#Client  = i@Client .}
+
+				:apply(csb52)
+
+					*** Goal`2-3-2-1-3-1  -  inv3(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb53 = :ctf [statusp(S#Sys,i@Client) .]
+
+					:apply(csb53)
+
+						*** Goal`2-3-2-1-3-1-1 Success by reduction
+						:apply (rd)
+
+						*** Goal`2-3-2-1-3-1-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`2-3-2-1-3-1-3 Success by reduction
+						:apply (rd)
+
+					*** Goal`2-3-2-1-3-2  -  inv3(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb54 = :ctf [statusp(S#Sys,i@Client) .]
+
+					:apply(csb54)
+
+						*** Goal`2-3-2-1-3-2-1 Success by reduction
+						:apply (rd)
+
+						*** Goal`2-3-2-1-3-2-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`2-3-2-1-3-2-3 Success by implication and reduction.
+						:imp [proofCLOUD6] by {i:Client <- C#Client ; j:Client <- i@Client ;}
+
+						:apply (rd)
+
+			*** Goal`2-3-2-2 Success by implication and reduction.
+			:imp [proofCLOUD5] by {i:Client <- j@Client ;}
+
+			:apply (rd)
+
+	*** Goal`2-4  -  inv4(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+	:def csb55 = :ctf {eq i@Client  = j@Client .}
+
+	:apply(csb55)
+
+		*** Goal`2-4-1 Success by reduction
+		:apply (rd)
+
+		*** Goal`2-4-2  -  inv4(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+		:def csb56 = :ctf [statusc(S#Sys) .]
+
+		:apply(csb56)
+
+			*** Goal`2-4-2-1  -  inv4(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+			:def csb57 = :ctf [statusp(S#Sys,C#Client) .]
+
+			:apply(csb57)
+
+				*** Goal`2-4-2-1-1  -  inv4(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb58 = :ctf [statusp(S#Sys,i@Client) .]
+
+				:apply(csb58)
+
+					*** Goal`2-4-2-1-1-1  -  inv4(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb59 = :ctf [statusp(S#Sys,j@Client) .]
+
+					:apply(csb59)
+
+						*** Goal`2-4-2-1-1-1-1 Success by implication and reduction.
+						:imp [proofCLOUD3] by {i:Client <- i@Client ; j:Client <- j@Client ;}
+
+						:apply (rd)
+
+						*** Goal`2-4-2-1-1-1-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`2-4-2-1-1-1-3 Success by reduction
+						:apply (rd)
+
+					*** Goal`2-4-2-1-1-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`2-4-2-1-1-3 Success by reduction
+					:apply (rd)
+
+				*** Goal`2-4-2-1-2  -  inv4(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb60 = :ctf [statusp(S#Sys,i@Client) .]
+
+				:apply(csb60)
+
+					*** Goal`2-4-2-1-2-1  -  inv4(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb61 = :ctf [statusp(S#Sys,j@Client) .]
+
+					:apply(csb61)
+
+						*** Goal`2-4-2-1-2-1-1 Success by implication and reduction.
+						:imp [proofCLOUD3] by {i:Client <- i@Client ; j:Client <- j@Client ;}
+
+						:apply (rd)
+
+						*** Goal`2-4-2-1-2-1-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`2-4-2-1-2-1-3 Success by reduction
+						:apply (rd)
+
+					*** Goal`2-4-2-1-2-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`2-4-2-1-2-3 Success by reduction
+					:apply (rd)
+
+				*** Goal`2-4-2-1-3  -  inv4(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb62 = :ctf {eq C#Client  = i@Client .}
+
+				:apply(csb62)
+
+					*** Goal`2-4-2-1-3-1  -  inv4(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb63 = :ctf [statusp(S#Sys,i:Client) .]
+
+					:apply(csb63)
+
+						*** Goal`2-4-2-1-3-1-1 Success by implication and reduction.
+						:imp [proofCLOUD3] by {i:Client <- C#Client ; j:Client <- j@Client ;}
+
+						:apply (rd)
+
+						*** Goal`2-4-2-1-3-1-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`2-4-2-1-3-1-3 Success by reduction
+						:apply (rd)
+
+					*** Goal`2-4-2-1-3-2  -  inv4(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb64 = :ctf [statusp(S#Sys,i@Client) .]
+
+					:apply(csb64)
+
+						*** Goal`2-4-2-1-3-2-1 Success by implication and reduction.
+						:imp [proofCLOUD2] by {i:Client <- C#Client ; j:Client <- i@Client ;}
+
+						:apply (rd)
+
+						*** Goal`2-4-2-1-3-2-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`2-4-2-1-3-2-3 Success by reduction
+						:apply (rd)
+
+			*** Goal`2-4-2-2 Success by implication and reduction.
+			:imp [proofCLOUD5] by {i:Client <- i@Client ;}
+
+			:apply (rd)
+
+	*** Goal`2-5  -  inv5(gotoidle(S#Sys,C#Client),i@Client) - Success
+	:def csb65 = :ctf [statusc(S#Sys) .]
+
+	:apply(csb65)
+
+		*** Goal`2-5-1  -  inv5(gotoidle(S#Sys,C#Client),i@Client) - Success
+		:def csb66 = :ctf [statusp(S#Sys,C#Client) .]
+
+		:apply(csb66)
+
+			*** Goal`2-5-1-1 Success by reduction
+			:apply (rd)
+
+			*** Goal`2-5-1-2 Success by reduction
+			:apply (rd)
+
+			*** Goal`2-5-1-3  -  inv5(gotoidle(S#Sys,C#Client),i@Client) - Success
+			:def csb67 = :ctf {eq C#Client  = i@Client .}
+
+			:apply(csb67)
+
+				*** Goal`2-5-1-3-1  -  inv5(gotoidle(S#Sys,C#Client),i@Client) - Success
+				:def csb68 = :ctf [statusp(S#Sys,i@Client) .]
+
+				:apply(csb68)
+
+					*** Goal`2-5-1-3-1-1 Success by reduction
+					:apply (rd)
+
+					*** Goal`2-5-1-3-1-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`2-5-1-3-1-3 Success by reduction
+					:apply (rd)
+
+				*** Goal`2-5-1-3-2  -  inv5(gotoidle(S#Sys,C#Client),i@Client) - Success
+				:def csb69 = :ctf [statusp(S#Sys,i@Client) .]
+
+				:apply(csb69)
+
+					*** Goal`2-5-1-3-2-1 Success by reduction
+					:apply (rd)
+
+					*** Goal`2-5-1-3-2-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`2-5-1-3-2-3 Success by implication and reduction.
+					:imp [proofCLOUD6] by {i:Client <- C#Client ; j:Client <- i@Client ;}
+
+					:apply (rd)
+
+		*** Goal`2-5-2 Success by implication and reduction.
+		:imp [proofCLOUD4] by {i:Client <- i@Client ;}
+
+		:apply (rd)
+
+	*** Goal`2-6  -  inv6(gotoidle(S#Sys,C#Client),i@Client) - Success
+	:def csb70 = :ctf [statusc(S#Sys) .]
+
+	:apply(csb70)
+
+		*** Goal`2-6-1  -  inv6(gotoidle(S#Sys,C#Client),i@Client) - Success
+		:def csb71 = :ctf [statusp(S#Sys,C#Client) .]
+
+		:apply(csb71)
+
+			*** Goal`2-6-1-1 Success by reduction
+			:apply (rd)
+
+			*** Goal`2-6-1-2 Success by reduction
+			:apply (rd)
+
+			*** Goal`2-6-1-3  -  inv6(gotoidle(S#Sys,C#Client),i@Client) - Success
+			:def csb72 = :ctf {eq C#Client  = i@Client .}
+
+			:apply(csb72)
+
+				*** Goal`2-6-1-3-1  -  inv6(gotoidle(S#Sys,C#Client),i@Client) - Success
+				:def csb73 = :ctf [statusp(S#Sys,i@Client) .]
+
+				:apply(csb73)
+
+					*** Goal`2-6-1-3-1-1 Success by reduction
+					:apply (rd)
+
+					*** Goal`2-6-1-3-1-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`2-6-1-3-1-3 Success by reduction
+					:apply (rd)
+
+				*** Goal`2-6-1-3-2  -  inv6(gotoidle(S#Sys,C#Client),i@Client) - Success
+				:def csb74 = :ctf [statusp(S#Sys,i@Client) .]
+
+				:apply(csb74)
+
+					*** Goal`2-6-1-3-2-1 Success by implication and reduction.
+					:imp [proofCLOUD2] by {i:Client <- C#Client ; j:Client <- i@Client ;}
+
+					:apply (rd)
+
+					*** Goal`2-6-1-3-2-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`2-6-1-3-2-3 Success by reduction
+					:apply (rd)
+
+		*** Goal`2-6-2 Success by implication and reduction.
+		:imp [proofCLOUD5] by {i:Client <- i@Client ;}
+
+		:apply (rd)
+
+	*** Goal`2-7  -  inv7(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+	:def csb75 = :ctf {eq i@Client  = j@Client .}
+
+	:apply(csb75)
+
+		*** Goal`2-7-1 Success by reduction
+		:apply (rd)
+
+		*** Goal`2-7-2  -  inv7(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+		:def csb76 = :ctf [statusc(S#Sys) .]
+
+		:apply(csb76)
+
+			*** Goal`2-7-2-1  -  inv7(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+			:def csb77 = :ctf [statusp(S#Sys,C#Client) .]
+
+			:apply(csb77)
+
+				*** Goal`2-7-2-1-1  -  inv7(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb78 = :ctf [statusp(S#Sys,i@Client) .]
+
+				:apply(csb78)
+
+					*** Goal`2-7-2-1-1-1 Success by reduction
+					:apply (rd)
+
+					*** Goal`2-7-2-1-1-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`2-7-2-1-1-3  -  inv7(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb79 = :ctf [statusp(S#Sys,j@Client) .]
+
+					:apply(csb79)
+
+						*** Goal`2-7-2-1-1-3-1 Success by reduction
+						:apply (rd)
+
+						*** Goal`2-7-2-1-1-3-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`2-7-2-1-1-3-3 Success by implication and reduction.
+						:imp [proofCLOUD6] by {i:Client <- i@Client ; j:Client <- j@Client ;}
+
+						:apply (rd)
+
+				*** Goal`2-7-2-1-2  -  inv7(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb80 = :ctf [statusp(S#Sys,i@Client) .]
+
+				:apply(csb80)
+
+					*** Goal`2-7-2-1-2-1 Success by reduction
+					:apply (rd)
+
+					*** Goal`2-7-2-1-2-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`2-7-2-1-2-3  -  inv7(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb81 = :ctf [statusp(S#Sys,j@Client) .]
+
+					:apply(csb81)
+
+						*** Goal`2-7-2-1-2-3-1 Success by reduction
+						:apply (rd)
+
+						*** Goal`2-7-2-1-2-3-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`2-7-2-1-2-3-3 Success by implication and reduction.
+						:imp [proofCLOUD6] by {i:Client <- i@Client ; j:Client <- j@Client ;}
+
+						:apply (rd)
+
+				*** Goal`2-7-2-1-3  -  inv7(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb82 = :ctf {eq C#Client  = i@Client .}
+
+				:apply(csb82)
+
+					*** Goal`2-7-2-1-3-1  -  inv7(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb83 = :ctf [statusp(S#Sys,i@Client) .]
+
+					:apply(csb83)
+
+						*** Goal`2-7-2-1-3-1-1 Success by reduction
+						:apply (rd)
+
+						*** Goal`2-7-2-1-3-1-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`2-7-2-1-3-1-3 Success by reduction
+						:apply (rd)
+
+					*** Goal`2-7-2-1-3-2  -  inv7(gotoidle(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb84 = :ctf [statusp(S#Sys,i@Client) .]
+
+					:apply(csb84)
+
+						*** Goal`2-7-2-1-3-2-1 Success by reduction
+						:apply (rd)
+
+						*** Goal`2-7-2-1-3-2-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`2-7-2-1-3-2-3 Success by implication and reduction.
+						:imp [proofCLOUD6] by {i:Client <- C#Client ; j:Client <- i@Client ;}
+
+						:apply (rd)
+
+			*** Goal`2-7-2-2 Success by implication and reduction.
+			:imp [proofCLOUD4] by {i:Client <- i@Client ;}
+
+			:apply (rd)
+
+	:apply(tc)
+
+	*** The corresponding proof score was not present.
+	:apply (rd)
+
+	*** The corresponding proof score was not present.
+	:apply (rd)
+
+	*** The corresponding proof score was not present.
+	:apply (rd)
+
+	*** The corresponding proof score was not present.
+	:apply (rd)
+
+	*** The corresponding proof score was not present.
+	:apply (rd)
+
+	*** The corresponding proof score was not present.
+	:apply (rd)
+
+	*** The corresponding proof score was not present.
+	:apply (rd)
+
+	:apply(tc)
+
+	*** Goal`4-1  -  inv1(modval(S#Sys,C#Client),i@Client) - Success
+	:def csb85 = :ctf [statusp(S#Sys,C#Client) .]
+
+	:apply(csb85)
+
+		*** Goal`4-1-1 Success by implication and reduction.
+		:imp [proofCLOUD] by {i:Client <- i@Client ;}
+
+		:apply (rd)
+
+		*** Goal`4-1-2  -  inv1(modval(S#Sys,C#Client),i@Client) - Success
+		:def csb86 = :ctf {eq C#Client  = i@Client .}
+
+		:apply(csb86)
+
+			*** Goal`4-1-2-1  -  inv1(modval(S#Sys,C#Client),i@Client) - Success
+			:def csb87 = :ctf [statusp(S#Sys,i@Client) .]
+
+			:apply(csb87)
+
+				*** Goal`4-1-2-1-1 Success by reduction
+				:apply (rd)
+
+				*** Goal`4-1-2-1-2 Success by reduction
+				:apply (rd)
+
+				*** Goal`4-1-2-1-3 Success by implication and reduction.
+				:imp [proofCLOUD] by {i:Client <- i@Client ;}
+
+				:apply (rd)
+
+			*** Goal`4-1-2-2 Success by implication and reduction.
+			:imp [proofCLOUD] by {i:Client <- i@Client ;}
+
+			:apply (rd)
+
+		*** Goal`4-1-3 Success by implication and reduction.
+		:imp [proofCLOUD] by {i:Client <- i@Client ;}
+
+		:apply (rd)
+
+	*** The corresponding proof score was not present.
+	:imp [proofCLOUD1] by {i:Client <- i@Client ;}
+
+	*** The corresponding proof score was not present.
+	:apply (rd)
+
+	*** Goal`4-3  -  inv3(modval(S#Sys,C#Client),i@Client,j@Client) - Success
+	:def csb88 = :ctf {eq i@Client  = j@Client .}
+
+	:apply(csb88)
+
+		*** Goal`4-3-1 Success by reduction
+		:apply (rd)
+
+		*** Goal`4-3-2  -  inv3(modval(S#Sys,C#Client),i@Client,j@Client) - Success
+		:def csb89 = :ctf [statusp(S#Sys,i@Client) .]
+
+		:apply(csb89)
+
+			*** Goal`4-3-2-1 Success by reduction
+			:apply (rd)
+
+			*** Goal`4-3-2-2 Success by reduction
+			:apply (rd)
+
+			*** Goal`4-3-2-3  -  inv3(modval(S#Sys,C#Client),i@Client,j@Client) - Success
+			:def csb90 = :ctf [statusp(S#Sys,j@Client) .]
+
+			:apply(csb90)
+
+				*** Goal`4-3-2-3-1 Success by implication and reduction.
+				:imp [proofCLOUD2] by {i:Client <- i@Client ; j:Client <- j@Client ;}
+
+				:apply (rd)
+
+				*** Goal`4-3-2-3-2 Success by reduction
+				:apply (rd)
+
+				*** Goal`4-3-2-3-3 Success by reduction
+				:apply (rd)
+
+	*** Goal`4-4  -  inv4(modval(S#Sys,C#Client),i@Client,j@Client) - Success
+	:def csb91 = :ctf {eq i@Client  = j@Client .}
+
+	:apply(csb91)
+
+		*** Goal`4-4-1 Success by reduction
+		:apply (rd)
+
+		*** Goal`4-4-2  -  inv4(modval(S#Sys,C#Client),i@Client,j@Client) - Success
+		:def csb92 = :ctf [statusp(S#Sys,i@Client) .]
+
+		:apply(csb92)
+
+			*** Goal`4-4-2-1  -  inv4(modval(S#Sys,C#Client),i@Client,j@Client) - Success
+			:def csb93 = :ctf [statusp(S#Sys,j@Client) .]
+
+			:apply(csb93)
+
+				*** Goal`4-4-2-1-1 Success by implication and reduction.
+				:imp [proofCLOUD3] by {i:Client <- i@Client ; j:Client <- j@Client ;}
+
+				:apply (rd)
+
+				*** Goal`4-4-2-1-2 Success by reduction
+				:apply (rd)
+
+				*** Goal`4-4-2-1-3 Success by reduction
+				:apply (rd)
+
+			*** Goal`4-4-2-2 Success by reduction
+			:apply (rd)
+
+			*** Goal`4-4-2-3 Success by reduction
+			:apply (rd)
+
+	*** The corresponding proof score was not present.
+	:imp [proofCLOUD4] by {i:Client <- i@Client ;}
+
+	*** The corresponding proof score was not present.
+	:apply (rd)
+
+	*** The corresponding proof score was not present.
+	:imp [proofCLOUD5] by {i:Client <- i@Client ;}
+
+	*** The corresponding proof score was not present.
+	:apply (rd)
+
+	*** Goal`4-7  -  inv7(modval(S#Sys,C#Client),i@Client,j@Client) - Success
+	:def csb94 = :ctf {eq i@Client  = j@Client .}
+
+	:apply(csb94)
+
+		*** Goal`4-7-1 Success by reduction
+		:apply (rd)
+
+		*** Goal`4-7-2  -  inv7(modval(S#Sys,C#Client),i@Client,j@Client) - Success
+		:def csb95 = :ctf [statusp(S#Sys,i@Client) .]
+
+		:apply(csb95)
+
+			*** Goal`4-7-2-1 Success by reduction
+			:apply (rd)
+
+			*** Goal`4-7-2-2 Success by reduction
+			:apply (rd)
+
+			*** Goal`4-7-2-3  -  inv7(modval(S#Sys,C#Client),i@Client,j@Client) - Success
+			:def csb96 = :ctf [statusp(S#Sys,j@Client) .]
+
+			:apply(csb96)
+
+				*** Goal`4-7-2-3-1 Success by reduction
+				:apply (rd)
+
+				*** Goal`4-7-2-3-2 Success by reduction
+				:apply (rd)
+
+				*** Goal`4-7-2-3-3 Success by implication and reduction.
+				:imp [proofCLOUD6] by {i:Client <- i@Client ; j:Client <- j@Client ;}
+
+				:apply (rd)
+
+	:apply(tc)
+
+	*** Goal`5-1  -  inv1(update(S#Sys,C#Client),i@Client) - Success
+	:def csb97 = :ctf [statusc(S#Sys) .]
+
+	:apply(csb97)
+
+		*** Goal`5-1-1  -  inv1(update(S#Sys,C#Client),i@Client) - Success
+		:def csb98 = :ctf [statusp(S#Sys,C#Client) .]
+
+		:apply(csb98)
+
+			*** Goal`5-1-1-1  -  inv1(update(S#Sys,C#Client),i@Client) - Success
+			:def csb99 = :ctf {eq C#Client  = i@Client .}
+
+			:apply(csb99)
+
+				*** Goal`5-1-1-1-1  -  inv1(update(S#Sys,C#Client),i@Client) - Success
+				:def csb100 = :ctf [statusp(S#Sys,i@Client) .]
+
+				:apply(csb100)
+
+					*** Goal`5-1-1-1-1-1  -  inv1(update(S#Sys,C#Client),i@Client) - Success
+					:def csb101 = :ctf [tmp(S#Sys,i@Client)<= valp(S#Sys,i@Client) .]
+
+					:apply(csb101)
+
+						*** Goal`5-1-1-1-1-1-1 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-1-1-1-1-1-2 Success by implication and reduction.
+						:imp [proofCLOUD1] by {i:Client <- i@Client ;}
+
+						:apply (rd)
+
+					*** Goal`5-1-1-1-1-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`5-1-1-1-1-3 Success by implication and reduction.
+					:imp [proofCLOUD] by {i:Client <- i@Client ;}
+
+					:apply (rd)
+
+				*** Goal`5-1-1-1-2  -  inv1(update(S#Sys,C#Client),i@Client) - Success
+				:def csb102 = :ctf [tmp(S#Sys,C#Client)<= valp(S#Sys,C#Client) .]
+
+				:apply(csb102)
+
+					*** Goal`5-1-1-1-2-1  -  inv1(update(S#Sys,C#Client),i@Client) - Success
+					:def csb103 = :ctf [statusp(S#Sys,i@Client) .]
+
+					:apply(csb103)
+
+						*** Goal`5-1-1-1-2-1-1 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-1-1-1-2-1-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-1-1-1-2-1-3 Success by implication and reduction.
+						:imp [proofCLOUD2] by {i:Client <- i@Client ; j:Client <- C#Client ;}
+
+						:apply (rd)
+
+					*** Goal`5-1-1-1-2-2 Success by implication and reduction.
+					:imp [proofCLOUD] by {i:Client <- i@Client ;}
+
+					:apply (rd)
+
+			*** Goal`5-1-1-2 Success by implication and reduction.
+			:imp [proofCLOUD] by {i:Client <- i@Client ;}
+
+			:apply (rd)
+
+			*** Goal`5-1-1-3 Success by implication and reduction.
+			:imp [proofCLOUD] by {i:Client <- i@Client ;}
+
+			:apply (rd)
+
+		*** Goal`5-1-2 Success by implication and reduction.
+		:imp [proofCLOUD] by {i:Client <- i@Client ;}
+
+		:apply (rd)
+
+	*** Goal`5-2  -  inv2(update(S#Sys,C#Client),i@Client) - Success
+	:def csb104 = :ctf [statusc(S#Sys) .]
+
+	:apply(csb104)
+
+		*** Goal`5-2-1  -  inv2(update(S#Sys,C#Client),i@Client) - Success
+		:def csb105 = :ctf [statusp(S#Sys,C#Client) .]
+
+		:apply(csb105)
+
+			*** Goal`5-2-1-1  -  inv2(update(S#Sys,C#Client),i@Client) - Success
+			:def csb106 = :ctf {eq C#Client  = i@Client .}
+
+			:apply(csb106)
+
+				*** Goal`5-2-1-1-1  -  inv2(update(S#Sys,C#Client),i@Client) - Success
+				:def csb107 = :ctf [statusp(S#Sys,i@Client) .]
+
+				:apply(csb107)
+
+					*** Goal`5-2-1-1-1-1 Success by reduction
+					:apply (rd)
+
+					*** Goal`5-2-1-1-1-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`5-2-1-1-1-3 Success by reduction
+					:apply (rd)
+
+				*** Goal`5-2-1-1-2  -  inv2(update(S#Sys,C#Client),i@Client) - Success
+				:def csb108 = :ctf [tmp(S#Sys,C#Client)<= valp(S#Sys,C#Client) .]
+
+				:apply(csb108)
+
+					*** Goal`5-2-1-1-2-1  -  inv2(update(S#Sys,C#Client),i@Client) - Success
+					:def csb109 = :ctf [statusp(S#Sys,i@Client) .]
+
+					:apply(csb109)
+
+						*** Goal`5-2-1-1-2-1-1 Success by implication and reduction.
+						:imp [proofCLOUD3] by {i:Client <- C#Client ; j:Client <- i@Client ;}
+
+						:apply (rd)
+
+						*** Goal`5-2-1-1-2-1-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-2-1-1-2-1-3 Success by reduction
+						:apply (rd)
+
+					*** Goal`5-2-1-1-2-2 Success by implication and reduction.
+					:imp [proofCLOUD1] by {i:Client <- i@Client ;}
+
+					:apply (rd)
+
+			*** Goal`5-2-1-2 Success by implication and reduction.
+			:imp [proofCLOUD1] by {i:Client <- i@Client ;}
+
+			:apply (rd)
+
+			*** Goal`5-2-1-3 Success by implication and reduction.
+			:imp [proofCLOUD1] by {i:Client <- i@Client ;}
+
+			:apply (rd)
+
+		*** Goal`5-2-2 Success by implication and reduction.
+		:imp [proofCLOUD1] by {i:Client <- i@Client ;}
+
+		:apply (rd)
+
+	*** Goal`5-3  -  inv3(update(S#Sys,C#Client),i@Client,j@Client) - Success
+	:def csb110 = :ctf {eq i@Client  = j@Client .}
+
+	:apply(csb110)
+
+		*** Goal`5-3-1 Success by reduction
+		:apply (rd)
+
+		*** Goal`5-3-2  -  inv3(update(S#Sys,C#Client),i@Client,j@Client) - Success
+		:def csb111 = :ctf [statusc(S#Sys) .]
+
+		:apply(csb111)
+
+			*** Goal`5-3-2-1  -  inv3(update(S#Sys,C#Client),i@Client,j@Client) - Success
+			:def csb112 = :ctf [statusp(S#Sys,C#Client) .]
+
+			:apply(csb112)
+
+				*** Goal`5-3-2-1-1  -  inv3(update(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb113 = :ctf {eq C#Client  = i@Client .}
+
+				:apply(csb113)
+
+					*** Goal`5-3-2-1-1-1  -  inv3(update(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb114 = :ctf [statusp(S#Sys,i:Client) .]
+
+					:apply(csb114)
+
+						*** Goal`5-3-2-1-1-1-1 Success by implication and reduction.
+						:imp [proofCLOUD3] by {i:Client <- C#Client ; j:Client <- j@Client ;}
+
+						:apply (rd)
+
+						*** Goal`5-3-2-1-1-1-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-3-2-1-1-1-3 Success by reduction
+						:apply (rd)
+
+					*** Goal`5-3-2-1-1-2  -  inv3(update(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb115 = :ctf [statusp(S#Sys,i@Client) .]
+
+					:apply(csb115)
+
+						*** Goal`5-3-2-1-1-2-1 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-3-2-1-1-2-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-3-2-1-1-2-3 Success by implication and reduction.
+						:imp [proofCLOUD2] by {i:Client <- i@Client ; j:Client <- C#Client ;}
+
+						:apply (rd)
+
+				*** Goal`5-3-2-1-2  -  inv3(update(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb116 = :ctf [statusp(S#Sys,i@Client) .]
+
+				:apply(csb116)
+
+					*** Goal`5-3-2-1-2-1 Success by reduction
+					:apply (rd)
+
+					*** Goal`5-3-2-1-2-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`5-3-2-1-2-3  -  inv3(update(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb117 = :ctf [statusp(S#Sys,j@Client) .]
+
+					:apply(csb117)
+
+						*** Goal`5-3-2-1-2-3-1 Success by implication and reduction.
+						:imp [proofCLOUD2] by {i:Client <- i@Client ; j:Client <- j@Client ;}
+
+						:apply (rd)
+
+						*** Goal`5-3-2-1-2-3-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-3-2-1-2-3-3 Success by reduction
+						:apply (rd)
+
+				*** Goal`5-3-2-1-3  -  inv3(update(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb118 = :ctf [statusp(S#Sys,i@Client) .]
+
+				:apply(csb118)
+
+					*** Goal`5-3-2-1-3-1 Success by reduction
+					:apply (rd)
+
+					*** Goal`5-3-2-1-3-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`5-3-2-1-3-3  -  inv3(update(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb119 = :ctf [statusp(S#Sys,j@Client) .]
+
+					:apply(csb119)
+
+						*** Goal`5-3-2-1-3-3-1 Success by implication and reduction.
+						:imp [proofCLOUD2] by {i:Client <- i@Client ; j:Client <- j@Client ;}
+
+						:apply (rd)
+
+						*** Goal`5-3-2-1-3-3-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-3-2-1-3-3-3 Success by reduction
+						:apply (rd)
+
+			*** Goal`5-3-2-2 Success by implication and reduction.
+			:imp [proofCLOUD5] by {i:Client <- j@Client ;}
+
+			:apply (rd)
+
+	*** Goal`5-4  -  inv4(update(S#Sys,C#Client),i@Client,j@Client) - Success
+	:def csb120 = :ctf {eq i@Client  = j@Client .}
+
+	:apply(csb120)
+
+		*** Goal`5-4-1 Success by reduction
+		:apply (rd)
+
+		*** Goal`5-4-2  -  inv4(update(S#Sys,C#Client),i@Client,j@Client) - Success
+		:def csb121 = :ctf [statusc(S#Sys) .]
+
+		:apply(csb121)
+
+			*** Goal`5-4-2-1  -  inv4(update(S#Sys,C#Client),i@Client,j@Client) - Success
+			:def csb122 = :ctf [statusp(S#Sys,C#Client) .]
+
+			:apply(csb122)
+
+				*** Goal`5-4-2-1-1  -  inv4(update(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb123 = :ctf {eq C#Client  = i@Client .}
+
+				:apply(csb123)
+
+					*** Goal`5-4-2-1-1-1  -  inv4(update(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb124 = :ctf [statusp(S#Sys,i@Client) .]
+
+					:apply(csb124)
+
+						*** Goal`5-4-2-1-1-1-1 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-4-2-1-1-1-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-4-2-1-1-1-3 Success by reduction
+						:apply (rd)
+
+					*** Goal`5-4-2-1-1-2  -  inv4(update(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb125 = :ctf [statusp(S#Sys,i@Client) .]
+
+					:apply(csb125)
+
+						*** Goal`5-4-2-1-1-2-1 Success by implication and reduction.
+						:imp [proofCLOUD3] by {i:Client <- C#Client ; j:Client <- i@Client ;}
+
+						:apply (rd)
+
+						*** Goal`5-4-2-1-1-2-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-4-2-1-1-2-3 Success by reduction
+						:apply (rd)
+
+				*** Goal`5-4-2-1-2  -  inv4(update(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb126 = :ctf [statusp(S#Sys,i@Client) .]
+
+				:apply(csb126)
+
+					*** Goal`5-4-2-1-2-1  -  inv4(update(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb127 = :ctf [statusp(S#Sys,j@Client) .]
+
+					:apply(csb127)
+
+						*** Goal`5-4-2-1-2-1-1 Success by implication and reduction.
+						:imp [proofCLOUD3] by {i:Client <- i@Client ; j:Client <- j@Client ;}
+
+						:apply (rd)
+
+						*** Goal`5-4-2-1-2-1-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-4-2-1-2-1-3 Success by reduction
+						:apply (rd)
+
+					*** Goal`5-4-2-1-2-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`5-4-2-1-2-3 Success by reduction
+					:apply (rd)
+
+				*** Goal`5-4-2-1-3  -  inv4(update(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb128 = :ctf [statusp(S#Sys,i@Client) .]
+
+				:apply(csb128)
+
+					*** Goal`5-4-2-1-3-1  -  inv4(update(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb129 = :ctf [statusp(S#Sys,j@Client) .]
+
+					:apply(csb129)
+
+						*** Goal`5-4-2-1-3-1-1 Success by implication and reduction.
+						:imp [proofCLOUD3] by {i:Client <- i@Client ; j:Client <- j@Client ;}
+
+						:apply (rd)
+
+						*** Goal`5-4-2-1-3-1-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-4-2-1-3-1-3 Success by reduction
+						:apply (rd)
+
+					*** Goal`5-4-2-1-3-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`5-4-2-1-3-3 Success by reduction
+					:apply (rd)
+
+			*** Goal`5-4-2-2 Success by implication and reduction.
+			:imp [proofCLOUD5] by {i:Client <- i@Client ;}
+
+			:apply (rd)
+
+	*** Goal`5-5  -  inv5(update(S#Sys,C#Client),i@Client) - Success
+	:def csb130 = :ctf [statusc(S#Sys) .]
+
+	:apply(csb130)
+
+		*** Goal`5-5-1 Success by reduction
+		:apply (rd)
+
+		*** Goal`5-5-2 Success by implication and reduction.
+		:imp [proofCLOUD4] by {i:Client <- i@Client ;}
+
+		:apply (rd)
+
+	*** Goal`5-6  -  inv6(update(S#Sys,C#Client),i@Client) - Success
+	:def csb131 = :ctf [statusc(S#Sys) .]
+
+	:apply(csb131)
+
+		*** Goal`5-6-1 Success by reduction
+		:apply (rd)
+
+		*** Goal`5-6-2 Success by implication and reduction.
+		:imp [proofCLOUD5] by {i:Client <- i@Client ;}
+
+		:apply (rd)
+
+	*** Goal`5-7  -  inv7(update(S#Sys,C#Client),i@Client,j@Client) - Success
+	:def csb132 = :ctf {eq i@Client  = j@Client .}
+
+	:apply(csb132)
+
+		*** Goal`5-7-1 Success by reduction
+		:apply (rd)
+
+		*** Goal`5-7-2  -  inv7(update(S#Sys,C#Client),i@Client,j@Client) - Success
+		:def csb133 = :ctf [statusc(S#Sys) .]
+
+		:apply(csb133)
+
+			*** Goal`5-7-2-1  -  inv7(update(S#Sys,C#Client),i@Client,j@Client) - Success
+			:def csb134 = :ctf [statusp(S#Sys,C#Client) .]
+
+			:apply(csb134)
+
+				*** Goal`5-7-2-1-1  -  inv7(update(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb135 = :ctf {eq C#Client  = i@Client .}
+
+				:apply(csb135)
+
+					*** Goal`5-7-2-1-1-1  -  inv7(update(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb136 = :ctf [statusp(S#Sys,i:Client) .]
+
+					:apply(csb136)
+
+						*** Goal`5-7-2-1-1-1-1 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-7-2-1-1-1-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-7-2-1-1-1-3 Success by implication and reduction.
+						:imp [proofCLOUD6] by {i:Client <- C#Client ; j:Client <- j@Client ;}
+
+						:apply (rd)
+
+					*** Goal`5-7-2-1-1-2  -  inv7(update(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb137 = :ctf [statusp(S#Sys,i@Client) .]
+
+					:apply(csb137)
+
+						*** Goal`5-7-2-1-1-2-1 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-7-2-1-1-2-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-7-2-1-1-2-3 Success by implication and reduction.
+						:imp [proofCLOUD2] by {i:Client <- i@Client ; j:Client <- C#Client ;}
+
+						:apply (rd)
+
+				*** Goal`5-7-2-1-2  -  inv7(update(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb138 = :ctf [statusp(S#Sys,i@Client) .]
+
+				:apply(csb138)
+
+					*** Goal`5-7-2-1-2-1 Success by reduction
+					:apply (rd)
+
+					*** Goal`5-7-2-1-2-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`5-7-2-1-2-3  -  inv7(update(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb139 = :ctf [statusp(S#Sys,j@Client) .]
+
+					:apply(csb139)
+
+						*** Goal`5-7-2-1-2-3-1 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-7-2-1-2-3-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-7-2-1-2-3-3 Success by implication and reduction.
+						:imp [proofCLOUD6] by {i:Client <- i@Client ; j:Client <- j@Client ;}
+
+						:apply (rd)
+
+				*** Goal`5-7-2-1-3  -  inv7(update(S#Sys,C#Client),i@Client,j@Client) - Success
+				:def csb140 = :ctf [statusp(S#Sys,i@Client) .]
+
+				:apply(csb140)
+
+					*** Goal`5-7-2-1-3-1 Success by reduction
+					:apply (rd)
+
+					*** Goal`5-7-2-1-3-2 Success by reduction
+					:apply (rd)
+
+					*** Goal`5-7-2-1-3-3  -  inv7(update(S#Sys,C#Client),i@Client,j@Client) - Success
+					:def csb141 = :ctf [statusp(S#Sys,j@Client) .]
+
+					:apply(csb141)
+
+						*** Goal`5-7-2-1-3-3-1 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-7-2-1-3-3-2 Success by reduction
+						:apply (rd)
+
+						*** Goal`5-7-2-1-3-3-3 Success by implication and reduction.
+						:imp [proofCLOUD6] by {i:Client <- i@Client ; j:Client <- j@Client ;}
+
+						:apply (rd)
+
+			*** Goal`5-7-2-2 Success by implication and reduction.
+			:imp [proofCLOUD4] by {i:Client <- i@Client ;}
+
+			:apply (rd)
+
+
+close

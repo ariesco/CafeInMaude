@@ -1,0 +1,31 @@
+load ui
+
+(fth ELT is
+ inc BOOL .
+ sorts Elt .
+ op vo : -> Elt .
+ op _~_ : Elt Elt -> Bool .
+ vars E E' : Elt .
+---
+ eq E ~ E = true .
+ ceq E = E' if E ~ E' [nonexec].   
+endfth)
+
+(fmod LISTS{X :: ELT} is
+  sorts List .
+  op nil : -> List [ctor] .
+  op __ : X$Elt List -> List [ctor] .
+ --- 
+  vars L L1 L2 : List .
+  vars E E' : X$Elt .
+ --- 
+  op _@_ : List List -> List .
+  eq nil @ L2 = L2 .                   
+  ceq (E L1) @ L2 = E (L1 @ L2) if (E ~ vo) = false [metadata "CA-1"]. 
+  ceq (E L1) @ L2 = L1 @ L2     if E = vo           [metadata "CA-2"].
+endfm)
+
+(goal LISTS |- eq L1:List @ (L2:List @ L3:List) = (L1:List @ L2:List) @ L3:List .)
+
+(set ind on L1:List .)
+(apply SI TC CA IP .)

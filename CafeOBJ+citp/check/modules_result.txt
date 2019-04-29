@@ -1,0 +1,338 @@
+		     \||||||||||||||||||/
+		   --- Welcome to Maude ---
+		     /||||||||||||||||||\
+	    Maude 2.7 built: Feb  7 2014 15:12:51
+	    Copyright 1997-2014 SRI International
+		   Thu Jun 12 20:05:45 2014
+
+	    Full Maude 2.7 March 13th 2013
+
+     --- A Constructor-based Theorem Prover(2013.06.12)! ---
+Command lists:
+	load *.maude .			-- load modules into database
+
+	(goal ModuleName |- Equations/Rules/Memberships)
+	(set ind on Vars .)		-- specify the variables for induction
+	(init LEMMA by V <- c .)	-- initialize a lemma by substitution.
+	(auto goal GoalID .)		-- prove a subgoal
+	(auto .)			-- try to prove the current goal
+	(roll back .)			-- go back to the previous goal
+	(apply RuleName .)		-- apply a given rule to default goal
+	(apply RuleName to GoalId .)	-- apply a rule to a goal
+	(cp EQ >< EQ)			-- check critical pairs
+	(cp Label >< Label .)		-- check critical pairs
+	(rule .)			-- add a critical pair as a rule
+	(backward rule .)		-- rule in inverse direction
+	(equation .)			-- add a critical pair as an equation
+	(backward equation .)		-- equation in inverse direction
+	(show unproved goals .)		-- show all unproved goals
+	(show goal GoalID .)		-- show a goal and set it as default
+	(show goal .)			-- show the current goal
+	(show tactics .)		-- show all tactics
+	(set tactic PROOF STRATEGY .)	-- specify customized proof strategy
+	(select tactic NAT .)		-- to use customized proof strategy
+	(set module off .)		-- only show added contents in module
+	(set module on .)		-- display all content in modules
+set include BOOL off
+
+Introduced Tight Cafe Module: BASIC-INT
+
+
+mod! BASIC-INT{
+	[Zero < Int]
+	op 0 : -> Zero {constr}
+	ops s_ p_ : Int -> Int
+	eq s p X:Int = X:Int .
+	eq p s X:Int = X:Int .
+}
+Introduced Loose Cafe Module: MY-BOOL
+
+
+mod* MY-BOOL{
+	[Bool]
+	ops true false : -> Bool
+	op _and_ : Bool Bool -> Bool
+	op not_ : Bool -> Bool
+}
+Introduced Loose Cafe Module: GROUP
+
+
+mod* GROUP{
+	[G]
+	op 0 : -> G
+	op _+_ : G G -> G {comm}
+	op -_ : G -> G
+	eq (X:G + Y:G)+ Z:G = X:G +(Y:G + Z:G) .
+	eq 0 + X:G = X:G .
+	eq - X:G + X:G = 0 .
+}
+Introduced Tight Cafe Module: SIG-INT+
+
+
+mod! SIG-INT+{
+	pr(BASIC-INT)
+	op _+_ : Int Int -> Int
+}
+Introduced Tight Cafe Module: INT+
+
+
+mod! INT+{
+	pr(SIG-INT+)
+	eq 0 + X:Int = X:Int .
+	eq s X:Int + Y:Int = s(X:Int + Y:Int) .
+	eq p X:Int + Y:Int = p(X:Int + Y:Int) .
+}
+Introduced Tight Cafe Module: INToo
+
+
+mod! INToo{
+	ex(BASIC-INT)
+	op oo : -> Int {constr}
+	eq s oo = oo .
+	eq p oo = oo .
+}
+Introduced Tight Cafe Module: INT3
+
+
+mod! INT3{
+	us(BASIC-INT)
+	eq s s s X:Int = X:Int .
+	eq p p p X:Int = X:Int .
+}
+Introduced Tight Cafe Module: INT
+
+
+mod! INT{
+	pr(BASIC-INT)
+	pr(MY-BOOL)
+	op _<=_ : Int Int -> Bool
+	op _>=_ : Int Int -> Bool
+	op _>_ : Int Int -> Bool
+	ops _-_ _*_ : Int Int -> Int
+	op 1 : -> Int {constr}
+}
+Introduced Tight Cafe Module: EQL-INT
+
+
+mod! EQL-INT{
+	pr(INT)
+	pred _==_ : Int Int .
+	eq [equals] : X:Int == Y:Int = X:Int <= Y:Int and Y:Int <= X:Int {
+    metadata "equality"} .
+}
+Introduced Tight Cafe Module: FACT
+
+
+mod! FACT{
+	pr(INT)
+	op fact : Int -> Int
+	ceq fact(X:Int) = X:Int * fact(X:Int - 1) if X:Int > 0 = true .
+	ceq fact(X:Int) = 1 if not(X:Int > 0)= true {nonexec} .
+}
+Introduced Loose Cafe Module: EQL-Elt
+
+
+mod! FACT{
+	pr(INT)
+	op fact : Int -> Int
+	ceq fact(X:Int) = X:Int * fact(X:Int - 1) if X:Int > 0 = true .
+	ceq fact(X:Int) = 1 if not(X:Int > 0)= true {nonexec} .
+}
+Introduced Tight Cafe Module: INT-STRING
+
+
+mod! INT-STRING{
+	pr(INT)
+	[Int < Str]
+	op _ _ : Str Str -> Str {assoc}
+}
+Introduced Tight Cafe Module: INT-BAG
+
+
+mod! INT-BAG{
+	pr(INT)
+	[Int < Bag]
+	op _ _ : Bag Bag -> Bag {assoc comm}
+}
+Introduced Tight Cafe Module: INT-BAG-IN
+
+
+mod! INT-BAG-IN{
+	pr(INT-BAG)
+	op _in_ : Int Bag -> Bool
+	eq X:Int in X:Int B:Bag = true .
+}
+Introduced Tight Cafe Module: BASIC-NAT
+
+
+mod! BASIC-NAT{
+	[Zero NzNat < Nat]
+	op 0 : -> Zero
+	op s_ : Nat -> NzNat
+}
+Introduced Tight Cafe Module: NAT-P
+
+
+mod! NAT-P{
+	pr(BASIC-NAT)
+	op p_ : NzNat -> Nat
+	eq p s N:Nat = N:Nat .
+}
+Introduced Tight Cafe Module: EQL-Elt-err
+
+
+mod! EQL-Elt-err{
+	pr(EQL-Elt)
+	op err : -> ?Elt
+	eq E:Elt == err = false .
+}
+Introduced Tight Cafe Module: ARRAY
+
+
+mod! ARRAY{
+	pr(EQL-INT + EQL-Elt-err)
+	*[Sys]*
+	bop val : Sys Int -> Elt
+	bop set : Sys Int Elt -> Sys
+	op init : -> Sys
+	eq val(init,X:Int) = err .
+	ceq val(set(S:Sys,X:Int,A:Elt),Y:Int) = A:Elt if X:Int == Y:Int = true
+    .
+	ceq val(set(S:Sys,X:Int,A:Elt),Y:Int) = val(S:Sys,Y:Int) if not(X:Int
+    == Y:Int)= true .
+}
+Introduced Tight Cafe Module: FOO
+
+
+mod! FOO(X :: MY-BOOL, Y :: MY-BOOL, Z :: MY-BOOL){
+	[Foo]
+}
+Introduced Tight Cafe Module: A
+
+
+mod! A{
+	[A]
+}
+Introduced Loose Cafe Module: B
+
+
+mod* B{
+	[B]
+}
+Introduced Cafe View: C
+
+Introduced Cafe View: C2
+
+Introduced Cafe View: C3
+
+Introduced Tight Cafe Module: D
+
+
+mod! D(X :: B){
+	[Foo]
+}
+
+Warning: Parameterized theories are not allowed in Maude.
+The module was introduced with tight semantics.
+
+
+mod* D2(X :: B, Y :: B){
+	[Foo]
+}
+Introduced Tight Cafe Module: D3
+
+
+mod! D3(X :: B, Y :: B, Z :: B){
+	[Foo]
+}
+Introduced Tight Cafe Module: E
+
+
+mod! E{
+	pr(D(X <= C))
+}
+Introduced Tight Cafe Module: E2
+
+
+mod! E2{
+	pr(D2(Y <= C2, X <= C))
+}
+Introduced Tight Cafe Module: E3
+
+
+mod! E3{
+	pr(D3(Y <= C2, Z <= C3, X <= C))
+}
+Introduced Tight Cafe Module: E4
+
+
+mod! E4{
+	pr(D(X <= view to A { sort B to A }))
+}
+Introduced Tight Cafe Module: E5
+
+
+mod! E5{
+	pr(D2(Y <= view to A { sort B to A }, X <= view to A { sort B to A }))
+}
+Introduced Tight Cafe Module: E6
+
+
+mod! E6{
+	pr(D3(Y <= view to A { sort B to A }, Z <= C3, X <= view to A { sort B
+    to A }))
+}
+Introduced Tight Cafe Module: E7
+
+
+mod! E7{
+	pr(D3(Y <= A { sort B to A '`}, Z <= C3, X <= view to A { sort B to A
+    }))
+}
+Introduced Tight Cafe Module: BAG
+
+
+mod! BAG(D :: EQL-Elt){
+	pr(MY-BOOL)
+	[Elt.D < Bag]
+	op _ _ : Bag Bag -> Bag {assoc comm}
+	pred _in_ : Elt.D Bag .
+	
+}
+Introduced Cafe View: EQL-Elt2INT
+
+Introduced Tight Cafe Module: F
+
+
+mod! F{
+	pr(MY-BOOL * {sort Bool -> Boola})
+}
+Introduced Tight Cafe Module: RULES
+
+mod RULES is
+  protecting BOOL .
+  sorts A .
+  op a : -> A .
+  op b : -> A .
+  op c : -> A .
+  op d : A A -> Bool .
+  eq d(a,c)
+    = true .
+  crl b
+    => c
+    if d(a,c)= true .
+  rl a
+    => b [label a metadata "a rule" nonexec] .
+endm
+
+
+mod! RULES{
+	pr(BOOL)
+	[A]
+	pred d : A A .
+	ops a b c : -> A
+	trans [a] : a => b {metadata "a rule" nonexec} .
+	ctrns b => c if d(a,c)= true .
+	eq d(a,c) = true .
+}
+Bye.

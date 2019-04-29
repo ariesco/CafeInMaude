@@ -1,0 +1,7 @@
+#!/bin/sh
+export CLASSPATH=/Users/adrian/Documents/Maude/
+rm -f intro.tex
+rm -f combining.tex
+java MaudeLatex ../cafeOBJ2maude.maude >> intro.tex
+java MaudeLatex ../cafe_interface.maude >> combining.tex
+

@@ -1,0 +1,68 @@
+mod* ELT {
+ [Elt]
+
+ op mt : -> Elt {constr}
+}
+
+mod! LIST(X :: ELT) {
+  [List]
+
+  op nil : -> List {constr}
+  op __ : Elt.X List -> List {constr}
+
+  var E : Elt.X
+  var L L' : List
+
+  op _@_ : List List -> List
+  eq [com1] : nil @ L = L .
+  eq [com2] : (E L) @ L' = E (L @ L') .
+
+  op reverse : List -> List
+  eq [r1] : reverse(nil) = mt nil .
+  eq [r2] : reverse(E L) = reverse(L) @ (E nil) .
+
+  op mix : List List -> List {comm}
+
+  trans [m1] : mix(nil, L) => L .
+  trans [m2] : mix(E L, L') => E mix(L, L') .
+}
+
+view Elt from ELT to NAT {
+  sort Elt -> Nat,
+  op mt -> 0
+}
+
+mod! NAT-LIST {
+  pr(LIST(view to NAT {sort Elt -> Nat, op mt -> 0}))
+}
+
+mod! PROP-LIST {
+  pr(LIST(X <= Elt))
+
+  var L : List
+
+  op prop : List -> Bool
+  eq [p1] : prop(L) = reverse(reverse(L)) == L .
+}
+
+mod! CORRECT-PROP-LIST {
+  pr(LIST(X <= Elt))
+
+  var L : List
+
+  op prop : List -> Bool .
+  eq prop(L) = true .
+}
+
+open NAT + BOOL
+ -- declaring three arbitrary numbers i, j, and k on the sort Nat:
+ ops i j k : -> Nat
+ -- base step:
+ red (0 + j) + k == 0 + (j + k) .
+ --> should be true
+ -- induction hypothesis:
+ eq (i + j) + k = i + (j + k) .
+ -- inductive step:
+ red (s(i) + j) + k == s(i) + (j + k) .
+ --> should be true
+close

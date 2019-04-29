@@ -1,0 +1,2037 @@
+
+***(
+  Updated on 06-20-2013
+
+  1. to support the mix of equations, rewrite rules, and memberships in a single goal.
+  2. to support "red" function which reduces ground terms in goals to their normal forms.
+
+
+  new features:
+  modified on 2013.02.26
+  1. support rules and memberships in goals
+  2. add new prove strategy
+
+  NEW FEATURES:
+  1. support rollback to an intermediate goal from which you can re-prove
+  2. add an option to show all contents or only added parts in modules of goals.
+
+  modified in 2013.01.04
+   new functions:
+   1. roll back to previous goal by (go back .) command
+   2. specify the rule to be applied to a goal by (apply ruleName [to goalID] .) command
+   3. all files are integrated into a single file.
+
+  todo list
+   1. to add lemmas to a goal
+ )
+
+load full-maude.maude
+
+in cafeOBJ2maude.maude
+*** Adrian
+
+load tool.maude
+
+
+fmod PROOF-TREE is
+    including #LIBRARY# .
+    sorts PTree PTreeSet .
+    subsort PTree < PTreeSet .
+    op empty : -> PTreeSet [ctor] .
+    op __ : PTreeSet PTreeSet -> PTreeSet [ctor assoc comm id: empty] .
+
+    op null : -> PTree [ctor] .
+    op [_;_;_;_] : Qid Goal Bool PTreeSet -> PTree [ctor] .
+
+    --- basic operations
+    op getPTree : PTree Qid ~> PTree .
+    op getPTreeAux : PTreeSet Qid ~> PTree .
+    op ptreeErr : QidList ~> PTree .
+
+    vars TID TID' : Qid .
+    var G : Goal .
+    var B : Bool .
+    vars PS PS' : PTreeSet .
+    var PT? : [PTree] .
+    vars PT PT' PT'' : PTree .
+    var N : Nat .
+    var GS : GoalSet .
+
+    eq getPTree(null, TID) = ptreeErr('Goal TID 'does 'not 'exist!).
+    eq getPTree([ TID' ; G ; B ; PS ], TID) = (if TID == TID' then [ TID' ; G ; B ; PS ] else getPTreeAux(PS,TID) fi) .
+
+    eq getPTreeAux(empty, TID) = ptreeErr('Goal TID 'does 'not 'exist!) .
+    ceq getPTreeAux((PT PS), TID) = (if PT? :: PTree then PT? else getPTreeAux(PS,TID) fi )
+      if PT? := getPTree(PT,TID) .
+
+
+    *** indexGoals --> initPTreeSet
+    op initPTreeSet : GoalSet Qid Nat -> PTreeSet .
+    eq initPTreeSet(emptyGoalSet, TID, N) = empty .
+    eq initPTreeSet((G GS), TID, N) = [ qid( string(TID) + "-" + string(N,10)) ; G ; false ; empty ] initPTreeSet(GS, TID, N + 1) .
+
+    ***
+    op getDefaultGoalIndex : PTreeSet -> Qid .
+    eq getDefaultGoalIndex([ TID ; G ; B ; PS ] PS') = TID .
+    eq getDefaultGoalIndex(empty) = 'nil .
+
+    *** goalIndex
+    op goalIndex : PTreeSet GoalSet -> Qid .
+    eq goalIndex([ TID ; G ; B ; PS ], GS) = TID .
+    eq goalIndex([ TID ; G ; B ; PS ] PS', emptyGoalSet) = TID .
+    ceq goalIndex([ TID ; G ; B ; PS ] PS', (G GS)) = goalIndex(PS', GS) if PS' =/= empty .
+    eq goalIndex([ TID ; G ; B ; PS ] PS', GS) = TID [owise] .
+
+    ***
+    op addPTreeSet : PTree Qid PTreeSet -> PTree .
+    op addPTreeSetAux : PTree Qid PTreeSet -> PTree .
+    eq addPTreeSet([ TID ; G ; B ; PS ], TID', PS') =
+	(if TID == TID' then [ TID ; G ; B ; PS' ] else [ TID ; G ; B ; addPTreeSetAux(PS, TID', PS') ] fi ) .
+    eq addPTreeSetAux(empty, TID, PS) = empty .
+    ceq addPTreeSetAux((PT PS), TID, PS') =  (if PT' =/= PT then (PT' PS) else (PT addPTreeSetAux(PS, TID, PS')) fi )
+	  if PT' := addPTreeSet(PT, TID, PS') .
+
+      *** set a labeled node's treeset emtpy and Boolean value false
+    op initPTree : PTree Qid -> PTree .
+    op initPTreeAux : PTreeSet Qid -> PTreeSet .
+
+    eq initPTree([ TID ; G ; B ; PS ], TID') =
+	(if TID == TID' then [ TID ; G ; false ; empty ] else  [ TID ; G ; B ; initPTreeAux(PS, TID') ] fi ) .
+    eq initPTreeAux(empty, TID) = empty .
+    ceq initPTreeAux((PT PS'), TID) =
+	(if PT' =/= PT then (PT' PS') else (PT initPTreeAux(PS', TID)) fi )
+      if PT' := initPTree(PT, TID) .
+
+    op containsGoal : PTree Qid -> Bool .
+    op containsGoalAux : PTreeSet Qid -> Bool .
+
+    eq containsGoal([ TID ; G ; B ; PS ], TID') = (if TID == TID' then true else containsGoalAux(PS, TID') fi ) .
+    eq containsGoalAux(empty, TID) = false .
+    eq containsGoalAux((PT PS), TID) = (if containsGoal(PT, TID) then true else containsGoalAux(PS, TID) fi ) .
+
+    op setGoalProved : PTree Qid -> PTree .
+    op setGoalProvedAux : PTreeSet Qid -> PTreeSet .
+
+    eq setGoalProved([ TID ; G ; B ; PS ], TID') =
+	(if TID == TID' then [ TID ; G ; true ; PS ] else
+	    [ TID ; G ; B ; setGoalProvedAux(PS,TID') ] fi ) .
+    eq setGoalProvedAux(empty, TID) = empty .
+    ceq setGoalProvedAux((PT PS), TID) =
+	(if PT' =/= PT then (PT' PS) else (PT setGoalProvedAux(PS, TID)) fi )
+      if PT' := setGoalProved(PT, TID) .
+
+    op replacePTree : PTree Qid PTree -> PTree .
+    op replacePTreeAux : PTreeSet Qid PTree -> PTree .
+
+    eq replacePTree([ TID ; G ; B ; PS ], TID', PT') =
+	(if TID == TID' then PT' else [ TID ; G ; B ; replacePTreeAux(PS, TID', PT')  ] fi ) .
+    ceq replacePTreeAux((PT PS), TID, PT') =
+	( if PT'' =/= PT then (PT'' PS) else (PT replacePTreeAux(PS, TID, PT')) fi )
+      if PT'' := replacePTree(PT, TID, PT') .
+    eq replacePTreeAux(empty, TID, PT) = empty .
+
+
+    op unprovedGoals : PTree -> PTreeSet .
+    op unprovedGoalsAux : PTreeSet -> PTreeSet .
+    eq unprovedGoals(null) = empty .
+    eq unprovedGoals([ TID ; G ; B ; PS ]) =
+	( if PS =/= empty then unprovedGoalsAux(PS) else (if B then empty else [ TID ; G ; B ; PS ] fi ) fi ) .
+    eq unprovedGoalsAux(empty) = empty .
+    eq unprovedGoalsAux((PT PS)) = unprovedGoals(PT) unprovedGoalsAux(PS) .
+
+    *** num
+    op num : PTreeSet -> Nat .
+    eq num(empty) = 0 .
+    eq num(PT PS) = 1 + num(PS) .
+
+    op rmChild : PTree Qid -> PTree .
+    op rmChildAux : PTreeSet Qid -> PTreeSet .
+
+    eq rmChild([ TID ; G ; B ; PS ], TID') =
+	(if TID == TID' then  [ TID ; G ; false ; empty ] else [ TID ; G ; B ;  rmChildAux(PS, TID') ] fi ) .
+    ceq rmChildAux((PT PS), TID) = (if PT' == PT then (PT rmChildAux(PS,TID)) else (PT' PS) fi )
+      if PT' := rmChild(PT,TID) .
+    eq rmChildAux(empty,TID) = empty .
+
+
+
+
+endfm
+
+
+
+fmod THM-BANNER is
+    protecting STRING .
+    protecting EXT-QID-LIST .
+
+    op thm-banner : -> String .
+    eq thm-banner = " --- A Constructor-based Theorem Prover (2013.06.12)! ---" .
+    op help-list : -> QidList .
+    eq help-list = (string2qidList("Command lists:") '\n
+	  '\t    string2qidList("load *.maude .") '\t '\t '\t '\t string2qidList("-- load modules into database")'\n '\n
+	  '\t string2qidList("(goal") '\s string2qidList("ModuleName |-") '\s string2qidList("Equations/Rules/Memberships )") '\n
+		'\t string2qidList("(set ind on Vars .)") '\t '\t '\t string2qidList("-- specify the variables for induction")'\n
+		'\t string2qidList("(init LEMMA by V <- c .)") '\t '\t string2qidList("-- initialize a lemma by substitution.")'\n
+		'\t string2qidList("(auto goal GoalID .)") '\t '\t '\t string2qidList("-- prove a subgoal")'\n
+		'\t string2qidList("(auto .)") '\t '\t '\t '\t  string2qidList("-- try to prove the current goal")'\n
+		'\t string2qidList("(roll back .)") '\t '\t '\t '\t string2qidList("-- go back to the previous goal") '\n
+		'\t string2qidList("(apply RuleName .)") '\t '\t '\t  string2qidList("-- apply a given rule to default goal") '\n
+		'\t string2qidList("(apply RuleName to GoalId .)") '\t '\t string2qidList("-- apply a rule to a goal") '\n
+		'\t string2qidList("(show unproved goals .)") '\t '\t '\t string2qidList("-- show all unproved goals") '\n
+		'\t string2qidList("(show goal GoalID .)") '\t '\t '\t string2qidList("-- show a goal and set it as default") '\n
+		'\t string2qidList("(show goal .)") '\t '\t  '\t '\t string2qidList("-- show the current goal") '\n
+	'\t string2qidList("(show tactics .)") '\t '\t '\t string2qidList("-- show all tactics") '\n
+		'\t string2qidList("(set tactic PROOF STRATEGY .)") '\t '\t string2qidList("-- specify customized proof strategy") '\n
+		'\t string2qidList("(select tactic NAT .)") '\t '\t '\t string2qidList("-- to use customized proof strategy") '\n
+		'\t string2qidList("(set module off .)") '\t '\t '\t string2qidList("-- only show added contents in module") '\n
+		'\t string2qidList("(set module on .)") '\t '\t '\t string2qidList("-- display all content in modules") ) .
+
+endfm
+
+--- constructor-based theorem prover
+
+fmod PROVE-COMMANDS is
+    including COMMANDS .
+    including VIEWS .
+
+    --- op prove_. : @Bubble@ -> @Command@ .
+
+    *** in the new version
+
+    sort @SentenceSet@ .
+    op __ : @SentenceSet@ @SentenceSet@ -> @SentenceSet@ [assoc comm] .
+
+    op eq_=_; : @Bubble@ @Bubble@ -> @SentenceSet@ .
+    op ceq_=_if_; : @Bubble@ @Bubble@ @Bubble@ -> @SentenceSet@ .
+    op rl_=>_; : @Bubble@ @Bubble@ -> @SentenceSet@ .
+    op crl_=>_if_; : @Bubble@ @Bubble@ @Bubble@ -> @SentenceSet@ .
+    op mb_:_; : @Bubble@ @Bubble@ -> @SentenceSet@ .
+    op cmb_:_if_; : @Bubble@ @Bubble@ @Bubble@ -> @SentenceSet@ .
+
+
+    op trans_=>_; : @Bubble@ @Bubble@ -> @SentenceSet@ .
+    op ctrans_=>_if_; : @Bubble@ @Bubble@ @Bubble@ -> @SentenceSet@ .
+    op trns_=>_; : @Bubble@ @Bubble@ -> @SentenceSet@ .
+    op ctrns_=>_if_; : @Bubble@ @Bubble@ @Bubble@ -> @SentenceSet@ .
+    *** Adrian
+
+    op goal_|-_ : @Token@ @SentenceSet@ -> @Command@ .
+
+
+    op init_by_. : @Token@ @Bubble@ -> @Command@ .
+    op set`tactic_. : @Bubble@ -> @Command@ .
+    op show`tactics`. : -> @Command@ .
+    op select`tactic_. : @Token@ -> @Command@ .
+    op set`ind`on_. : @Bubble@ -> @Command@ .
+    op set`label_. : @Token@ -> @Command@ .
+
+    op show`goal_. : @Token@ -> @Command@ .
+    op show`goal`. : ->  @Command@ .
+    op auto`. : ->  @Command@ .
+    op auto`goal_. : @Token@ ->  @Command@ .
+    op show`unproved`goals`. : -> @Command@ .
+    op apply_. : @Bubble@ -> @Command@ .
+    op help?`. : -> @Command@ .
+    op apply_to_. : @Bubble@ @Token@ -> @Command@ .
+    op set`module`on`. : -> @Command@ .
+    op set`module`off`. : -> @Command@ .
+    op roll`back`. : -> @Command@ .
+    *** Adrian
+    op maude`language`. : -> @Command@ .
+    op cafeOBJ`language`. : -> @Command@ .
+
+endfm
+
+--- jump instruction
+
+fmod META-THM-SIGN is
+    including META-FULL-MAUDE-SIGN .
+    inc META-CAFE2MAUDE-SIGNATURE .
+    *** Adrian
+    op thm-Grammar : -> FModule .
+    eq thm-Grammar = addImports((including 'PROVE-COMMANDS .), CafeGRAMMAR) .
+    *** Adrian: CafeGRAMMAR
+endfm
+
+
+fmod TACTIC is
+    including QID-LIST .
+    including NAT .
+
+    sorts Tactic Tactics .
+    subsort QidList < Tactic < Tactics .
+    op _@_ : Tactics Tactics -> Tactics [assoc id: nil] .
+
+    op getTactic : Tactics Nat -> Tactic .
+    op num : Tactics -> Nat .
+
+    var TA : Tactic .
+    var TAS : Tactics .
+    var N : Nat .
+
+    eq getTactic(nil, N) = nil .
+    ceq getTactic(TA @ TAS, 0) = TA if TA =/= nil .
+    ceq getTactic(TA @ TAS, N) = getTactic(TAS, sd(N,1)) if TA =/= nil .
+
+    eq num(nil) = 0 .
+    ceq num(TA @ TAS) = num( TAS) + 1 if TA =/= nil .
+
+endfm
+
+
+
+
+fmod MODULE-OPERATION is
+    including UNIT .
+    protecting #LIBRARY# .
+    op _-_ : EquationSet EquationSet -> EquationSet .
+    op _-_ : OpDeclSet OpDeclSet -> OpDeclSet .
+
+    var Eq : Equation .
+    vars EqS EqS' : EquationSet .
+    eq (Eq EqS) - (Eq EqS') = (EqS - EqS') .
+    eq (EqS - EqS') = EqS [owise] .
+
+    var OD : OpDecl .
+    vars OPD OPD' : OpDeclSet .
+    eq (OD OPD) - (OD OPD')  = (OPD - OPD') .
+    eq OPD - OPD' = OPD [owise] .
+
+
+
+
+    *** Function: getEqLemmas
+    *** Description: to get the all the equations used as lemmas
+    vars T1 T2 : Term .
+    vars AS : AttrSet .
+    vars EqSet : EquationSet .
+    var EC : EqCondition .
+    vars E E' : Equation .
+    var Str : String .
+
+
+
+    op getEqLemmas : EquationSet -> EquationSet .
+    eq getEqLemmas(none) = none .
+    ceq getEqLemmas((eq T1 = T2 [label(Lab) AS] .) EqSet) =
+	(eq T1 = T2 [label(Lab) AS] .) getEqLemmas(EqSet)
+      if substr(string(Lab),0,5) = "lemma"  .
+    ceq getEqLemmas((ceq T1 = T2 if EC [label(Lab) AS] .) EqSet) =
+	  (ceq T1 = T2 if EC [label(Lab) AS] .) getEqLemmas(EqSet)
+	  if substr(string(Lab),0,5) = "lemma" .
+    eq getEqLemmas(E EqSet) = getEqLemmas(EqSet) [owise] .
+
+
+    *** Function: getRlLemmas
+    *** Description: to get the all the rules used as lemmas
+
+    op getRlLemmas : RuleSet -> RuleSet .
+    eq getRlLemmas(none) = none .
+    ceq getRlLemmas((rl T1 => T2 [label(Lab) AS] .) RS) =
+	(rl T1 => T2 [label(Lab) AS] .) getRlLemmas(RS)
+      if substr(string(Lab),0,5) = "lemma"  .
+    ceq getRlLemmas((crl T1 => T2 if Co [label(Lab) AS] .) RS) =
+	  (crl T1 => T2 if Co [label(Lab) AS] .) getRlLemmas(RS)
+	  if substr(string(Lab),0,5) = "lemma" .
+    eq getRlLemmas(R RS) = getRlLemmas(RS) [owise] .
+
+
+    *** Function: getEqbyLabel
+    *** Description: to get an equation with a given label
+    op getEqbyLabel : Module Qid ~> Equation .
+    op getEqbyLabelAux : EquationSet Qid ~> Equation .
+    op eqErr : QidList ~> Equation .
+    vars Lab Lab' : Qid .
+    var M : Module .
+    var Q Q' : Qid .
+    var V : Variable .
+    var TL : TermList .
+    var RP : ResultPair? .
+    var T : Term .
+
+    eq getEqbyLabel(M, Lab) = getEqbyLabelAux(getEqs(M), Lab) .
+    eq getEqbyLabelAux(eq T1 = T2 [ label(Lab) AS]. EqSet, Lab) = (eq T1 = T2 [ label(Lab) rmNonexecAttr(AS)]. ) .
+    eq getEqbyLabelAux(ceq T1 = T2 if EC [ label(Lab) AS]. EqSet, Lab) = (ceq T1 = T2 if EC [ label(Lab) rmNonexecAttr(AS)].) .
+    eq getEqbyLabelAux(EqSet, Lab) = eqErr(Lab 'is 'not 'in 'the 'module) [owise] .
+
+
+    *** Function: getRlbyLabel
+    *** Description: to get an equation with a given label
+    op getRlbyLabel : Module Qid ~> Rule .
+    op getRlbyLabelAux : RuleSet Qid ~> Rule .
+    op rlErr : QidList ~> Rule .
+    var Co : Condition .
+    var RS : RuleSet .
+    var R : Rule .
+
+    eq getRlbyLabel(M,Lab) = getRlbyLabelAux(getRls(M),Lab) .
+    eq getRlbyLabelAux(rl T1 => T2 [label(Lab) AS] . RS, Lab) = (rl T1 => T2 [label(Lab) rmNonexecAttr(AS)] .) .
+    eq getRlbyLabelAux(crl T1 => T2  if Co [label(Lab) AS] . RS, Lab) = (crl T1 => T2  if Co [label(Lab) rmNonexecAttr(AS)] .) .
+    eq getRlbyLabelAux(RS, Lab) = rlErr(Lab 'is 'not 'in 'the 'module.) .
+
+
+    *** Function: constructSubst
+    *** Description: to construct substitutions from the given substitution pairs
+
+    op constructSubst : Module TermList QidList ~> Substitution .
+    op constructSubstAux : Module TermList Qid Qid ~> Substitution .
+    op constructSubstAux2 : TermList Qid Qid Term ~> Substitution .
+    op subErr : QidList ~> Substitution .
+
+    vars Subst' Subst'' : [Substitution] .
+    var QIL : QidList .
+    var Ty : Type .
+
+    eq constructSubst(M,TL,nil) = none .
+    eq constructSubst(M,TL,QIL) =
+	subErr('\r 'ERROR: '\o  QIL 'is 'a 'bad 'substitution! '\n 'Example: 'a '<- 'A '; 'b '<- 'B '\n) [owise] .
+
+    eq constructSubst(M,TL, Q '<- Q') =
+	constructSubstAux(M,TL,Q,Q') .
+
+    eq constructSubst(M,TL, '`( Q '<- Q' '`)) =
+	constructSubstAux(M,TL,Q,Q') .
+
+
+    ceq constructSubst(M, TL, Q '<- Q' '; QIL) =
+      if Subst' :: Substitution then
+	if constructSubstAux(M,TL,Q,Q') :: Substitution then
+	    Subst' ;  constructSubstAux(M,TL,Q,Q')
+	  else
+	    constructSubstAux(M,TL,Q,Q')
+	  fi
+	else Subst' fi
+      if QIL =/= nil /\
+	  Subst' := constructSubst(M,TL,QIL) .
+
+    ceq constructSubst(M, TL, '`( Q '<- Q' '`) '; QIL) =
+      if Subst' :: Substitution then
+	if constructSubstAux(M,TL,Q,Q') :: Substitution then
+	    Subst' ;  constructSubstAux(M,TL,Q,Q')
+	  else
+	    constructSubstAux(M,TL,Q,Q')
+	  fi
+	else Subst' fi
+      if QIL =/= nil /\
+	  Subst' := constructSubst(M,TL,QIL) .
+
+
+    ceq constructSubstAux(M, TL, Q, Q') =
+      if RP :: ResultPair then
+	if Ty == getType(RP) then
+	  if getTerm(RP) :: Variable then
+	      getTerm(RP) <- T
+	    else subErr('\r 'ERROR: '\o Q 'is 'not 'a 'variable!) fi
+	  else
+	    subErr('\r 'ERROR: '\o Q 'and Q' 'are 'of 'different 'types!)
+	  fi
+	else
+	  constructSubstAux2(TL, Q, Ty, T)
+	fi
+	if {T, Ty} :=  metaParse(M, Q',anyType) /\
+	    RP := metaParse(M, Q, anyType) .
+
+    eq constructSubstAux(M,TL,Q,Q') = subErr('\r 'ERROR: '\o Q' 'cannot 'be 'parsed!) [owise] .
+
+    eq constructSubstAux2((V, TL), Q', Ty, T) =
+      if getName(V) == Q' then
+	  if getType(V) == Ty then
+	    V <- T
+	  else
+	    subErr('\r 'ERROR: '\o Q' 'is 'not 'of 'the 'type Ty)
+	  fi
+	else
+	  constructSubstAux2(TL, Q', Ty, T)
+	fi .
+    eq constructSubstAux2(empty, Q', Ty, T) =
+	subErr('\r 'ERROR: '\o  'No 'such 'variable Q' 'in 'the 'lemma.) .
+    eq constructSubstAux2(TL, Q', Ty, T) =
+	subErr('\r 'ERROR: '\o 'unkown 'reason) [owise] .
+
+    *** Function: setEq
+    *** Description: replace an equation with a new one by label
+    op setEq : Module Qid Equation -> Module .
+    op setEqAux : EquationSet Qid Equation -> EquationSet .
+    eq setEq(M,Lab,E) = setEqs(M,setEqAux(getEqs(M),Lab,E)) .
+
+    eq setEqAux((eq T1 = T2 [label(Lab) AS].) EqSet, Lab, E) = (E EqSet) .
+    eq setEqAux((ceq T1 = T2 if EC [label(Lab) AS].) EqSet, Lab, E) = (E EqSet) .
+    eq setEqAux(none, Lab, E) = none .
+    eq setEqAux(E EqSet, Lab, E') = E setEqAux(EqSet, Lab, E') [owise] .
+
+    *** Function: setRl
+    *** Description: replace an equation with a new one by label
+    op setRl : Module Qid Rule -> Module .
+    op setRlAux : RuleSet Qid Rule -> RuleSet .
+    eq setRl(M,Lab,R) = setRls(M,setRlAux(getRls(M),Lab,R)) .
+    var R' : Rule .
+
+    eq setRlAux((rl T1 => T2 [label(Lab) AS].) RS, Lab, R) = (R RS) .
+    eq setRlAux((crl T1 => T2 if Co [label(Lab) AS].) RS, Lab, R) = (R RS) .
+    eq setRlAux(none, Lab, R) = none .
+    eq setRlAux(R RS, Lab, R') = R setRlAux(RS, Lab, R') [owise] .
+
+
+    *** Function: rmNonexecAttr
+    *** Description: to remove the nonexec attribute from the attribute set.
+    var AtS : AttrSet .
+    op rmNonexecAttr : AttrSet -> AttrSet .
+    eq rmNonexecAttr(nonexec AtS) = AtS .
+    eq rmNonexecAttr(AtS) = AtS [owise] .
+
+
+*** Function: getAddedEqs
+*** Description: to get the all the equations that are added during the proof.
+
+    op getAddedEqs : EquationSet -> EquationSet .
+    eq getAddedEqs(none) = none .
+    eq getAddedEqs((eq T1 = T2 [metadata("added") AS] .) EqSet) = (eq T1 = T2 [metadata("added") AS] .) getAddedEqs(EqSet) .
+    eq getAddedEqs((ceq T1 = T2 if EC [metadata("added") AS] .) EqSet) = (ceq T1 = T2 if EC [metadata("added") AS] .) getAddedEqs(EqSet) .
+    eq getAddedEqs(E EqSet) = getAddedEqs(EqSet) [owise] .
+
+
+    op getAddedRls : RuleSet -> RuleSet .
+    eq getAddedRls(none) = none .
+    eq getAddedRls((rl T1 => T2 [metadata("added") AS] .) RS) = (rl T1 => T2 [metadata("added") AS] .) getAddedRls(RS) .
+    eq getAddedRls((crl T1 => T2 if Co [metadata("added") AS] .) RS) = (crl T1 => T2 if Co [metadata("added") AS] .) getAddedRls(RS) .
+    eq getAddedRls(R RS) = getAddedRls(RS) [owise] .
+
+
+    op getAddedMbs : MembAxSet -> MembAxSet .
+    var MBS : MembAxSet .
+    var MB : MembAx .
+    var So : Sort .
+
+    eq getAddedMbs(none) = none .
+    eq getAddedMbs((mb T1 : So [metadata("added") AS] .) MBS) = (mb T1 : So [metadata("added") AS] .) getAddedMbs(MBS) .
+    eq getAddedMbs((cmb T1 : So if Co [metadata("added") AS] .) MBS) = (cmb T1 : So if Co [metadata("added") AS] .) getAddedMbs(MBS) .
+    eq getAddedMbs(MB MBS) = getAddedMbs(MBS) [owise] .
+
+
+endfm
+
+
+fmod PRETTY-PRINT is
+    including DATABASE .
+    including NAT .
+    including TACTIC .
+    including MODULE-OPERATION .
+    including UNIT-META-PRETTY-PRINT .
+    including PROOF-TREE .
+
+    op prettyPrintProofTree : PTree Database Bool -> QidList .
+    op prettyPrintProofTreeAux : PTreeSet  Database Bool -> QidList .
+    op prettyPrintGoal : Goal Database Bool -> QidList .
+    op prettyPrintTrace : Trace Database Bool -> QidList .
+    op prettyPrintTactics : Tactics Nat -> QidList .
+    op prettyPrintTacticsAux : Tactics Nat Nat -> QidList .
+
+    vars B B' : Bool .
+    vars DB DB' : Database .
+    var Q : Qid .
+    var G : Goal .
+    vars PS PS' : PTreeSet  .
+    vars FM' FM FM'' : Module .
+    var E : Equation .
+    var L : Label .
+    var ME : ModuleExpression .
+    var PT : PTree .
+    var Mx : MembAx .
+
+    var TA : Tactic .
+    var TAS : Tactics .
+    var N' : Nat .
+    var EqS : EquationSet .
+
+    var ScS : SentenceSet .
+
+    eq prettyPrintTactics(TAS,N) = prettyPrintTacticsAux(TAS, N,0) .
+    eq prettyPrintTacticsAux(nil, N,N') = nil .
+    ceq prettyPrintTacticsAux(TA @ TAS, N,N') =
+	( '`[ (if (N == N') then ('\g) else nil fi ) qid(string(N',10)) '\o '`] '\t TA '\n) prettyPrintTacticsAux(TAS, N, s N') if TA =/= nil .
+
+
+    eq prettyPrintProofTree([ Q ; G ; B' ; PS' ], DB, B) =
+	'============================ '\s 'GOAL Q '============================ '\n (prettyPrintGoal(G, DB, B)  '\b  (if B' then 'proved else 'unproved fi ) '\o '\n ) .
+
+
+    --- commented. Child trees will not show
+    ---	  (if PS' =/= empty then '\n '\b '`[ '\o  prettyPrintProofTreeAux(PS', DB, B) '\b '`] '\o '\n  else nil fi )
+
+    eq prettyPrintProofTreeAux(empty, DB, B) = nil .
+    eq prettyPrintProofTreeAux(PT PS, DB, B) = 	prettyPrintProofTree(PT, DB, B) prettyPrintProofTreeAux(PS, DB, B) .
+
+    ceq prettyPrintGoal( < FM, ScS, L > , DB, B) =
+	('< (if B then eMetaPrettyPrint(FM', FM)
+	    else ('Module '\g getName(FM) '\o 'is 'concealed '\n '... '\n
+		eMetaPrettyPrint(FM', getOps(FM) - getOps(getFlatModule(getName(FM),DB))) '... '\n
+		eMetaPrettyPrint(FM', getAddedEqs(getEqs(FM)))
+		eMetaPrettyPrint(FM', getAddedRls(getRls(FM)))
+		eMetaPrettyPrint(FM', getAddedMbs(getMbs(FM)))
+		eMetaPrettyPrint(FM', getEqLemmas(getEqs(FM)))
+		eMetaPrettyPrint(FM', getRlLemmas(getRls(FM)))
+		'\b 'end '\o '\n) fi ) '`, eMetaPrettyPrint(FM', ScS) '>  '\n )
+      if DB' := evalModule(FM, none, DB) /\
+	  FM' := getFlatModule(getName(FM),DB')  .
+
+
+    eq prettyPrintGoal( G, DB, B) = ('Bad 'GOAL) [owise]  .
+
+
+    *** fix me (done on 2013.06.18)
+    op eMetaPrettyPrint : Module SentenceSet -> QidList .
+    var AtS : AttrSet .
+    var Cond : Condition .
+    var M : Module .
+
+    eq eMetaPrettyPrint(M, (none).SentenceSet) = nil .
+
+
+    eq eMetaPrettyPrint(M, (eq T = T'  [AtS]) ScS) =
+	('\n '\s '\s '\g 'eq '\s '\o eMetaPrettyPrint(M, T)
+	  '\n '\s '\s '\s '\s '\g '= '\s '\o eMetaPrettyPrint(M, T')
+          '\s '\g '`[ '\o (if AtS == none then 'none else eMetaPrettyPrint(M, AtS) fi) '\g '`] '\o
+	  eMetaPrettyPrint(M, ScS)) .
+    eq eMetaPrettyPrint(M, (ceq T = T' if Cond  [AtS]) ScS) =
+	  ('\n '\s '\s '\g 'ceq '\s '\o eMetaPrettyPrint(M, T)
+	  '\n '\s '\s '\s '\s '\g '= '\s '\o eMetaPrettyPrint(M, T')
+	  '\n '\s '\s '\s '\s '\g 'if '\o '\s eMetaPrettyPrint(M, Cond)
+            '\s '\g '`[ '\o (if AtS == none then 'none else eMetaPrettyPrint(M, AtS) fi) '\g '`] '\o
+	    eMetaPrettyPrint(M, ScS)) .
+
+    eq eMetaPrettyPrint(M, (rl T => T'  [AtS]) ScS) =
+	('\n '\s '\s '\g 'rl '\s '\o eMetaPrettyPrint(M, T)
+	  '\n '\s '\s '\s '\s '\g '=> '\s '\o eMetaPrettyPrint(M, T')
+          '\s '\g '`[ '\o (if AtS == none then 'none else eMetaPrettyPrint(M, AtS) fi) '\g '`] '\o
+	  eMetaPrettyPrint(M, ScS)) .
+    eq eMetaPrettyPrint(M, (crl T => T' if Cond  [AtS]) ScS) =
+	  ('\n '\s '\s '\g 'crl '\s '\o eMetaPrettyPrint(M, T)
+	  '\n '\s '\s '\s '\s '\g '=> '\s '\o eMetaPrettyPrint(M, T')
+	  '\n '\s '\s '\s '\s '\g 'if '\o '\s eMetaPrettyPrint(M, Cond)
+            '\s '\g '`[ '\o (if AtS == none then 'none else eMetaPrettyPrint(M, AtS) fi) '\g '`] '\o
+	    eMetaPrettyPrint(M, ScS)) .
+
+    var So : Sort .
+
+    eq eMetaPrettyPrint(M, (mb T : So  [AtS]) ScS) =
+	('\n '\s '\s '\g 'mb '\s '\o eMetaPrettyPrint(M, T)
+	  '\n '\s '\s '\s '\s '\g ': '\s '\o So
+          '\s '\g '`[ '\o (if AtS == none then 'none else eMetaPrettyPrint(M, AtS) fi) '\g '`] '\o
+	  eMetaPrettyPrint(M, ScS)) .
+    eq eMetaPrettyPrint(M, (cmb T : So if Cond  [AtS]) ScS) =
+	  ('\n '\s '\s '\g 'cmb '\s '\o eMetaPrettyPrint(M, T)
+	  '\n '\s '\s '\s '\s '\g ': '\s '\o  So
+	  '\n '\s '\s '\s '\s '\g 'if '\o '\s eMetaPrettyPrint(M, Cond)
+            '\s '\g '`[ '\o (if AtS == none then 'none else eMetaPrettyPrint(M, AtS) fi) '\g '`] '\o
+	    eMetaPrettyPrint(M, ScS)) .
+
+
+    *** to fix a bug in FullMaude for downAttr
+    vars T T' : Term .
+    eq downAttr('metadata[T]) = metadata(downString(getName(T))) .
+
+    var TR : Trace .
+    var N : Nat .
+    var TRS : TraceStep .
+
+    eq prettyPrintTrace(TR, DB, B) = prettyPrintTraceAux(TR, DB, B, 1) .
+
+    op prettyPrintTraceAux : Trace Database Bool Nat -> QidList .
+    op prettyPrintTraceStep : TraceStep Term Database Bool Nat -> QidList .
+
+    eq prettyPrintTraceAux((TRS {T,Ty,R} TR), DB,B ,N) =
+	prettyPrintTraceStep(TRS,T,DB,B,N)
+	prettyPrintTraceAux(({T,Ty,R} TR),DB,B, N + 1) .
+
+    eq prettyPrintTraceAux(TRS, DB,B , N) =
+	(prettyPrintTraceStep(TRS, 'emptyGoalSet.GoalSet, DB, B, N)
+	  '\n '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '\r 'DEPTH qid(string(N + 1,10)) '\o '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '\n '\n 'emptyGoalSet '\n)
+ .
+    var R : Rule .
+    var Ty : Type .
+    var GS : GoalSet .
+
+    ceq prettyPrintTraceStep( { T, Ty, R }, T', DB, B, N) =
+	('\n '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '\r 'DEPTH qid(string(N,10)) '\o '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '\n '\n
+	  prettyPrintProofTreeAux(PS, DB, B)
+	  '\n '~~~~~~~~~~~~~~~~~~ 'Rule 'applied 'to '\r 'Goal goalIndex(PS, downTerm(T', emptyGoalSet)) '\o '~~~~~~~~~~~~~~~~~~~ '\n
+	  eMetaPrettyPrint(upModule('TOOL, false), R) '\n )
+      if GS := downTerm(T, emptyGoalSet) /\
+	  PS := initPTreeSet(GS, qid(string(N,10)),1) .
+
+    eq prettyPrintTraceStep( { T, Ty, R }, T', DB, B, N) = ('BAD 'GOAL) [owise] .
+endfm
+
+
+*** in procCommands.maude
+
+fmod PROVE-COMMANDS-PROC is
+    protecting UNIT-DECL-PARSING .
+    protecting PROOF-TREE .
+    protecting DATABASE .
+    protecting MOVE-DOWN .
+    protecting PRETTY-PRINT .
+    protecting META-LEVEL .
+
+    sort ProveResult .
+    sort ApplyResult .
+
+    op <<_;_;_>> : Database PTreeSet QidList -> ProveResult .
+    op <<_;_>> : PTreeSet Rule -> ApplyResult .
+    op applyError : QidList ~> PTreeSet .
+
+    op procGoals : Database ModuleExpression Term -> ProveResult .
+    op procGoalsAux : Database ModuleExpression Term -> ProveResult .
+
+    *** fix me (done on June. 14th)
+    op procGoalCmd : Database ModuleExpression SentenceSet -> ProveResult .
+    op procGoalCmdAux : Database ModuleExpression SentenceSet -> ProveResult .
+
+    ***(
+    op procGoalCmd : Database ModuleExpression EquationSet -> ProveResult .
+    op procGoalCmd : Database ModuleExpression RuleSet -> ProveResult .
+    op procGoalCmd : Database ModuleExpression MembAxSet -> ProveResult .
+
+    op procGoalCmdAux : Database ModuleExpression EquationSet -> ProveResult .
+    op procGoalCmdAux : Database ModuleExpression RuleSet -> ProveResult .
+    op procGoalCmdAux : Database ModuleExpression MembAxSet -> ProveResult .
+    )
+
+    *** fix me  (done on June. 14th)
+    op setGoal : Database Module SentenceSet -> ProveResult .
+
+    ***op setGoal : Database Module EquationSet -> ProveResult .
+    ***op setGoal : Database Module RuleSet -> ProveResult .
+    ***op setGoal : Database Module MembAxSet -> ProveResult .
+
+    op appendType : QidList TermList -> QidList .
+    op getVarbyName : Qid TermList -> Qid .
+
+    op procIndVars : Database PTree Term -> ProveResult .
+    op checkVars : QidList TermList -> Bool .
+    op checkVarsAux : Qid TermList -> Bool .
+    op getBadVars : QidList TermList -> QidList .
+    op rmInduVars : AttrSet -> AttrSet .
+
+
+    vars T T' T'' T3 T4 T5 : Term .
+    vars ME ME' : ModuleExpression .
+    var E? : [Equation] .
+    vars B B' : Bool .
+    vars RP1 RP2 RP3 : [ResultPair] .
+    vars DB DB' : Database .
+    vars QLHS QRHS QCON QIND QSTR : QidList .
+    vars FM FM' : Module .
+    vars Q GID : Qid .
+    var QIL : QidList .
+    var E : Equation .
+    vars L L' : Label .
+    var DT : Default{Term} .
+    var VDS : OpDeclSet .
+    var U : Module .
+    var E' : Equation .
+    vars PT PT' : PTree .
+    var AtS : AttrSet .
+    var EqC : EqCondition .
+    vars T1 T2 : Term .
+    var TL : TermList .
+    var At : Attr .
+    var Str : String .
+    vars G' : Goal .
+    var GS : GoalSet .
+    vars R : Rule .
+    var Mx  : MembAx .
+    var Mx' : MembAx .
+    var R' : Rule .
+
+    var ASet : AttrSet .
+    var EC : EqCondition .
+    var St : Sort .
+    var RT : [ResultTriple] .
+    var G : Goal .
+    var PS : PTreeSet .
+    var QIL' : QidList .
+    var Co : Condition .
+
+
+    var RP : [ResultPair] .
+    var M : Module .
+    vars EqS EqS' : EquationSet .
+    vars RlS RlS' : RuleSet .
+    vars MbS MbS' : MembAxSet .
+
+    ---
+    op metaRed : Module Term -> Term .
+    ceq metaRed(M,T) = if RP :: ResultPair
+	then getTerm(RP)
+	else T fi
+      if RP := metaReduce(M,T) .
+
+    --- equation
+    op metaRedEq : Module EquationSet -> EquationSet .
+    eq metaRedEq(M,none) = none .
+    eq metaRedEq(M,eq T = T' [ASet]. EqS) =
+	(eq metaRed(M,T) = metaRed(M,T') [ASet] .) metaRedEq(M,EqS) .
+    eq metaRedEq(M,ceq T = T' if EC [ASet]. EqS) =
+	  (ceq metaRed(M,T) = metaRed(M,T') if metaRed(M,EC) [ASet].) metaRedEq(M,EqS) .
+
+	--- membership
+    op metaRedMb : Module MembAxSet -> MembAxSet .
+    eq metaRedMb(M,none) = none .
+    eq metaRedMb(M,mb T : St [ASet]. MbS) =
+	(mb metaRed(M,T) : St [ASet] .) metaRedMb(M,MbS) .
+    eq metaRedMb(M,cmb T : St if EC [ASet]. MbS ) =
+	  (cmb metaRed(M,T) : St if metaRed(M,EC) [ASet].) metaRedMb(M,MbS) .
+
+	    --- rule
+    op metaRedRl : Module RuleSet -> RuleSet .
+    eq metaRedRl(M,none) = none .
+    eq metaRedRl(M,rl T => T' [ASet]. RlS) =
+	(rl metaRed(M,T) => metaRed(M,T')[ASet].) metaRedRl(M,RlS) .
+    eq metaRedRl(M,crl T => T' if Co [ASet]. RlS) =
+	  (crl metaRed(M,T) => metaRed(M,T') if metaRed(M,Co)[ASet].) metaRedRl(M,RlS) .
+
+	    --- condition
+    op metaRed : Module Condition -> Condition .
+    eq metaRed(M,(nil).EqCondition) = (nil).EqCondition .
+    eq metaRed(M,T = T' /\ Co) =
+	(metaRed(M,T) = metaRed(M,T') /\ metaRed(M,Co)).
+    eq metaRed(M,T := T' /\ Co) =
+	(metaRed(M,T) := metaRed(M,T') /\ metaRed(M,Co)).
+    eq metaRed(M,T : St /\ Co) =
+	(metaRed(M,T) : St /\ metaRed(M,Co)).
+    eq metaRed(M,T => T' /\ Co) =
+	(metaRed(M,T) => metaRed(M,T') /\ metaRed(M,Co)).
+
+	*** Function: procSetTactic
+	*** Description: to construct a new module to support customized proof strategy
+
+    op procSetTactic : Database QidList ~> Database .
+    op dbErr : QidList ~> Database .
+
+    ceq procSetTactic(DB, QIL) =
+	evalModule(M, none, insTermModule(getName(M),M, DB))
+      if M := buildModule(QIL) .
+
+    ceq procSetTactic(DB, QIL) =
+	dbErr(QL)
+      if mdErr(QL) := buildModule(QIL) .
+
+    op buildModule : QidList -> Module .
+    op cusStraModule : -> Module .
+    eq cusStraModule =
+	(
+          mod 'CUS-STRATEGY is
+              including 'TOOL .
+              sorts none .
+              none none
+              none none none
+          endm
+	  ) .
+
+    op mdErr : QidList ~> Module .
+
+    op getInvalidTac : QidList -> QidList .
+    ceq getInvalidTac(Q QIL) =
+	getInvalidTac(QIL)
+      if (Q == 'SI or Q == 'CA or Q == 'TC or Q == 'IP or Q == 'TL or Q == 'CT) .
+    eq getInvalidTac(nil) = nil .
+    eq getInvalidTac(Q QIL) = Q getInvalidTac(QIL) [owise] .
+
+
+    ceq buildModule(QIL) =
+	if QL == nil then  addRls(genRls(QIL),cusStraModule)
+	else mdErr('\r 'ERROR: '\o 'Invalid 'proof 'rules: '\g QL '\o '\n) fi
+    if QL := getInvalidTac(QIL) .
+
+    op genRls : QidList -> RuleSet .
+    op getFun : Qid -> Qid .
+    eq getFun('SI) = 'ind .
+    eq getFun('CA) = 'ca .
+    eq getFun('TC) = 'tc .
+    eq getFun('IP) = 'imp .
+
+    vars Q' Q'' Q3 Q4 : Qid .
+
+    ceq genRls(Q Q' Q4 QIL) =
+	(rl '<_`,_`,_>['M:Module,'E:Equation,Q''] =>
+          getFun(Q)['<_`,_`,_>['M:Module,'E:Equation,Q3]] [label(string2qidList(Str + "e"))] .
+    rl '<_`,_`,_>['M:Module,'R:Rule,Q''] =>
+        getFun(Q)['<_`,_`,_>['M:Module,'R:Rule,Q3]] [label(string2qidList(Str + "r"))] .
+    rl '<_`,_`,_>['M:Module,'Mx:MembAx,Q''] =>
+        getFun(Q)['<_`,_`,_>['M:Module,'Mx:MembAx,Q3]] [label(string2qidList(Str + "m"))] .)      genRls(Q' Q4 QIL)
+    if Q =/= 'TL /\ Q =/= 'CT /\
+	Q'' := string2qidList("C" + string(Q) + ".Label") /\
+	Q3 := (if Q' =/= 'TL and Q' =/= 'CT then string2qidList("C" + string(Q') + ".Label") else string2qidList(string(Q') + ".Label") fi ) /\
+	Str :=  "C" + string(Q) .
+
+    ceq genRls(Q Q') =
+	(rl '<_`,_`,_>['M:Module,'E:Equation,Q''] =>
+          getFun(Q)['<_`,_`,_>['M:Module,'E:Equation,Q3]] [label(string2qidList(Str + "e"))] .
+    rl '<_`,_`,_>['M:Module,'R:Rule,Q''] =>
+        getFun(Q)['<_`,_`,_>['M:Module,'R:Rule,Q3]] [label(string2qidList(Str + "r"))] .
+    rl '<_`,_`,_>['M:Module,'Mx:MembAx,Q''] =>
+        getFun(Q)['<_`,_`,_>['M:Module,'Mx:MembAx,Q3]] [label(string2qidList(Str + "m"))] .)
+    if Q =/= 'TL /\ Q =/= 'CT /\
+	Q'' := string2qidList("C" + string(Q) + ".Label") /\
+	Q3 :=  string2qidList(string(Q') + ".Label") /\
+	Str := "C" + string(Q) .
+
+
+    eq genRls(nil) = none .
+    eq genRls(Q') = none .
+
+    eq genRls('TL QIL) = genRls(QIL) .
+    eq genRls('CT QIL) = genRls(QIL) .
+
+    *** Function: procInitLemma
+    *** Description: to initialize a lemma
+    op procInitLemma : Database PTree Qid QidList -> ProveResult .
+
+
+    *** fix me  (done on June. 16th)
+    op getVar : Equation -> TermList .
+    op getVar : MembAx -> TermList .
+    op getVar  : Rule -> TermList .
+    *** end of fix me
+
+
+    var Cond : Condition .
+    var SBS : Substitution .
+
+    eq getVar(eq T = T' [AtS] .) = getVar(eq T = T' [AtS]) .
+    eq getVar(ceq T = T' if Cond [AtS] .) = getVar(ceq T = T' if Cond [AtS]) .
+    eq getVar(rl T => T' [AtS] .) = getVar(rl T => T' [AtS]) .
+    eq getVar(crl T => T' if Cond [AtS] .) = getVar(crl T => T' if Cond [AtS]) .
+    eq getVar(mb T : T' [AtS] .) = getVar(mb T : T' [AtS]) .
+    eq getVar(cmb T : T' if Cond [AtS] .) = getVar(cmb T : T' if Cond [AtS]) .
+
+
+    var EQ : [Equation] .
+    vars QL QL' QL'' : QidList .
+    var Subst : [Substitution] .
+    var Rl : [Rule] .
+    var ScS : SentenceSet .
+
+    ceq procInitLemma(DB, [ GID ; < FM, ScS, L > ; B ; PS ], Q, QL) =
+      	<< DB ; [ GID ; < FM, ScS, L > ; B ; PS ] ; QL'' >>
+	if eqErr(QL') := getEqbyLabel(FM, Q) /\
+           rlErr(QL'') := getRlbyLabel(FM,Q)  .
+
+    ceq procInitLemma(DB, [ GID ; < FM, ScS, L > ; B ; PS ], Q, QL) =
+      	<< DB ; [ GID ; < FM, ScS, L > ; B ; PS ] ; QL'' >>
+	if eqErr(QL') := getEqbyLabel(FM, Q) /\
+           Rl := getRlbyLabel(FM,Q) /\
+           Rl :: Rule /\
+	   subErr(QL'') := constructSubst(FM, getVar(Rl), QL) .
+
+    ceq procInitLemma(DB, [ GID ; < FM, ScS, L > ; B ; PS ], Q, QL) =
+      	<< DB ; [ GID ; < setRl(FM,Q,(Rl << Subst)), ScS, L > ; B ; PS ] ; 'OK >>
+	if eqErr(QL') := getEqbyLabel(FM, Q) /\
+           Rl := getRlbyLabel(FM,Q) /\
+           Rl :: Rule /\
+	   Subst := constructSubst(FM, getVar(Rl), QL) /\
+	   Subst :: Substitution .
+
+    ceq procInitLemma(DB, [ GID ; < FM, ScS, L > ; B ; PS ], Q, QL) =
+      	<< DB ; [ GID ; < setEq(FM,Q,(EQ << Subst)), ScS, L > ; B ; PS ] ; 'OK >>
+      if EQ := getEqbyLabel(FM, Q) /\
+    EQ :: Equation /\
+	Subst := constructSubst(FM, getVar(EQ), QL) /\
+	Subst :: Substitution .
+
+
+    ceq procInitLemma(DB, [ GID ; < FM, ScS, L > ; B ; PS ], Q, QL) =
+	<< DB ; [ GID ; < FM, ScS, L > ; B ; PS ] ; QL' >>
+      if EQ := getEqbyLabel(FM, Q) /\
+    EQ :: Equation /\
+	subErr(QL') := constructSubst(FM, getVar(EQ), QL) .
+
+    eq procInitLemma(DB, [ GID ; < FM, ScS, L > ; B ; PS ], Q, QL) =
+	<< DB ; [ GID ; < FM, ScS, L > ; B ; PS ] ; ('Please 'check 'the 'existence 'of Q '!) >>  [owise] .
+
+
+    op addSentAttr : SentenceSet AttrSet -> SentenceSet .
+
+    var AtS' : AttrSet .
+    var So : Sort .
+
+    eq addSentAttr(none, AtS') = none .
+    eq addSentAttr((eq T1 = T2 [AtS]) ScS,AtS') = (eq T1 = T2 [rmInduVars(AtS)AtS']) addSentAttr(ScS,AtS') .
+    eq addSentAttr((ceq T1 = T2 if EqC [AtS]) ScS,AtS') = (ceq T1 = T2 if EqC [rmInduVars(AtS)AtS']) addSentAttr(ScS,AtS') .
+    eq addSentAttr((rl T1 => T2 [AtS]) ScS,AtS') = (rl T1 => T2 [rmInduVars(AtS)AtS']) addSentAttr(ScS,AtS') .
+    eq addSentAttr((crl T1 => T2 if Co [AtS]) ScS,AtS') = (crl T1 => T2 if Co [rmInduVars(AtS)AtS']) addSentAttr(ScS,AtS') .
+
+    eq addSentAttr((mb T1 : So [AtS]) ScS,AtS') = (mb T1 : So [rmInduVars(AtS)AtS']) addSentAttr(ScS,AtS') .
+    eq addSentAttr((cmb T1 : So if EqC [AtS]) ScS,AtS') = (cmb T1 : So if EqC [rmInduVars(AtS)AtS']) addSentAttr(ScS,AtS') .
+
+
+    eq procIndVars(DB, [ GID ; < FM , ScS, L > ; B ; PS ] , T) =
+	<< DB ; [ GID ; < FM, addSentAttr(ScS,  buildMetadata(downQidList(T))), L > ; B ; PS ] ; 'OK >> .
+
+
+
+    eq rmInduVars(none) = none .
+    ceq rmInduVars(At AtS) = rmInduVars(AtS)
+      if  metadata(Str) := At /\ "induction-on" = substr(Str, 0,12) .
+    eq rmInduVars(At AtS) = (At rmInduVars(AtS)) [owise] .
+
+    eq checkVars(nil, TL) = true .
+    eq checkVars((Q QIL), TL) = if checkVarsAux(Q,TL) then checkVars(QIL, TL) else false fi .
+    eq checkVarsAux(Q, empty) = false .
+    eq checkVarsAux(Q, (T,TL)) = if Q == getName(T) or Q == T then true else checkVarsAux(Q, TL) fi .
+
+    eq appendType(Q QIL, TL) =
+      if Q :: Variable then (Q appendType(QIL, TL)) else getVarbyName(Q, TL) appendType(QIL, TL) fi .
+    eq appendType(nil, TL) = nil .
+    eq getVarbyName(Q, (T, TL)) = if Q == getName(T) then T else getVarbyName(Q, TL) fi .
+    eq getVarbyName(Q, empty) = 'nil .
+
+    eq getBadVars(nil, TL) = nil .
+    eq getBadVars((Q QIL), TL) = if checkVars(Q, TL) then getBadVars(QIL, TL) else (Q getBadVars(QIL, TL)) fi .
+
+
+    ceq procGoals(DB, ME, T) =
+      if unitInDb(ME', DB') then
+	  procGoalsAux(DB', ME', T)
+	else
+	  << DB' ; null ; ('\r 'Error: '\o 'The 'module eMetaPrettyPrint(ME) 'is 'not 'in 'the 'database '. '\n) >>
+	fi
+      if < DB' ; ME' > := evalModExp(ME, DB) .
+
+      *** fix me (done)
+    op parseSentence : Term -> SentenceSet .
+    op sentErr : QidList ~> SentenceSet .
+    var S : Sentence .
+
+    eq sentErr(QIL) sentErr(QIL') = sentErr(QIL QIL') .
+    eq sentErr(QIL) S ScS = sentErr(QIL) .
+
+   eq parseSentence('eq_=_;[T, T']) = (eq T = T' [none]) .
+    eq parseSentence('ceq_=_if_;[T, T', T'']) = (ceq T = T' if T'' = 'true.Bool [none]) .
+   eq parseSentence('rl_=>_;[T, T']) = (rl T => T' [none]) .
+    eq parseSentence('crl_=>_if_;[T, T', T'']) = (crl T => T' if T'' = 'true.Bool [none]) .
+
+    eq parseSentence('mb_:_;[T, T']) =
+	(mb T : getSort(breakMb(T',none)) [getAttrSet(breakMb(T',none))] ) .
+    eq parseSentence('cmb_:_if_;[T, T', T'']) =
+	  (cmb T : getSort(breakMb(T',none)) if term(pullStmtAttrOut(T'',none)) = 'true.Bool [attrSet(pullStmtAttrOut(T'',none))]) .
+
+    ceq parseSentence('__[T,T']) = S ScS
+      if S := parseSentence(T) /\ ScS := parseSentence(T') .
+
+    eq parseSentence('__[T,T']) = sentErr('Bad 'goal)  [owise] .
+
+
+
+***(
+    op parseEq : Term ~> EquationSet .
+    op parseRl : Term ~> RuleSet .
+    op parseMb : Term ~> MembAxSet .
+
+    eq parseEq('eq_=_.[T, T']) = (eq T = T' [none] .) .
+    eq parseEq('ceq_=_if_.[T, T', T'']) = (ceq T = T' if T'' = 'true.Bool [none] .) .
+    eq parseEq('cq_=_if_.[T, T', T'']) = (ceq T = T' if T'' = 'true.Bool [none] .) .
+    ceq parseEq('__[T,T']) = E EqS
+      if E := parseEq(T) /\ EqS := parseEq(T') .
+    eq parseEq('__[T,T']) = equationError('Bad 'goal)  [owise] .
+
+    eq parseRl('rl_=>_.[T, T']) = (rl T => T' [none] .) .
+    eq parseRl('crl_=>_if_.[T, T', T'']) = (crl T => T' if T'' = 'true.Bool [none] .) .
+    ceq parseRl('__[T,T']) = R RlS
+      if R := parseRl(T) /\ RlS := parseRl(T') .
+    eq parseRl('__[T,T']) = ruleError('Bad 'goal)  [owise] .
+
+    eq parseMb('mb_:_.['bubble['__[''`[.Qid, Q, ''`].Qid]], T]) =
+	(mb getTerm(breakMb(T,none)) : getSort(breakMb(T,none)) [label(downQid(Q)) getAttrSet(breakMb(T,none))] .) .
+    eq parseMb('mb_:_.[T, T']) = (mb T : getSort(breakMb(T', none)) [getAttrSet(breakMb(T',none))] .) [owise] .
+    eq parseMb('cmb_:_if_.[T, T', T'']) = (cmb T : getSort(breakMb(T', none)) if term(pullStmtAttrOut(T'',none)) = 'true.Bool
+	      [attrSet(pullStmtAttrOut(T'',none))] .) .
+    eq parseMb('cmb`[_`]:_:_if_.['token[T3], T, T', T'']) =
+	  (cmb T : getSort(breakMb(T',none)) if term(pullStmtAttrOut(T'',none)) = 'true.Bool
+	      [attrSet(pullStmtAttrOut(T'',none)) label(downQid(T3))] .) .
+    ceq parseMb('__[T,T']) = Mx MbS if Mx := parseMb(T) /\ MbS := parseMb(T') .
+    eq parseMb('__[T,T']) = membAxError('Bad 'goal) [owise] .
+    *** obsolete 2013.06.11
+  )
+
+    ceq procGoalsAux(DB, ME, T) =
+    	<< DB ; null ; ('bad 'goal 'specified) >>
+    if sentErr(QIL) := parseSentence(T) .
+
+    eq procGoalsAux(DB, ME, T) =
+	procGoalCmd(DB, ME, parseSentence(T)) [owise] .
+
+
+    ceq procGoalCmd(DB, ME, ScS) =
+      if unitInDb(ME', DB') then
+	  procGoalCmdAux(DB', ME', ScS)
+	else
+	  << DB' ; null ; ('\r 'Error: '\o 'The 'module eMetaPrettyPrint(ME) 'is 'not 'in 'the 'database '. '\n) >>
+	fi
+      if < DB' ; ME' > := evalModExp(ME, DB) .
+
+
+
+    op copy : SentenceSet ~> SentenceSet .
+    eq copy(ScS':[SentenceSet]) = ScS':[SentenceSet] .
+
+    ceq procGoalCmdAux(DB, ME, ScS) =
+	<< DB ; null ; (QIL) >>
+      if M := getFlatModule(ME, DB) /\
+	  sentErr(QIL) := solveBubbles(ScS, M, addInfoConds(M), false, getVars(ME, DB), DB) .
+
+    ceq procGoalCmdAux(DB, ME, ScS) =
+	setGoal(DB, M, ScS'':SentenceSet)
+      if M := getFlatModule(ME, DB) /\
+	 ScS'':SentenceSet := solveBubbles(ScS, M, addInfoConds(M), false, getVars(ME, DB), DB).
+
+
+    op solveBubbles : SentenceSet Module Module Bool OpDeclSet Database ~> SentenceSet .
+    var ScS' : [SentenceSet] .
+    vars M' : Module .
+
+    *** equations
+    ceq solveBubbles((eq T = T' [none]), M, M', B, VDS, DB) =
+	  sentErr(QIL)
+	if equationError(QIL) := solveBubbles((eq T = T' [none] .), M, M', B, VDS, DB) .
+    ceq solveBubbles((eq T = T' [none]), M, M', B, VDS, DB) =
+	(eq T1 = T2 [AtS])
+	if (eq T1 = T2 [AtS] .) := solveBubbles((eq T = T' [none] .), M, M', B, VDS, DB) .
+
+    ceq solveBubbles((ceq T = T' if T'' = 'true.Bool [none]), M, M', B, VDS, DB) =
+	  sentErr(QIL)
+	if equationError(QIL) := solveBubbles((ceq T = T' if T'' = 'true.Bool [none] .), M, M', B, VDS, DB) .
+    ceq solveBubbles((ceq T = T' if T'' = 'true.Bool [none]), M, M', B, VDS, DB) =
+	  (ceq T1 = T2 if Cond [AtS])
+	if  (ceq T1 = T2 if Cond [AtS] .) := solveBubbles((ceq T = T' if T'' = 'true.Bool [none] .), M, M', B, VDS, DB) .
+
+    ceq solveBubbles((rl T => T'  [none]), M, M', B, VDS, DB) =
+	sentErr(QIL)
+      if ruleError(QIL) := solveBubbles((rl T => T'  [none] .), M, M', B, VDS, DB) .
+    ceq solveBubbles((rl T => T' [none]), M, M', B, VDS, DB) =
+	(rl T1 => T2  [AtS])
+      if  (rl T1 => T2 [AtS] .) := solveBubbles((rl T => T'  [none] .), M, M', B, VDS, DB) .
+
+
+    ceq solveBubbles((crl T => T' if T'' = 'true.Bool [none]), M, M', B, VDS, DB) =
+	  sentErr(QIL)
+	if ruleError(QIL) := solveBubbles((crl T => T' if T'' = 'true.Bool [none] .), M, M', B, VDS, DB) .
+
+    ceq solveBubbles((crl T => T' if T'' = 'true.Bool [none]), M, M', B, VDS, DB) =
+	  (crl T1 => T2 if Cond [AtS])
+	if  (crl T1 => T2 if Cond [AtS] .) := solveBubbles((crl T => T' if T'' = 'true.Bool [none] .), M, M', B, VDS, DB) .
+
+
+   vars So' : Sort .
+
+    ceq solveBubbles((mb T : So [none]), M, M', B, VDS, DB) =
+	  sentErr(QIL)
+	if membAxError(QIL) := solveBubbles((mb T : So [none] .), M, M', B, VDS, DB) .
+    ceq solveBubbles((mb T : So [none]), M, M', B, VDS, DB) =
+	(mb T1 : So' [AtS])
+	if (mb T1 : So' [AtS] .) := solveBubbles((mb T : So [none] .), M, M', B, VDS, DB) .
+
+    ceq solveBubbles((cmb T : So if T'' = 'true.Bool [none]), M, M', B, VDS, DB) =
+	  sentErr(QIL)
+	if membAxError(QIL) := solveBubbles((cmb T : So if T'' = 'true.Bool [none] .), M, M', B, VDS, DB) .
+    ceq solveBubbles((cmb T : So if T'' = 'true.Bool [none]), M, M', B, VDS, DB) =
+	  (cmb T1 : So' if Cond [AtS])
+	if  (cmb T1 : So' if Cond [AtS] .) := solveBubbles((cmb T : So if T'' = 'true.Bool [none] .), M, M', B, VDS, DB) .
+
+
+    vars S' : Sentence .
+
+    ceq solveBubbles(S ScS, M, M', B, VDS, DB) =
+	solveBubbles(S, M, M', B, VDS, DB) solveBubbles(ScS, M, M', B, VDS, DB)
+      if ScS =/= none .
+
+    eq solveBubbles((none).SentenceSet, M, M', B, VDS, DB) = none .
+
+    *** to do tomorow.
+
+    ***(
+    ceq procGoalCmd(DB, ME, EqS) =
+      if unitInDb(ME', DB') then
+	  procGoalCmdAux(DB', ME', EqS)
+	else
+	  << DB' ; null ; ('\r 'Error: '\o 'The 'module eMetaPrettyPrint(ME) 'is 'not 'in 'the 'database '. '\n) >>
+	fi
+      if < DB' ; ME' > := evalModExp(ME, DB) .
+
+    ceq procGoalCmd(DB, ME, RlS) =
+      if unitInDb(ME', DB') then
+	  procGoalCmdAux(DB', ME', RlS)
+	else
+	  << DB' ; null ; ('\r 'Error: '\o 'The 'module eMetaPrettyPrint(ME) 'is 'not 'in 'the 'database '. '\n) >>
+	fi
+      if < DB' ; ME' > := evalModExp(ME, DB) .
+
+
+    ceq procGoalCmd(DB, ME, MbS) =
+      if unitInDb(ME', DB') then
+	  procGoalCmdAux(DB', ME', MbS)
+	else
+	  << DB' ; null ; ('\r 'Error: '\o 'The 'module eMetaPrettyPrint(ME) 'is 'not 'in 'the 'database '. '\n) >>
+	fi
+      if < DB' ; ME' > := evalModExp(ME, DB) .
+
+    ceq procGoalCmdAux(DB, ME, EqS) =
+	setGoal(DB, M, metaRedEq(M,EqS'))
+      if M := getFlatModule(ME, DB) /\
+	  EqS' := solveBubbles(EqS, M, addInfoConds(M), false, getVars(ME, DB), DB) .
+
+    ceq procGoalCmdAux(DB, ME, EqS) =
+	<< DB ; null ; (QIL) >>
+      if M := getFlatModule(ME, DB) /\
+	  equationError(QIL) EqS' := solveBubbles(EqS, M, addInfoConds(M), false, getVars(ME, DB), DB) .
+
+    ceq procGoalCmdAux(DB, ME, RlS) =
+	setGoal(DB, M, metaRedRl(M,RlS'))
+      if M := getFlatModule(ME, DB) /\
+	  RlS' := solveBubbles(RlS, M, addInfoConds(M), true, getVars(ME, DB), DB) .
+
+    ceq procGoalCmdAux(DB, ME, RlS) =
+	<< DB ; null ; (QIL) >>
+      if M := getFlatModule(ME, DB) /\
+	  ruleError(QIL) RlS' := solveBubbles(RlS, M, addInfoConds(M), true, getVars(ME, DB), DB) .
+
+    ceq procGoalCmdAux(DB, ME, MbS) =
+	setGoal(DB, M, metaRedMb(M,MbS'))
+      if M := getFlatModule(ME, DB) /\
+	  MbS' := solveBubbles(MbS, M, addInfoConds(M), false, getVars(ME, DB), DB) .
+
+    ceq procGoalCmdAux(DB, ME, MbS) =
+	<< DB ; null ; (QIL) >>
+      if M := getFlatModule(ME, DB) /\
+	  membAxError(QIL) MbS' := solveBubbles(MbS, M, addInfoConds(M), false, getVars(ME, DB), DB) .
+    )
+
+    eq setGoal(DB, U, ScS) =
+	<< DB ; [ '1-1 ; < U ,ScS, TL  > ; false ; empty ] ; ('OK) >> .
+
+    ***(
+    eq setGoal(DB, U, EqS) =
+	<< DB ; [ '1-1 ; < U ,EqS, TL  > ; false ; empty ] ; ('OK) >> .
+
+    eq setGoal(DB, U, RlS) =
+	<< DB ; [ '1-1 ; < U ,RlS, TL  > ; false ; empty ] ; ('OK) >> .
+
+    eq setGoal(DB, U, MbS) =
+	<< DB ; [ '1-1 ; < U ,MbS, TL  > ; false ; empty ] ; ('OK) >> .
+
+    *** obsolete
+    )
+
+   var P : PTree .
+
+
+    op buildMetadata : QidList -> AttrSet .
+    eq buildMetadata(nil) = none .
+    eq buildMetadata((Q QIL)) =
+      if Q =/= 'nil then
+	  metadata("induction-on-" + string(Q)) buildMetadata(QIL)
+	else buildMetadata(QIL) fi .
+
+
+    op ruleList : -> QidList .
+    eq ruleList = (
+	  'Name '\t '\t 'Meaning  '\n '\n
+	  '\r 'SI '\t '\o 'Simultaneous 'Induction  '\n
+	  '\r 'CA '\t '\o 'Case 'Analysis  '\n
+	  '\r 'TC '\t '\o 'Theorem 'of 'Constant '\n
+	  '\r 'IP '\t '\o 'Implication '\n
+	  '\r 'CS '\t '\o 'Case 'analysis 'on 'Sequences '\n) .
+
+    op isValidRule : QidList -> Bool .
+    eq isValidRule(nil) = true .
+    eq isValidRule(Q QIL) = (Q == 'SI or Q == 'RD or Q == 'CA or Q == 'TC or Q == 'IP or Q == 'CS) and isValidRule(QIL)  .
+
+    op applyRules : Tactic PTree ~> PTreeSet .
+
+    var TA : Tactic .
+
+
+
+    ceq applyRules(TA, [ GID ; G ; B ; PS ]) =
+      if copy(GS)  =/= G then
+	  initPTreeSet(GS, GID, 1)
+	else applyError('No 'new 'goal 'generated!)
+	fi
+      if T := buildCmd(TA, upTerm(metaNormGoal(G))) /\
+	  RP := metaRewrite(upModule('#TOOL#, false), T, unbounded) /\
+	  RP :: ResultPair /\
+	  GS := downTerm(getTerm(RP), emptyGoalSet).
+
+    op copy : Goal -> Goal .
+    eq copy(G) = G .
+
+    op metaNormGoal : Goal -> Goal .
+    op metaNormSen : Module SentenceSet -> SentenceSet .
+    op metaNormCond : Module Condition -> Condition .
+
+    eq metaNormGoal( < M, ScS, L > ) =
+	< M, metaNormSen(M, ScS), L > .
+    eq metaNormSen(M, none) = none .
+    eq metaNormSen(M, (ceq T = T' if Co [AtS]) ScS) =
+	  (ceq getTerm(metaNormalize(M, metaGRed(M,T))) = getTerm(metaNormalize(M, metaGRed(M,T'))) if metaNormCond(M, Co) [AtS])
+	    metaNormSen(M, ScS) .
+    eq metaNormSen(M, (eq T = T' [AtS]) ScS) =
+	  (eq getTerm(metaNormalize(M, metaGRed(M,T))) = getTerm(metaNormalize(M, metaGRed(M,T'))) [AtS])
+	    metaNormSen(M, ScS) .
+
+    eq metaNormSen(M, (crl T => T' if Co [AtS]) ScS) =
+	  (crl getTerm(metaNormalize(M, metaGRed(M,T))) => getTerm(metaNormalize(M, metaGRed(M,T'))) if metaNormCond(M, Co) [AtS])
+	    metaNormSen(M, ScS) .
+    eq metaNormSen(M, (rl T => T' [AtS]) ScS) =
+	  (rl getTerm(metaNormalize(M, metaGRed(M,T))) => getTerm(metaNormalize(M, metaGRed(M,T'))) [AtS])
+	    metaNormSen(M, ScS) .
+
+    eq metaNormSen(M, (mb T : So [AtS]) ScS) =
+	  (mb getTerm(metaNormalize(M, metaGRed(M,T))) : So [AtS])
+	    metaNormSen(M, ScS) .
+    eq metaNormSen(M, (cmb T : So if Co [AtS]) ScS) =
+	  (cmb getTerm(metaNormalize(M, metaGRed(M,T))) : So if metaNormCond(M, Co) [AtS])
+	    metaNormSen(M, ScS) .
+
+    eq metaNormCond(M, nil) = nil .
+    eq metaNormCond(M,T = T' /\ Co) =
+	(getTerm(metaNormalize(M, metaGRed(M,T))) = getTerm(metaNormalize(M, metaGRed(M,T'))) /\ metaNormCond(M,Co)).
+    eq metaNormCond(M,T := T' /\ Co) =
+	(getTerm(metaNormalize(M, metaGRed(M,T))) := getTerm(metaNormalize(M, metaGRed(M,T'))) /\ metaNormCond(M,Co)).
+    eq metaNormCond(M,T : St /\ Co) =
+	(getTerm(metaNormalize(M,metaGRed(M,T))) : St /\ metaNormCond(M,Co)).
+    eq metaNormCond(M,T => T' /\ Co) =
+	(getTerm(metaNormalize(M,metaGRed(M,T))) => getTerm(metaNormalize(M,metaGRed(M,T'))) /\ metaNormCond(M,Co)) .
+
+
+
+
+
+    eq applyRules(TA, [ GID ; G ; B ; PS ]) =
+	applyError('unkown 'reason! 'Maybe 'bad 'proof 'rule.)
+	[owise] .
+
+    op buildCmd : Tactic Term -> Term .
+    eq buildCmd(nil,T) = T .
+    eq buildCmd('SI TA, T) = buildCmd(TA, 'ind['red[T]]) .
+    eq buildCmd('TC TA, T) = buildCmd(TA, 'tc['red[T]]) .
+    eq buildCmd('CA TA, T) = buildCmd(TA, 'ca['red[T]]) .
+    eq buildCmd('IP TA, T) = buildCmd(TA, 'imp['red[T]]) .
+    eq buildCmd('CS TA, T) = buildCmd(TA, 'cs['red[T]]) .
+    eq buildCmd('RD TA, T) = buildCmd(TA, 'red[T]) .
+
+    op preGoal : String -> Qid .
+    var STR : String .
+    ceq preGoal(STR) =  qid(substr(STR,0,rfind(STR,"-",length(STR))))
+      if rfind(STR,"-",length(STR)) =/= notFound /\
+	 rfind(STR,"-",length(STR)) =/= 1 .
+    eq preGoal(STR) = qid(STR) [owise] .
+
+    op getLabel : Qid -> Qid .
+
+endfm
+
+
+
+mod THM-DATABASE-HANDLING is
+    including DATABASE-HANDLING .
+    including PROVE-COMMANDS-PROC .
+    including PRETTY-PRINT .
+    including NAT .
+    including THM-BANNER .
+    inc CAFE2MAUDE-DATABASE-HANDLING .
+    *** Adrian
+
+    sort CITPDatabaseClass .
+    subsort CITPDatabaseClass < CafeDatabaseClass .
+    op CITPDatabase : -> CITPDatabaseClass .
+    *** Adrian
+
+    sort Language .
+    ops maude cafeobj : -> Language [ctor] .
+    *** Adrian
+
+    op currentGoal`:_ : Qid -> Attribute .
+    op pTree`:_ : PTreeSet  -> Attribute .
+    op showMod`:_ : Bool -> Attribute .
+    op tactic`:_ : Nat -> Attribute .
+    op tacticRec`:_ : Tactics -> Attribute .
+    op language`:_ : Language -> Attribute [ctor] .
+    *** Adrian
+
+    vars T T' T'' T3 T4 T5 : Term .
+    vars PS PS' : PTreeSet .
+    vars P P' : PTree .
+    var GID : Qid .
+    var O : Oid .
+    vars DB DB' : Database .
+    var ME : ModuleExpression .
+    var X@Database : CITPDatabaseClass .
+    *** Adrian
+    var Atts : AttributeSet .
+    vars QIL QIL' : QidList .
+    vars B B' : Bool .
+    var TAS : Tactics .
+    var RP : [ResultPair] .
+
+    rl [set-ind-vars-noGoal] :
+	< O         : X@Database |
+				   input   : ('set`ind`on_.['bubble[T]]),
+				   output : nil ,
+				   currentGoal : 'nil,
+				   Atts > =>
+    	< O         : X@Database |
+				   input   : nilTermList,
+				   output : ('\r 'ERROR: '\o 'No 'goal 'is 'specified!) ,
+				   currentGoal : 'nil,
+				   Atts > .
+
+    crl [set-ind-vars] :
+	< O         : X@Database | db : DB,
+				   input   : ('set`ind`on_.['bubble[T]]),
+				   output : nil ,
+				   default : ME,
+				   pTree : P,
+				   currentGoal : GID,
+				   showMod : B,
+				   Atts > =>
+    	< O         : X@Database | db : DB',
+				   input   : nilTermList,
+				   output : (if QIL == 'OK then
+				       ('\g 'INFO: '\o 'Induction 'will 'be 'conducted 'on downQidList(T))
+				     else QIL fi ) ,
+				   default : ME,
+				   pTree : (if QIL == 'OK then replacePTree(P,GID,P') else P fi ),
+				   currentGoal : GID,
+				   showMod : B,
+				   Atts >
+      if GID =/= 'nil /\
+	  << DB' ; P' ; QIL >> := procIndVars(DB,getPTree(P,GID),T) .
+
+
+    crl [goal-Mod] :         < O         : X@Database | db : DB,
+						    input   : ('goal_|-_[T,T']),
+						    output : nil ,
+						    default : ME,
+						    pTree : P,
+						    currentGoal : GID,
+					  			showMod : B,
+			  					language : maude,
+			  					*** Adrian
+						    Atts >   =>
+	  < O         : X@Database | db : DB,
+				   input   : nilTermList,
+				   output : (if QIL == 'OK then (prettyPrintProofTree(P', DB', B) '\n '\g 'INFO: '\o  'an 'initial 'goal  'generated!)  else QIL fi ),
+				   default : ME,
+				   pTree : P',
+				   currentGoal : getDefaultGoalIndex(P'),
+				   showMod : B,
+							language : maude,
+	 					*** Adrian
+				   Atts >
+      if << DB' ; P' ; QIL >> := procGoals(DB, parseModExp(T), T') .
+
+
+    var P? : PTree .
+
+    crl [showGoal] :
+        < O         : X@Database | db : DB,
+				   input   : ('show`goal_.['token[T]]),
+				   output : nil ,
+				   pTree : P,
+				   currentGoal : GID,
+				   showMod : B,
+				   language : maude,
+				   *** Adrian
+				   Atts >   =>
+	< O         : X@Database | db : DB,
+				   input   : nilTermList,
+				   currentGoal : downQidList(T),
+				   output :  (prettyPrintProofTree(P', DB, B)),
+				   pTree : P,
+				   showMod : B,
+				   language : maude,
+				   *** Adrian
+				   Atts >
+      if P' := getPTree(P, downQidList(T))  .
+
+    rl [showGoal] :
+        < O         : X@Database |
+				   input   : ('show`tactics`..@Command@),
+				   output : nil ,
+				   tacticRec : TAS,
+				   tactic : N,
+				   Atts >   =>
+	< O         : X@Database |
+				   input   : nilTermList,
+				   output :  (prettyPrintTactics(TAS,N) '\g 'INFO: '\o 'Green 'number 'means 'current 'tactic. ),
+				   tacticRec : TAS,
+				   tactic : N,
+				   Atts > .
+
+
+    crl [showGoal] :
+        < O         : X@Database | db : DB,
+				   input   : ('show`goal_.['token[T]]),
+				   output : nil ,
+				   pTree : P,
+				   currentGoal : GID,
+				   language : maude,
+				   *** Adrian
+				   Atts >   =>
+	< O         : X@Database | db : DB,
+				   input   : nilTermList,
+				   currentGoal : GID,
+				   output :   ('\r 'WARNING: '\o QIL),
+				   pTree : P,
+				   language : maude,
+				   *** Adrian
+				   Atts >
+      if ptreeErr(QIL) := getPTree(P, downQidList(T)) .
+
+
+    rl [showGoal] :
+        < O         : X@Database | db : DB,
+				   input   : ('show`goal`..@Command@),
+				   output : nil ,
+				   pTree : P,
+				   currentGoal : GID,
+				   showMod : B,
+				   language : maude,
+				   *** Adrian
+				   Atts >   =>
+	< O         : X@Database | db : DB,
+				   input   : nilTermList,
+				   currentGoal : GID,
+				   output : (if GID =/= 'nil then prettyPrintProofTree(getPTree(P, GID), DB, B) else ('\r 'WARNING: '\o 'no 'goals 'to 'show!) fi ),
+				   pTree : P,
+				   showMod : B,
+				   language : maude,
+				   *** Adrian
+				   Atts > .
+
+    rl [proveGoal] :
+        < O         : X@Database | db : DB,
+				   input   : ('auto`..@Command@),
+				   currentGoal : GID,
+				   Atts >   =>
+	< O         : X@Database | db : DB,
+				   input   : ('auto`goal_.['token[upTerm(GID)]]),
+				   currentGoal : GID,
+				   Atts > .
+
+
+    crl [showUnprovedGoals] :
+        < O         : X@Database | db : DB,
+				   input   : ('show`unproved`goals`..@Command@),
+				   output : nil ,
+				   pTree : P,
+				   currentGoal : GID,
+				   showMod : B,
+				   language : maude,
+				   *** Adrian
+				   Atts >   =>
+	< O         : X@Database | db : DB,
+				   input   : nilTermList,
+				   output :
+				   (if PS =/= empty then (prettyPrintProofTreeAux(PS, DB, B) '\n '\g 'INFO: '\o (qid(string(num(PS), 10)) 'goal`(s`) 'unproved! '\n '\g 'INFO: '\o 'Next 'goal 'to 'be 'proved 'is '\r getDefaultGoalIndex(PS) '\o)) else ('\r 'WARNING: 'no 'goals!) fi ),
+				   currentGoal : getDefaultGoalIndex(PS),
+				   pTree : P,
+				   showMod : B,
+				   language : maude,
+				   *** Adrian
+				   Atts >
+      if PS := unprovedGoals(P) .
+
+
+    var R : Rule .
+    var P'' : PTree .
+    var N : Nat .
+
+    crl [applyRule] :
+        < O         : X@Database | db : DB,
+				   input   : ('apply_.['bubble[T]]),
+				   output : nil ,
+				   pTree : P,
+				   currentGoal : GID,
+				   tactic : N,
+				   showMod : B,
+				   language : maude,
+				   *** Adrian
+				   Atts >   =>
+	  < O         : X@Database | db : DB,
+				     input   : nilTermList,
+				     output  : ('~~~~~~~~~~~~~~~~~~~~~~~ '\s  '\s '\s '\s  '\s '\s  'Generated 'GOALS '\s  '\s '\s  '\s '\s  '\s  '~~~~~~~~~~~~~~~~~~~~~~~ '\n '\n
+				       prettyPrintProofTreeAux((P'' PS), DB, B) '\n '\g 'INFO: '\o  (qid(string(num(P'' PS), 10)) 'goal`(s`) 'generated! '\n '\g 'INFO: '\o 'Next 'goal 'to 'be 'proved 'is '\r getDefaultGoalIndex(P'') '\o )),
+				     pTree : addPTreeSet(P, GID, (P'' PS)),
+				     currentGoal : getDefaultGoalIndex(P''),
+				     showMod : B,
+				     tactic : N,
+		  		   language : maude,
+  				   *** Adrian
+				     Atts >
+      if isValidRule(downQidList(T)) /\
+	  P' := getPTree(P, GID) /\
+	  (P'' PS) := applyRules(downQidList(T), P') .
+
+    crl [applyRule] :
+        < O         : X@Database |
+				   input   : ('apply_.['bubble[T]]),
+				   output : nil ,
+				   pTree : P,
+				   currentGoal : GID,
+				   language : maude,
+				   *** Adrian
+				   Atts >   =>
+	  < O         : X@Database |
+				     input   : nilTermList,
+				     output : ('\g 'INFO: '\o 'goal GID 'is 'proved '\n '\g 'INFO: '\o (if num(PS) == 0 then ('PROOF 'COMPLETED!) else  ('\r qid(string(num(PS), 10)) '\o 'goal`(s`) 'remained '\n 	   '\g 'INFO: '\o 'Next 'goal 'to 'be 'proved 'is '\r getDefaultGoalIndex(PS) '\o) fi )) ,
+				     pTree : P'',
+				     currentGoal : getDefaultGoalIndex(PS),
+				     language : maude,
+				     *** Adrian
+				     Atts >
+      if isValidRule(downQidList(T)) /\
+	  P' := getPTree(P, GID) /\
+	  empty := applyRules(downQidList(T), P') /\
+	  P'' := setGoalProved(P,GID)  /\
+	  PS := unprovedGoals(P'') .
+
+
+
+    crl [applyRule] :
+	< O         : X@Database |
+				   input   : ('apply_.['bubble[T]]),
+				   output : nil ,
+				   pTree : P,
+				   currentGoal : GID,
+				   language : maude,
+				   *** Adrian
+				   Atts >   =>
+        < O      : X@Database |
+				input   : nilTermList,
+				output : ('\r 'ERROR: '\o QIL),
+				pTree : P,
+				currentGoal : GID,
+				language : maude,
+				*** Adrian
+				Atts >
+      if isValidRule(downQidList(T)) /\
+	  ptreeErr(QIL) := getPTree(P, GID) .
+
+    crl [applyRule] :
+	< O         : X@Database |
+				   input   : ('apply_.['bubble[T]]),
+				   output : nil ,
+				   pTree : P,
+				   currentGoal : GID,
+				   language : maude,
+				   *** Adrian
+				   Atts >   =>
+        < O      : X@Database |
+				input   : nilTermList,
+				output : ('\r 'ERROR: '\o getInvalidTac(downQidList(T)) 'is 'not 'a 'valid 'proof 'rule '\n 'Valid 'proof 'rules: '\n ruleList),
+				pTree : P,
+				currentGoal : GID,
+				   language : maude,
+				   *** Adrian
+				Atts >
+      if not isValidRule(downQidList(T)) .
+
+
+    crl [applyRule] :
+        < O         : X@Database |
+				   input   : ('apply_.['bubble[T]]),
+				   output : nil ,
+				   pTree : P,
+				   currentGoal : GID,
+				   language : maude,
+				   *** Adrian
+				   Atts >   =>
+        < O         : X@Database |
+				   input   : nilTermList,
+				   output : ('\r 'ERROR: '\o QIL ) ,
+				   pTree : P,
+				   currentGoal : GID,
+				   language : maude,
+				   *** Adrian
+				   Atts >
+      if isValidRule(downQidList(T)) /\
+	  P' := getPTree(P,GID) /\
+	  applyError(QIL) := applyRules(downQidList(T), P') .
+
+    var G : Goal .
+
+    crl [applyTo] :
+        < O         : X@Database |
+				   input   : ('apply_to_.['token[T],'token[T']]),
+				   output : nil ,
+				   pTree : P,
+				   Atts >   =>
+	< O         : X@Database |
+				   input : nilTermList,
+				   output : ('\r 'ERROR: '\o QIL),
+				   pTree : P,
+				   Atts	 >
+      if ptreeErr(QIL) := getPTree(P, downQidList(T')) .
+
+    crl [applyTo] :
+        < O         : X@Database |
+				   input   : ('apply_to_.['bubble[T],'token[T']]),
+				   pTree : P,
+				   currentGoal : GID,
+				   Atts >   =>
+	< O         : X@Database |
+				   input : ('apply_.['bubble[T]]),
+				   pTree : P,
+				   currentGoal : downQidList(T'),
+				   Atts	 >
+      if P' := getPTree(P, downQidList(T')) .
+
+
+    crl [proveGoal-bad] :
+        < O         : X@Database |
+				   input   : ('auto`goal_.['token[T]]),
+				   output : nil ,
+				   pTree : P,
+				   Atts >   =>
+	< O         : X@Database |
+				   input   : nilTermList,
+				   output : ('\r 'ERROR: '\o QIL ),
+				   pTree : P,
+				   Atts >
+      if ptreeErr(QIL) :=  getPTree(P, downQidList(T)) .
+
+
+    crl [proveGoal] :
+        < O         : X@Database | db : DB,
+				   input   : ('auto`goal_.['token[T]]),
+				   output : nil ,
+				   pTree : P,
+				   currentGoal : GID,
+				   tacticRec : TAS,
+				   tactic : N,
+				   Atts >   =>
+	  < O         : X@Database | db : DB,
+				     input   : nilTermList,
+				     output :  (('\n '\g 'INFO: '\o 'Goal '\g GID' '\o 'was 'sucessfully 'proved '\n
+					 'by 'applying 'tactic: '\g QIL' '\o '\n) (if PS == empty then ('\n '\g 'INFO: '\o 'PROOF 'COMPLETED) else ('\n '\g 'INFO: '\o qid(string(num(PS),10)) 'unproved 'goal`(s`) 'remained '\n  '\g 'INFO: '\o 'Next 'goal 'to 'be 'proved 'is '\r getDefaultGoalIndex(PS) '\o ) fi )),
+				     pTree :  P'',
+				     currentGoal : ( if PS =/= empty then getDefaultGoalIndex(PS) else 'nil fi ) ,
+				     tacticRec : TAS,
+				     tactic : N,
+				     Atts >
+      if GID' := downQidList(T) /\
+	  P' :=  getPTree(P, GID') /\
+	  QIL' := getTactic(TAS,N) /\
+	  applyRules(QIL',P') == empty  /\
+	  P'' := setGoalProved(P, downQidList(T)) /\ PS := unprovedGoals(P'') .
+
+
+    var GID' : Qid .
+    var GS : GoalSet .
+
+    crl [proveGoal] :
+        < O         : X@Database |
+				   input   : ('auto`goal_.['token[T]]),
+				   output : nil ,
+				   pTree : P,
+				   currentGoal : GID,
+				   tacticRec : TAS,
+				   tactic : N,
+				   Atts >   =>
+	  < O         : X@Database |
+				     input   : nilTermList,
+				     output :  ('\g 'WARNING: '\o 'No 'proof 'found 'for 'goal GID '\n),
+				     pTree :  P,
+				     currentGoal : downQidList(T),
+				     tacticRec : TAS,
+				     tactic : N,
+				     Atts >
+      if GID' := downQidList(T) /\
+	  P' :=  getPTree(P, GID') /\
+	  applyRules(getTactic(TAS,N),P') =/= empty .
+
+
+    crl [proveGoal] :
+        < O         : X@Database |
+				   input   : ('auto`goal_.['token[T]]),
+				   output : nil ,
+				   pTree : P,
+				   currentGoal : GID,
+				   tacticRec : TAS,
+				   tactic : N,
+				   Atts >   =>
+	  < O         : X@Database |
+				     input   : nilTermList,
+				     output :  ('\g 'WARNING: '\o 'No 'proof 'found 'for 'goal GID '\n),
+				     pTree :  P,
+				     currentGoal : downQidList(T),
+				     tacticRec : TAS,
+				     tactic : N,
+				     Atts >
+      if GID' := downQidList(T) /\
+	  P' :=  getPTree(P, GID') /\
+	  applyError(QIL) := applyRules(getTactic(TAS,N),P') .
+
+
+
+    rl [badCommand] :
+	< O         : X@Database | db : DB,
+				   input     : ('bad`input.Qid),
+				   output : nil ,
+				   Atts >   =>
+    	< O         : X@Database | db : DB,
+				   input     : nilTermList,
+				   output : ('\r 'ERROR: '\o string2qidList("Bad input for prove command.")),
+				   Atts > .
+
+    crl [setTacticOn] :
+	< O         : X@Database |
+				   input     : ('select`tactic_.['token[T]]),
+				   output : nil ,
+				   tactic : N,
+				   tacticRec : TAS,
+				   Atts >   =>
+    	< O         : X@Database |
+				   input     : nilTermList,
+				   output : (if RP :: ResultPair then
+				       (if getTactic(TAS,downTerm(getTerm(RP),0)) =/= nil then
+					   ('\g 'INFO: '\o 'Tactic '\g getTactic(TAS,downTerm(getTerm(RP),0)) '\o 'will 'be 'used '\n)
+					 else ('\r 'ERROR: '\o 'bad 'number '\n) fi)
+				     else
+				       ('\r 'ERROr: '\o 'no 'parse 'for downQidList(T)) fi),
+				   tacticRec : TAS,
+				   tactic : (if getTactic(TAS,downTerm(getTerm(RP),0)) =/= nil then downTerm(getTerm(RP),0) else N fi),
+				   Atts >
+      if RP := metaParse(upModule('NAT,false), downQidList(T),'Nat)  .
+
+    rl [setModuleOn] :
+	< O         : X@Database | db : DB,
+				   input     : ('set`module`on`..@Command@),
+				   output : nil ,
+				   showMod : B,
+				   Atts >   =>
+    	< O         : X@Database | db : DB,
+				   input     : nilTermList,
+				   output : ('\g 'INFO: '\o 'Module 'will 'be 'displayed 'in 'goals),
+				   showMod : true,
+				   Atts > .
+
+    rl [goBackCommand] :
+	< O         : X@Database | db : DB,
+				   input     : ('roll`back`..@Command@),
+				   output : nil,
+				   pTree : P,
+				   currentGoal : GID,
+				   Atts >   =>
+    	< O         : X@Database | db : DB,
+				   input     : nilTermList,
+				   output : (if preGoal(string(GID)) == GID then
+				       ('\r 'WARNING: '\o 'No 'goal 'or 'Goal GID 'is 'already 'the 'toppest 'one)
+				     else
+				       ('\g 'INFO: '\o 'Goal preGoal(string(GID)) 'is 'set 'as 'the 'current 'goal!) fi),
+				   pTree : rmChild(P,preGoal(string(GID))),
+				   currentGoal : preGoal(string(GID)),
+				   Atts > .
+
+
+    rl [helpCommand] :
+	< O         : X@Database | db : DB,
+				   input     : ('set`module`off`..@Command@),
+				   output : nil ,
+				   showMod : B,
+				   Atts >   =>
+    	< O         : X@Database | db : DB,
+				   input     : nilTermList,
+				   output : ('\g 'INFO: '\o 'Module 'will 'be 'concealed 'in 'goals),
+				   showMod : false,
+				   Atts > .
+
+    rl [helpCommand] :
+	< O         : X@Database | db : DB,
+				   input     : ('help?`..@Command@),
+				   output : nil ,
+				   Atts >   =>
+    	< O         : X@Database | db : DB,
+				   input     : nilTermList,
+				   output : (help-list),
+				   Atts > .
+
+    rl [init-lemmar-noGoal] :
+	< O         : X@Database |
+				   input   : ('init_by_.['token[T],'bubble[T']]),
+				   output : nil ,
+				   currentGoal : 'nil,
+				   language : maude,
+				   *** Adrian
+				   Atts > =>
+    	< O         : X@Database |
+				   input   : nilTermList,
+				   output : ('\r 'ERROR: '\o 'No 'goal 'is 'specified!) ,
+				   currentGoal : 'nil,
+				   language : maude,
+				   *** Adrian
+				   Atts > .
+
+    crl [set-tactic] :
+	< O         : X@Database | input   : ('set`tactic_.['bubble[T']]),
+				   output : nil ,
+				   tactic : N,
+				   tacticRec : TAS,
+				   Atts > =>
+    	< O         : X@Database | input   : nilTermList,
+				   output : (if isValidRule(QIL') then ('New 'tactic '\g QIL' '\o 'will 'be 'used 'by 'default) else
+				       ('\r 'ERROR: '\o 'bad 'proof 'rules: getInvalidTac(QIL') '\n ) fi ),
+				   tactic : (if isValidRule(QIL') then num(TAS) else N fi ),
+				   tacticRec : (if isValidRule(QIL') then  TAS @ downQidList(T') else TAS fi ),
+				   Atts >
+    if QIL' := downQidList(T') .
+
+    crl [set-tactic-error] :
+	< O         : X@Database | db : DB,
+				   input   : ('set`tactic_.['bubble[T']]),
+				   output : nil ,
+				   Atts > =>
+    	< O         : X@Database | db : DB,
+				   input   : nilTermList,
+				   output : (QIL),
+				   Atts >
+      if dbErr(QIL) := procSetTactic(DB, downQidList(T')) .
+
+    crl [init-lemma] :
+	< O         : X@Database | db : DB,
+				   input   : ('init_by_.['token[T],'bubble[T']]),
+				   output : nil ,
+				   pTree : P,
+				   currentGoal : GID,
+				   language : maude,
+				   *** Adrian
+				   Atts > =>
+    	< O         : X@Database | db : DB',
+				   input   : (if QIL == 'OK then 'show`goal`..@Command@ else nilTermList fi ),
+				   output : (if QIL == 'OK then
+				       ('\g 'INFO: '\o 'Lemma downQidList(T) 'is 'initialized! '\n)
+				     else QIL fi ) ,
+				   pTree : (if QIL == 'OK then replacePTree(P,GID,P') else P fi ),
+				   currentGoal : GID,
+				   language : maude,
+				   *** Adrian
+				   Atts >
+      if GID =/= 'nil /\
+	  << DB' ; P' ; QIL >> := procInitLemma(DB,getPTree(P,GID),downQidList(T),downQidList(T')) .
+
+   *** Adrian
+   ***************************************
+   *** Rules for choosing the language ***
+   ***************************************
+
+   var L : Language .
+   rl [maude-specs] :
+      < O : X@Database | input : ('maude`language`..@Command@), output : nil ,
+                         language : L, Atts >
+   => < O : X@Database | input : nilTermList, output : ('\n '\b 'Maude 'selected 'as
+                                                        'current 'specification
+                                                        'language. '\o '\n),
+                         language : maude, Atts > .
+
+   rl [cafe-specs] :
+      < O : X@Database | input : ('cafeOBJ`language`..@Command@), output : nil ,
+                         language : L, Atts >
+   => < O : X@Database | input : nilTermList, output : ('\n '\b 'CafeOBJ 'selected 'as
+                                                        'current 'specification
+                                                        'language. '\o '\n),
+                         language : cafeobj, Atts > .
+endm
+
+load cafe_interface.maude
+*** Adrian
+
+mod THEOREM-PROVER-UI is
+    protecting THM-BANNER .
+    extending LOOP-MODE .
+    protecting META-THM-SIGN .
+    protecting THM-DATABASE-HANDLING .
+    pr CAFE-UI .
+    *** Adrian
+    inc LOOP-PRE-PROCESSING .
+    *** Adrian
+
+    subsort Object < State .
+    op o : -> Oid .
+
+
+    var H 				: Header .
+    var O 				: Oid .
+    var X@Database 		        : CITPDatabaseClass .
+    var QI 				: Qid .
+    vars QIL QIL' QIL''                 : QidList .
+    var TL 				: TermList .
+    var DB 				: Database .
+    var Atts 			        : AttributeSet .
+
+    op init 			        : -> System .
+
+    rl [init] : init => [nil,
+	  < o		: CITPDatabase |
+	  *** Adrian
+	  db		: initialDatabase,
+	  input 	: nilTermList ,
+          default       : 'CONVERSION ,
+	  pTree         : null,
+	  currentGoal   : 'nil,
+	  showMod       : false,
+	  tactic        : 0,
+	  tacticRec     : ('SI 'CA 'CS 'TC 'IP),
+	  language : maude,
+	  *** Adrian
+   initCafeAttS,
+   *** Adrian
+	  output 	: nil >,
+	  ('\s '\s '\s '\s '\s '\b string2qidList(thm-banner) '\o '\n help-list)] .
+
+    rl [input] : 	[QI QIL,
+	  < O 			: X@Database |
+	  input 		: nilTermList,
+	  output 		: nil, Atts >,
+	  QIL' ] =>
+      if metaParse(thm-Grammar, QI QIL, '@Input@) :: ResultPair
+	then
+	  [nil,
+	    < O 		: X@Database |
+	    input 		: getTerm(metaParse(thm-Grammar, QI QIL, '@Input@)),
+	    output 		: nil, Atts >,
+	    QIL']
+	else
+	  [nil,
+	    < O 		: X@Database |
+	    input 		: nilTermList,
+	    output 		: ('\r 'WARNING: '\o printSyntaxError(metaParse(thm-Grammar, QI QIL, '@Input@), QI QIL) '\n
+	      'ERROR: 'No 'parse 'for 'input.), Atts >,
+	    QIL' ]
+	fi .
+
+    rl 	[output] :
+	[QIL,
+	  < O : X@Database |
+			     output 	: (QI QIL'), Atts >,
+	  QIL''] =>
+	[QIL,
+	  < O 		: X@Database |
+	  output 	: nil, Atts >, (QIL'' QI QIL')] .
+
+endm
+
+
+loop init .
+
+set print conceal on .
+print conceal db .
+*** print conceal fmod_is_sorts_.____endfm .
+
+print conceal mod_is_sorts_._____endm .
+print conceal th_is_sorts_._____endth .
+print conceal fth_is_sorts_.____endfth .
+
+

@@ -1,0 +1,19 @@
+load abps
+
+(th ABPSL is inc ABPS .
+ var S : Sys .
+ crl [lemma-inc]: true => false if not bit(S) => bit(S)[nonexec].
+endth)
+
+(goal ABPSL |- crl B':Bit => bit(S:Sys) if C1:Channel,< B:Bit,D:Data > ,C2:Channel,< B':Bit,D':Data >,C3:Channel := channel(S:Sys) /\ B:Bit = bit(S:Sys).)
+
+(set ind on S:Sys .)
+ (apply SI .)
+--- init ---
+ (auto .)
+--- send ---     
+ (auto .)   
+--- drop ---                                 
+ (auto .)
+--- rec ----
+ (init lemma-inc by S:Sys <- x#1 .) (auto .) 

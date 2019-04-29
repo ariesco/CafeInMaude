@@ -1,0 +1,7 @@
+load pnat
+
+(goal PNAT |- eq M:PNat + 0 = M:PNat . eq M:PNat + s N:PNat = s(M:PNat + N:PNat) .)  
+
+(set ind on M:PNat .)
+
+(auto .)

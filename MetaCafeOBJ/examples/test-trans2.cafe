@@ -1,0 +1,61 @@
+(mod! TEST {
+ [Foo]
+ op a : -> Foo
+ op b : -> Foo
+ op `{_`,_`} : Foo Foo -> Bool {comm}
+ --- We just check whether the values are equal
+ eq [l1] : {a, a} = true .
+ eq [l2] : {b, b} = true .
+ eq [l3] : {a, b} = false {metadata "different"} .
+})
+
+(mod! BASIC-NAT {
+  [Nat]
+  op 0 : -> Nat {constr}
+  op s_ : Nat -> Nat {constr}
+  pred equal : Nat Nat {comm}
+
+  var N : Nat
+
+  eq [e1] : equal(0, 0) = true .
+  eq [e2] : equal(0, s(N)) = false .
+  eq [e3] : equal(s(N), s(M:Nat)) = equal(N, M) .
+
+  trans [lemma-1] : s(N:Nat) => s(0) {nonexec} .
+})
+
+eof
+
+loop cafe2maude-init .
+
+(red equal(0, s(0)) .)
+
+(rew [5] s(s(s(0))) .)
+
+(mod MAUDE-TEST is
+  pr TEST .
+
+  sort A .
+  subsort A < Foo .
+
+  rl [a2b] : a => b .
+endm)
+
+(original CafeOBJ module BASIC-NAT .)
+
+(cafeOBJ language .)
+
+(set module on .)
+
+(goal BASIC-NAT |- eq equal(N:Nat, N':Nat) = equal(N', N) ; trans s(0) => s(0) {metadata "foo"} ;)
+
+(init lemma-1 by N:Nat <- 0 .)
+
+(set module off .)
+
+(show goal .)
+
+(apply SI .)
+
+(auto .)
+

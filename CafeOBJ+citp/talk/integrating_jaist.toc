@@ -1,0 +1,16 @@
+\beamer@endinputifotherversion {3.10pt}
+\beamer@sectionintoc {1}{Motivation}{2}{0}{1}
+\beamer@sectionintoc {2}{Preliminaries}{3}{0}{2}
+\beamer@subsectionintoc {2}{1}{CafeOBJ}{3}{0}{2}
+\beamer@subsectionintoc {2}{2}{Maude}{9}{0}{2}
+\beamer@subsectionintoc {2}{3}{The Maude system: meta-programming}{20}{0}{2}
+\beamer@subsectionintoc {2}{4}{Descent functions}{32}{0}{2}
+\beamer@sectionintoc {3}{Defining the syntax}{39}{0}{3}
+\beamer@subsectionintoc {3}{1}{Input}{50}{0}{3}
+\beamer@subsectionintoc {3}{2}{Example}{51}{0}{3}
+\beamer@sectionintoc {4}{Integration}{52}{0}{4}
+\beamer@subsectionintoc {4}{1}{Example}{58}{0}{4}
+\beamer@sectionintoc {5}{Integration with the CITP}{59}{0}{5}
+\beamer@subsectionintoc {5}{1}{Example}{67}{0}{5}
+\beamer@sectionintoc {6}{Concluding remarks and future work}{68}{0}{6}
+\beamer@subsectionintoc {6}{1}{Concluding remarks}{68}{0}{6}

@@ -1,0 +1,21 @@
+mod* ELT {
+ [Elt]
+}
+
+mod! LISTS(X :: ELT) {
+  [List]
+  op nil : -> List {constr}
+  op __ : Elt.X List -> List {constr}
+
+  vars L L1 L2 L3 : List
+  vars E E' : Elt.X
+
+  op _@_ : List List -> List
+  eq nil @ L2 = L2 .
+  eq (E L1) @ L2 = E (L1 @ L2) . *** [metadata "CA-1"] .
+
+  op mix : List List -> List {comm}
+
+  trans [m1] : mix(nil, L) => L .
+  trans [m2] : mix(E L1, L2) => E mix(L1, L2) .
+}

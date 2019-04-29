@@ -1,0 +1,40 @@
+load abp
+
+(th INV is inc ABP .
+ vars B B' : Bit . 
+ vars P P' : Packet .
+ vars C1 C2 C3 : Channel1 .
+ vars D1 D2 D3 : Channel2 .
+ var S : Sys .
+ crl [lemma-inv2] : B  => bit1(S)     if C1,< B,P >,C2 := channel1(S) /\  bit2(S) = bit1(S)[nonexec].
+ ceq [lemma-inv3] : bit2(S) = bit1(S) if D1,B,D2 := channel2(S) /\ B = bit1(S).
+ crl [lemma-inc]: true => false if not bit1(S) => bit1(S) [nonexec].
+endth)
+
+*** GOAL: INV |- inv5
+*** apply Structural Induction
+*** SUBGOALs:  1. INV |- inv5[S <- init]
+***           2. INV5 |- inv5[S <- ctor(z)] 
+*** where INV5 is defined as follows:
+
+(goal INV |- crl P:Packet => pac(next(S:Sys)) if C1:Channel1,< B:Bit,P:Packet >,C2:Channel1 := channel1(S:Sys) /\ B:Bit = bit1(S:Sys).)
+
+(set ind on S:Sys .) (apply SI .)
+
+--- init ---
+(auto .)           
+--- send1 ---
+(auto .)           
+--- send2 ---
+(auto .)           
+--- drop2 ---
+(auto .)           
+--- drop1 ---
+(auto .)           
+--- rec2 ---
+(auto .)    
+--- rec1 ---       
+(init lemma-inv3 by S:Sys <- x#1 .)
+(init lemma-inv2 by S:Sys <- x#1 .)
+(init lemma-inc by S:Sys <- x#1 .)
+(auto .)

@@ -1,0 +1,6 @@
+load abps
+
+(goal ABPS |- eq  mk(next(S:Sys)) = data(next(S:Sys)),list(S:Sys) .)
+
+(set ind on S:Sys .)
+(auto .)

@@ -1,0 +1,31 @@
+
+
+(open NAT + BOOL
+ ops i j k : -> Nat .
+
+ red (0 + j) + k == 0 + (j + k) .
+
+ eq (i + j) + k = i + (j + k) .
+
+ red (s(i) + j) + k == s(i) + (j + k) .
+close)
+
+(open NAT + BOOL
+ [A]
+ op a : -> Nat
+ reduce a + 0 == a .
+ ops b c : -> Nat
+ reduce a + b == b + a .
+close)
+
+eof
+
+(show module OPEN_CLOSE .)
+
+(open NAT + BOOL
+ [A]
+ op a : -> Nat
+ reduce a + 0 == a .
+ ops b c : -> Nat
+ reduce a + b == b + a .
+close)

@@ -1,0 +1,178 @@
+%!TEX root = ug.tex
+
+We present in this section how to use the Constructor-based Inductive Theorem Prover
+(CITP) with CafeOBJ specifications. A comprehensive explanation of the CITP can be
+found in \url{http://www.jaist.ac.jp/~danielmg/citp.html}.
+
+The CITP is started by configuring and executing the \verb"citp" script available
+\url{http://maude.sip.ucm.es/cafe/}, followed by the CafeOBJ modules to be used,
+as shown in the previous sections.
+Note that this script automatically applies the transformation described in Section~\ref{sec:intro},
+so the actual CafeOBJ files being used can be introduced.
+%It starts an input-output loop where Maude modules and commands can be
+%introduced by enclosing them in parentheses, as shown in Section~\ref{sec:intro}.
+%Moreover, the \verb"ui.maude" file automatically loads the \verb"cafeOBJ2maude.maude" file,
+%so CafeOBJ specifications can also be introduced.
+%
+Although we could work with the transformed Maude
+versions obtained from the introduced modules, it is more convenient to allow CafeOBJ users to
+work with the tool in a transparent way. To allow that, the tool has been extended with two commands:
+\begin{itemize}
+\item
+\verb"(cafeOBJ language .)", which informs the tool that we want to work with CafeOBJ
+specifications, and hence no mentions to Maude code will be done.
+
+\item
+\verb"(maude language .)", which informs the tool that we want to forget about CafeOBJ
+syntax and use Maude syntax for commands and visualization.
+\end{itemize}
+
+By using the \verb"(cafeOBJ language .)" option a number of commands in the CITP are
+modified from the interface point of view. We will consider in the following that
+this command has been used:
+
+{\codesize
+\begin{verbatim}
+Maude> (cafeOBJ language .)
+CafeOBJ selected as current specification language.
+\end{verbatim}
+}
+
+The revised commands are:
+
+\begin{itemize}
+\item
+\verb"(goal ModuleName |- Equations/Rules/Memberships)", which has been adapted to use
+CafeOBJ syntax and thus only accepts (possibly conditional) equations and transitions.
+Moreover, we can also use the standard syntactic sugar from CafeOBJ to avoid writing
+the variable sort once it has already been stated.
+For example, we can define a simple module \verb"SPEC" (already modified by using the
+application shown in Section~\ref{sec:intro}) for integers with the \verb"0" constant,
+the successor and predecessor constructors, equations for representing the behavior of
+these operators combined,
+and a rule that decreases terms expressed by using successor:
+
+{\codesize
+\begin{verbatim}
+(mod! SPEC {
+  [Zero < Int]
+  op 0 : -> Zero {constr}
+  ops s_ p_ : Int -> Int {constr}
+  eq [eq1] : s p X:Int = X .
+  eq [eq2] : p s X:Int = X .
+  trans [tr1] : s(0) => 0 .
+})
+\end{verbatim}
+}
+
+And now introduce a simple goal with two sentences. The first one
+will be an equation stating that the successor of any number is equal to
+applying the predecessor function once and the successor function twice to
+that number. The second one is a transition which indicates that we reach
+the integer \verb"X" if we start from a term applying the successor function
+twice to it:
+
+{\codesize
+\begin{verbatim}
+Maude> (goal SPEC |- eq s(X:Int) = p(s(s(X))) ; trans s(s(X:Int)) => X ;)
+============================ GOAL 1-1 ============================
+< Module SPEC is concealed
+...
+end
+,
+	  eq s X:Int
+	    = p s s X:Int .
+	  trans s s X:Int
+	    => X . >
+unproved
+
+INFO: an initial goal generated!
+\end{verbatim}
+}
+
+It is important to note that, since Maude does not allow importation of theories
+in protecting mode, this tool considers that the intended semantics is that of
+protecting. This is coherent with the approach presented in the previous section,
+where the importation modes were modified to including.
+
+\item
+\verb"(set module on .)", which asks the tool to show the current module in every
+proof step of the proof. If we activate this mode and then apply a step requiring
+the module to be shown, it will be displayed by using CafeOBJ syntax. For example,
+we can activate this mode
+
+{\codesize
+\begin{verbatim}
+Maude> (set module on .)
+INFO: Module will be displayed in goals
+\end{verbatim}
+}
+
+\noindent
+and introduce the goal shown above:
+
+{\codesize
+\begin{verbatim}
+Maude> (goal SPEC |- eq s(X:Int) = p(s(s(X))) ; trans s(s(X:Int)) => X ;)
+============================ GOAL 1-1 ============================
+<
+mod! SPEC{
+	[Zero < Int]
+	op 0 : -> Zero {constr}
+	ops s_ p_ : Int -> Int {constr}
+	eq [eq1] : s p X:Int = X:Int .
+	eq [eq2] : p s X:Int = X:Int .
+	trans [tr1] : s 0 => 0 .
+},
+	  eq s X:Int
+	    = p s s X:Int .
+	  trans s s X:Int
+	    => X:Int . >
+unproved
+
+INFO: an initial goal generated!
+\end{verbatim}
+}
+
+Note that now the original CafeOBJ module is displayed. Moreover, the prover
+introduces in some cases equations and rules to the module. These new statements
+will be also displayed following CafeOBJ syntax.
+
+\item
+\verb"(discard critical pair .)", which allows to discard critical pairs in equations and transitions.
+This command is dealt by using the commands \verb"(equation .)", to apply an equation,
+\verb"(backward equation .)", to apply an equation from right to left, \verb"(transition .)", to
+apply a transition, and \verb"(backward transition .)", to apply a transition from right to left.
+
+\item
+The rest of the rules, like the ones for applying rules or instantiating lemmas,
+have been internally modified to deal with CafeOBJ statements instead of Maude ones.
+However, its appearance is only modified is the command above is activated.
+
+\item
+It is worth noticing that the commands are also extended with error rules dealing
+with specific errors due to the interleaving of CafeOBJ and Maude specifications.
+For instance, if the CafeOBJ mode is active the user cannot introduce goals on
+Maude modules:
+
+{\codesize
+\begin{verbatim}
+Maude> (goal MAUDE-MODULE |- eq 0 = 0 ;)
+WARNING: the selected module is not a CafeOBJ specification.
+\end{verbatim}
+}
+
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+

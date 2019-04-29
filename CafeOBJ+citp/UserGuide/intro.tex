@@ -1,0 +1,168 @@
+%!TEX root = ug.tex
+
+We describe in this section how to use our tool to introduce CafeOBJ specifications
+into the Full Maude database. We will use this tool as base to develop the tools in
+the next sections.
+
+\subsection{Configuring the tool\label{subsec:c2m_config}}
+
+The first step for configuring the tool is downloading the \verb"parser.jar",
+\verb"cafeOBJ2maude.maude", and \verb"cafe2maude" files, available at
+\url{http://maude.sip.ucm.es/cafe/}. Then, the user must edit
+(with any text editor) the \verb"cafe2maude" file by fixing the values of the variables:
+\begin{description}
+\item[\texttt{MAUDE},] which keeps the path to the Maude binary (available at
+\url{http://maude.cs.uiuc.edu/}).
+
+\item[\texttt{CAFE2MAUDE},] which keeps the path of to the \verb"cafeOBJ2maude.maude"
+file described above.
+
+\item[\texttt{PARSER},] which keeps the path of to the \verb"parser.jar"
+file described above.
+\end{description}
+
+Moreover, the file \verb"full-maude.maude" must be available either in the same directory
+as Maude or in the current directory.
+
+\subsection{Using the tool\label{subsec:c2m_using}}
+
+To start the tool it is enough to execute the \verb"cafe2maude" script configured in the
+previous section by:
+
+{\codesize
+\begin{verbatim}
+$> ./cafe2maude file_1 ... file_n
+\end{verbatim}
+}
+
+\noindent
+where \verb"file_1 ... file_n" refer to the CafeOBJ files we want to introduce.
+The \verb"cafe2maude" script modifies the CafeOBJ files by using \verb""parser.jar"
+to add the features required by Full Maude, and then creates a temporal file with
+these modified files. This file is the one loaded by Full Maude. 
+%
+The particularities of this translation can be found in Appendix~\ref{sec:trans},
+while Appendix~\ref{app:java} describes the transformations performed by the Java file,
+and how to use it in an isolated way.
+
+The modules introduced in this way will behave as standard Maude modules, and hence
+they can:
+\begin{itemize}
+\item
+Be imported, that is, they can be imported by other CafeOBJ and \emph{Maude} specifications,
+for example we can introduce the Maude module:
+
+{\codesize
+\begin{verbatim}
+(fmod EXT-TEST is
+  pr TEST .
+  
+  sort SFoo .
+  subsort Foo < SFoo .
+endfm)
+\end{verbatim}
+}
+
+However, the importations are restricted to those allowed by Maude. See
+Section~\ref{sec:trans} for details.
+
+\item
+Be used as source or target module in a view. Any combination with Maude
+theories or modules is allowed. For example, we can define the following
+view using the \verb"TEST" module:
+
+{\codesize
+\begin{verbatim}
+view Test from TRIV to TEST is
+  sort Elt to Foo .
+endv
+\end{verbatim}
+}
+
+\item
+Import Maude modules, that is, CafeOBJ specifications can import Maude
+modules. For example, we can 
+
+{\codesize
+\begin{verbatim}
+mod! TEST2 {
+  pr(EXT-TEST)
+  [Value]
+}
+\end{verbatim}
+}
+
+\item
+Show the original CafeOBJ modules. We can use the command
+\texttt{(original CafeOBJ module MODULE-NAME .)} to print the CafeOBJ specification
+initially introduced into Full Maude. For example, the original \verb"TEST" module
+is shown as follows:
+
+{\codesize
+\begin{verbatim}
+Maude> (original CafeOBJ module TEST .)
+
+mod! TEST{
+  [Foo]
+  op a : -> Foo {constr}
+  op b : -> Foo {constr}
+  op `{_`,_`} : Foo Foo -> Bool {comm}
+  eq [l1] : {a,a} = true .
+  eq [l2] : {b,b} = true .
+  eq [l3] : {a,b} = false {metadata "different"} .
+}
+\end{verbatim}
+}
+
+\item
+Show the transformed modules. The Maude command \verb"(show module MODULE-NAME .)"
+allows the user to visualize all the modules thus far introduced. For example, the
+following command is used to show the module \verb"TEST2":
+
+{\codesize
+\begin{verbatim}
+Maude> (show module TEST2 .)
+fmod TEST2 is
+  including BOOL .
+  protecting EXT-TEST .
+  sorts Value .
+endfm
+\end{verbatim}
+}
+
+\item
+Show the views. Similarly to the command above, the command \verb"(show view VIEW-NAME .)"
+allows the user to print the views. For example, we can use it to show the \verb"Test"
+view as follows:
+
+{\codesize
+\begin{verbatim}
+Maude> (show view Test .)
+view Test from TRIV to TEST is
+  sort Elt to Foo . 
+endv
+\end{verbatim}
+}
+
+\item
+Use all the evaluation Maude commands, including \verb"red", \verb"rew", and \verb"search".
+For example, we can reduce a term in \verb"TEST" as follows:
+
+{\codesize
+\begin{verbatim}
+Maude> (red in TEST : {a, b} .)
+reduce in TEST : {a,b}
+result Bool : false
+\end{verbatim}
+}
+
+Note that, since the \verb"red" command is available and importing Maude modules is possible,
+we can also use the Maude model checker~\cite[Chapter 13]{maude-book}. 
+
+\end{itemize}
+
+
+
+
+
+

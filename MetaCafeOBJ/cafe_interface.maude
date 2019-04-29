@@ -1,0 +1,1328 @@
+
+***(%
+
+We present in this section how to integrate the specification shown in the
+previous version with any existing tool for Maude specifications implemented
+in Full Maude.
+
+\subsection{Extending the tool\label{subsec:ext}}
+
+We first present the new modules required to process the commands from the tool
+we want to extend. Note that this part is different for each tool.
+%
+The module \verb"CAFE-CITP-COMMANDS-PROC" is in charge of processing the commands.
+
+{\codesize
+\begin{verbatim}
+%)
+
+mod CAFE-CITP-COMMANDS-PROC is
+  pr PROVE-COMMANDS-PROC .
+  pr CAFE-PRETTY-PRINT .
+
+***(%
+\end{verbatim}
+}
+
+{\codesize
+\begin{comment}
+%)
+
+  vars QIL QIL' QIL'' QIL1 QIL2 QIL3 QIL4 QILL QILA PL : QidList .
+  vars T T' T'' T''' T1 T2 T3 TW TW' : Term .
+  vars ODS ODS' ODS'' VDS : OpDeclSet .
+  vars St St' St'' St''' : String .
+  vars ME ME' : ModuleExpression .
+  vars ScS ScS' : SentenceSet .
+  vars EqS EqS' : EquationSet .
+  vars TL TL' TL'' : TermList .
+  var  SSDS : SubsortDeclSet .
+  vars AtS AtS' : AttrSet .
+  vars Q Q' GID QI : Qid .
+  vars PS PS' : PTreeSet .
+  vars RS RS' : RuleSet .
+  var  COND : Condition .
+  vars M M' FM : Module .
+  var  RP : ResultPair .
+  var  IL : ImportList .
+  var  MAS : MembAxSet .
+  var  Snt : Sentence .
+  var  DB : Database .
+  var  Ct : Constant .
+  var  C : Condition .
+  var  V : Variable .
+  var  SS : SortSet .
+  vars P P' : PTree .
+  vars B B' : Bool .
+  vars N N' : Nat .
+  var  H : Header .
+  var  L : Label .
+  var  S : Sort .
+  var  G : Goal .
+
+***(%
+\end{comment}
+}
+
+The function \verb"procGoalsCafe" is in charge of processing the initial goal
+introduced by the user. It receives the current database, the module expression
+standing for the module where the proof will take place, and the term containing
+the goal sentences and returns a term of sort \verb"ProveResult", composed of
+the updated database, the generated proof tree, and a list of quoted identifiers
+propagating errors.
+%
+If the parsing of the sentences fails, we do not modify the database, the proof
+tree is \verb"null", and an error message is sent:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op procGoalsCafe : Database ModuleExpression Term -> ProveResult .
+  ceq procGoalsCafe(DB, ME, T) = << DB ; null ; ('\r 'ERROR: '\o
+                                                 'bad 'goal 'specified) >>
+   if sentErr(QIL) := parseSentenceCafe(T) .
+
+***(%
+\end{verbatim}
+}
+
+Otherwise, the \texttt{procGoalCmdCafe} is applied:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  eq procGoalsCafe(DB, ME, T) = procGoalCmdCafe(DB, ME, parseSentenceCafe(T)) [owise] .
+
+***(%
+\end{verbatim}
+}
+
+The auxiliary function \verb"parseSentenceCafe" takes a term as argument and returns
+a set of sentences, a special sort defined by the CITP to put together equations and
+rules. Thus, we translate equations into equations and transitions into rules:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op parseSentenceCafe : Term -> SentenceSet .
+  eq parseSentenceCafe('eq_=_;[T, T']) = (eq T = T' [none]) .
+  eq parseSentenceCafe('ceq_=_if_;[T, T', T'']) =
+                                (ceq T = T' if T'' = 'true.Bool [none]) .
+  eq parseSentenceCafe('trans_=>_;[T, T']) = (rl T => T' [none]) .
+  eq parseSentenceCafe('trns_=>_;[T, T']) = (rl T => T' [none]) .
+  eq parseSentenceCafe('ctrans_=>_if_;[T, T', T'']) =
+                                (crl T => T' if T'' = 'true.Bool [none]) .
+  eq parseSentenceCafe('ctrns_=>_if_;[T, T', T'']) =
+                                (crl T => T' if T'' = 'true.Bool [none]) .
+  ceq parseSentenceCafe('__[T, T']) = Snt ScS
+   if Snt := parseSentenceCafe(T) /\
+      ScS := parseSentenceCafe(T') .
+  eq parseSentenceCafe(Q[TL]) = sentErr('Bad 'goal)  [owise] .
+
+***(%
+\end{verbatim}
+}
+
+The parsing continues with \verb"procGoalCmdCafe". This function extracts the module
+from the database and tries to solve the bubbles. If this parsing returns an error,
+it is returned to the user, keeping the same database and building the \verb"null"
+proof tree:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op procGoalCmdCafe : Database ModuleExpression SentenceSet -> ProveResult .
+  ceq procGoalCmdCafe(DB, ME, ScS) = << DB ; null ; QIL >>
+   if M := getFlatModule(ME, DB) /\
+      sentErr(QIL) := solveBubblesCafe(ScS, M, addInfoConds(M), false,
+                                       getVars(ME, DB), DB) .
+
+***(%
+\end{verbatim}
+}
+
+If the sentences are successfully parsed, the new goal is created with them:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  ceq procGoalCmdCafe(DB, ME, ScS) = setGoal(DB, M, ScS')
+   if M := getFlatModule(ME, DB) /\
+      ScS' := solveBubblesCafe(ScS, M, addInfoConds(M), false, getVars(ME, DB), DB) .
+
+***(%
+\end{verbatim}
+}
+
+Ohterwise, we return a module error:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  eq procGoalCmdCafe(DB, ME, ScS) = << DB ; null ; ('\r 'ERROR: '\o 'Module
+                                                    'error.) >> [owise] .
+
+***(%
+\end{verbatim}
+}
+
+The auxiliary function \verb"solveBubblesCafe" is in charge of building the terms
+defined inside bubbles in equations and rules. Since all the equations for this function
+are very similar, we only show how they are solved for an equation. In this case, we
+only need to extend the set of operators standing for the variables, and use it with
+the \verb"solveBubbles" function from Full Maude:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op solveBubblesCafe : SentenceSet Module Module Bool OpDeclSet Database
+                        ~> SentenceSet .
+  ceq solveBubblesCafe((eq 'bubble[T] = T' [none]), M, M', B, VDS, DB) =
+                                  eq T1 = T2 [AtS]
+   if QIL := downQidList(T) /\
+      ODS := VDS opDeclSetFromQidList(QIL) /\
+      eq T1 = T2 [AtS] . := solveBubbles(eq 'bubble[T] = T' [none] .,
+                                         M, M', B, ODS, DB) .
+
+***(%
+\end{verbatim}
+}
+{\codesize
+\begin{comment}
+%)
+
+  ceq solveBubblesCafe(eq 'bubble[T] = 'bubble[T'] [none], M, M', B, VDS, DB) = sentErr(QIL)
+   if QIL := downQidList(T) /\
+      ODS := VDS opDeclSetFromQidList(QIL) /\
+      T'' := cafeEqAtS2maudeEqAts(T') /\
+      equationError(QIL) := solveBubbles(eq 'bubble[T] = 'bubble[T''] [none] ., M, M', B, ODS, DB) .
+
+  ceq solveBubblesCafe((ceq 'bubble[T] = T' if 'bubble[T''] = 'true.Bool [none]), M, M', B, VDS, DB) =
+                                  sentErr(QIL)
+   if QIL := downQidList(T) /\
+      ODS := VDS opDeclSetFromQidList(QIL) /\
+      T''' := cafeEqAtS2maudeEqAts(T'') /\
+      equationError(QIL) := solveBubbles(ceq 'bubble[T] = T' if 'bubble[T'''] = 'true.Bool [none] .,
+                                         addOps(ODS, M), addOps(ODS, M'), B, ODS, DB) .
+
+  ceq solveBubblesCafe((ceq T = T' if 'bubble[T''] = 'true.Bool [none]), M, M', B, VDS, DB) =
+                                  ceq T1 = T2 if C [AtS]
+   if QIL := downQidList(T) /\
+      ODS := VDS opDeclSetFromQidList(QIL) /\
+      T''' := cafeEqAtS2maudeEqAts(T'') /\
+      (ceq T1 = T2 if C [AtS] .) := solveBubbles((ceq T = T' if 'bubble[T'''] = 'true.Bool [none] .),
+                                                  addOps(ODS, M), addOps(ODS, M'), B, ODS, DB) .
+
+  *** rules
+  ceq solveBubblesCafe(rl 'bubble[T] => 'bubble[T'] [none], M, M', B, VDS, DB) = sentErr(QIL)
+   if QIL := downQidList(T) /\
+      ODS := VDS opDeclSetFromQidList(QIL) /\
+      T'' := cafeEqAtS2maudeEqAts(T') /\
+      ruleError(QIL) := solveBubbles(rl 'bubble[T] => 'bubble[T''] [none] ., M, M', B, ODS, DB) .
+
+  ceq solveBubblesCafe(rl 'bubble[T] => 'bubble[T'] [none], M, M', B, VDS, DB) =
+                                  rl T1 => T2 [AtS]
+   if QIL := downQidList(T) /\
+      ODS := VDS opDeclSetFromQidList(QIL) /\
+      T'' := cafeEqAtS2maudeEqAts(T') /\
+      rl T1 => T2 [AtS] . := solveBubbles(rl 'bubble[T] => 'bubble[T''] [none] ., M, M', B, ODS, DB) .
+
+  ceq solveBubblesCafe(crl 'bubble[T] => T' if 'bubble[T''] = 'true.Bool [none], M, M', B, VDS, DB) =
+                                  sentErr(QIL)
+   if QIL := downQidList(T) /\
+      ODS := VDS opDeclSetFromQidList(QIL) /\
+      T''' := cafeEqAtS2maudeEqAts(T'') /\
+      ruleError(QIL) := solveBubbles(crl 'bubble[T] => T' if 'bubble[T'''] = 'true.Bool [none] .,
+                                     addOps(ODS, M), addOps(ODS, M'), B, ODS, DB) .
+
+  ceq solveBubblesCafe(crl 'bubble[T] => T' if 'bubble[T''] = 'true.Bool [none], M, M', B, VDS, DB) =
+                                  crl T1 => T2 if C [AtS]
+   if QIL := downQidList(T) /\
+      ODS := VDS opDeclSetFromQidList(QIL) /\
+      T''' := cafeEqAtS2maudeEqAts(T'') /\
+      crl T1 => T2 if C [AtS] . := solveBubbles(crl 'bubble[T] => T' if 'bubble[T'''] = 'true.Bool [none] .,
+                                                addOps(ODS, M), addOps(ODS, M'), B, ODS, DB) .
+
+***(%
+\end{comment}
+}
+
+Moreover, we also define the equations for dealing with several sentences and with the
+empty set of sentences (\verb"none"):
+
+{\codesize
+\begin{verbatim}
+%)
+
+  ceq solveBubblesCafe(Snt ScS, M, M', B, VDS, DB) =
+                                  solveBubblesCafe(Snt, M, M', B, VDS, DB)
+                                  solveBubblesCafe(ScS, M, M', B, VDS, DB)
+   if ScS =/= none .
+  eq solveBubblesCafe(none, M, M', B, VDS, DB) = none .
+
+***(%
+\end{verbatim}
+}
+
+{\codesize
+\begin{comment}
+%)
+
+  op labels2metadataAtS : AttrSet -> AttrSet .
+  eq labels2metadataAtS(label(Q) AtS) = label(Q) metadata("#label-" + string(Q)) AtS .
+  eq labels2metadataAtS(AtS) = AtS [owise] .
+
+***(%
+\end{comment}
+}
+
+%  ***************************************
+%  ************ PROCESS LEMMA ************
+%  ***************************************
+
+The function \verb"procInitLemmaCafe" just applies the general
+function \verb"procInitLemma" from the CITP:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op procInitLemmaCafe : Database PTree Qid QidList -> ProveResult .
+  eq procInitLemmaCafe(DB, P, Q, QIL) = procInitLemma(DB, P, Q, QIL) .
+
+  op procInitLemmaCafe : Database PTree Equation QidList -> ProveResult .
+  eq procInitLemmaCafe(DB, P, EqS, QIL) = procInitLemma(DB, P, EqS, QIL) .
+
+  op procInitLemmaCafe : Database PTree Rule QidList -> ProveResult .
+  eq procInitLemmaCafe(DB, P, RS, QIL) = procInitLemma(DB, P, RS, QIL) .
+
+***(%
+\end{verbatim}
+}
+
+We also define several printing functions to print sentences and goals in
+CafeOBJ style. We present some of them:
+\begin{itemize}
+\item
+Printing the empty set of sentences returns \verb"nil":
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op printSentencesCafe : Module SentenceSet -> QidList .
+  eq printSentencesCafe(M, none) = nil .
+
+***(%
+\end{verbatim}
+}
+
+\item
+Equations are printed by printing each side, the labels and the attributes:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  ceq printSentencesCafe(M, (eq T = T' [AtS]) ScS) =
+                  ('\n '\t '\s '\s '\g 'eq QILL '\s '\o QIL1
+                   '\n '\t '\s '\s '\s '\s '\g '= '\s '\o QIL2
+                   '\s QIL3 '.
+                   printSentencesCafe(M, ScS))
+   if QIL1 := eMetaPrettyPrint(M, T) /\
+      QIL2 := eMetaPrettyPrint(M, T') /\
+      QIL3 := printCafeAtS(AtS) /\
+      QILL := printLabel(AtS) .
+
+***(%
+\end{verbatim}
+}
+{\codesize
+\begin{comment}
+%)
+
+  ceq printSentencesCafe(M, (ceq T = T' if C [AtS]) ScS) =
+                  ('\n '\t '\s '\s '\g 'ceq QILL '\s '\o QIL1
+                   '\n '\t '\s '\s '\s '\s '\g '= '\s '\o QIL2
+                   '\n '\t '\s '\s '\s '\s '\g 'if '\o '\s QIL3
+                   '\s QIL4 '.
+                   printSentencesCafe(M, ScS))
+   if QIL1 := eMetaPrettyPrint(M, T) /\
+      QIL2 := eMetaPrettyPrint(M, T') /\
+      QIL3 := eMetaPrettyPrint(M, C) /\
+      QIL4 := printCafeAtS(AtS) /\
+      QILL := printLabel(AtS) .
+
+  ceq printSentencesCafe(M, (rl T => T' [AtS]) ScS) =
+                  ('\n '\t '\s '\s '\g 'trans QILL '\s '\o QIL1
+                   '\n '\t '\s '\s '\s '\s '\g '=> '\s '\o QIL2
+                   '\s QIL3 '.
+                   printSentencesCafe(M, ScS))
+   if QIL1 := eMetaPrettyPrint(M, T) /\
+      QIL2 := eMetaPrettyPrint(M, T') /\
+      QIL3 := printCafeAtS(AtS) /\
+      QILL := printLabel(AtS) .
+
+  ceq printSentencesCafe(M, (crl T => T' if C [AtS]) ScS) =
+                  ('\n '\t '\s '\s '\g 'ctrans QILL '\s '\o QIL1
+                   '\n '\t '\s '\s '\s '\s '\g '=> '\s '\o QIL2
+                   '\n '\t '\s '\s '\s '\s '\g 'if '\o '\s QIL3
+                   '\s QIL4 '.
+                   printSentencesCafe(M, ScS))
+   if QIL1 := eMetaPrettyPrint(M, T) /\
+      QIL2 := eMetaPrettyPrint(M, T') /\
+      QIL3 := eMetaPrettyPrint(M, C) /\
+      QIL4 := printCafeAtS(AtS) /\
+      QILL := printLabel(AtS) .
+
+***(%
+\end{comment}
+}
+
+\item
+In some cases the prover adds extra sentences, that we want to print
+in a special way. If the option asking to print the module is set to \verb"false"
+nothing is printed, but in other case we print these extra sentences:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op printExtraStmnts : Module Bool -> QidList .
+  eq printExtraStmnts(FM, false) = nil .
+  eq printExtraStmnts(FM, true) =
+            printAddedEqs(FM, getAddedEqs(getEqs(FM)))
+            printAddedRls(FM, getAddedRls(getRls(FM)))
+            printAddedEqLemmas(FM, getEqLemmas(getEqs(FM)))
+            printAddedRlLemmas(FM, getRlLemmas(getRls(FM))) .
+
+***(%
+\end{verbatim}
+}
+
+{\codesize
+\begin{comment}
+%)
+
+  op printAddedEqs : Module EquationSet -> QidList .
+  eq printAddedEqs(M, none) = nil .
+  ceq printAddedEqs(M, eq T = T' [AtS] . EqS) =
+                  ('\n '\t '\s '\s '\g 'eq QILL '\s '\o QIL1
+                   '\n '\t '\s '\s '\s '\s '\g '= '\s '\o QIL2
+                   '\s QIL3 '. '\b
+                   ' '--> 'Equation 'added 'by 'the 'prover. '\o '\n
+                   printAddedEqs(M, EqS))
+   if QIL1 := eMetaPrettyPrint(M, T) /\
+      QIL2 := eMetaPrettyPrint(M, T') /\
+      QIL3 := printCafeAtS(AtS) /\
+      QILL := printLabel(AtS) .
+
+  ceq printAddedEqs(M, ceq T = T' if C [AtS] . EqS) =
+                  ('\n '\t '\s '\s '\g 'ceq QILL '\s '\o QIL1
+                   '\n '\t '\s '\s '\s '\s '\g '= '\s '\o QIL2
+                   '\n '\t '\s '\s '\s '\s '\g 'if '\o '\s QIL3
+                   '\s QIL4 '. '\b
+                   ' '--> 'Equation 'added 'by 'the 'prover. '\o '\n
+                   printAddedEqs(M, EqS))
+   if QIL1 := eMetaPrettyPrint(M, T) /\
+      QIL2 := eMetaPrettyPrint(M, T') /\
+      QIL3 := eMetaPrettyPrint(M, C) /\
+      QIL4 := printCafeAtS(AtS) /\
+      QILL := printLabel(AtS) .
+
+  op printAddedRls : Module RuleSet -> QidList .
+  eq printAddedRls(M, none) = nil .
+  ceq printAddedRls(M, rl T => T' [AtS] . RS) =
+                  ('\n '\t '\s '\s '\g 'trans QILL '\s '\o QIL1
+                   '\n '\t '\s '\s '\s '\s '\g '=> '\s '\o QIL2
+                   '\s QIL3 '. '\b
+                   ' '--> 'Transition 'added 'by 'the 'prover. '\o '\n
+                   printAddedRls(M, RS))
+   if QIL1 := eMetaPrettyPrint(M, T) /\
+      QIL2 := eMetaPrettyPrint(M, T') /\
+      QIL3 := printCafeAtS(AtS) /\
+      QILL := printLabel(AtS) .
+
+  ceq printAddedRls(M, crl T => T' if C [AtS] . RS) =
+                  ('\n '\t '\s '\s '\g 'ctrans QILL '\s '\o QIL1
+                   '\n '\t '\s '\s '\s '\s '\g '=> '\s '\o QIL2
+                   '\n '\t '\s '\s '\s '\s '\g 'if '\o '\s QIL3
+                   '\s QIL4 '. '\b
+                   ' '--> 'Transition 'added 'by 'the 'prover. '\o '\n
+                   printAddedRls(M, RS))
+   if QIL1 := eMetaPrettyPrint(M, T) /\
+      QIL2 := eMetaPrettyPrint(M, T') /\
+      QIL3 := eMetaPrettyPrint(M, C) /\
+      QIL4 := printCafeAtS(AtS) /\
+      QILL := printLabel(AtS) .
+
+  op printAddedEqLemmas : Module EquationSet -> QidList .
+  eq printAddedEqLemmas(M, none) = nil .
+  ceq printAddedEqLemmas(M, eq T = T' [AtS] . EqS) =
+                  ('\n '\t '\s '\s '\g 'eq QILL '\s '\o QIL1
+                   '\n '\t '\s '\s '\s '\s '\g '= '\s '\o QIL2
+                   '\s QIL3 '. '\b
+                   ' '--> 'Current 'instantiation 'of getLabel(AtS) '\o '\n
+                   printAddedEqLemmas(M, EqS))
+   if QIL1 := eMetaPrettyPrint(M, T) /\
+      QIL2 := eMetaPrettyPrint(M, T') /\
+      QIL3 := printCafeAtS(AtS) /\
+      QILL := printLabel(AtS) .
+  ceq printAddedEqLemmas(M, ceq T = T' if C [AtS] . EqS) =
+                  ('\n '\t '\s '\s '\g 'ceq QILL '\s '\o QIL1
+                   '\n '\t '\s '\s '\s '\s '\g '= '\s '\o QIL2
+                   '\n '\t '\s '\s '\s '\s '\g 'if '\o '\s QIL3
+                   '\s QIL4 '. '\b
+                   ' '--> 'Current 'instantiation 'of getLabel(AtS) '\o '\n
+                   printAddedEqLemmas(M, EqS))
+   if QIL1 := eMetaPrettyPrint(M, T) /\
+      QIL2 := eMetaPrettyPrint(M, T') /\
+      QIL3 := eMetaPrettyPrint(M, C) /\
+      QIL4 := printCafeAtS(AtS) /\
+      QILL := printLabel(AtS) .
+
+***(%
+\end{comment}
+}
+
+\item
+When printing rule lemmas, besides printing both sides, the label, and
+the attributes, we show an extra line indicating that it is a lemma added
+by the tool. Note that we print rules using CafeOBJ syntax for transitions:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op printAddedRlLemmas : Module RuleSet -> QidList .
+  ceq printAddedRlLemmas(M, rl T => T' [AtS] . RS) =
+                  ('\n '\t '\s '\s '\g 'trans QILL '\s '\o QIL1
+                   '\n '\t '\s '\s '\s '\s '\g '=> '\s '\o QIL2
+                   '\s QIL3 '. '\b
+                   ' '--> 'Current 'instantiation 'of getLabel(AtS) '\o '\n
+                   printAddedRlLemmas(M, RS))
+   if QIL1 := eMetaPrettyPrint(M, T) /\
+      QIL2 := eMetaPrettyPrint(M, T') /\
+      QIL3 := printCafeAtS(AtS) /\
+      QILL := printLabel(AtS) .
+
+***(%
+\end{verbatim}
+}
+{\codesize
+\begin{comment}
+%)
+
+  ceq printAddedRlLemmas(M, crl T => T' if C [AtS] . RS) =
+                  ('\n '\t '\s '\s '\g 'ctrans QILL '\s '\o QIL1
+                   '\n '\t '\s '\s '\s '\s '\g '=> '\s '\o QIL2
+                   '\n '\t '\s '\s '\s '\s '\g 'if '\o '\s QIL3
+                   '\s QIL4 '. '\b
+                   ' '--> 'Current 'instantiation 'of getLabel(AtS) '\o '\n
+                   printAddedRlLemmas(M, RS))
+   if QIL1 := eMetaPrettyPrint(M, T) /\
+      QIL2 := eMetaPrettyPrint(M, T') /\
+      QIL3 := eMetaPrettyPrint(M, C) /\
+      QIL4 := printCafeAtS(AtS) /\
+      QILL := printLabel(AtS) .
+  eq printAddedRlLemmas(M, none) = nil .
+
+  op getLabel : AttrSet ~> Qid .
+  eq getLabel(label(Q) AtS) = Q .
+
+***(%
+\end{comment}
+}
+
+\item
+Modules are printed by combining the functions for extra statements shown above
+and the printing functions from Section~\ref{subsec:pretty}:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op printCafeModuleGoal : Term Module Database Bool -> QidList .
+  ceq printCafeModuleGoal('cmod!_`{_`}[T, T'], M, DB, B) =
+              '\n 'mod! printCafeName(DB, M, T) '`{
+              '\n first(printCafeBody*(paramSortsMap(T', PL), M, DB, none, PL))
+              printExtraStmnts(M, B)
+              '\n '`}
+   if PL := paramNames(T) .
+  ceq printCafeModuleGoal('cmod*_`{_`}[T, T'], M, DB, B) =
+              '\n 'mod* printCafeName(DB, M, T) '`{
+              '\n first(printCafeBody*(paramSortsMap(T', PL), M, DB, none, PL))
+              printExtraStmnts(M, B)
+              '\n '`}
+   if PL := paramNames(T) .
+
+***(%
+\end{verbatim}
+}
+{\codesize
+\begin{comment}
+%)
+
+  op prettyPrintProofTreeAuxCafe : PTreeSet  Database Bool Term -> QidList .
+  eq prettyPrintProofTreeAuxCafe(empty, DB, B, T) = nil .
+  eq prettyPrintProofTreeAuxCafe(P PS, DB, B, T) =
+                          prettyPrintProofTreeCafe(P, DB, B, T)
+                          prettyPrintProofTreeAuxCafe(PS, DB, B, T) .
+
+***(%
+\end{comment}
+}
+
+\item
+The proof tree is printed by printing the current goal:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op prettyPrintProofTreeCafe : PTree Database Bool Term -> QidList .
+  eq prettyPrintProofTreeCafe([ Q ; G ; B' ; PS' ], DB, B, T) =
+  '============================ '\s 'GOAL Q '============================ '\n
+  (prettyPrintGoalCafe(G, DB, B, T)  '\b  (if B'
+                                        then 'proved
+                                        else 'unproved
+                                        fi ) '\o '\n ) .
+
+***(%
+\end{verbatim}
+}
+
+\item
+Finally, to print the goal we first check whether the whole module must be displayed.
+In this case we print it, otherwise only the extra statements are shown. Finally, the
+sentences composing the goal are shown:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op prettyPrintGoalCafe : Goal Database Bool Term -> QidList .
+  eq prettyPrintGoalCafe(< FM, ScS, L >, DB, B, T) =
+     ('< (if B then printCafeModuleGoal(T, FM, DB, true)
+          else ('Module '\g getName(FM) '\o 'is 'concealed '\n '... '\n
+                printAddedEqs(FM, getAddedEqs(getEqs(FM)))
+                printAddedRls(FM, getAddedRls(getRls(FM)))
+                printAddedEqLemmas(FM, getEqLemmas(getEqs(FM)))
+                printAddedRlLemmas(FM, getRlLemmas(getRls(FM)))
+               '\b 'end '\o '\n) fi ) '`, printSentencesCafe(FM, ScS) '>  '\n ) .
+  eq prettyPrintGoalCafe(G, DB, B, T) = ('Bad 'GOAL) [owise]  .
+endm
+
+***(%
+\end{verbatim}
+}
+
+\end{itemize}
+
+The module \verb"CAFE-UI" is in charge of implementing the rules required to
+execute the CITP commands for CafeOBJ specifications. We will only present the
+main rules and some examples of error handling:
+
+{\codesize
+\begin{verbatim}
+%)
+
+mod CAFE-UI is
+  pr CAFE2MAUDE-DATABASE-HANDLING .
+  pr CAFE-CITP-COMMANDS-PROC .
+  inc THM-DATABASE-HANDLING .
+
+***(%
+\end{verbatim}
+}
+
+{\codesize
+\begin{comment}
+%)
+
+  var  X@Database : CafeDatabaseClass .
+  vars ME ME' ME'' : ModuleExpression .
+  vars DB DB' DB'' : Database .
+  vars CPS CPS' : CritPairSet .
+  var  Atts : AttributeSet .
+  vars QIL QIL' : QidList .
+  vars T T' T'' T1 : Term .
+  vars TL TL' : TermList .
+  vars P P' P'' : PTree .
+  var  ODS : OpDeclSet .
+  var  CMD : Constant .
+  vars M M' : Module .
+  var  PS : PTreeSet .
+  var  RS : RuleSet .
+  var CP : CritPair .
+  vars Q GID : Qid .
+  vars G G' : Goal .
+  var  R : Rule .
+  var  B : Bool .
+  var  N : Nat .
+  var  O : Oid .
+
+***(%
+\end{comment}
+}
+
+This module defines a new attribute \verb"originalCafeModule" which is in charge of
+storing the original CafeOBJ specification used for the current goal. It is necessary
+to store it because the default module can be modified when introducing new modules
+during a proving session:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op originalCafeModule :_ : TermList -> Attribute [ctor] .
+
+***(%
+\end{verbatim}
+}
+
+The \verb"goal-Mod-cafe" rule processes a goal introduced by the user. It parses the
+module expression and looks for the module in the database. Once it is found, we
+check that it is a CafeOBJ specification with \verb"isCafeMod?". Then the sentences
+are parsed with the function \verb"procGoalsCafe" shown above and printed with
+\verb"prettyPrintProofTreeCafe". It also sets the \texttt{originalCafeModule}
+attribute to the selected module.
+%
+Note that we use an attribute \verb"language" with value \texttt{cafeobj}. It will be
+described in Section~\ref{subsec:citp:modifs}, but its behavior is clear: state that
+this rule is only applied if CafeOBJ is the selected specification language.
+
+%  ************************************************************
+%  ************************* NEW GOAL *************************
+%  ************************************************************
+
+{\codesize
+\begin{verbatim}
+%)
+
+  crl [goal-Mod-cafe] :
+      < O : X@Database | db : DB, input : ('goal_|-_[T, T']), output : nil,
+                         default : ME, pTree : P, currentGoal : GID, showMod : B,
+                         language : cafeobj, originalCafeModule : TL, Atts >
+   => < O : X@Database | db : DB, input : nilTermList,
+                         output : (if QIL == 'OK
+                                   then QIL'
+                                   else QIL
+                                   fi), default : ME, pTree : P',
+                         currentGoal : getDefaultGoalIndex(P'), showMod : B,
+                         language : cafeobj, originalCafeModule : T1, Atts >
+   if ME' := parseModExp(T) /\
+      < DB' ; ME'' > := evalModExp(ME', DB) /\
+      < T1 ; ODS ; M > := getTermModule(ME'', DB') /\
+      isCafeMod?(T1) /\
+      << DB'' ; P' ; QIL >> := procGoalsCafe(DB', ME'', T') /\
+      QIL' := prettyPrintProofTreeCafe(P', DB', B, T1) '\n '\g
+              'INFO: '\o 'an 'initial 'goal 'generated! .
+
+***(%
+\end{verbatim}
+}
+
+\noindent
+where the function \verb"isCafeMod?" just checks the operator at the top of the term:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op isCafeMod? : Term -> Bool .
+  eq isCafeMod?('cmod!_`{_`}[TL]) = true .
+  eq isCafeMod?('cmod*_`{_`}[TL]) = true .
+  eq isCafeMod?(T) = false [owise] .
+
+***(%
+\end{verbatim}
+}
+
+When the selected module does not correspond to a CafeOBJ specification, we use the
+rule \texttt{goal-Mod-cafe-error-module-type} to display an error message:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  crl [goal-Mod-cafe-error-module-type] :
+      < O : X@Database | db : DB, input : ('goal_|-_[T, T']), output : nil,
+                         language : cafeobj, Atts >
+   => < O : X@Database | db : DB, input : nilTermList,
+                         output : ('\r 'WARNING: '\o 'the 'selected 'module 'is 'not
+                                   'a 'CafeOBJ 'specification.),
+                         language : cafeobj, Atts >
+   if ME' := parseModExp(T) /\
+      < DB' ; ME'' > := evalModExp(ME', DB) /\
+      < null ; ODS ; M > := getTermModule(ME'', DB') .
+
+***(%
+\end{verbatim}
+}
+
+{\codesize
+\begin{comment}
+%)
+
+  crl [goal-Mod-cafe-error-module-type] :
+      < O : X@Database | db : DB, input : ('goal_|-_[T, T']), output : nil,
+                         language : cafeobj, Atts >
+   => < O : X@Database | db : DB, input : nilTermList,
+                         output : ('\n '\r 'WARNING: '\o 'the 'selected 'module 'is 'not
+                                   'a 'CafeOBJ 'specification. '\n),
+                         language : cafeobj, Atts >
+   if ME' := parseModExp(T) /\
+      < DB' ; ME'' > := evalModExp(ME', DB) /\
+      < T1 ; ODS ; M > := getTermModule(ME'', DB') /\
+      not isCafeMod?(T1) .
+
+  crl [goal-Mod-cafe-error-no-module] :
+      < O : X@Database | db : DB, input : ('goal_|-_[T, T']), output : nil,
+                         language : cafeobj, Atts >
+   => < O : X@Database | db : DB, input : nilTermList,
+                         output : ('\n '\r 'WARNING: '\o 'the 'selected 'module 'is 'not
+                                   'in 'the 'database. '\n),
+                         language : cafeobj, Atts >
+   if ME' := parseModExp(T) /\
+      < DB' ; ME'' > := evalModExp(ME', DB) /\
+      not unitInDb(ME'', DB') .
+
+***(%
+\end{comment}
+}
+
+The \verb"showGoal-cafe" rule displays the current goal by using the
+\texttt{prettyPrintProofTreeCafe} function:
+
+%  *************************************************************
+%  ************************* SHOW GOAL *************************
+%  *************************************************************
+
+{\codesize
+\begin{verbatim}
+%)
+
+  rl [showGoal-cafe] :
+     < O : X@Database | db : DB, input : ('show`goal`..@Command@),
+                        output : nil , pTree : P, currentGoal : GID,
+                        showMod : B, language : cafeobj,
+                        originalCafeModule : T, Atts >
+  => < O : X@Database | db : DB, input : nilTermList, currentGoal : GID,
+                        output : if GID =/= 'nil
+                                 then
+                                   prettyPrintProofTreeCafe(getPTree(P, GID), DB, B, T)
+                                 else
+                                   ('\r 'WARNING: '\o 'no 'goals 'to 'show!)
+                                 fi, pTree : P, showMod : B,
+                        language : cafeobj, originalCafeModule : T, Atts > .
+
+***(%
+\end{verbatim}
+}
+
+The \verb"showGoal-id-cafe" rule displays the goal selected by the user by applying the
+function \texttt{prettyPrintProofTreeCafe}:
+
+%  ****************************************************************
+%  ************************* SHOW GOAL ID *************************
+%  ****************************************************************
+
+{\codesize
+\begin{verbatim}
+%)
+
+  crl [showGoal-id-cafe] :
+      < O : X@Database | db : DB, input : ('show`goal_.['token[T]]),
+                         output : nil, pTree : P, currentGoal : GID,
+                         showMod : B, language : cafeobj,
+                         originalCafeModule : T', Atts >
+   => < O : X@Database | db : DB, input : nilTermList, currentGoal : downQidList(T),
+                         output : prettyPrintProofTreeCafe(P', DB, B, T'),
+                         pTree : P, showMod : B, language : cafeobj,
+                         originalCafeModule : T', Atts >
+   if P' := getPTree(P, downQidList(T)) .
+
+***(%
+\end{verbatim}
+}
+{\codesize
+\begin{comment}
+%)
+
+  crl [showGoal-id-cafe-error] :
+      < O : X@Database | db : DB, input : ('show`goal_.['token[T]]),
+                         output : nil, pTree : P, currentGoal : GID,
+                         language : cafeobj, Atts >
+   => < O : X@Database | db : DB, input : nilTermList, output : ('\r 'WARNING: '\o QIL),
+                         pTree : P, currentGoal : GID, language : cafeobj, Atts >
+   if ptreeErr(QIL) := getPTree(P, downQidList(T)) .
+
+***(%
+\end{comment}
+}
+
+%  **********************************************************************
+%  ************************* SHOW UNPROVED GOAL *************************
+%  **********************************************************************
+
+{\codesize
+\begin{comment}
+%)
+
+  crl [showUnprovedGoals-cafe] :
+      < O : X@Database | db : DB, input : ('show`unproved`goals`..@Command@),
+                         output : nil, pTree : P, currentGoal : GID, showMod : B,
+                         language : cafeobj, originalCafeModule : T,
+       Atts >
+   => < O : X@Database | db : DB, input : nilTermList,
+                         output : if PS =/= empty
+                                  then (prettyPrintProofTreeAuxCafe(PS, DB, B, T)
+                                        '\n '\g 'INFO: '\o (qid(string(num(PS), 10))
+                                        'goal '`( 's '`) ' 'unproved! '\n '\g 'INFO:
+                                        '\o 'Next 'goal 'to 'be 'proved 'is '\r
+                                        getDefaultGoalIndex(PS) '\o))
+                                  else ('\r 'WARNING: 'no 'goals!)
+                                  fi, pTree : P, currentGoal : getDefaultGoalIndex(PS),
+                         showMod : B, language : cafeobj, originalCafeModule : T, Atts >
+   if PS := unprovedGoals(P) .
+
+***(%
+\end{comment}
+}
+
+The \texttt{applyRule-cafe-not-finish} rule applies the given rule to the default goal.
+It first checks whether it is a valid rule. If true, then it is applied to the current
+goal and the new set of goals is displayed:
+
+%  **************************************************************
+%  ************************* APPLY RULE *************************
+%  **************************************************************
+
+{\codesize
+\begin{verbatim}
+%)
+
+  crl [applyRule-cafe-not-finished] :
+      < O : X@Database | db : DB, input : ('apply_.['bubble[T]]), output : nil,
+                         pTree : P, currentGoal : GID, tactic : N, showMod : B,
+                         language : cafeobj, originalCafeModule : T', Atts >
+   => < O : X@Database | db : DB, input   : nilTermList,
+                         output  : ('~~~~~~~~~~~~~~~~~~~~~~~ '\s '\s '\s '\s '\s '\s
+                                    'Generated 'GOALS '\s '\s '\s '\s '\s '\s
+                                    '~~~~~~~~~~~~~~~~~~~~~~~ '\n '\n
+                                    prettyPrintProofTreeAuxCafe((P'' PS), DB, B, T')
+                                    '\n '\g 'INFO: '\o (qid(string(num(P'' PS), 10))
+                                    'goal`(s`) 'generated! '\n '\g 'INFO: '\o 'Next
+                                    'goal 'to 'be 'proved 'is '\r
+                                    getDefaultGoalIndex(P'') '\o )),
+                         pTree : addPTreeSet(P, GID, (P'' PS)),
+                         currentGoal : getDefaultGoalIndex(P''), tactic : N,
+                         showMod : B, language : cafeobj, originalCafeModule : T',
+                         Atts >
+   if isValidRule(downQidList(T)) /\
+      P' := getPTree(P, GID) /\
+      (P'' PS) := applyRules(downQidList(T), P') .
+
+***(%
+\end{verbatim}
+}
+{\codesize
+\begin{comment}
+%)
+
+  crl [applyRule-cafe-finished] :
+      < O : X@Database | input : ('apply_.['bubble[T]]), output : nil, pTree : P,
+                         currentGoal : GID, language : cafeobj, Atts >
+   => < O : X@Database | input : nilTermList,
+                         output : ('\g 'INFO: '\o 'goal GID 'is 'proved '\n '\g
+                                   'INFO: '\o (if num(PS) == 0
+                                               then ('PROOF 'COMPLETED!)
+                                               else ('\r qid(string(num(PS), 10)) '\o
+                                                     'goal '`( 's '`) ' 'remained '\n
+                                                     '\g 'INFO: '\o 'Next 'goal 'to
+                                                     'be 'proved 'is '\r
+                                                     getDefaultGoalIndex(PS) '\o)
+                                                     fi )),
+                         pTree : P'', currentGoal : getDefaultGoalIndex(PS),
+                         language : cafeobj, Atts >
+   if isValidRule(downQidList(T)) /\
+      P' := getPTree(P, GID) /\
+      empty := applyRules(downQidList(T), P') /\
+      P'' := setGoalProved(P, GID)  /\
+      PS := unprovedGoals(P'') .
+
+  crl [applyRule-cafe-error-tree] :
+      < O : X@Database | input : ('apply_.['bubble[T]]), output : nil, pTree : P,
+                         currentGoal : GID, language : cafeobj, Atts >
+   => < O : X@Database | input : nilTermList, output : ('\r 'ERROR: '\o QIL),
+                         pTree : P, currentGoal : GID, language : cafeobj, Atts >
+   if isValidRule(downQidList(T)) /\
+      ptreeErr(QIL) := getPTree(P, GID) .
+
+  crl [applyRule-cafe-error-not-valid] :
+      < O : X@Database | input : ('apply_.['bubble[T]]), output : nil, pTree : P,
+                         currentGoal : GID, language : cafeobj, Atts >
+   => < O : X@Database | input : nilTermList,
+                         output : ('\r 'ERROR: '\o getInvalidTac(downQidList(T)) 'is
+                                   'not 'a 'valid 'proof 'rule '\n 'Valid 'proof
+                                   'rules: '\n ruleList), pTree : P,
+                         currentGoal : GID,  language : cafeobj, Atts >
+   if not isValidRule(downQidList(T)) .
+
+  crl [applyRule-cafe-error-apply] :
+      < O : X@Database | input : ('apply_.['bubble[T]]), output : nil ,
+                         pTree : P, currentGoal : GID, language : cafeobj, Atts >
+   => < O : X@Database | input : nilTermList, output : ('\r 'ERROR: '\o QIL ),
+                         pTree : P, currentGoal : GID, language : cafeobj, Atts >
+   if isValidRule(downQidList(T)) /\
+      P' := getPTree(P,GID) /\
+      applyError(QIL) := applyRules(downQidList(T), P') .
+
+***(%
+\end{comment}
+}
+
+% The \texttt{init-lemma-cafe} rule initializes a rule or transition by
+% using the substitution given in the command:
+
+%  **************************************************************
+%  ************************* INIT LEMMA *************************
+%  **************************************************************
+
+{\codesize
+\begin{comment}
+%)
+
+  crl [init-lemma-label-cafe] :
+      < O : X@Database | db : DB, input : ('init_by_.['token[T],'bubble[T']]),
+                         output : nil, pTree : P, currentGoal : GID,
+                         language : cafeobj, Atts >
+   =>  < O : X@Database | db : DB', input : if QIL == 'OK
+                                            then 'show`goal`..@Command@
+                                            else nilTermList
+                                            fi,
+                          output : if QIL == 'OK
+                                   then '\g 'INFO: '\o 'Lemma downQidList(T)
+                                        'is 'initialized! '\n
+                                   else QIL
+                                   fi,
+                          pTree : if QIL == 'OK
+                                  then replacePTree(P, GID, P')
+                                  else P
+                                  fi, currentGoal : GID, language : cafeobj, Atts >
+   if GID =/= 'nil /\
+      << DB' ; P' ; QIL >> := procInitLemmaCafe(DB, getPTree(P,GID), downQidList(T),
+                                                downQidList(T')) .
+
+  crl [init-lemma-eq-cafe] :
+      < O : X@Database | db : DB, input : ('init_by_.[Q[TL],'bubble[T']]), output : nil,
+                         pTree : P, currentGoal : GID, language : cafeobj, Atts >
+   => < O : X@Database | db : DB', input : (if QIL == 'OK
+                                            then 'show`goal`..@Command@
+                                            else nilTermList
+                                            fi),
+                         output : (if QIL == 'OK
+                                   then ('\g 'INFO: '\o 'Lemma 'is 'initialized! '\n)
+                                   else QIL
+                                   fi),
+                         pTree : (if QIL == 'OK
+                                  then replacePTree(P,GID,P')
+                                  else P
+                                  fi ), currentGoal : GID, language : cafeobj, Atts >
+   if (Q == 'eq_=_. or-else Q == 'ceq_=_if_. or-else Q == 'cq_=_if_.) /\
+      GID =/= 'nil /\
+      << DB' ; P' ; QIL >> := procInitLemmaCafe(DB,getPTree(P,GID),parseEq(Q[TL]),
+                                                downQidList(T')) .
+
+  crl [init-lemma-rl-cafe] :
+      < O : X@Database | db : DB, input : ('init_by_.[Q[TL],'bubble[T']]),
+                         output : nil, pTree : P, currentGoal : GID,
+                         language : cafeobj, Atts >
+   => < O : X@Database | db : DB', input : (if QIL == 'OK
+                                            then 'show`goal`..@Command@ else
+                                            nilTermList
+                                            fi),
+                         output : (if QIL == 'OK
+                                   then ('\g 'INFO: '\o 'Lemma 'is 'initialized! '\n)
+                                   else QIL
+                                   fi),
+                         pTree : (if QIL == 'OK
+                                  then replacePTree(P,GID,P')
+                                  else P
+                                  fi), currentGoal : GID, language : cafeobj, Atts >
+   if (Q == 'trans_=>_. or-else Q == 'trns_=>_. or-else
+       Q == 'ctrans_=>_if_. or-else Q == 'ctrns_=>_if_.) /\
+      GID =/= 'nil /\
+      << DB' ; P' ; QIL >> := procInitLemmaCafe(DB, getPTree(P,GID), parseTrans(Q[TL]),
+                                                downQidList(T')) .
+
+
+  op parseTrans : Term ~> RuleSet .
+  eq parseTrans('trans_=>_.[T, T']) = rl T => T' [none] . .
+  eq parseTrans('trns_=>_.[T, T']) = rl T => T' [none] . .
+  eq parseTrans('ctrans_=>_if_.[T, T', T'']) =
+                          crl T => T' if T'' = 'true.Bool [none] . .
+  eq parseTrans('ctrns_=>_if_.[T, T', T'']) =
+                          crl T => T' if T'' = 'true.Bool [none] . .
+  ceq parseTrans('__[T,T']) = R RS
+   if R := parseTrans(T) /\ RS := parseTrans(T') .
+  eq parseTrans('__[T,T']) = ruleError('Bad 'goal)  [owise] .
+
+
+  crl [init-lemma-cp] :
+      < O : X@Database | db : DB, input : ('init_by_.['token[T],'bubble[T']]),
+                         output : nil , pTree : P, currentGoal : GID, critPair : none,
+                         language : cafeobj, Atts >
+   => < O : X@Database | db : DB', input : nilTermList,
+                         output : ('\g 'INFO: '\o 'Non-confluence 'occurred 'after
+                                   'initializing 'lemma downQidList(T) '! '\n QIL '\n
+                                   '\n '\g 'INFO '\o 'use 'command '\r 'discard
+                                   'critical 'pair '\o 'to 'make 'module 'confluent
+                                   '\n 'or 'command '\r 'ignore '\o 'to 'ignore 'the
+                                   'non-confluence '\n) ,
+                         pTree : replacePTree(P, GID, P'), critPair : CPS,
+                         currentGoal : GID, language : cafeobj, Atts >
+   if GID =/= 'nil /\
+      << DB' ; P' ; QIL ; CPS >> := procInitLemma(DB, getPTree(P, GID),
+                                                  downQidList(T), downQidList(T')) .
+
+  rl [init-lemmar-noGoal-cafe] :
+     < O : X@Database | input : ('init_by_.['token[T],'bubble[T']]), output : nil,
+                        currentGoal : 'nil, language : cafeobj, Atts >
+  => < O : X@Database | input : nilTermList,
+                        output : ('\r 'ERROR: '\o 'No 'goal 'is 'specified!) ,
+                        currentGoal : 'nil, language : cafeobj, Atts > .
+
+***(%
+\end{comment}
+}
+
+% We define next the rules for dealing with critical pairs:
+
+%  ******************************************************************
+%  ************************* CRITICAL PAIRS *************************
+%  ******************************************************************
+
+{\codesize
+\begin{comment}
+%)
+
+  crl [critical-pair-cafe] :
+      < O : X@Database | db : DB, input : ('discard`critical`pair`..@Command@),
+                         output : nil, critPair : (CP CPS), pTree : P,
+                         currentGoal : GID, answerMode : B, language : cafeobj, Atts >
+   => < O : X@Database | db : DB, input : nilTermList,
+                         output : (eMetaPrettyPrint(M,'=>, CP) '\n '\g 'Question:
+                                   '\o 'add 'as '\r 'equation '\o 'or '\r
+                                   'transition '\o '? ),
+                         critPair : (CP CPS), currentGoal : GID, answerMode : true,
+                         pTree : P, language : cafeobj, Atts >
+   if M := getModuleinGoal(getGoalinTree(P,GID)) .
+
+  crl [critical-pair-cafe-eq] :
+      < O : X@Database | db : DB, input : ('equation`..@Command@), output : nil,
+                         critPair : (CP CPS), pTree : P, currentGoal : GID,
+                         answerMode : true, showMod : B, language : cafeobj,
+                         originalCafeModule : T, Atts >
+   => < O : X@Database | db : DB, input : if CPS == none
+                                          then nilTermList
+                                          else 'discard`critical`pair`..@Command@
+                                          fi,
+                         critPair : CPS, output : prettyPrintGoalCafe(G', DB, B, T),
+                         answerMode : (CPS =/= none), pTree : setGoalinTree(P,GID,G'),
+                         currentGoal : GID, showMod : B, language : cafeobj,
+                         originalCafeModule : T, Atts >
+   if GID =/= 'nil /\
+      G := getGoalinTree(P, GID) /\
+      M := addEqs(eq(CP, true), getModuleinGoal(G)) /\
+      G' := setModuleinGoal(G, M) .
+
+  crl [critical-pair-cafe-back-eq] :
+      < O : X@Database | db : DB, input : ('backward`equation`..@Command@),
+                         output : nil, critPair : (CP CPS), pTree : P,
+                         currentGoal : GID, answerMode : true, showMod : B,
+                         language : cafeobj, originalCafeModule : T, Atts >
+   => < O : X@Database | db : DB, input : if CPS == none
+                                          then nilTermList
+                                          else 'discard`critical`pair`..@Command@
+                                          fi,
+                         output : if CPS == none
+                                  then ('\n '\g 'INFO: '\o 'All 'critical 'pairs
+                                        'are 'discarded '\n '\n
+                                        prettyPrintGoalCafe(G', DB, B, T))
+                                  else nil
+                                  fi,
+                         critPair : CPS, answerMode : (CPS =/= none),
+                         pTree : setGoalinTree(P,GID,G'), currentGoal : GID,
+                         showMod : B, language : cafeobj, originalCafeModule : T, Atts >
+   if GID =/= 'nil /\
+      G := getGoalinTree(P, GID) /\
+      M := addEqs(eq(CP, false), getModuleinGoal(G)) /\
+      G' := setModuleinGoal(G, M) .
+
+
+  crl [critical-pair-cafe-trans] :
+      < O : X@Database | db : DB, input : ('transition`..@Command@), output : nil,
+                         critPair : (CP CPS), pTree : P, currentGoal : GID,
+                         answerMode : true, showMod : B, language : cafeobj,
+                         originalCafeModule : T, Atts >
+   => < O : X@Database | db : DB, input : if CPS == none
+                                          then nilTermList
+                                          else 'discard`critical`pair`..@Command@
+                                          fi,
+                         output : if CPS == none
+                                  then ('\n '\g 'INFO: '\o 'All 'critical 'pairs
+                                        'are 'discarded '\n '\n
+                                        prettyPrintGoalCafe(G', DB, B, T))
+                                  else nil fi, critPair : CPS,
+                         answerMode : (CPS =/= none), pTree : setGoalinTree(P,GID,G'),
+                         currentGoal : GID, showMod : B, language : cafeobj,
+                         originalCafeModule : T, Atts >
+   if GID =/= 'nil /\
+      G := getGoalinTree(P, GID) /\
+      M := addRls(rl(CP, true), getModuleinGoal(G)) /\
+      G' := setModuleinGoal(G, M) .
+
+  crl [critical-pair-cafe-back-trans] :
+      < O : X@Database | db : DB, input : ('backward`transition`..@Command@),
+                         output : nil, critPair : (CP CPS), pTree : P,
+                         currentGoal : GID, answerMode : true, showMod : B,
+                         language : cafeobj, originalCafeModule : T, Atts >
+   => < O : X@Database | db : DB, input : if CPS == none
+                                          then nilTermList
+                                          else 'discard`critical`pair`..@Command@
+                                          fi,
+                         output : if CPS == none
+                                  then ('\n '\g 'INFO: '\o 'All 'critical 'pairs
+                                        'are 'discarded '\n '\n
+                                        prettyPrintGoalCafe(G', DB, B, T)) else nil
+                                  fi,
+                         critPair : CPS, answerMode : (CPS =/= none),
+                         pTree : setGoalinTree(P, GID, G'), currentGoal : GID,
+                         showMod : B, language : cafeobj, originalCafeModule : T, Atts >
+   if GID =/= 'nil /\
+      G := getGoalinTree(P, GID) /\
+      M := addRls(rl(CP, false), getModuleinGoal(G)) /\
+      G' := setModuleinGoal(G, M) .
+
+  rl [ignore-cafe] :
+     < O : X@Database | db : DB, input : ('ignore`..@Command@), output : nil,
+                        critPair : (CP CPS), answerMode : true, language : cafeobj,
+                        Atts >
+  => < O : X@Database | db : DB, input : if CPS == none
+                                         then nilTermList
+                                         else 'discard`critical`pair`..@Command@
+                                         fi,
+                        output : if CPS == none
+                                 then ('\n '\g 'INFO: '\o 'All 'critical 'pairs
+                                       'are 'discarded)
+                                 else nil
+                                 fi, critPair : CPS, answerMode : (CPS =/= none),
+                        language : cafeobj, Atts > .
+
+  crl [answerMode-cafe] :
+      < O : X@Database | input : CMD, output : nil, answerMode : true,
+                         language : cafeobj, Atts >
+   => < O : X@Database | input : nilTermList, output : ('\r 'WARNING: '\o 'please
+                                                        'answer '\r 'equation '\o
+                                                        'or '\r 'transition '\o '\n),
+                         answerMode : true, language : cafeobj, Atts >
+   if CMD =/= 'equation`..@Command@ /\ CMD =/= 'transition`..@Command@ /\
+      CMD =/= 'ignore`..@Command@ /\ CMD =/= 'backward`equation`..@Command@ /\
+      CMD =/= 'backward`transition`..@Command@ .
+
+
+  crl [nonAnswerMode-cafe] :
+      < O : X@Database | input : CMD, output : nil, answerMode : false,
+                         language : cafeobj, Atts >
+   => < O : X@Database | input : nilTermList, output : ('\r 'ERROR: '\o 'No 'critical
+                                                        'pair 'to 'discard '\n),
+                         answerMode : false, language : cafeobj, Atts >
+   if CMD == 'transition`..@Command@ or-else CMD == 'equation`..@Command@ or-else
+      CMD == 'ignore`..@Command@ or-else CMD == 'backward`equation`..@Command@ or-else
+      CMD == 'backward`transition`..@Command@ .
+
+  crl [crit-pair-cafe-terms] :
+      < O : X@Database | db : DB, input : ('cp_><_[T,T']), output : nil,
+                         pTree : P, currentGoal : GID, answerMode : B,
+                         critPair : CPS', language : cafeobj, Atts >
+   => < O : X@Database | db : DB, input : nilTermList,
+                         output : ('\g 'INFO: '\o if CPS == none
+                                                  then ('No 'critical 'pairs)
+                                                  else eMetaPrettyPrint(M, '=>, CPS)
+                                                  fi),
+                         pTree : P, currentGoal : GID, critPair : CPS,
+                         answerMode : if CPS == none then B else true fi,
+                         language : cafeobj, Atts >
+   if M := getModuleinGoal(getGoalinTree(P, GID)) /\
+      CPS := procCPCmd(DB, M, T, T')  .
+
+  crl [crit-pair-cafe-label] :
+      < O : X@Database | db : DB, input : ('cp_><_.['token[T],'token[T']]),
+                         output : nil, pTree : P, currentGoal : GID, answerMode : B,
+                         critPair : CPS', language : cafeobj, Atts >
+   => < O : X@Database | db : DB, input : nilTermList,
+                         output : ('\g 'INFO: '\o if CPS == none
+                                                  then ('No 'critical 'pairs)
+                                                  else eMetaPrettyPrint(M,'=>,CPS)
+                                                  fi),
+                         pTree : P, currentGoal : GID, critPair : CPS,
+                         answerMode : if CPS == none
+                                      then B
+                                      else true
+                                      fi,
+                         language : cafeobj, Atts >
+   if M := getModuleinGoal(getGoalinTree(P,GID)) /\
+      CPS := procCPCmdLabel(M,downQidList(T),downQidList(T'))  .
+
+  crl [crit-pair-cafe-label-error] :
+      < O : X@Database | db : DB, input : ('cp_><_.['token[T],'token[T']]),
+                         output : nil, pTree : P, currentGoal : GID,
+                         language : cafeobj, Atts >
+   => < O : X@Database | db : DB, input : nilTermList, output : ('\r 'ERROR: '\o QIL),
+                         pTree : P, currentGoal : GID, language : cafeobj, Atts >
+   if M := getModuleinGoal(getGoalinTree(P, GID)) /\
+      cpError(QIL) := procCPCmdLabel(M, downQidList(T), downQidList(T'))  .
+
+
+
+  crl [crit-pair-term-error] :
+      < O : X@Database | db : DB, input : ('cp_><_[T,T']), output : nil, pTree : P,
+                         currentGoal : GID, language : cafeobj, Atts >
+   => < O : X@Database | db : DB, input : nilTermList, output : ('\r 'ERROR: '\o  QIL),
+                         pTree : P, currentGoal : GID, language : cafeobj, Atts >
+   if M := getModuleinGoal(getGoalinTree(P, GID)) /\
+      cpError(QIL) := procCPCmd(DB, M, T, T') .
+
+***(%
+\end{comment}
+}
+
+Finally, we define a constant with the initial values of the attributes related to
+CafeOBJ specifications:
+
+%  ***********************************************************************
+%  ************************* AUXILIARY FUNCTIONS *************************
+%  ***********************************************************************
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op initCafeAttS : -> AttributeSet .
+  eq initCafeAttS = strict : false, originalCafeModule : empty .
+endm
+
+***(%
+
+\end{verbatim}
+}
+%)

@@ -1,0 +1,18 @@
+open CLOUD .
+  :id(proofCLOUD)
+
+  ops i j : -> Client .
+
+  red inv1(S:Sys, i) .
+  red inv2(S:Sys, i) .
+  red inv3(S:Sys, i, j) .
+  red inv4(S:Sys, i, j) .
+  red inv5(S:Sys, i) .
+  red inv6(S:Sys, i) .
+  red inv7(S:Sys, i, j) .
+close
+
+open CLOUD .
+  :infer(proofCLOUD)
+close
+

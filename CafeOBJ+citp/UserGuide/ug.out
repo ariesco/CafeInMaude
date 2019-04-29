@@ -1,0 +1,13 @@
+\BOOKMARK [1][-]{section.1}{Introducing CafeOBJ modules into the Full Maude database}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{Configuring the tool}{section.1}% 2
+\BOOKMARK [2][-]{subsection.1.2}{Using the tool}{section.1}% 3
+\BOOKMARK [1][-]{section.2}{Using the Constructor-based Inductive Theorem Prover }{}% 4
+\BOOKMARK [1][-]{appendix.A}{Translation}{}% 5
+\BOOKMARK [2][-]{subsection.A.1}{Built-in modules}{appendix.A}% 6
+\BOOKMARK [2][-]{subsection.A.2}{Types of modules}{appendix.A}% 7
+\BOOKMARK [2][-]{subsection.A.3}{Parameterized modules and views}{appendix.A}% 8
+\BOOKMARK [2][-]{subsection.A.4}{Importations}{appendix.A}% 9
+\BOOKMARK [2][-]{subsection.A.5}{Operators}{appendix.A}% 10
+\BOOKMARK [2][-]{subsection.A.6}{Equations}{appendix.A}% 11
+\BOOKMARK [2][-]{subsection.A.7}{Rules}{appendix.A}% 12
+\BOOKMARK [1][-]{appendix.B}{Transforming CafeOBJ files to meet Full Maude requirements}{}% 13

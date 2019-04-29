@@ -1,0 +1,204 @@
+load abp
+
+*** GOAL:     ABP |- {inv1,inv2,inv3,inv4}
+*** Apply Simultaneous Induction
+*** SUBGOALs: 1. ABP |- invk[S <- init]
+***           2. INV |- invk[S <- ctor(z)]
+*** where INV is defined as follows:
+
+(th INV is inc ABP .
+ vars B B' : Bit .
+ vars P P' : Packet .
+ vars C1 C2 C3 : Channel1 .
+ vars D1 D2 D3 : Channel2 .
+ op z : -> Sys .
+ crl [inv1] : B' => bit1(z)     if C1,< B,P >,C2,< B',P' >,C3 := channel1(z) /\ B = bit1(z) .
+ crl [inv2] : B  => bit1(z)     if C1,< B,P >,C2 := channel1(z) /\  bit2(z) = bit1(z).
+ ceq [inv3] : bit2(z) = bit1(z) if D1,B,D2 := channel2(z) /\ B = bit1(z).
+ crl [inv4] : B' => bit1(z)     if D1,B,D2,B',D3 := channel2(z) /\ B = bit1(z).
+endth)
+
+***  1. ABP |- invk[S <- init] ***
+
+--- inv1[init] ----
+(goal ABP |- crl B1:Bit => bit1(init)
+  if C1:Channel1,< B:Bit,P:Packet >,C2:Channel1,< B1:Bit,P1:Packet >,C3:Channel1 := channel1(init) /\ B:Bit = bit1(init) ;)
+
+(auto .)
+
+--- inv2[init] ----
+(goal ABP |- crl B:Bit => bit1(init) if C1:Channel1,< B:Bit,P:Packet >,C2:Channel1 := channel1(init) /\ bit1(init) = bit1(init) ;)
+
+(auto .)
+
+--- inv3[init] ----
+(goal ABP |- crl bit2(init) => bit1(init) if C2:Channel2,B:Bit,C2:Channel2 := channel2(init) /\ B:Bit = bit1(init) ;)
+
+(auto .)
+
+--- inv4[init] ----
+(goal ABP |- crl B':Bit => bit1(init) if D1:Channel2,B:Bit,D2:Channel2,B':Bit,D3:Channel2 := channel2(init) /\ B:Bit = bit1(init) ;)
+
+(auto .)
+
+*** 2. INV |- invk[S <- ctor(z)] ***
+
+*** we have  INV |- true => false if not bit1(z) => bit1(z)
+*** we prove INV + {true => false if not bit1(z) => bit1(z)} |- invk[S <- ctor(z)]
+
+(th INV-L is
+ inc INV .
+ crl true => false if not bit1(z) => bit1(z) .
+endth)
+
+*** GOALs: INV-L |- invk[S <- ctor(z)] ***
+
+--- inv1[rec1(z)] ----
+(goal INV-L |- crl B1:Bit => bit1(rec1(z))
+ if C1:Channel1,< B:Bit,P:Packet >,C2:Channel1,< B1:Bit,P1:Packet >,C3:Channel1 := channel1(rec1(z)) /\ B:Bit = bit1(rec1(z)) ;)
+
+(auto .)
+
+--- inv1[rec2(z)] ----
+(goal INV-L |- crl B1:Bit => bit1(rec2(z))
+ if C1:Channel1,< B:Bit,P:Packet >,C2:Channel1,< B1:Bit,P1:Packet >,C3:Channel1 := channel1(rec2(z)) /\ B:Bit = bit1(rec2(z)) ;)
+
+(auto .)
+
+--- inv1[send1(z)] ----
+(goal INV-L |- crl B1:Bit => bit1(send1(z))
+if C1:Channel1,< B:Bit,P:Packet >,C2:Channel1,< B1:Bit,P1:Packet >,C3:Channel1 := channel1(send1(z)) /\ B:Bit = bit1(send1(z)) ;)
+
+(auto .)
+
+--- inv1[send2(z)] ----
+(goal INV-L |- crl B1:Bit => bit1(send2(z))
+ if C1:Channel1,< B:Bit,P:Packet >,C2:Channel1,< B1:Bit,P1:Packet >,C3:Channel1 := channel1(send2(z)) /\ B:Bit = bit1(send2(z)) ;)
+
+(auto .)
+
+--- inv1[drop1(z)] ----
+(goal INV-L |- crl B1:Bit => bit1(drop1(z))
+ if C1:Channel1,< B:Bit,P:Packet >,C2:Channel1,< B1:Bit,P1:Packet >,C3:Channel1 := channel1(drop1(z)) /\ B:Bit = bit1(drop1(z)) ;)
+
+(auto .)
+
+--- inv1[drop2(z)] ----
+(goal INV-L |- crl B1:Bit => bit1(drop2(z))
+ if C1:Channel1,< B:Bit,P:Packet >,C2:Channel1,< B1:Bit,P1:Packet >,C3:Channel1 := channel1(drop2(z)) /\ B:Bit = bit1(drop2(z)) ;)
+
+(auto .)
+
+*** INV-L |- inv2[S <- ctor(z)] ***
+
+--- inv2[rec1(z)] ----
+(goal INV-L |- crl B:Bit  => bit1(rec1(z))
+     if C1:Channel1,< B:Bit,P:Packet >,C2:Channel1 := channel1(rec1(z)) /\  bit2(rec1(z)) = bit1(rec1(z));)
+
+(auto .)
+
+--- inv2[rec2(z)] ----
+(goal INV-L |- crl B:Bit  => bit1(rec2(z))
+  if C1:Channel1,< B:Bit,P:Packet >,C2:Channel1 := channel1(rec2(z)) /\  bit2(rec2(z)) = bit1(rec2(z)) ;)
+
+(auto .)
+
+--- inv2[send1(z)] ----
+(goal INV-L |- crl B:Bit  => bit1(send1(z))
+  if C1:Channel1,< B:Bit,P:Packet >,C2:Channel1 := channel1(send1(z)) /\  bit2(send1(z)) = bit1(send1(z)) ;)
+
+(auto .)
+
+--- inv2[send2(z)] ----
+(goal INV-L |- crl B:Bit  => bit1(send2(z))
+   if C1:Channel1,< B:Bit,P:Packet >,C2:Channel1 := channel1(send2(z)) /\  bit2(send2(z)) = bit1(send2(z)) ;)
+
+(auto .)
+
+--- inv2[drop1(z)] ----
+(goal INV-L |- crl B:Bit  => bit1(drop1(z))
+  if C1:Channel1,< B:Bit,P:Packet >,C2:Channel1 := channel1(drop1(z)) /\  bit2(drop1(z)) = bit1(drop1(z)) ;)
+
+(auto .)
+
+--- inv2[drop2(z)] ----
+(goal INV-L |- crl B:Bit  => bit1(drop2(z))
+  if C1:Channel1,< B:Bit,P:Packet >,C2:Channel1 := channel1(drop2(z)) /\  bit2(drop2(z)) = bit1(drop2(z)) ;)
+
+(auto .)
+
+*** INV-L |- inv3[S <- ctor(z)] ***
+
+--- inv3[rec1(z)] ----
+(goal INV-L |- crl bit2(rec1(z)) => bit1(rec1(z))
+  if C2:Channel2,B:Bit,C2:Channel2 := channel2(rec1(z)) /\ B:Bit = bit1(rec1(z)) ;)
+
+(auto .)
+
+--- inv3[rec2(z)] ----
+(goal INV-L |- crl bit2(rec2(z)) => bit1(rec2(z))
+   if C2:Channel2,B:Bit,C2:Channel2 := channel2(rec2(z)) /\ B:Bit = bit1(rec2(z)) ;)
+
+(auto .)
+
+--- inv3[send1(z)] ----
+(goal INV-L |- crl bit2(send1(z)) => bit1(send1(z))
+   if C2:Channel2,B:Bit,C2:Channel2 := channel2(send1(z)) /\ B:Bit = bit1(send1(z)) ;)
+
+(auto .)
+
+--- inv3[send2(z)] ----
+(goal INV-L |- crl bit2(send2(z)) => bit1(send2(z))
+  if C2:Channel2,B:Bit,C2:Channel2 := channel2(send2(z)) /\ B:Bit = bit1(send2(z)) ;)
+
+(auto .)
+
+--- inv3[drop1(z)] ----
+(goal INV-L |- crl bit2(drop1(z)) => bit1(drop1(z))
+ if C2:Channel2,B:Bit,C2:Channel2 := channel2(drop1(z)) /\ B:Bit = bit1(drop1(z)) ;)
+
+(auto .)
+
+--- inv3[drop2(z)] ----
+(goal INV-L |- crl bit2(drop2(z)) => bit1(drop2(z))
+  if C2:Channel2,B:Bit,C2:Channel2 := channel2(drop2(z)) /\ B:Bit = bit1(drop2(z)) ;)
+
+(auto .)
+
+*** INV-L |- inv4[S <- ctor(z)] ***
+
+--- inv4[rec1(z)] ----
+(goal INV-L |- crl B':Bit => bit1(rec1(z))
+   if D1:Channel2,B:Bit,D2:Channel2,B':Bit,D3:Channel2 := channel2(rec1(z)) /\ B:Bit = bit1(rec1(z)) ;)
+
+(auto .)
+
+--- inv4[rec2(z)] ----
+(goal INV-L |- crl B':Bit => bit1(rec2(z))
+  if D1:Channel2,B:Bit,D2:Channel2,B':Bit,D3:Channel2 := channel2(rec2(z)) /\ B:Bit = bit1(rec2(z)) ;)
+
+(auto .)
+
+--- inv4[send1(z)] ----
+(goal INV-L |- crl B':Bit => bit1(send1(z))
+  if D1:Channel2,B:Bit,D2:Channel2,B':Bit,D3:Channel2 := channel2(send1(z)) /\ B:Bit = bit1(send1(z)) ;)
+
+(auto .)
+
+--- inv4[send2(z)] ----
+(goal INV-L |- crl B':Bit => bit1(send2(z))
+  if D1:Channel2,B:Bit,D2:Channel2,B':Bit,D3:Channel2 := channel2(send2(z)) /\ B:Bit = bit1(send2(z)) ;)
+
+(auto .)
+
+--- inv4[drop1(z)] ----
+(goal INV-L |- crl B':Bit => bit1(drop1(z))
+  if D1:Channel2,B:Bit,D2:Channel2,B':Bit,D3:Channel2 := channel2(drop1(z)) /\ B:Bit = bit1(drop1(z)) ;)
+
+(auto .)
+
+--- inv4[drop2(z)] ----
+(goal INV-L |- crl B':Bit => bit1(drop2(z))
+  if D1:Channel2,B:Bit,D2:Channel2,B':Bit,D3:Channel2 := channel2(drop2(z)) /\ B:Bit = bit1(drop2(z)) ;)
+
+(auto .)
