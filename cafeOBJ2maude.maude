@@ -5809,7 +5809,7 @@ the \verb"maps2maps" function shown above to the body:
   eq noneCtor(M, T) = noneCtor(getOps(M), T) .
 
   op noneCtor : OpDeclSet Term -> Bool .
-  eq noneCtor(ODS, V) = true .
+  eq noneCtor(ODS, V) = false .
   ceq noneCtor(op Q : nil -> Ty [ctor AtS] . ODS, C) = false
    if Q := getName(C) .
   ceq noneCtor(op Q : nil -> Ty [AtS] . ODS, C) = true
