@@ -1701,6 +1701,4 @@ open CLOUD .
 			:imp [proofCLOUD4] by {i:Client <- i@Client ;}
 
 			:apply (rd)
-
-
 close

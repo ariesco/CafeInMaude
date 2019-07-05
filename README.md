@@ -1,4 +1,4 @@
-Cafe4Maude: A translation from CafeOBJ into Maude
+CafeInMaude: A translation from CafeOBJ into Maude
 =================================================
 
 CafeInMaude is a tool to introduce CafeOBJ specifications into the Maude system.
@@ -38,7 +38,7 @@ The **cafeOBJ2maude.maude** file is experimental, so we recommend to replace thi
 Using the tool
 --------------
 
-1. In order to use the easiest way it to configure the **cafe2maude** script by
+1. The easiest way to use CafeInMaude is to configure the **cafe2maude** script by
 editing the location of the Maude binary in the variable *MAUDE*. It is assumed that
 the Full Maude file is accessible in the folder where Maude is located or in the current
 folder.
