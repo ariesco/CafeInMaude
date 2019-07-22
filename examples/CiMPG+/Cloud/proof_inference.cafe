@@ -1,19 +1,6 @@
 open CLOUD .
   :id(proofCLOUD)
 
-  op  S : -> Sys .
-  ops i j C : -> Client .
-
-  eq statusp(S,C) = gotval .
-
-  red inv1(getval(S, C), i) .
-close
-
-eof
-
-open CLOUD .
-  :id(proofCLOUD)
-
   ops i j : -> Client .
 
   red inv1(S:Sys, i) .
