@@ -3125,7 +3125,7 @@ a list of quoted identifiers reporting the errors found during the parsing proce
 %)
 
   vars TL TL' TL'' PL PL' TLR TL1 TL2 TL3 : TermList .
-  vars T T' T'' T''' T1 T2 T3 T4 T5 T6 TP TI : Term .
+  vars T T' T'' T''' T1 T2 T3 T4 T5 T6 T7 TP TI : Term .
   vars PrL PrL' PrL'' PrL1 PrL2 : ProofTreeList .
   vars S S' S'' S''' St St' St'' St''' : String .
   vars SIS SIS' SIS1 SIS2 : ScoreInfoSet .
@@ -4398,12 +4398,6 @@ the \verb"maps2maps" function shown above to the body:
       T'' := qid(substr(string(Ty), 0, 1) + string(N, 10) + St + string(Ty) + "." + string(Ty)) .
   eq joinConstantsESV(TL, St, N) = TL [owise] .
 
-***(
-  op natlist2string : NatList -> String .
-  eq natlist2string(nil) = "" .
-  eq natlist2string(N NL) = string(N, 10) + natlist2string(NL) .
-  )
-
   op buildVSS : Module Type String -> TermList .
   ceq buildVSS(M, Ty, St) = TL', TL
    if ODS := getExactCtors(M, Ty) /\
@@ -5376,7 +5370,7 @@ the \verb"maps2maps" function shown above to the body:
             else P
             fi [print "Imp forgotten\n"] .
   eq inferNewProof(P, NL y PO, SIS, MACS) =
-                 createNewProof(P, NL y PO, SIS, MACS, 5) [owise print "Infer proof for " NL] .
+                 createNewProof(P, NL y PO, SIS, MACS, backtrackLevels) [owise print "Infer proof for " NL] .
 
   ---------------------------------------------------------------------------------------
   ---                                createNewProof                                   ---
@@ -5440,7 +5434,8 @@ the \verb"maps2maps" function shown above to the body:
       not redForgotten(M, T) /\
       TL := getHypotheses(M) /\
       [IPL, false] := tryImplication(M, T, TL) /\
-      [QIL, MACS', true] := tryCaseSplitting([M, T, s(N)], MACS, nil, "Goal " + natlist2stringNoDot(NL), 1)
+      [QIL, MACS', true] := tryCaseSplitting([M, T, s(N)], MACS, nil,
+                                             "Goal " + natlist2stringNoDot(NL), 1, NL)
         [print "Inference correct "] .
 
   op natlist2stringNoDot : NatList -> String .
@@ -5459,7 +5454,7 @@ the \verb"maps2maps" function shown above to the body:
       not redForgotten(M, T) /\
       TL := getHypotheses(M) /\
       [IPL, false] := tryImplication(M, T, TL) /\
-      [QIL, MACS', false] := tryCaseSplitting([M, T, s(N)], MACS, nil, "Goal 1", 1)
+      [QIL, MACS', false] := tryCaseSplitting([M, T, s(N)], MACS, nil, "Goal 1", 1, NL)
         [owise print "Inference failure " NL] .
 
   eq createNewProof(P, NL y PO, SIS, MACS, N) =
@@ -5469,137 +5464,296 @@ the \verb"maps2maps" function shown above to the body:
             else '\t ':postpone '. '\n '\n
             fi [owise print "Final postpone " NL] .
 
-*** TODO: Check case splitting not used for that term?
-
   *** Goal to prove
   *** Current SIS
   *** Success QidList
   *** Failure QidList
   *** Indentation
-  op tryCaseSplitting : IT Macros QidList String Nat -> IR .
-  ceq tryCaseSplitting([M, T, N], MACS, QILR, S, INDENT) = [QILR QIL, MACS, true]
+  op tryCaseSplitting : IT Macros QidList String Nat NatList -> IR .
+  ceq tryCaseSplitting([M, T, N], MACS, QILR, S, INDENT, NL) = [QILR QIL, MACS, true]
    if redForgotten(M, T) /\
       QIL := indent(INDENT) '*** qid(S) 'Success 'by 'reduction '\n
              indent(INDENT) ':apply ' '`( 'rd '`) '\n '\n .
-  ceq tryCaseSplitting([M, T, N], MACS, QILR, S, INDENT) = [QILR QIL, MACS, true]
+  ceq tryCaseSplitting([M, T, N], MACS, QILR, S, INDENT, NL) = [QILR QIL, MACS, true]
    if not redForgotten(M, T) /\
       TL := getHypotheses(M) /\
       [IPL, true] := tryImplication(M, T, TL) /\
       QIL := printImpCom(IPL, S, INDENT) .
-  ceq tryCaseSplitting([M, T, 0], MACS, QILR, S, INDENT) = [QILR QIL, MACS, false]
+  ceq tryCaseSplitting([M, T, 0], MACS, QILR, S, INDENT, NL) = [QILR QIL, MACS, false]
    if not redForgotten(M, T) /\
       TL := getHypotheses(M) /\
       [IPL, false] := tryImplication(M, T, TL) /\
       QIL := indent(INDENT) '*** qid(S) 'cannot 'be 'discharged.
                             'Maximum 'depth 'reached. '\n '\n [print "Max depth"] .
-  ceq tryCaseSplitting([M, T, s(N)], MACS, QILR, S, INDENT) =
-                 $tryCaseSplitting([M, T, s(N)], MACS, QILR, TPS, TPS', S, INDENT, 1)
+  ceq tryCaseSplitting([M, T, s(N)], MACS, QILR, S, INDENT, NL) =
+                 $tryCaseSplitting([M, T, s(N)], MACS, QILR, TPS, TPS'', S, INDENT, 1, NL)
    if not redForgotten(M, T) /\
       [IPL, false] := tryImplication(M, T, getHypotheses(M)) /\
       TrS := getEqualityTerms(M, T) /\
       TrS' := getEqTermsWithImps(M, T) /\
       TPS := processEqualityTerm*(M, TrS) /\
-      TPS' := processEqualityTerm*(M, TrS' - TrS) [print "TPS " TPS] .
+      TPS' := processEqualityTerm*(M, TrS' - TrS) /\
+      TPS'' := (TPS' - TPS) [print "TPS " TPS "\nTPS' " TPS'' "\ninit-term " T] .
+
+*** For testing purposes, inv9 - rec2
+  op prior : TrialPairSet -> TrialPairSet .
+  eq prior(['_=_['dc['S#Sys.Sys],'_`,_['pbps1@PBPSeq.PBPSeq,'<_`,_>['p1@Packet.Packet,'b1@Bit.Bit]]],ctf] TPS) =
+      ['_=_['dc['S#Sys.Sys],'_`,_['pbps1@PBPSeq.PBPSeq,'<_`,_>['p1@Packet.Packet,'b1@Bit.Bit]]],ctf]
+      prior(TPS) .
+  eq prior(['_=_['sb['S#Sys.Sys],'b2@Bit.Bit],ctf] TPS) =
+                  ['_=_['sb['S#Sys.Sys],'b2@Bit.Bit],ctf] prior(TPS) .
+  eq prior(['_=_['p2s['S#Sys.Sys],'p2@Packet.Packet],ctf] TPS) =
+                  ['_=_['p2s['S#Sys.Sys],'p2@Packet.Packet],ctf] prior(TPS) .
+  eq prior(['pbps2@PBPSeq.PBPSeq,cesv] TPS) = ['pbps2@PBPSeq.PBPSeq,cesv] prior(TPS) .
+
+  eq prior(TPS) = mtTPS [owise] .
+
+***( For testing purposes, inv8 - rec2
+  op prior : TrialPairSet -> TrialPairSet .
+  eq prior(['dc['S#Sys.Sys],cevs] TPS) = ['dc['S#Sys.Sys],cevs] .
+  eq prior(['_=_['rb['S#Sys.Sys],'B#EVS1-1.SubBit.Bit],ctf] TPS) = ['_=_['rb['S#Sys.Sys],'B#EVS1-1.SubBit.Bit],ctf] .
+  eq prior(['_=_['ac['S#Sys.Sys],'_`,_['bs1@BSeq.BSeq,'b1@Bit.Bit,'b2@Bit.Bit,'bs2@BSeq.BSeq]],ctf] TPS) =  ['_=_['ac['S#Sys.Sys],'_`,_['bs1@BSeq.BSeq,'b1@Bit.Bit,'b2@Bit.Bit,'bs2@BSeq.BSeq]],ctf] .
+
+  eq prior(['_=_['B#EVS1-1.SubBit.Bit,'b1@Bit.Bit],ctf] TPS) = ['_=_['b1@Bit.Bit,'B#EVS1-1.SubBit.Bit],ctf] .
+  eq prior(TPS) = mtTPS [owise] .
+)
+
+***( For testing purposes, inv1 - rec1
+  op prior1 : TrialPairSet TrialPairSet -> TrialPairSet .
+  op prior2 : TrialPairSet -> TrialPairSet .
+  eq prior1(['ac['S#Sys.Sys],cevs] TPS, TPS') = ['ac['S#Sys.Sys],cevs] .
+  eq prior1(['_=_['sb['S#Sys.Sys],'B0EVS1-1.Bit.Bit],ctf] TPS, TPS') =
+                             ['_=_['sb['S#Sys.Sys],'B0EVS1-1.Bit.Bit],ctf] .
+  eq prior2(['_=_['rb['S#Sys.Sys],'B0EVS1-1.Bit.Bit],ctf] TPS) =
+                             ['_=_['rb['S#Sys.Sys],'B0EVS1-1.Bit.Bit],ctf] .
+***  eq prior1(['_=_['mksq['p2s['S#Sys.Sys]],'psr['S#Sys.Sys]],ctf] TPS, TPS') =
+***                             ['_=_['mksq['p2s['S#Sys.Sys]],'psr['S#Sys.Sys]],ctf] .
+  eq prior1(TPS, ['_=_['rb['S#Sys.Sys],'B0EVS1-1.Bit.Bit],ctf] TPS') = mtTPS .
+  eq prior1(TPS, TPS') = TPS [owise] .
+  eq prior2(TPS) = TPS [owise] .
+)
+
+***( For testing purposes, inv9 - rec1
+  op prior : TrialPairSet TrialPairSet -> TrialPairSet .
+  op prior : TrialPairSet -> TrialPairSet .
+  eq prior(['ac['S#Sys.Sys],cevs] TPS, TPS') = ['ac['S#Sys.Sys],cevs] .
+  eq prior(['_=_['sb['S#Sys.Sys],'B0EVS1-1.Bit.Bit],ctf] TPS, TPS') =
+                                         ['_=_['sb['S#Sys.Sys],'B0EVS1-1.Bit.Bit],ctf] .
+  eq prior(['_=_['dc['S#Sys.Sys],'_`,_['pbps1@PBPSeq.PBPSeq,'<_`,_>['p1@Packet.Packet,'b1@Bit.Bit],'<_`,_>['p2@Packet.Packet,
+    'b2@Bit.Bit],'pbps2@PBPSeq.PBPSeq]],ctf] TPS, TPS') =
+                                         ['_=_['dc['S#Sys.Sys],'_`,_['pbps1@PBPSeq.PBPSeq,'<_`,_>['p1@Packet.Packet,'b1@Bit.Bit],'<_`,_>['p2@Packet.Packet,
+    'b2@Bit.Bit],'pbps2@PBPSeq.PBPSeq]],ctf] .
+  eq prior(TPS, ['_=_['sb['S#Sys.Sys],'b1@Bit.Bit],ctf] TPS') = mtTPS .
+  eq prior(['_=_['p2s['S#Sys.Sys],'p1@Packet.Packet],ctf] TPS) = ['_=_['p2s['S#Sys.Sys],'p1@Packet.Packet],ctf] .
+  eq prior(['_=_['sb['S#Sys.Sys],'b1@Bit.Bit],ctf] TPS) = ['_=_['sb['S#Sys.Sys],'b1@Bit.Bit],ctf] .
+
+  eq prior(TPS) = TPS [owise] .
+  eq prior(TPS, TPS') = TPS [owise] .
+)
+
 
   var  MACS'' : Macros .
   var  IT : IT .
   var  ITL : ITL .
-  vars TPS TPS' : TrialPairSet .
+  vars TPS TPS' TPS'' : TrialPairSet .
   var  TPair : TrialPair .
   var  CTXT : Context .
   var  IR : IR .
+
+  eq TPair TPair = TPair .
 
   op _-_ : TermSet TermSet -> TermSet .
   eq (T | TrS) - (T | TrS') = TrS - TrS' .
   eq TrS - TrS' = TrS [owise] .
 
-  op $tryCaseSplitting : IT Macros QidList TrialPairSet TrialPairSet String Nat Nat -> IR .
-  eq $tryCaseSplitting([M, T, 0], MACS, QILR, TPS, TPS', S, INDENT, N') =
-                                                 [QILR, MACS, false] [print "Maximum depth"] .
-  eq $tryCaseSplitting([M, T, N], MACS, QILR, mtTPS, mtTPS, S, INDENT, N') =
-                                                 [QILR, MACS, false] [print "No more cs available"] .
-  ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, ([T', ctf] TPS), TPS', S, INDENT, N') =
-             if B
-             then [QIL'', MACS'', true]
-             else $tryCaseSplitting([M, T, s(N)], MACS, QIL'', TPS, TPS', S, INDENT, s(N'))
-             fi
-   if Eq := getEq(T') /\
-      | MACS', Q | := addNewMac(MACS, M, Eq) /\
-      M' := createCTFmodTrue(M, Eq) /\
-      M'' := createCTFmodFalse(M, Eq) /\
-      QIL := printCtfComm(M, Q, Eq, INDENT) /\
-      [QIL', MACS'', B] := tryCaseSplitting*([M', T, N] [M'', T, N],
-                                              MACS', S, s(INDENT), 1) /\
-      QIL'' := indent(INDENT)
-               if B
-               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
-               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
-                    metaPrettyPrint(M, T, po) ' '- 'Failure '\n
-               fi
-               QIL QIL' [print "Case splitting true-false applied " Eq] .
-  ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, ([T', term] TPS), TPS', S, INDENT, N') =
-             if B
-             then [QIL'', MACS'', true]
-             else $tryCaseSplitting([M, T, s(N)], MACS, QIL'', TPS, TPS', S, INDENT, s(N'))
-             fi
-   if | MACS', Q | := addNewMac(MACS, M, T') /\
-      Ty := getType(metaReduce(M, T')) /\
-      ODS := getCtors(M, Ty) /\
-      TL := ordTrueFalse(buildTermsCtors(ODS, "CS")) /\
-      TL =/= empty /\
-      ML := createModules(M, T', TL) /\
-      ITL := createITL(ML, T, N) /\
-      QIL := printCtfTermComm(M, Q, T', INDENT) /\
-      [QIL', MACS'', B] := tryCaseSplitting*(ITL, MACS', S, s(INDENT), 1) /\
-      QIL'' := indent(INDENT)
-               if B
-               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
-               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
-                    metaPrettyPrint(M, T, po) ' '- 'Failure '\n
-               fi
-               QIL QIL' [print "Case splitting term applied " T' " - " B] .
-  ***********
-  ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, mtTPS, ([T', ctf] TPS), S, INDENT, N') =
-             if B
-             then [QIL'', MACS'', true]
-             else $tryCaseSplitting([M, T, s(N)], MACS, QIL'', mtTPS, TPS, S, INDENT, s(N'))
-             fi
-   if Eq := getEq(T') /\
-      | MACS', Q | := addNewMac(MACS, M, Eq) /\
-      M' := createCTFmodTrue(M, Eq) /\
-      M'' := createCTFmodFalse(M, Eq) /\
-      QIL := printCtfComm(M, Q, Eq, INDENT) /\
-      [QIL', MACS'', B] := tryCaseSplitting*([M', T, N] [M'', T, N],
-                                              MACS', S, s(INDENT), 1) /\
-      QIL'' := indent(INDENT)
-               if B
-               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
-               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
-                    metaPrettyPrint(M, T, po) ' '- 'Failure '\n
-               fi
-               QIL QIL' [print "Case splitting true-false applied " Eq] .
-  ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, mtTPS, ([T', term] TPS), S, INDENT, N') =
-             if B
-             then [QIL'', MACS'', true]
-             else $tryCaseSplitting([M, T, s(N)], MACS, QIL'', mtTPS, TPS, S, INDENT, s(N'))
-             fi
-   if | MACS', Q | := addNewMac(MACS, M, T') /\
-      Ty := getType(metaReduce(M, T')) /\
-      ODS := getCtors(M, Ty) /\
-      TL := ordTrueFalse(buildTermsCtors(ODS, "CS")) /\
-      TL =/= empty /\
-      ML := createModules(M, T', TL) /\
-      ITL := createITL(ML, T, N) /\
-      QIL := printCtfTermComm(M, Q, T', INDENT) /\
-      [QIL', MACS'', B] := tryCaseSplitting*(ITL, MACS', S, s(INDENT), 1) /\
-      QIL'' := indent(INDENT)
-               if B
-               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
-               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
-                    metaPrettyPrint(M, T, po) ' '- 'Failure '\n
-               fi
-               QIL QIL' [print "Case splitting term applied " T' " - " B] .
+  op _-_ : TrialPairSet TrialPairSet -> TrialPairSet .
+  eq (TPair TPS) - (TPair TPS') = TPS - TPS' .
+  eq TPS - TPS' = TPS [owise] .
 
+  op $tryCaseSplitting : IT Macros QidList TrialPairSet TrialPairSet String Nat Nat NatList
+                         -> IR .
+  eq $tryCaseSplitting([M, T, 0], MACS, QILR, TPS, TPS', S, INDENT, N', NL) =
+                                                 [QILR, MACS, false] [print "Maximum depth"] .
+  eq $tryCaseSplitting([M, T, N], MACS, QILR, mtTPS, mtTPS, S, INDENT, N', NL) =
+                                                 [QILR, MACS, false] [print "No more cs available"] .
+  ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, ([T', ctf] TPS), TPS', S, INDENT, N', NL) =
+             if B
+             then [QIL'', MACS'', true]
+             else $tryCaseSplitting([M, T, s(N)], MACS, QIL'', TPS, TPS', S, INDENT, s(N'), NL)
+             fi
+   if not hasCEVS(TPS) /\
+      Eq := getEq(T') /\
+      | MACS', Q | := addNewMac(MACS, M, Eq) /\
+      M' := createCTFmodTrue(M, Eq) /\
+      M'' := createCTFmodFalse(M, Eq) /\
+      QIL := printCtfComm(M, Q, Eq, INDENT) /\
+      [QIL', MACS'', B] := tryCaseSplitting*([M', T, N] [M'', T, N],
+                                              MACS', S, s(INDENT), 1, NL) /\
+      QIL'' := indent(INDENT)
+               if B
+               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
+               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
+                    metaPrettyPrint(M, T, po) ' '- 'Failure '\n
+               fi
+               QIL QIL' [print "Case splitting true-false 1 applied " Eq " - " B] .
+  ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, ([T', term] TPS), TPS', S, INDENT, N', NL) =
+             if B
+             then [QIL'', MACS'', true]
+             else $tryCaseSplitting([M, T, s(N)], MACS, QIL'', TPS, TPS', S, INDENT, s(N'), NL)
+             fi
+   if not hasCEVS(TPS) /\
+      | MACS', Q | := addNewMac(MACS, M, T') /\
+      Ty := getType(metaReduce(M, T')) /\
+      ODS := getCtors(M, Ty) /\
+      TL := ordTrueFalse(buildTermsCtors(ODS, "CS" + natlist2string(NL s(N')))) /\
+      TL =/= empty /\
+      ML := createModules(M, T', TL) /\
+      ITL := createITL(ML, T, N) /\
+      QIL := printCtfTermComm(M, Q, T', INDENT) /\
+      [QIL', MACS'', B] := tryCaseSplitting*(ITL, MACS', S, s(INDENT), 1, NL) /\
+      EqS := getEqs(M) /\
+      QIL'' := indent(INDENT)
+               if B
+               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
+               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
+                    metaPrettyPrint(M, T, po) ' '- 'Failure '\n
+               fi
+               QIL QIL' [print "Case splitting term applied " T' " - " B " " TPS " - " TPS'] .
+  ***********
+  ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, mtTPS, ([T', ctf] TPS), S, INDENT, N', NL) =
+             if B
+             then [QIL'', MACS'', true]
+             else $tryCaseSplitting([M, T, s(N)], MACS, QIL'', mtTPS, TPS, S, INDENT, s(N'), NL)
+             fi
+   if not hasCEVS(TPS) /\
+      Eq := getEq(T') /\
+      | MACS', Q | := addNewMac(MACS, M, Eq) /\
+      M' := createCTFmodTrue(M, Eq) /\
+      M'' := createCTFmodFalse(M, Eq) /\
+      QIL := printCtfComm(M, Q, Eq, INDENT) /\
+      [QIL', MACS'', B] := tryCaseSplitting*([M', T, N] [M'', T, N],
+                                              MACS', S, s(INDENT), 1, NL) /\
+      EqS := getEqs(M') /\
+      QIL'' := indent(INDENT)
+               if B
+               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
+               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
+                    metaPrettyPrint(M, T, po) ' '- 'Failure '\n
+               fi
+               QIL QIL' [print "Case splitting true-false 2 applied " Eq " - " B " - " TPS] .
+  ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, mtTPS, ([T', term] TPS), S, INDENT, N', NL) =
+             if B
+             then [QIL'', MACS'', true]
+             else $tryCaseSplitting([M, T, s(N)], MACS, QIL'', mtTPS, TPS, S, INDENT, s(N'), NL)
+             fi
+   if not hasCEVS(TPS) /\
+      | MACS', Q | := addNewMac(MACS, M, T') /\
+      Ty := getType(metaReduce(M, T')) /\
+      ODS := getCtors(M, Ty) /\
+      TL := ordTrueFalse(buildTermsCtors(ODS, "CS" + natlist2string(NL s(N')))) /\
+      TL =/= empty /\
+      ML := createModules(M, T', TL) /\
+      ITL := createITL(ML, T, N) /\
+      QIL := printCtfTermComm(M, Q, T', INDENT) /\
+      [QIL', MACS'', B] := tryCaseSplitting*(ITL, MACS', S, s(INDENT), 1, NL) /\
+      EqS := getEqs(M) /\
+      QIL'' := indent(INDENT)
+               if B
+               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
+               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
+                    metaPrettyPrint(M, T, po) ' '- 'Failure '\n
+               fi
+               QIL QIL' [print "Case splitting term applied " T' " - " B] .
+  ****************** CEVS *************
+  ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, ([T', cevs] TPS), TPS', S, INDENT, N', NL) =
+             if B
+             then [QIL'', MACS'', true]
+             else $tryCaseSplitting([M, T, s(N)], MACS, QIL'', TPS, TPS', S, INDENT, s(N'), NL)
+             fi
+   if | MACS', Q | := addNewMac(MACS, M, T') /\
+      Ty := getType(metaNormalize(M, T')) /\
+      TL := buildEVS(M, Ty, "EVS" + natlist2string(NL)) /\
+      TL' := joinConstantsEVS(TL, "EVS" + natlist2string(NL), 0) /\
+      ML := createModules(M, T', TL') /\
+      ITL := createITL(ML, T, N) /\
+      QIL := printCEVS(M, Q, T') /\
+      [QIL', MACS'', B] := tryCaseSplitting*(ITL, MACS', S, s(INDENT), 1, NL) /\
+      ODS := getOps(M) /\
+      EqS := getEqs(M) /\
+      QIL'' := indent(INDENT)
+               if B
+               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
+               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
+                    metaPrettyPrint(M, T, po) ' '- 'Failure '\n
+               fi
+               QIL QIL' [print "Case splitting cevs term applied " T' " - " B " - " TL'] .
+  ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, mtTPS, ([T', cevs] TPS'), S, INDENT, N', NL) =
+             if B
+             then [QIL'', MACS'', true]
+             else $tryCaseSplitting([M, T, s(N)], MACS, QIL'', mtTPS, TPS', S, INDENT, s(N'), NL)
+             fi
+   if | MACS', Q | := addNewMac(MACS, M, T') /\
+      Ty := getType(metaNormalize(M, T')) /\
+      TL := buildEVS(M, Ty, "EVS" + natlist2string(NL)) /\
+      TL' := joinConstantsEVS(TL, "EVS" + natlist2string(NL), 0) /\
+      ML := createModules(M, T', TL') /\
+      ITL := createITL(ML, T, N) /\
+      QIL := printCEVS(M, Q, T') /\
+      [QIL', MACS'', B] := tryCaseSplitting*(ITL, MACS', S, s(INDENT), 1, NL) /\
+      QIL'' := indent(INDENT)
+               if B
+               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
+               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
+                    metaPrettyPrint(M, T, po) ' '- 'Failure '\n
+               fi
+               QIL QIL' [print "Case splitting cevs term applied " T' " - " B] .
+  *** CESV
+  ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, ([T', cesv] TPS), TPS', S, INDENT, N', NL) =
+             if B
+             then [QIL'', MACS'', true]
+             else $tryCaseSplitting([M, T, s(N)], MACS, QIL'', TPS, TPS', S, INDENT, s(N'), NL)
+             fi
+   if | MACS', Q | := addNewMac(MACS, M, T') /\
+      Ty := getType(metaNormalize(M, T')) /\
+      TL := buildESV(M, Ty, "ESV" + natlist2string(NL)) /\
+      TL' := joinConstantsEVS(TL, "ESV" + natlist2string(NL), 0) /\
+      ML := createModules(M, T', TL') /\
+      ITL := createITL(ML, T, N) /\
+      QIL := printCEVS(M, Q, T') /\
+      [QIL', MACS'', B] := tryCaseSplitting*(ITL, MACS', S, s(INDENT), 1, NL) /\
+      ODS := getOps(M) /\
+      EqS := getEqs(M) /\
+      QIL'' := indent(INDENT)
+               if B
+               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
+               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
+                    metaPrettyPrint(M, T, po) ' '- 'Failure '\n
+               fi
+               QIL QIL' [print "Case splitting cevs term applied " T' " - " B " - " TL'] .
+  ceq $tryCaseSplitting([M, T, s(N)], MACS, QILR, mtTPS, ([T', cesv] TPS'), S, INDENT, N', NL) =
+             if B
+             then [QIL'', MACS'', true]
+             else $tryCaseSplitting([M, T, s(N)], MACS, QIL'', mtTPS, TPS', S, INDENT, s(N'), NL)
+             fi
+   if | MACS', Q | := addNewMac(MACS, M, T') /\
+      Ty := getType(metaNormalize(M, T')) /\
+      TL := buildESV(M, Ty, "ESV" + natlist2string(NL)) /\
+      TL' := joinConstantsESV(TL, "ESV" + natlist2string(NL), 0) /\
+      ML := createModules(M, T', TL') /\
+      ITL := createITL(ML, T, N) /\
+      QIL := printCEVS(M, Q, T') /\
+      [QIL', MACS'', B] := tryCaseSplitting*(ITL, MACS', S, s(INDENT), 1, NL) /\
+      QIL'' := indent(INDENT)
+               if B
+               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
+               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
+                    metaPrettyPrint(M, T, po) ' '- 'Failure '\n
+               fi
+               QIL QIL' [print "Case splitting cevs term applied " T' " - " B] .
+
+  op hasCEVS : TrialPairSet -> Bool .
+  eq hasCEVS([T, cevs] TPS) = true .
+  eq hasCEVS(TPS) = false [owise] .
 
   op createITL : MList Term Nat -> ITL .
   eq createITL(mtML, T, N) = nilITL .
@@ -5609,16 +5763,16 @@ the \verb"maps2maps" function shown above to the body:
   eq getEq('_=_[T, 'false.Bool]) = getEq(T) .
   eq getEq('_=_[T, T']) = eq T = T' [none] . .
 
-  op tryCaseSplitting* : ITL Macros String Nat Nat -> IR .
-  ceq tryCaseSplitting*(IT ITL, MACS, S, INDENT, N) = [QIL QIL', MACS'', B and B']
-   if [QIL, MACS', B] := tryCaseSplitting(IT, MACS, nil, S + "-" + string(N, 10), INDENT) /\
-      [QIL', MACS'', B'] := tryCaseSplitting*(ITL, MACS', S, INDENT, s(N)) .
-  eq tryCaseSplitting*(nilITL, MACS, S, INDENT, N) = [nil, MACS, true] .
+  op tryCaseSplitting* : ITL Macros String Nat Nat NatList -> IR .
+  ceq tryCaseSplitting*(IT ITL, MACS, S, INDENT, N, NL) = [QIL QIL', MACS'', B and B']
+   if [QIL, MACS', B] := tryCaseSplitting(IT, MACS, nil, S + "-" + string(N, 10), INDENT, NL N) /\
+      [QIL', MACS'', B'] := tryCaseSplitting*(ITL, MACS', S, INDENT, s(N), NL) .
+  eq tryCaseSplitting*(nilITL, MACS, S, INDENT, N, NL) = [nil, MACS, true] .
 
   sorts TrialType TrialPair TrialPairSet .
   subsort TrialPair < TrialPairSet .
 
-  ops ctf term : -> TrialType [ctor] .
+  ops ctf term cevs cesv : -> TrialType [ctor] .
 
   op [_,_] : Term TrialType -> TrialPair [ctor] .
 
@@ -5627,41 +5781,140 @@ the \verb"maps2maps" function shown above to the body:
   eq TPair TPair TPS = TPair TPS [metadata "idempotency"] .
 
   op processEqualityTerm : Module Term -> TrialPairSet .
+  ceq processEqualityTerm(M, T) = mtTPS
+   if hasVars(T) .
+  ceq processEqualityTerm(M, '_=_[T, T']) = mtTPS
+   if subterm(T, T') .
   ceq processEqualityTerm(M, Q[TL]) = processEqualityTerm*(M, tl2ts(TL))
-   if containsBoolOps*(TL) .
+   if containsBoolOps*(TL) . *** [print "Equality Bools " Q "(" TL ")"] .
   eq processEqualityTerm(M, '_=_[T, T]) = mtTPS .
-  *** Built-in strategies for sequences
+  *** Built-in strategies for sequences: built sequences with same top constructor
   ceq processEqualityTerm(M, '_=_[T, T']) = seqEqualities(M, T, T')
-   if sameSeqCtor(M, T, T') .
-  eq processEqualityTerm(M, T) = $processEqualityTerm(M, T) [owise] .
+   if sameSeqCtor(M, T, T') /\
+      sameSize(T, T') . *** [print "s&s " T " = " T'] .
+  *** Built-in strategies for sequences: seq = seq, elem*, seq
+  ceq processEqualityTerm(M, '_=_[T, T']) = seqEqConst2Seq(M, T, T')
+   if not subterm(T, T') /\
+      const2seq(M, T, T') [print "c&ses 1 " T " = " T'] .
+  *** Built-in strategies for sequences: seq, elem*, seq = seq
+  ceq processEqualityTerm(M, '_=_[T, T']) = seqEqConst2Seq(M, T', T)
+   if not subterm(T', T) /\
+      const2seq(M, T', T) [print "c&ses 2 " T " = " T'] .
+  *** Built-in strategies for sequences: elem^n, seq = seq,elem^n,seq
+  ceq processEqualityTerm(M, '_=_[T, T']) = es&ses(M, T, T')
+   if es&sesCheck(M, T, T') [print "es&ses " T " = " T'] .
+  *** Built-in strategies for sequences: seq,elem^n, seq = elem^n,seq
+  ceq processEqualityTerm(M, '_=_[T, T']) = es&ses(M, T', T)
+   if es&sesCheck(M, T', T) [print "es&ses " T' " = " T] .
+  *** Built-in strategies for sequences: elem^n, seq = seq,elem^n,seq
+  ceq processEqualityTerm(M, '_=_[T, T']) = se&ses(M, T', T)
+   if se&sesCheck(M, T', T) [print "se&ses " T " = " T'] .
+  *** Built-in strategies for sequences: elem^n, seq = elem^n,seq
+  ceq processEqualityTerm(M, '_=_[T, T']) = es&es(M, T, T')
+   if es&esCheck(M, T, T') [print "es&es " T " = " T'] .
+  *** Unary sequence, no constructors
+  ceq processEqualityTerm(M, '_=_[T, T']) = ['_=_[T, T'], ctf]
+   if T =/= T' /\
+      unarySeqCheck(M, T, T') [print "Unary " T " = " T'] .
+  *** Built-in strategies for sequences: seq, elem, elem, seq, elem = seq,elem
+  ceq processEqualityTerm(M, '_=_[T, T']) = seese&se(T, T')
+   if seese&seCheck(M, T, T') [print "seese&se " T " = " T'] .
+  *** Default
+  ceq processEqualityTerm(M, '_=_[T, T']) = ['_=_[T, T'], ctf]
+   if T =/= T' /\
+      not sees&seCheck(M, T, T') /\
+      sameSeqCtor(M, T, T') /\
+      not sameSize(T, T') /\
+      not se&sesCheck(M, T, T') /\
+      not es&sesCheck(M, T, T') /\
+      not es&sesCheck(M, T', T) /\
+      not es&esCheck(M, T, T') /\
+      not seese&seCheck(M, T, T') /\
+      not es&esCheck(M, T', T) [print "Default seq " T " = " T'] .
+  *** seq1, elem1, elem2, seq2 = seq3, elem3 -> seq3 = seq1, elem1
+  ceq processEqualityTerm(M, '_=_[T, T']) = sees&se(M, T, T')
+   if sees&seCheck(M, T, T') [print "sees&se " T " = " T'] .
+  *** Default
+  ceq processEqualityTerm(M, '_=_[T, T']) = ['_=_[T, T'], ctf]
+   if T =/= T' /\
+      not subterm(T, T') /\
+      Q[T1] := T /\
+      isFreshCons(M, T1) /\
+      Q'[TL'] := T' /\
+      not seqCtor(getOps(M), Q) /\
+      seqCtor(getOps(M), Q') /\ *** Both sequences, one of the is a function
+      anyTC(M, TL') /\
+      not es&sesCheck(M, T, T') /\
+      not es&sesCheck(M, T', T) /\
+      not se&sesCheck(M, T, T') /\
+      not es&esCheck(M, T, T') /\
+      not seese&seCheck(M, T, T') /\
+      not es&esCheck(M, T', T) [print "es&es 2 " T " = " T'] .
+  eq processEqualityTerm(M, T) = $processEqualityTerm(M, T) [owise print "Eq terms owise " T] .
+
+  op subterm : Term Term -> Bool .
+  eq subterm(T, Q[TL, T, TL']) = true .
+  eq subterm(T, T') = false [owise] .
+
+  op anyTC : Module TermList -> Bool .
+  eq anyTC(M, empty) = false .
+  eq anyTC(M, (Q[TL], TL')) = false .
+  eq anyTC(M, (V, TL)) = false .
+  eq anyTC(M, (C, TL)) = fromTC(getOps(M), C) or-else anyTC(M, TL) .
+
+  op fromTC : OpDeclSet Constant -> Bool .
+  ceq fromTC(op Q : nil -> Ty [metadata("tc")] . ODS, C) = true
+   if Q := getName(C) /\
+      Ty := getType(C) .
+  eq fromTC(ODS, C) = false [owise] .
 
   op $processEqualityTerm : Module Term -> TrialPairSet .
-  ceq $processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T1, T2], ctf]
-   if (allCtor(M, T1) or isFreshCons(M, T1)) /\
-      (allCtor(M, T2) or isFreshCons(M, T2)) .
+  ceq $processEqualityTerm(M, '_=_[T1, T2]) = mtTPS
+   if allCtor(M, T1) /\
+      allCtor(M, T2) . *** [print "Eqt 1" T1] . *** [print "Equality term 1 " T1 " = " T2] .
+  ceq $processEqualityTerm(M, '_=_[T1, T2]) = if isCevs(M, T2)
+                                              then [T2, cevs]
+                                              else [T2, term] *** ['_=_[T2, T1], ctf]
+                                              fi
+   if allCtor(M, T1) /\
+      isFreshCons(M, T2) . *** [print "Equality term 2 " T1 " = " T2] .
+  ceq $processEqualityTerm(M, '_=_[T1, T2]) = if isCevs(M, T1)
+                                              then [T1, cevs]
+                                              else [T1, term]
+                                              fi
+   if isFreshCons(M, T1) /\
+      allCtor(M, T2) . *** [print "Equality term 3 " T1 " = " T2] .
+  ceq $processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T1, T2], ctf] *** cevs?
+   if isFreshCons(M, T1) /\
+      isFreshCons(M, T2) . *** [print "Equality term 4 " T1 " = " T2] .
   ceq $processEqualityTerm(M, '_=_[T1, T2]) =  $processEqualityTerm(M, T1)
    if not (allCtor(M, T1) or isFreshCons(M, T1)) /\
-      allCtor(M, T2) .
+      allCtor(M, T2) . *** [print "Equality term 5 " T1 " = " T2] .
   ceq $processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T1, T2], ctf]
-                                             $processEqualityTerm(M, T1)
+                                              $processEqualityTerm(M, T1)
    if not (allCtor(M, T1) or isFreshCons(M, T1)) /\
-      isFreshCons(M, T2) .
+      isFreshCons(M, T2) . *** [print "Equality term 6 " T1 " = " T2] .
   ceq $processEqualityTerm(M, '_=_[T1, T2]) = $processEqualityTerm(M, T2)
    if allCtor(M, T1) /\
-      not (allCtor(M, T2) or isFreshCons(M, T2)) .
-  ceq $processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T2, T1], ctf]
-                                             $processEqualityTerm(M, T2)
+      not (allCtor(M, T2) or isFreshCons(M, T2)) . *** [print "Equality term 7 " T1 " = " T2] .
+  ceq $processEqualityTerm(M, '_=_[T1, T2]) = mtTPS
    if isFreshCons(M, T1) /\
+      hasVars(T2) /\
       not (allCtor(M, T2) or isFreshCons(M, T2)) .
+  ceq $processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T1, T2], ctf] *** ['_=_[T2, T1], ctf]
+                                              $processEqualityTerm(M, T2)
+   if isFreshCons(M, T1) /\
+      not hasVars(T2) /\
+      not (allCtor(M, T2) or isFreshCons(M, T2)) . *** [print "Equality term 8 " T1 " = " T2] .
   ceq $processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T1, T2], ctf] *** !!! Seq
                                               processEqualityTerm*(M, T1 | T2)
    if not (allCtor(M, T1) or isFreshCons(M, T1)) /\
       not (allCtor(M, T2) or isFreshCons(M, T2)) /\
-      noneCtor(M, T1) /\ noneCtor(M, T2) .
+      noneCtor(M, T1) /\ noneCtor(M, T2) . *** [print "Equality term 9 " T1 " = " T2] .
   ceq $processEqualityTerm(M, '_=_[T1, T2]) = processEqualityTerm*(M, T1 | T2)
    if not (allCtor(M, T1) or isFreshCons(M, T1)) /\
       not (allCtor(M, T2) or isFreshCons(M, T2)) /\
-      not (noneCtor(M, T1) and noneCtor(M, T2)) .
+      not (noneCtor(M, T1) and noneCtor(M, T2)) . *** [print "Equality term 10 " T1 " = " T2] .
   ceq $processEqualityTerm(M, Q[T, T']) = processEqualityTerm*(M, T | T')
    if (Q == '_or_) or (Q == '_and_) or (Q == '_xor_) .
   eq $processEqualityTerm(M, 'not_[T]) = $processEqualityTerm(M, T) .
@@ -5670,30 +5923,147 @@ the \verb"maps2maps" function shown above to the body:
    if T1 := reduce(M, T) /\
       T =/= T1 .
   ceq $processEqualityTerm(M, T) = mtTPS
-   if allCtor(M, T) .
-  eq $processEqualityTerm(M, T) = $$processEqualityTerm(M, T, getEqs(M)) [owise] .
+   if allCtor(M, T) . *** [print "Equality term 12 " T] .
+  eq $processEqualityTerm(M, T) = $$processEqualityTerm(M, T, getEqs(M)) [owise] . *** print "Equality term 13 " T] .
 
   op $$processEqualityTerm : Module Term EquationSet -> TrialPairSet .
   ceq $$processEqualityTerm(M, T, EqS) = if TPS == mtTPS
-                                        then decomposeTerm(M, T)
-                                        else TPS
-                                        fi
+                                         then decomposeTerm(M, T)
+                                         else TPS
+                                         fi
    if TPS := processEq*(M, T, EqS) .
 
   op sameSeqCtor : Module Term Term -> Bool .
-  eq sameSeqCtor(M, Q[TL], Q[TL']) = seqCtor(getOps(M), Q) and-then
-                                     sizeTL(TL) == sizeTL(TL') .
+  eq sameSeqCtor(M, Q[TL], Q[TL']) = seqCtor(getOps(M), Q) .
   eq sameSeqCtor(M, T, T') = false [owise] .
 
   op seqCtor : OpDeclSet Qid -> Bool .
   eq seqCtor(op Q : TyL -> Ty [ctor assoc AtS] . ODS, Q) = true .
   eq seqCtor(ODS, Q) = false [owise] .
 
+  op const2seq : Module Term Term -> Bool .
+  ceq const2seq(M, C, Q[T, TL]) = true
+   if seqCtor(getOps(M), Q) /\
+      hasId(getOps(M), Q) /\
+      isCevs(M, C) /\
+      isCevs(M, T) .
+  eq const2seq(M, T, T') = false [owise] .
+
+  op hasId : OpDeclSet Qid -> Bool .
+  eq hasId(op Q : TyL -> Ty [id(T) AtS] . ODS, Q) = true .
+  eq hasId(ODS, Q) = false [owise] .
+
+  op unarySeqCheck : Module Term Term -> Bool .
+  ceq unarySeqCheck(M, Q[TL], Q'[TL']) = (not isCtor(getOps(M), Q)) and-then
+                                         (not isCtor(getOps(M), Q')) and-then
+                                         isCevs(Ty, getSubsorts(M), getOps(M))
+   if Ty := getType(metaReduce(M, Q[TL])) /\
+      Ty := getType(metaReduce(M, Q'[TL'])) .
+
+  op seqEqConst2Seq : Module Term Term ~> TrialPairSet .
+  eq seqEqConst2Seq(M, C, Q[T, TL]) = [T, cevs] . *** ['_=_[C, TL], ctf] . *** If the first fails the second makes no sense
+
+  op sees&seCheck : Module Term Term -> Bool .
+  ceq sees&seCheck(M, T, T') = true
+   if sameSeqCtor(M, T, T') /\
+      Q[T1, T2, T3, T4] := T /\
+      Q[T5, T6] := T' /\
+      isCevs(M, T1) /\
+      isCevs(M, T4) /\
+      isCevs(M, T5) /\
+      not isCevs(M, T2) /\
+      not isCevs(M, T3) /\
+      not isCevs(M, T6) /\
+      T5 =/= T1 .
+  eq sees&seCheck(M, T, T') = false [owise] .
+
+  op seese&se : Term Term ~> TrialPairSet .
+  eq seese&se(Q[T1, T2, T3, T4, T5], Q[T6, T7]) = ['_=_[T6, Q[T1, T2, T3, T4]], ctf] .
+
+  op seese&seCheck : Module Term Term -> Bool .
+  ceq seese&seCheck(M, T, T') = true
+   if sameSeqCtor(M, T, T') /\
+      Q[T1, T2, T3, T4, T5] := T /\
+      Q[T6, T7] := T' /\
+      isCevs(M, T1) /\
+      isCevs(M, T4) /\
+      isCevs(M, T6) /\
+      not isCevs(M, T2) /\
+      not isCevs(M, T3) /\
+      not isCevs(M, T5) /\
+      not isCevs(M, T7)  .
+  eq seese&seCheck(M, T, T') = false [owise] .
+
+  op sees&se : Module Term Term -> TrialPairSet .
+  ceq sees&se(M, Q[T1, T2, T3, T4], Q[T5, T6]) = [T4, cesv]
+   if eq '_=_[T5, Q[T1, T2]] = 'false.Bool [AtS] . EqS := getEqs(M) .
+  eq sees&se(M, Q[T1, T2, T3, T4], Q[T5, T6]) = ['_=_[T5, Q[T1, T2]], ctf] [owise] .
+
+  op es&sesCheck : Module Term Term -> Bool .
+  eq es&sesCheck(M, T, Q[T', TL]) =
+                             es&sesSize(M, T, Q[T', TL]) and-then
+                             es&sesTypes(M, T, Q[T', TL]) and-then
+                             sameSeqCtor(M, T, Q[T', TL]) and-then
+                             isCevs(M, T') .
+
+  op se&sesCheck : Module Term Term -> Bool .
+  eq se&sesCheck(M, T, Q[TL, T']) =
+                             es&sesSize(M, T, Q[TL, T']) and-then
+                             se&sesTypes(M, T, Q[TL, T']) and-then
+                             sameSeqCtor(M, T, Q[TL, T']) and-then
+                             isCevs(M, T') .
+
+  op es&esCheck : Module Term Term -> Bool .
+  eq es&esCheck(M, T, T') = sameSeqCtor(M, T, T') and-then
+                            not sameSize(T, T') and-then
+                            not es&sesCheck(M, T, T') and-then
+                            firstIsElem(M, T) and-then
+                            firstIsElem(M, T') .
+
+  op firstIsElem : Module Term -> Bool .
+  eq firstIsElem(M, Q[T, TL]) = not isCevs(M, T) .
+  eq firstIsElem(M, T) = false [owise] .
+
+  op es&sesSize : Module Term Term -> Bool .
+  eq es&sesSize(M, Q[TL], Q[TL']) = (size(TL) + 1) == size(TL') .
+  eq es&sesSize(M, T, T') = false [owise] .
+
+  op es&sesTypes : Module Term Term -> Bool .
+  eq es&sesTypes(M, Q[TL], Q[T', TL']) = es&sesTypes*(M, TL, TL') .
+
+  op se&sesTypes : Module Term Term -> Bool .
+  eq se&sesTypes(M, Q[TL], Q[TL', T']) = es&sesTypes*(M, TL, TL') .
+
+  op es&sesTypes* : Module TermList TermList -> Bool .
+  eq es&sesTypes*(M, (T, TL), (T', TL')) =
+                              getType(metaReduce(M, T)) == getType(metaReduce(M, T')) and
+                              es&sesTypes*(M, TL, TL') .
+  eq es&sesTypes*(M, empty, empty) = true .
+  eq es&sesTypes*(M, TL, TL') = false [owise] .
+
+  op es&ses : Module Term Term ~> TrialPairSet .
+  eq es&ses(M, Q[TL], Q[T', TL']) = [T', cevs] . *** $processEqualityTerm(M, '_=_[Q[TL], Q[TL']]) .
+
+  op se&ses : Module Term Term ~> TrialPairSet .
+  eq se&ses(M, Q[TL], Q[TL', T']) = [T', cevs] . *** $processEqualityTerm(M, '_=_[Q[TL], Q[TL']]) .
+
+
+  op es&es : Module Term Term ~> TrialPairSet .
+  ceq es&es(M, Q[T, TL], Q[T', TL']) = processEqualityTerm*(M, TrS) *** ['_=_[Q[TL], Q[TL']], ctf]
+   if T1 := reduce(M, '_=_[T, T']) /\
+      TrS := getEqualityTerms(M, T1) .
+
   *** TODO: With different sizes it would be possible to make different equalities.
+  op sameSize : Term Term -> Bool [comm] .
+  eq sameSize(Q[TL], Q[TL']) = size(TL) == size(TL') .
+  eq sameSize(Q[TL], C) = false .
+  eq sameSize(Q[TL], V) = true .
+  eq sameSize(T, T') = true [owise] .
+
   op seqEqualities : Module Term Term ~> TrialPairSet .
   eq seqEqualities(M, Q[TL], Q[TL']) = seqEqualities*(M, TL, TL') .
 
-  op seqEqualities* : Module TermList TermList -> TrialPairSet .
+  op seqEqualities* : Module TermList TermList ~> TrialPairSet .
   eq seqEqualities*(M, empty, empty) = mtTPS .
   eq seqEqualities*(M, (T, TL), (T', TL')) = processEqualityTerm(M, '_=_[T, T'])
                                              seqEqualities*(M, TL, TL') [print "Sequence inference " T " = " T'] .
@@ -5710,20 +6080,47 @@ the \verb"maps2maps" function shown above to the body:
   eq decomposeTerm(M, V) = mtTPS .
   eq decomposeTerm(M, C) = if allCtor(M, C) or isFreshCons(M, C)
                            then mtTPS
-                           else [C, term]
+                           else if isCevs(M, C)
+                                then [C, cevs] *** [C, term] *** Adrian
+                                else [C, term]
+                                fi
                            fi .
   eq decomposeTerm(M, Q[TL]) = if allCtor(M, Q[TL]) or Q == 'if_then_else_fi
                                then mtTPS
                                else decomposeTerm*(M, TL)
                                     if isCtor(getOps(M), Q)
                                     then mtTPS
-                                    else [Q[TL], term]
+                                    else if isCevs(M, Q[TL])
+                                         then [Q[TL], cevs] *** [Q[TL], term] *** Adrian
+                                         else [Q[TL], term]
+                                         fi
                                     fi
                                fi .
 
   op decomposeTerm* : Module TermList -> TrialPairSet .
   eq decomposeTerm*(M, empty) = mtTPS .
   eq decomposeTerm*(M, (T, TL)) = decomposeTerm(M, T) decomposeTerm*(M, TL) .
+
+  op isCevs : Module Term -> Bool .
+  eq isCevs(M, V) = false .
+  ceq isCevs(M, C) = (not isCtor(getOps(M), getName(C))) and
+                     isCevs(Ty, getSubsorts(M), getOps(M))
+   if Ty := getType(metaReduce(M, C)) .
+  ceq isCevs(M, Q[TL]) = allConstants(TL) and isCevs(Ty, getSubsorts(M), getOps(M))
+   if Ty := getType(metaReduce(M, Q[TL])) .
+
+  op allConstants : TermList -> Bool .
+  eq allConstants(empty) = true .
+  eq allConstants((C, TL)) = allConstants(TL) .
+  eq allConstants(TL) = false [owise] .
+
+  op isCevs : Type SubsortDeclSet OpDeclSet -> Bool .
+  eq isCevs(Ty, subsort Ty' < Ty . SSDS, ODS) = isCevs(Ty, ODS) .
+  eq isCevs(Ty, SSDS, ODS) = false [owise] .
+
+  op isCevs : Type OpDeclSet -> Bool .
+  eq isCevs(Ty, op Q : TyL -> Ty [ctor assoc id(T) AtS] . ODS) = true .
+  eq isCevs(Ty, ODS) = false [owise] .
 
   op isCtor : OpDeclSet Qid -> Bool .
   eq isCtor(op Q : TyL -> Ty [ctor AtS] . ODS, Q) = true .
@@ -5870,32 +6267,80 @@ and \verb"sizeTL" just computes the size of a list of terms:
 
   op getEqTermsWithImps* : Module Term TermList -> TermSet .
   eq getEqTermsWithImps*(M, T, empty) = emptyTermSet .
-  eq getEqTermsWithImps*(M, T, (T', TL)) = getEqualityTerms(reduce(M, '_implies_[T', T])) |
-                                           getEqTermsWithImps*(M, T, TL).
+  ceq getEqTermsWithImps*(M, Q[TL], (Q[TL'], TL'')) =
+               getEqualityTerms(M, reduce(M, '_implies_[substitute(Q[TL'], SB), Q[TL]]), Q[TL]) |
+               getEqTermsWithImps*(M, Q[TL], TL'')
+   if SB := basicSB*(TL', TL) . *** [print "Implication with " Q "(" TL' ") - " SB] .
+  ceq getEqTermsWithImps*(M, T, (T', TL)) = getEqTermWithImpsInst(M, T, TSPS) |
+                                            getEqTermsWithImps*(M, T, TL)
+   if numVars(T') <= numInstVars /\
+      TSPS := allIns(M, [T', none, getLabel(M, T')]) .
+  ceq getEqTermsWithImps*(M, T, (T', TL)) = getEqualityTerms(M, T1, T) |
+                                            getEqTermsWithImps*(M, T, TL)
+   if T1 := reduce(M, '_implies_[T', T]) [owise] . *** print "Implication owise with " T' " - " T1] .
+
+  op getEqTermWithImpsInst : Module Term TermSubPairSet -> TermSet .
+  eq getEqTermWithImpsInst(M, T, mtTSPS) = emptyTermSet .
+  ceq getEqTermWithImpsInst(M, T, [T', SB, Q] TSPS) = getEqualityTerms(M, T1, T) |
+                                                      getEqTermWithImpsInst(M, T, TSPS)
+   if T1 := reduce(M, '_implies_[T', T]) .
 
   ---------------------------------------------------------------------------------------
   ---                               getEqualityTerms                                  ---
   ---------------------------------------------------------------------------------------
 
   op getEqualityTerms : Module Term -> TermSet .
-  eq getEqualityTerms(M, T) = getEqualityTerms(reduce(M, T)) .
+  ceq getEqualityTerms(M, T) = getEqualityTerms(M, T', T)
+   if T' := reduce(M, T) .
 
-  op getEqualityTerms : Term -> TermSet .
-  eq getEqualityTerms('_=_[T1, T2]) = '_=_[T1, T2] .
-  eq getEqualityTerms('not_[T]) = T .
-  ceq getEqualityTerms(Q[TL]) = getEqualityTerms*(TL)
-   if (Q == '_or_) or (Q == '_xor_) or (Q == '_and_) .
-  eq getEqualityTerms('if_then_else_fi[T, T', T'']) = getEqualityTerms(T) .
-  eq getEqualityTerms(T) = emptyTermSet [owise] .
+  op getEqualityTerms : Module Term Term -> TermSet .
+  ceq getEqualityTerms(M, '_=_[T1, T2], T) = reorder(M, '_=_[T1, T2], T)
+   if not containsBoolOps('_=_[T1, T2]) .
+  ceq getEqualityTerms(M, Q[TL], T) = getEqualityTerms*(M, TL, T)
+   if Q =/= 'if_then_else_fi /\
+      containsBoolOps(Q[TL]) .
+  eq getEqualityTerms(M, 'not_[T], T') = T .
+  eq getEqualityTerms(M, 'if_then_else_fi[T, T', T''], T1) = getEqualityTerms(M, T, T1) .
+  eq getEqualityTerms(M, 'true.Bool, T) = emptyTermSet .
+  eq getEqualityTerms(M, 'false.Bool, T) = emptyTermSet .
+  eq getEqualityTerms(M, T, T') = '_=_[T, 'true.Bool] [owise] .
 
-  op getEqualityTerms* : TermList -> TermSet .
-  eq getEqualityTerms*(empty) = emptyTermSet .
-  eq getEqualityTerms*((T, TL)) = getEqualityTerms(T) | getEqualityTerms*(TL) .
+  op getEqualityTerms* : Module TermList Term -> TermSet .
+  eq getEqualityTerms*(M, empty, T) = emptyTermSet .
+  eq getEqualityTerms*(M, (T, TL), T') = getEqualityTerms(M, T, T') |
+                                         getEqualityTerms*(M, TL, T') .
 
+  op reorder : Module Term Term -> Term .
+  eq reorder(M, '_=_[C, T], Q[TL, C, TL']) = '_=_[T, C] .
+  ceq reorder(M, '_=_[Q[TL], C], Q'[TL']) = '_=_[C, Q[TL]]
+   if not C in TL' /\
+      isCtor(getOps(M), Q) .
+  ceq reorder(M, '_=_[C, Q[TL]], T) = '_=_[Q[TL], C]
+   if not isCtor(getOps(M), Q) .
+  ceq reorder(M, '_=_[C, Q[TL]], T) = '_=_[Q[TL], C]
+   if C in TL .
+  ***(
+  ceq reorder(M, '_=_[T1, T2], T) = '_=_[T2, T1]
+   if eq T3 = T4 [AtS] . EqS := getEqs(M) /\
+      T1 := reduce(M, T4) .
+  )
+  ceq reorder(M, '_=_[Q[TL], Q[TL']], T) = '_=_[Q[TL'], Q[TL]]
+   if sameSeqCtor(M, Q[TL], Q[TL']) /\
+      size(TL') > size(TL) .
+  eq reorder(M, T, T') = T [owise] .
+
+  op _in_ : Term TermList -> Bool .
+  eq T in (TL, T, TL') = true .
+  eq T in TL = false [owise] .
 
   ---------------------------------------------------------------------------------------
   ---                                tryImplication                                   ---
   ---------------------------------------------------------------------------------------
+
+  ops numInstVars backtrackLevels extraImpLevels : -> Nat .
+  eq backtrackLevels = 7 .
+  eq numInstVars = 2 .
+  eq extraImpLevels = 0 .
 
   sort ImpPair ImpPairList ImpTryRes .
   subsort ImpPair < ImpPairList .
@@ -5907,68 +6352,230 @@ and \verb"sizeTL" just computes the size of a list of terms:
 
   op [_,_] : ImpPairList Bool -> ImpTryRes [ctor] .
 
-  op tryImplication : Module Term TermList -> ImpTryRes .
-  ceq tryImplication(M, T, TL) = if B
-                                 then [IPL, B]
-                                 else contrPrem*(M, TL)
-                                 fi
-   if [IPL, B] := $tryImplication(M, T, TL, empty, nilIPL) .
-  eq tryImplication(M, T, TL) = [nilIPL, false] [owise] .
 
-  op $tryImplication : Module Term TermList TermList ImpPairList -> ImpTryRes .
-  eq $tryImplication(M, T, empty, TL, IPL) = [nilIPL, false] .
-  ceq $tryImplication(M, T, (T', TL), TL', IPL) = [IPL [T', getLabel(M, T'), none], true]
+
+
+
+
+  var SB? : [Substitution] .
+  var SB' : Substitution .
+  var TS? : [TermSet] .
+
+  op preSubstitution : Module Term Term ~> SbSet .
+  eq preSubstitution(M, T, T') = preSubstitution(M, T, T', 0) .
+
+  op preSubstitution : Module Term Term Nat ~> SbSet .
+  ceq preSubstitution(M, T, T', N) = SB +
+                                     if SB == none
+                                     then mtSBS
+                                     else preSubstitution(M, T, T', s(N))
+                                     fi
+   if TrS := getEquals(reduce(M, '_implies_[T, T'])) /\
+      SB := traverseEquals(M, TrS, N, none) .
+
+  op traverseEquals : Module TermSet Nat Substitution ~> Substitution .
+  ceq traverseEquals(M, ('_=_[T, T']) | TrS, N, SB) =
+                                                traverseEquals(M, TrS, N, SB ; SB?)
+   if T1 := substitute(T, SB) /\
+      T2 := substitute(T', SB) /\
+      hasVars(T1) /\
+      not (T1 :: Variable) /\
+      not hasVars(T2) /\
+      SB? := metaMatch(M, T1, T2, nil, N) /\
+      SB? :: Substitution .
+  ceq traverseEquals(M, ('_=_[T, T']) | TrS, N, SB) =
+                                                traverseEquals(M, TrS, N, SB ; SB?)
+   if T1 := substitute(T, SB) /\
+      T2 := substitute(T', SB) /\
+      hasVars(T2) /\
+      not (T2 :: Variable) /\
+      not hasVars(T1) /\
+      SB? := metaMatch(M, T2, T1, nil, N) /\
+      SB? :: Substitution .
+  ceq traverseEquals(M, ('_=_[T, T']) | ('_=_[T, T'']) | TrS, N, SB) =
+                                                traverseEquals(M, TrS, N, SB ; SB?)
+   if T1 := substitute(T'', SB) /\
+      T2 := substitute(T', SB) /\
+      hasVars(T2) /\
+      not (T2 :: Variable) /\
+      not hasVars(T1) /\
+      SB? := metaMatch(M, T2, T1, nil, N) /\
+      SB? :: Substitution .
+  eq traverseEquals(M, TrS, N, SB) = SB [owise] .
+
+  op getEquals : Term -> TermSet .
+  eq getEquals(C) = emptyTermSet .
+  eq getEquals(V) = emptyTermSet .
+  eq getEquals('_=_[TL]) = '_=_[TL] .
+  eq getEquals(Q[TL]) = getEquals*(TL) [owise] .
+
+  op getEquals* : TermList -> TermSet .
+  eq getEquals*(empty) = emptyTermSet .
+  eq getEquals*((T, TL)) = getEquals(T) | getEquals*(TL) .
+
+
+
+
+
+
+
+
+  sort SbSet .
+  subsort Substitution < SbSet .
+
+  op mtSBS : -> SbSet .
+  op _+_ : SbSet SbSet -> SbSet [ctor assoc comm id: mtSBS] .
+
+  eq (V <- T ; SB) + none = (V <- T ; SB) .
+
+  var SBS : SbSet .
+
+
+  sorts TermSubPair TermSubPairSet .
+  subsort TermSubPair < TermSubPairSet .
+
+  op mtTSPS : -> TermSubPairSet [ctor] .
+  op [_,_,_] : Term Substitution Qid -> TermSubPair [ctor] .
+  op __ : TermSubPairSet TermSubPairSet -> TermSubPairSet [ctor assoc comm id: mtTSPS] .
+
+  vars TSPS TSPS' : TermSubPairSet .
+  var  TSP  : TermSubPair .
+  var  IPL' : ImpPairList .
+  var  IP : ImpPair .
+
+  op tryImplication : Module Term TermList -> ImpTryRes .
+  eq tryImplication(M, T, TL) = tryImplication(M, T, TL, extraImpLevels) .
+
+  op tryImplication : Module Term TermList Nat -> ImpTryRes .
+  ceq tryImplication(M, Q[TL], (TL1, Q[TL'], TL2), N) =
+                                    if T'' == 'true.Bool
+                                    then [IP, true]
+                                    else $tryImplication(M, '_implies_[T', Q[TL]],
+                                                         (TL1, Q[TL'], TL2),
+                                                         (TL1, Q[TL'], TL2), IP, N)
+                                    fi
+   if SB := basicSB*(TL', TL) /\
+      T' := substitute(Q[TL'], SB) /\
+      T'' := reduce(M, '_implies_[T', Q[TL]]) /\
+      Q' := getLabel(M, Q[TL']) /\
+      IP := [T', Q', SB] .
+
+  op $tryImplication : Module Term TermList TermList ImpPair Nat -> ImpTryRes .
+  eq $tryImplication(M, T, empty, TL, IP, N) = [nilIPL, false] .
+  ceq $tryImplication(M, T, (T', TL), TL', IP, N) = [IP [T'', Q, SB'], true]
+   if (SB + SBS) := preSubstitution(M, T', T) /\
+      T1 := substitute(T', SB) /\
+      numVars(T1) < 3 /\
+      [T'', SB', Q] TSPS := allIns(M, [T1, SB, getLabel(M, T')]) /\
+      reduce(M, '_implies_[T'', T]) == 'true.Bool .
+  ceq $tryImplication(M, T, (T', TL), TL', IP, s(N)) = [IP [T'', Q, SB'], true]
+   if (SB + SBS) := preSubstitution(M, T', T) /\
+      T1 := substitute(T', SB) /\
+      numVars(T1) < 3 /\
+      [T'', SB', Q] TSPS := allIns(M, [T1, SB, getLabel(M, T')]) /\
+      [IPL, true] := $tryImplication(M, '_implies_[T'', T], TL', TL', IP, N) .
+  eq $tryImplication(M, T, (T', TL), TL', IP, N) = $tryImplication(M, T, TL, TL', IP, N) [owise] .
+
+  op allIns : Module TermSubPairSet -> TermSubPairSet [memo] .
+  ceq allIns(M, [T, SB, Q] TSPS) = allIns(M, TSPS TSPS')
+   if hasVars(T) /\
+      TSPS' := allIns([T, SB, Q], getOps(M)) .
+  eq allIns(M, TSPS) = TSPS [owise] .
+
+  op allIns : TermSubPair OpDeclSet ~> TermSubPairSet .
+  ceq allIns([Q[TL, V, TL'], SB, Q'], op Q'' : nil -> Ty [metadata(S) AtS] . ODS) =
+                                        [Q[TL, C, TL'], V <- C ; SB, Q']
+                                        allIns([Q[TL, V, TL'], SB, Q'], ODS)
+   if not hasVars*(TL) /\
+      Ty := getType(V) /\
+      (S == "generated-si" or S == "tc") /\
+      C := qid(string(Q'') + "." + string(Ty)) .
+  eq allIns(TSP, ODS) = mtTSPS [owise] .
+
+  op basicSB* : TermList TermList -> Substitution .
+  eq basicSB*(empty, empty) = none .
+  eq basicSB*((V, TL), (C, TL')) = V <- C ; basicSB*(TL, TL') .
+  eq basicSB*((T, TL), (T', TL')) = basicSB*(TL, TL') [owise] .
+
+
+
+  op numVars : Term -> Nat .
+  eq numVars(T) = size(getVars(T)) .
+
+  op size : TermSet -> Nat .
+  eq size(T | TrS) = s(size(TrS)) .
+  eq size(TrS) = 0 [owise] .
+
+***( Old version
+  op tryImplication : Module Term TermList Nat -> ImpTryRes .
+  ceq tryImplication(M, T, TL, N) = if B
+                                    then [IPL, B]
+                                    else contrPrem*(M, TL)
+                                    fi
+   if [IPL, B] := $tryImplication(M, T, TL, empty, nilIPL, N) . *** [print "Implication 1 - " B] .
+  eq tryImplication(M, T, TL, N) = [nilIPL, false] [owise] . *** print "Implication 2"] .
+
+  op $tryImplication : Module Term TermList TermList ImpPairList Nat -> ImpTryRes .
+  eq $tryImplication(M, T, empty, TL, IPL, N) = [nilIPL, false] . *** [print "Implication 3"] .
+  eq $tryImplication(M, T, empty, TL, IPL, 0) = [nilIPL, false] . *** [print "Implication 4"] .
+  ceq $tryImplication(M, T, (T', TL), TL', IPL, s(N)) = [IPL [T', getLabel(M, T'), none], true]
    if not hasVars(T') /\
       T'' := '_implies_[T', T] /\
-      reduce(M, T'') == 'true.Bool .
-  ceq $tryImplication(M, T, (T', TL), TL', IPL) = [IPL [T', getLabel(M, T'), SB], true]
+      reduce(M, T'') == 'true.Bool . *** [print "Implication 5"] .
+  ceq $tryImplication(M, T, (T', TL), TL', IPL, s(N)) = [IPL [T', getLabel(M, T'), SB], true]
    if hasVars(T') /\
       SB := getImpSubs(M, T', T) /\
       T'' := '_implies_[applyImpSub(T', SB), T] /\
-      reduce(M, T'') == 'true.Bool .
-  ceq $tryImplication(M, T, (T', TL), TL', IPL) =
+      reduce(M, T'') == 'true.Bool . *** [print "Implication 6"] .
+  ceq $tryImplication(M, T, (T', TL), TL', IPL, s(N)) =
                       if B
                       then [IPL, B]
-                      else $tryImplication(M, T, TL, (TL', T'), IPL)
+                      else $tryImplication(M, T, TL, (TL', T'), IPL, s(N))
                       fi
    if not hasVars(T') /\
       T'' := '_implies_[T', T] /\
       reduce(M, T'') =/= 'true.Bool /\
-      [IPL, B] := $tryImplication(M, T, (TL', TL), empty, (IPL [T', getLabel(M, T'), none])) .
-  ceq $tryImplication(M, T, (T', TL), TL', IPL) =
+      [IPL, B] := $tryImplication(M, T, (TL', TL), empty, (IPL [T', getLabel(M, T'), none]), N) . *** [print "Implication 7"] .
+  ceq $tryImplication(M, T, (T', TL), TL', IPL, s(N)) =
                       if B
                       then [IPL, B]
-                      else $tryImplication(M, T, TL, (TL', T'), IPL)
+                      else $tryImplication(M, T, TL, (TL', T'), IPL, s(N))
                       fi
    if hasVars(T') /\
       SB := getImpSubs(M, T', T) /\
       T'' := '_implies_[applyImpSub(T', SB), T] /\
       reduce(M, T'') =/= 'true.Bool /\
-      [IPL, B] := $tryImplication(M, T, (TL', TL), empty, (IPL [T', getLabel(M, T'), SB])) .
-  eq $tryImplication(M, T, (T', TL), TL', IPL) = $tryImplication(M, T, TL, TL', IPL) .
+      [IPL, B] := $tryImplication(M, T, (TL', TL), empty, (IPL [T', getLabel(M, T'), SB]), N) . *** [print "Implication 8"] .
+  eq $tryImplication(M, T, (T', TL), TL', IPL, N) = $tryImplication(M, T, TL, TL', IPL, N) [owise] . *** print "Implication 9"] .
 
   op contrPrem* : Module TermList -> ImpTryRes .
-  eq contrPrem*(M, empty) = [nilIPL, false] .
+  eq contrPrem*(M, empty) = [nilIPL, false] . *** [print "Premises 1"] .
   ceq contrPrem*(M, (T, TL)) = if B
                                then [IPL, B]
                                else contrPrem*(M, TL)
                                fi
-   if [IPL, B] := contrPrem(M, getOps(M), T, getLabel(M, T)) .
+   if [IPL, B] := contrPrem(M, getOps(M), T, getLabel(M, T)) . *** [print "Premises 2 - " B " con " TL] .
 
   op contrPrem : Module OpDeclSet Term Qid -> ImpTryRes .
   ceq contrPrem(M, ODS, T, Q) = [[T, Q, SB], true]
-   if SB := subContr(M, ODS, T) .
-  eq contrPrem(M, ODS, T, Q) = [nilIPL, false] [owise] .
+   if SB := subContr(M, ODS, T) . *** [print "Premises 3 "] .
+  eq contrPrem(M, ODS, T, Q) = [nilIPL, false] [owise] . *** print "Premises 4"] .
 
-  op subContr : Module OpDeclSet Term ~> Substitution .
+  op subContr : Module OpDeclSet Term ~> Substitution [memo] .
   ceq subContr(M, ODS, T) = none
    if not hasVars(T) /\
-      reduce(M, T) == 'false.Bool .
+      reduce(M, T) == 'false.Bool . *** [print "Subs 1"] .
   ceq subContr(M, ODS, Q[TL, V, TL']) = V <- C ; SB
-   if op Q' : nil -> Ty [metadata(S) AtS] . ODS' := ODS /\
+   if not hasVars*(TL) /\
+      Ty := getType(V) /\
+      op Q' : nil -> Ty [metadata(S) AtS] . ODS' := ODS /\
       (S == "generated-si" or S == "tc") /\
       C := qid(string(Q') + "." + string(Ty)) /\
-      SB := subContr(M, ODS, Q[TL, C, TL']) .
+      SB := subContr(M, ODS, Q[TL, C, TL']) . *** [print "Subs 2"] .
+)
+
+
+
 
   op getLabel : Module Term ~> Qid [memo] .
   eq getLabel(M, T) = getLabel(getEqs(M), T) .
@@ -6034,6 +6641,11 @@ and \verb"sizeTL" just computes the size of a list of terms:
    if Q := getName(C) /\
       Ty := getType(C) /\
       op Q : nil -> Ty [metadata("tc") AtS] . ODS := getOps(M) .
+  ceq isFreshCons(M, C) = true
+   if Q := getName(C) /\
+      Ty := getType(C) /\
+      op Q : nil -> Ty [metadata(St) AtS] . ODS := getOps(M) /\
+      find(St, "CTF-", 0) =/= notFound .
   eq isFreshCons(M, T) = false [owise] .
 
 
@@ -9151,8 +9763,8 @@ set to \verb"false":
   rl [init] :
      cafe4maude-init
   => [nil, < o : CafeDatabase | db : initialDatabase, input : nilTermList,
-                                output : ('\n '\t '\b 'CafeInMaude '2.0 '
-                                          '`( 'July '6 '`, '2018 '`)
+                                output : ('\n '\t '\b 'CafeInMaude '2.1 '
+                                          '`( 'August '8 '`, '2019 '`)
                                           '\o ' 'started. '\n),
                                 default : 'CONVERSION, initCafeAttS >,
                                 nil] .
@@ -9222,7 +9834,7 @@ set show loop stats off .
 set show loop timing off .
 
 *** for debugging purposes
-set print attribute on .
+set print attribute off .
 
 set show advisories off .
 
@@ -9238,4 +9850,5 @@ select CAFE2MAUDE .
 
 loop cafe4maude-init .
 
+*** 3TUPLE now available in Full Maude with different syntax
 load predefined.maude
