@@ -1,0 +1,55 @@
+
+***(%
+
+The \texttt{SCORE-INFO-MAP} stores information about proof scores. It first defines a
+3-tuple (\texttt{ScoreInfo}) to store the information in open-close environments. Then,
+it defines a partial function (\texttt{ScoreInfoMap}) from open-close identifiers to
+sets of 3-tuples.
+
+{\codesize
+\begin{comment}
+%)
+
+fmod SCORE-INFO-MAP is
+ pr META-LEVEL .
+
+ sorts ScoreInfo ScoreInfoSet .
+ subsort ScoreInfo < ScoreInfoSet .
+
+ *** Flat module
+ *** Top module
+ *** Reduced terms
+ op $_,_,_$ : Module Module TermList -> ScoreInfo [ctor] .
+
+ op noScoreInfo : -> ScoreInfoSet [ctor] .
+ op __ : ScoreInfoSet ScoreInfoSet -> ScoreInfoSet [ctor assoc comm id: noScoreInfo] .
+
+ sort ScoreInfoMap .
+
+ op mtSIM : -> ScoreInfoMap [ctor] .
+ op _:_ : Qid ScoreInfoSet -> ScoreInfoMap [ctor] .
+ op __ : ScoreInfoMap ScoreInfoMap -> ScoreInfoMap [ctor assoc comm id: mtSIM] .
+
+ var  SIM : ScoreInfoMap .
+ var  Q : Qid .
+ var  SI : ScoreInfo .
+ var  SIS : ScoreInfoSet .
+ vars M M' : Module .
+ var  TL : TermList .
+
+ op addSIM : ScoreInfoMap Qid ScoreInfo -> ScoreInfoMap .
+ eq addSIM((Q : SIS) SIM, Q, SI) = (Q : SIS SI) SIM .
+ eq addSIM(SIM, Q, SI) = (Q : SI) SIM .
+
+ op completeTermList : ScoreInfoSet -> TermList .
+ eq completeTermList(noScoreInfo) = empty .
+ eq completeTermList($ M, M', TL $ SIS) = TL, completeTermList(SIS) .
+
+ op _[_] : ScoreInfoMap Qid -> ScoreInfoSet .
+ eq ((Q : SIS) SIM)[Q] = SIS .
+ eq SIM[Q] = noScoreInfo [owise] .
+
+ op allReductions : ScoreInfoSet -> TermList .
+ eq allReductions(noScoreInfo) = empty .
+ eq allReductions($ M, M', TL $ SIS) = TL, allReductions(SIS) .
+endfm
