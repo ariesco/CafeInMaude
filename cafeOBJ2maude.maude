@@ -1,6 +1,7 @@
 load predefined_core.maude
 load citp_defs.maude
 load cimpg_defs.maude
+load parameter_config.maude
 
 ***(%
 
@@ -9,31 +10,6 @@ specifications~\cite{cafe-report}. First, we will see how to define the syntax,
 and how to parse the terms to obtain the Maude modules~\cite{maude-book}. Then,
 we will show how to pretty print these terms and how to create new commands and
 rules and will be added in addition to the ones already defined in Full Maude.
-
-{\codesize
-\begin{comment}
-%)
-
-******************************************************
-***predefined modules
-******************************************************
-***for HS
-
-fmod COMPONENTS is
-  sorts AComp OComp State .
-  subsort AComp OComp < State .
-
-  op empty-state : -> State .
-  op __ : State State -> State [assoc comm id: empty-state format(o nt o)] .
-endfm
-
-*****************************************************
-***for translation
-*****************************************************
-
-***(%
-\end{comment}
-}
 
 \subsection{Syntax\label{subsec:syntax}}
 
@@ -2933,6 +2909,7 @@ mod CafePARSER is
   inc CafeDECL-PARSING .
   pr DATABASE-HANDLING .
   pr SEARCH_PREDICATE .
+  pr PARAMETER-CONFIG .
   pr MACROS .
   pr GOAL .
 
@@ -6186,11 +6163,6 @@ and \verb"sizeTL" just computes the size of a list of terms:
   ---------------------------------------------------------------------------------------
   ---                                tryImplication                                   ---
   ---------------------------------------------------------------------------------------
-
-  ops numInstVars backtrackLevels extraImpLevels : -> Nat .
-  eq backtrackLevels = 7 .
-  eq numInstVars = 2 .
-  eq extraImpLevels = 0 .
 
   sort ImpPair ImpPairList ImpTryRes .
   subsort ImpPair < ImpPairList .
