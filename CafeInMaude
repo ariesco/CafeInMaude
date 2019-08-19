@@ -2,7 +2,7 @@
 declare -r TEMP=trans-temp-mod
 declare -r ALL=all-temp-mod.cafe
 declare -r CAFE2MAUDE=./cafeOBJ2maude.maude
-declare -r MAUDE=/Applications/maude-darwin/maude.darwin64
+declare -r MAUDE=/Applications/maude/maude.darwin64
 declare -r PARSER=./parser.jar
 rm -f $ALL
 rm -f $TEMP
