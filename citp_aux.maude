@@ -1,0 +1,208 @@
+fmod GOAL is
+ pr META-LEVEL .
+
+ sort Goal .
+ *** Id
+ *** Sentence
+ *** Is it the current one?
+ *** Is it proven?
+ op [_,_,_,_,_] : NatList Qid EquationSet Bool Bool -> Goal [ctor] .
+
+ op noGoal : -> Goal [ctor] .
+ op _+_ : Goal Goal -> Goal [ctor assoc id: noGoal] .
+
+ sort ProofTree ProofTreeList .
+ subsort ProofTree < ProofTreeList .
+
+ op mtPT : -> ProofTree [ctor] .
+ op __ : ProofTreeList ProofTreeList -> ProofTreeList [ctor assoc id: mtPT] .
+
+ op |_,_,_,_| : Module Goal ProofTreeList Nat -> ProofTree [ctor] .
+
+ var  M : Module .
+ var  G : Goal .
+ var  P : ProofTree .
+ vars PrL PrL' : ProofTreeList .
+ vars N N' : Nat .
+ vars NL NL' : NatList .
+ var  Q : Qid .
+ var  EqS : EquationSet .
+ vars CURR PRV : Bool .
+ vars SR SR' : SearchRes .
+ var  PO : ProofOrder .
+
+ op getEq : Goal -> EquationSet .
+ eq getEq([NL, Q, EqS, CURR, PRV]) = EqS .
+
+ op getId : Goal -> NatList .
+ eq getId([NL, Q, EqS, CURR, PRV]) = NL .
+
+ op isProven : Goal -> Bool .
+ eq isProven([NL, Q, EqS, CURR, PRV]) = PRV .
+
+ op size : ProofTree -> Nat .
+ eq size(mtPT) = 0 .
+ eq size(| M, G, PrL, N |) = N .
+
+ op size* : ProofTreeList -> Nat .
+ eq size*(mtPT) = 0 .
+ eq size*(| M, G, PrL, N | PrL') = N + size*(PrL') .
+
+ sort SearchRes .
+ subsort NatList < SearchRes .
+
+ op allProven : -> SearchRes [ctor] .
+
+ op minSR : SearchRes SearchRes -> SearchRes [comm assoc] .
+ eq minSR(allProven, SR) = SR .
+ eq minSR(N NL, N' NL') = if N < N'
+                          then N NL
+                          else N' NL'
+                          fi .
+ eq minSR(NL, nil) = NL .
+
+ sort ProofOrder .
+ subsort NatList < ProofOrder .
+ op finished : -> ProofOrder [ctor] .
+ op _y_ : ProofOrder ProofOrder -> ProofOrder [ctor assoc id: finished] .
+
+ op pop : ProofOrder -> ProofOrder .
+ eq pop(finished) = finished .
+ eq pop(NL y PO) = PO .
+
+ op fst : ProofOrder ~> NatList .
+ eq fst(NL y PO) = NL .
+
+ op getGoal : ProofTree NatList ~> Equation .
+ eq getGoal(| M, G, PrL, N |, nil) = getEq(G) .
+ ceq getGoal(| M, G, PrL, N |, s(N') NL) = getGoal(P, NL)
+  if P := getNth(PrL, N') .
+
+ op getNth : ProofTreeList Nat ~> ProofTree .
+ ceq getNth(P PrL, 0) = P
+  if P =/= mtPT .
+ ceq getNth(P PrL, s(N)) = getNth(PrL, N)
+  if P =/= mtPT .
+
+ op getMod : ProofTree NatList ~> Module .
+ eq getMod(| M, G, PrL, N |, nil) = M .
+ ceq getMod(| M, G, PrL, N |, s(N') NL) = getMod(P, NL)
+  if P := getNth(PrL, N') .
+endfm
+
+fmod MACROS is
+ pr META-LEVEL .
+
+ sorts Macro Macros MacroLabel .
+ subsort Macro < Macros .
+
+ ops cvss cvvs cvsv cevss cvs csv csvs : -> MacroLabel [ctor] .
+
+ op #_,_-_# : Module Qid Equation -> Macro [ctor] .
+ op #_,_-_# : Module Qid Term -> Macro [ctor] .
+ op #_,_-_._# : Module Qid Term MacroLabel -> Macro [ctor] .
+
+ op mtMacros : -> Macros [ctor] .
+ op __ : Macros Macros -> Macros [ctor assoc comm id: mtMacros] .
+endfm
+
+fmod CITP-AUX is
+  pr MOVE-DOWN .
+  pr MACROS .
+  pr GOAL .
+
+  vars PrL PrL' : ProofTreeList .
+  vars EqS EqS' : EquationSet .
+  var  SSDS : SubsortDeclSet .
+  vars Eq Eq' : Equation .
+  vars M M' M'' : Module .
+  var  MAS : MembAxSet .
+  vars IL : ImportList .
+  var  ODS : OpDeclSet .
+  vars T T' T1 T2 : Term .
+  var  P : ProofTree .
+  vars AtS : AttrSet .
+  var  NL : NatList .
+  var  SS : SortSet .
+  var  RS : RuleSet .
+  var  Q CMD : Qid .
+  var  PRVN : Bool .
+  vars N N' : Nat .
+  var  H : Header .
+  var  G : Goal .
+
+  ************************************************************************************
+  ***************************** Add Hypotheses to module *****************************
+  ************************************************************************************
+
+  op addHyp : Module EquationSet -> Module .
+  eq addHyp(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, EqS') =
+             fmod H is IL sorts SS . SSDS ODS MAS EqS EqS' endfm .
+  eq addHyp(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, EqS') =
+             mod H is IL sorts SS . SSDS ODS MAS EqS EqS' RS endm .
+  eq addHyp(fth H is IL sorts SS . SSDS ODS MAS EqS endfth, EqS') =
+             fth H is IL sorts SS . SSDS ODS MAS EqS EqS' endfth .
+  eq addHyp(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, EqS') =
+             th H is IL sorts SS . SSDS ODS MAS EqS EqS' RS endth .
+
+  ************************************************************************************
+  ******************************* APPLY EQUATION MACRO *******************************
+  ************************************************************************************
+
+  op applyEquationMacro : ProofTree Qid Equation -> ProofTree .
+  eq applyEquationMacro(P, Q, Eq) = $applyEquationMacro(P, Q, Eq) .
+
+  op $applyEquationMacro : ProofTree Qid Equation -> ProofTree .
+  eq $applyEquationMacro(mtPT, Q, Eq) = mtPT .
+  ceq $applyEquationMacro(| M, [NL, CMD, EqS, false, PRVN], PrL, N' |, Q, Eq') =
+                                   | M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |
+   if PrL' := $applyEquationMacro*(PrL, Q, Eq') .
+  ceq $applyEquationMacro(| M, [NL, CMD, EqS, true, PRVN], mtPT, N' |, Q, Eq') =
+                                   | M, [NL, CMD, EqS, false, PRVN], PrL', 3 |
+   if M' := createCTFmodTrue(M, Eq') /\
+      M'' := createCTFmodFalse(M, Eq') /\
+      PrL' := | M', [NL 1, Q, EqS, true, false], mtPT, 1 |
+              | M'', [NL 2, Q, EqS, false, false], mtPT, 1 | .
+
+  op $applyEquationMacro* : ProofTreeList Qid Equation -> ProofTree .
+  eq $applyEquationMacro*(mtPT, Q, Eq) = mtPT .
+  eq $applyEquationMacro*(| M', G, PrL, N | PrL', Q, Eq) =
+                $applyEquationMacro(| M', G, PrL, N |, Q, Eq)
+                $applyEquationMacro*(PrL', Q, Eq) .
+
+  ************************************************************************************
+  ********************************** EQUATION MACRO **********************************
+  ************************************************************************************
+
+  op parseEqMacro : ProofTree Qid Term -> Macros .
+  eq parseEqMacro(mtPT, Q, T) = mtMacros .
+  eq parseEqMacro(| M, [NL, CMD, EqS, false, PRVN], PrL, N' |, Q, T) =
+          parseEqMacro*(PrL, Q, T) .
+  eq parseEqMacro(| M, [NL, CMD, EqS, true, PRVN], PrL, N' |, Q, T) =
+          parseEqMacro(M, Q, T) .
+
+  op parseEqMacro* : ProofTreeList Qid Term -> Macros .
+  eq parseEqMacro*(mtPT, Q, T) = mtMacros .
+  eq parseEqMacro*(| M', G, PrL, N | PrL', Q, T) = parseEqMacro(| M', G, PrL, N |, Q, T)
+                                                   parseEqMacro*(PrL', Q, T) .
+
+  op parseEqMacro : Module Qid Term -> Macros .
+  ceq parseEqMacro(M, Q, 'eq_=_.['CafeBubble[T],'CafeBubble[T']]) = # M, Q - Eq #
+   if T1 := getTerm(metaParse(M, downQidList(T), anyType)) /\
+      T2 := getTerm(metaParse(M, downQidList(T'), anyType)) /\
+      Eq := eq T1 = T2 [none] . .
+  eq parseEqMacro(M, Q, T) = mtMacros [owise] .
+
+  ************************************************************************************
+  ***  Creates modules for case splitting true-false                               ***
+  ************************************************************************************
+
+  op createCTFmodTrue : Module Equation -> Module .
+  ceq createCTFmodTrue(M, eq T = T' [AtS] .) = addHyp(M, Eq)
+   if Eq := eq T = T' [AtS metadata("CTF-true")] . .
+
+  op createCTFmodFalse : Module Equation -> Module .
+  ceq createCTFmodFalse(M, eq T = T' [AtS] .) = addHyp(M, Eq)
+   if Eq := eq '_=_[T, T'] = 'false.Bool [AtS metadata("CTF-false")] . .
+endfm
+
