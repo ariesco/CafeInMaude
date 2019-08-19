@@ -117,22 +117,26 @@ CiMPG requires that:
 * All open-close environments open the same module, including the one for **:proof**.
 * All the reductions on these environments are related to the proof.
 
-Using the CITP
---------------
+The CafeInMaude Proof Generator & Upper-Fixer (CiMPG+F)
+-------------------------------------------------------
 
-The code here includes the last version of the translation integrated with the
-Constructor-based Inductive Theorem Prover. The latest version of the CITP is
-available [here](http://www.jaist.ac.jp/~danielmg/citp.html).
+The CafeInMaude Proof Generator & Upper-Fixer (CiMPG+F) allows users to fix proofs
+when some proof scores were omitted and even generate proofs from scratch in some
+cases. The user is still required to create a proof score identified with **:id(LAB)**
+and including the properties he/she wants to prove. These properties must use variables
+for those arguments were induction should be applied and constants for the rest of
+arguments. Then, an extra open-close environment with the annotation **:infer(LAB)**
+must be used.
 
-Using the MFE
--------------
+Using the MFE (discontinued)
+----------------------------
 
 The code here includes the last version of the translation integrated with the
 Maude Formal Environment. The latest version of the MFE is available
 [here](http://maude.lcc.uma.es/MFE/).
 
-Using the MDDTCG
-----------------
+Using the MDDTCG (discontinued)
+-------------------------------
 
 The code here includes the last version of the Maude Declarative Debugger and
 Test-Case Generator. More details are available
