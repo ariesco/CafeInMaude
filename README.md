@@ -146,6 +146,6 @@ Test-Case Generator. More details are available
 Acknowledgments
 ---------------
 
-Research partially supported by Japanese project *Kakenhi* 23220002,
+Research partially supported by Japanese projects *Kakenhi* 23220002 and 19H04082,
 MICINN Spanish project *StrongSoft* (TIN2012-39391-C04-04), and
 Comunidad de Madrid project *N-Greens* Software-CM (S2013/ICE-2731).

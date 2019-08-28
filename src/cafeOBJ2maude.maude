@@ -2709,7 +2709,7 @@ the \verb"maps2maps" function shown above to the body:
       not es&esCheck(M, T, T') /\
       not seese&seCheck(M, T, T') /\
       not es&esCheck(M, T', T) [print "es&es 2 " T " = " T'] .
-  eq processEqualityTerm(M, T) = $processEqualityTerm(M, T) [owise print "Eq terms owise " T] .
+  eq processEqualityTerm(M, T) = $processEqualityTerm(M, T) [owise] . *** print "Eq terms owise " T] .
 
   op subterm : Term Term -> Bool .
   eq subterm(T, Q[TL, T, TL']) = true .
