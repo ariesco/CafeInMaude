@@ -29,12 +29,6 @@ have to write in your Linux/MacOS console:
 This will create a CafeInMaude folder containing the source code of the tool as well as
 several examples.
 
-The latest release of CafeInMaude is CafeInMaude 2.0, which corresponds to the
-**cafeOBJ2maude20.maude** file. This version implements the features in the paper
-*Prove it! Inferring Formal Proof Scripts from CafeOBJ Proof Scores*.
-The **cafeOBJ2maude.maude** file is experimental, so we recommend to replace this file with
-**cafeOBJ2maude20.maude** if no new features are required.
-
 Using the tool
 --------------
 
@@ -98,7 +92,7 @@ again until the rest of goals has been dealt with.
 * **:show proof**. This command displays the current goals (that is, the leaves of
 the proof tree). A goal is displayed with * if it has already been proved and with
 **>** if it is the current one.
-* **desc .**. This command displays the current goal.
+* **:desc .**. This command displays the current goal.
 * **:desc proof**. This command depicts the complete proof tree.
 A goal is displayed with * if it has already been proved and with
 **>** if it is the current one.
