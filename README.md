@@ -38,7 +38,7 @@ The **cafeOBJ2maude.maude** file is experimental, so we recommend to replace thi
 Using the tool
 --------------
 
-1. The easiest way to use CafeInMaude is to configure the **cafe2maude** script by
+1. The easiest way to use CafeInMaude is to configure the **CafeInMaude** script by
 editing the location of the Maude binary in the variable *MAUDE*. It is assumed that
 the Full Maude file is accessible in the folder where Maude is located or in the current
 folder.
@@ -47,7 +47,7 @@ Once this information is set, CafeOBJ specifications can be loaded into the Maud
 For example, you can execute the alternating bit protocol example available in the
 examples folder by typing:
 
-    $ ./cafe4maude examples/abp.cafe
+    $ ./CafeInMaude examples/abp.cafe
 
 Once a module has been loaded, Maude commands can be used in the usual way.
 
