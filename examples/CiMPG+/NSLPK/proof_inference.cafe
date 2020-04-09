@@ -13,3 +13,8 @@ open NSLPK .
   :infer(proofNSLPK)
 close
 
+***(Suggested configuration:
+  eq backtrackLevels = 6 .
+  eq numInstVars = 2 .
+  eq extraImpLevels = 1 .
+)
