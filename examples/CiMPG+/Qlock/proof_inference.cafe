@@ -10,3 +10,9 @@ close
 open QLOCK .
   :infer(qlock)
 close
+
+***(Recommended configuration
+  eq backtrackLevels = 5 .
+  eq numInstVars = 1 .
+  eq extraImpLevels = 0 .
+)

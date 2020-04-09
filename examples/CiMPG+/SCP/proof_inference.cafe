@@ -9,3 +9,9 @@ close
 open SCP .
   :infer(proofSCP)
 close
+
+***(Recommended configuration
+  eq backtrackLevels = 5 .
+  eq numInstVars = 2 .
+  eq extraImpLevels = 1 .
+)

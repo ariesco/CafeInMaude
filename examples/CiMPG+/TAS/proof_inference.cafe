@@ -1,16 +1,4 @@
 open TAS .
- op S#Sys : -> Sys .
- ops P#Pid i@Pid j@Pid : -> Pid .
-
- eq (i@Pid = j@Pid) = false .
- eq lock(S#Sys) = close .
- eq pc(S#Sys,i@Pid) = cs .
- eq pc(S#Sys,j@Pid) = cs .
-
- red inv1(enter(S#Sys,P#Pid),i@Pid,j@Pid) .
-close
-
-open TAS .
  :id(tas)
 -- fresh constants
   ops i j : -> Pid .
@@ -22,3 +10,9 @@ close
 open TAS .
  :infer(tas)
 close
+
+***(Recommended configuration
+  eq backtrackLevels = 5 .
+  eq numInstVars = 0 .
+  eq extraImpLevels = 0 .
+)

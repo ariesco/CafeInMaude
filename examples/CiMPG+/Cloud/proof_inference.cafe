@@ -16,3 +16,8 @@ open CLOUD .
   :infer(proofCLOUD)
 close
 
+***(Recommended configuration:
+  eq backtrackLevels = 5 .
+  eq numInstVars = 0 .
+  eq extraImpLevels = 1 .
+)

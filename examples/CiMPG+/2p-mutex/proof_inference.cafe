@@ -7,3 +7,9 @@ close
 open 2P-MUTEX .
   :infer(2pm)
 close
+
+***(Recommended configuration:
+  eq backtrackLevels = 3 .
+  eq numInstVars = 0 .
+  eq extraImpLevels = 0 .
+)
