@@ -1128,7 +1128,7 @@ the \verb"maps2maps" function shown above to the body:
              else P'
              fi /\
       QIL := '\n '\n 'Reduction 'applied.
-             'The 'goal 'was if B then nil else 'not fi 'discarded
+             'The 'goal 'was if B then nil else 'not fi 'discharged
              if B and (not B')
              then '\n 'Next 'goal 'is '\! printIndex(fst(PO')) '\o
              else if B'
@@ -1148,7 +1148,7 @@ the \verb"maps2maps" function shown above to the body:
              else P'
              fi /\
       QIL := '\n '\n 'Reduction 'applied.
-             'The 'goal 'was if B then nil else 'not fi 'discarded
+             'The 'goal 'was if B then nil else 'not fi 'discharged
              if B and (not B')
              then '\n 'Next 'goal 'is '\! printIndex(fst(PO')) '\o
              else if B'
@@ -6617,7 +6617,7 @@ set show loop stats off .
 set show loop timing off .
 
 *** for debugging purposes
-set print attribute off .
+set print attribute on .
 
 set show advisories off .
 

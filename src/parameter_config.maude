@@ -3,7 +3,7 @@ fmod PARAMETER-CONFIG is
 
   ops numInstVars backtrackLevels extraImpLevels : -> Nat .
 
-  eq backtrackLevels = 5 .
+  eq backtrackLevels = 6 .
   eq numInstVars = 2 .
-  eq extraImpLevels = 0 .
+  eq extraImpLevels = 1 .
 endfm

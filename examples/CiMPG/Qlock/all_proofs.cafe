@@ -1,6 +1,6 @@
 -- I) Base case
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    ops i j : -> Pid .
 -- |-
@@ -10,7 +10,7 @@ close
 -- II) Induction cases
 -- 1) want(s,k)
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i j k : -> Pid .
@@ -23,7 +23,7 @@ open QLOCK .
    red inv1(s,i,j) implies inv1(want(s,k),i,j) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i j k : -> Pid .
@@ -37,7 +37,7 @@ open QLOCK .
    red inv1(s,i,j) implies inv1(want(s,k),i,j) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i j k : -> Pid .
@@ -51,7 +51,7 @@ open QLOCK .
    red inv1(s,i,j) implies inv1(want(s,k),i,j) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i j k : -> Pid .
@@ -64,7 +64,7 @@ open QLOCK .
 close
 -- 2) try(s,k)
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i j k : -> Pid .
@@ -79,7 +79,7 @@ open QLOCK .
    red inv1(s,i,j) implies inv1(try(s,k),i,j) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i j k : -> Pid .
@@ -97,7 +97,7 @@ open QLOCK .
    -- red inv2-0(s,i,j,k) implies inv1(try(s,k),i,j) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i j k : -> Pid .
@@ -114,7 +114,7 @@ open QLOCK .
    red inv1(s,i,j) implies inv1(try(s,k),i,j) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i j k : -> Pid .
@@ -131,7 +131,7 @@ open QLOCK .
    red inv2(s,i) implies inv1(s,i,j) implies inv1(try(s,k),i,j) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i j k : -> Pid .
@@ -148,7 +148,7 @@ open QLOCK .
    red inv1(s,i,j) implies inv1(try(s,k),i,j) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i j k : -> Pid .
@@ -165,7 +165,7 @@ open QLOCK .
    red inv1(s,i,j) implies inv1(try(s,k),i,j) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i j k : -> Pid .
@@ -179,7 +179,7 @@ open QLOCK .
    red inv1(s,i,j) implies inv1(try(s,k),i,j) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i j k : -> Pid .
@@ -193,7 +193,7 @@ open QLOCK .
 close
 -- 3) exit(s,k)
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i j k : -> Pid .
@@ -207,7 +207,7 @@ open QLOCK .
    red inv1(s,i,j) implies inv1(exit(s,k),i,j) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i j k : -> Pid .
@@ -222,7 +222,7 @@ open QLOCK .
    red inv1(s,i,j) implies inv1(exit(s,k),i,j) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i j k : -> Pid .
@@ -237,7 +237,7 @@ open QLOCK .
    red inv1(s,i,j) implies inv1(exit(s,k),i,j) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i j k : -> Pid .
@@ -259,7 +259,7 @@ close
 
 -- I) Base case
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op i : -> Pid .
 -- |-
@@ -269,7 +269,7 @@ close
 -- II) Induction cases
 -- 1) want(s,k)
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i k : -> Pid .
@@ -283,7 +283,7 @@ open QLOCK .
    red inv2(s,i) implies inv2(want(s,k),i) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i k : -> Pid .
@@ -298,7 +298,7 @@ open QLOCK .
    red inv2(s,i) implies inv2(want(s,k),i) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i k j : -> Pid .
@@ -314,7 +314,7 @@ open QLOCK .
    red inv2(s,i) implies inv2(want(s,k),i) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i k : -> Pid .
@@ -328,7 +328,7 @@ open QLOCK .
 close
 --> 2) try(s,k)
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i k : -> Pid .
@@ -343,7 +343,7 @@ open QLOCK .
    red inv2(s,i) implies inv2(try(s,k),i) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i k : -> Pid .
@@ -358,7 +358,7 @@ open QLOCK .
    red inv2(s,i) implies inv2(try(s,k),i) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i k : -> Pid .
@@ -372,7 +372,7 @@ open QLOCK .
    red inv2(s,i) implies inv2(try(s,k),i) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i k : -> Pid .
@@ -386,7 +386,7 @@ open QLOCK .
 close
 -- 3) exit(s,k)
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i k : -> Pid .
@@ -400,7 +400,7 @@ open QLOCK .
    red inv2(s,i) implies inv2(exit(s,k),i) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i k : -> Pid .
@@ -415,7 +415,7 @@ open QLOCK .
    red inv1(s,i,k) implies inv2(s,i) implies inv2(exit(s,k),i) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i k : -> Pid .
@@ -430,7 +430,7 @@ open QLOCK .
    red inv2(s,i) implies inv2(exit(s,k),i) .
 close
 open QLOCK .
-  :id(inv1)
+  :id(qlock)
 -- fresh constants
    op s : -> Sys .
    ops i k : -> Pid .
@@ -445,5 +445,5 @@ close
 --> Q.E.D
 
 open QLOCK .
-  :proof(inv1)
+  :proof(qlock)
 close
