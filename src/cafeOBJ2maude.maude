@@ -2184,8 +2184,9 @@ the \verb"maps2maps" function shown above to the body:
              then '\t ':imp ' '`[ Q '`] ' '. '\n '\n
              else '\t ':imp ' '`[ Q '`] ' 'by ' '`{ printSub(SB) '`} '\n '\n
              fi [print "Imp"] .
-  eq developProof(P, NL y PO, SIS, MACS) = inferNewProof(P, NL y PO, SIS, MACS)
-                           [owise print "Try reduction and implication for " NL] .
+  ceq developProof(P, NL y PO, SIS, MACS) = inferNewProof(P, NL y PO, SIS, MACS)
+   if eq T = 'true.Bool [AtS] . := getGoal(P, NL)
+                           [owise print "Try reduction and implication for " NL " (" T ")"] .
 
   -------------------------------------------------------------------------------------
   -------------------------------------------------------------------------------------
@@ -3258,21 +3259,18 @@ and \verb"sizeTL" just computes the size of a list of terms:
   eq traverseEquals(M, TrS, N, SB) = SB [owise] .
 
   op getEquals : Term -> TermSet .
-  eq getEquals(C) = emptyTermSet .
-  eq getEquals(V) = emptyTermSet .
-  eq getEquals('_=_[TL]) = '_=_[TL] .
-  eq getEquals(Q[TL]) = getEquals*(TL) [owise] .
+  eq getEquals(T) = getEquals(T, emptyTermSet) .
 
-  op getEquals* : TermList -> TermSet .
-  eq getEquals*(empty) = emptyTermSet .
-  eq getEquals*((T, TL)) = getEquals(T) | getEquals*(TL) .
+  op getEquals : Term TermSet -> TermSet .
+  eq getEquals(C, TrS) = TrS .
+  eq getEquals(V, TrS) = TrS .
+  eq getEquals('_=_[TL], TrS) = ('_=_[TL]) | TrS .
+  eq getEquals(Q[TL], TrS) = getEquals*(TL, TrS) [owise] .
 
-
-
-
-
-
-
+  op getEquals* : TermList TermSet -> TermSet .
+  eq getEquals*(empty, TrS) = TrS .
+  ceq getEquals*((T, TL), TrS) = getEquals*(TL, TrS')
+   if TrS' := getEquals(T, TrS) .
 
   sort SbSet .
   subsort Substitution < SbSet .
@@ -3316,19 +3314,19 @@ and \verb"sizeTL" just computes the size of a list of terms:
 
   op $tryImplication : Module Term TermList TermList ImpPair Nat -> ImpTryRes .
   eq $tryImplication(M, T, empty, TL, IP, N) = [nilIPL, false] .
-  ceq $tryImplication(M, T, (T', TL), TL', IP, N) = [IP [T'', Q, SB'], true]
+  ceq $tryImplication(M, T, (T', TL), TL', IP, s(N)) = [IP [T'', Q, SB'], true]
    if (SB + SBS) := preSubstitution(M, T', T) /\
       T1 := substitute(T', SB) /\
-      numVars(T1) < 3 /\
+      numVars(T1) <= numInstVars /\
       [T'', SB', Q] TSPS := allIns(M, [T1, SB, getLabel(M, T')]) /\
       reduce(M, '_implies_[T'', T]) == 'true.Bool .
   ceq $tryImplication(M, T, (T', TL), TL', IP, s(N)) = [IP [T'', Q, SB'], true]
    if (SB + SBS) := preSubstitution(M, T', T) /\
       T1 := substitute(T', SB) /\
-      numVars(T1) < 3 /\
+      numVars(T1) <= numInstVars /\
       [T'', SB', Q] TSPS := allIns(M, [T1, SB, getLabel(M, T')]) /\
       [IPL, true] := $tryImplication(M, '_implies_[T'', T], TL', TL', IP, N) .
-  eq $tryImplication(M, T, (T', TL), TL', IP, N) = $tryImplication(M, T, TL, TL', IP, N) [owise] .
+  eq $tryImplication(M, T, (T', TL), TL', IP, N) = $tryImplication(M, T, TL, TL', IP, N) [owise ] .
 
   op allIns : Module TermSubPairSet -> TermSubPairSet [memo] .
   ceq allIns(M, [T, SB, Q] TSPS) = allIns(M, TSPS TSPS')
