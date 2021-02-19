@@ -1,8 +1,10 @@
 CafeInMaude: A translation from CafeOBJ into Maude
 ==================================================
 
-CafeInMaude is a tool to introduce CafeOBJ specifications into the Maude system (please
-note that the current version of CafeInMaude works for Maude 2.7).
+CafeInMaude is a tool to introduce CafeOBJ specifications into the Maude system. Please note
+that the current version of CafeInMaude runs in Maude 3, please visit the *previous versions*
+folder for Maude 2 versions.
+
 This tool has the following features:
 * Supports operators, predicates, equations, and transitions, and all their related
 attributes.
@@ -11,7 +13,8 @@ attributes.
 * It provides the CafeInMaude Proof Assistant (CiMPA) for performing inductive proofs.
 * It provides the CafeInMaude Proof Generator (CiMPG) for inferring proof scripts
 from proof scores.
-* Full integration with Maude tools (such as the model checker or the citp).
+* It provides the CafeInMaude Proof Generator & Fixer-Upper (CiMPG+F) for generating
+proofs.
 
 The current translation has a number of limitations:
 * Behavioral specifications are not supported.
@@ -33,18 +36,13 @@ several examples.
 Using the tool
 --------------
 
-1. The easiest way to use CafeInMaude is to configure the **CafeInMaude** script by
-editing the location of the Maude binary in the variable *MAUDE*. It is assumed that
-the Full Maude file is accessible in the folder where Maude is located or in the current
-folder.
+1. The tool is started by just loading the **CafeInMaude.maude** file into the Maude system:
 
-Once this information is set, CafeOBJ specifications can be loaded into the Maude system.
-For example, you can execute the alternating bit protocol example available in the
-examples folder by typing:
+    $ maude src/CafeInMaude.maude
 
-    $ ./CafeInMaude examples/abp.cafe
+Once the tool is started, the **load** command can be used for loading files:
 
-Once a module has been loaded, Maude commands can be used in the usual way.
+    $ CafeInMaude> load examples/abp.cafe .
 
 The CafeInMaude Proof Assistant (CiMPA)
 ---------------------------------------
