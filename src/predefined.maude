@@ -1,4 +1,4 @@
-(fmod 3TUPLE {C1 :: TRIV, C2 :: TRIV, C3 :: TRIV} is
+fmod 3TUPLE {C1 :: TRIV, C2 :: TRIV, C3 :: TRIV} is
     sort 3Tuple .
 
     op <<_;_;_>> : C1$Elt C2$Elt C3$Elt -> 3Tuple [ctor prec 0] .
@@ -13,4 +13,4 @@
     eq (1* (<< e1 ; e2 ; e3 >>)) = e1 .
     eq (2* (<< e1 ; e2 ; e3 >>)) = e2 .
     eq (3* (<< e1 ; e2 ; e3 >>)) = e3 .
-endfm)
+endfm

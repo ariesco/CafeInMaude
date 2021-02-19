@@ -90,6 +90,16 @@ fmod GOAL is
   if P := getNth(PrL, N') .
 endfm
 
+fmod PROOF-DATA-STRUCTURES is
+ pr GOAL .
+
+ sort GoalRes .
+ op [_,_,_] : ProofTree ProofOrder QidList -> GoalRes [ctor] .
+
+ sort IndResPair .
+ op [_,_] : ProofTreeList ProofOrder -> IndResPair [ctor] .
+endfm
+
 fmod MACROS is
  pr META-LEVEL .
 

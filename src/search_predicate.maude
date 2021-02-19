@@ -1,8 +1,7 @@
 fmod SEARCH_PREDICATE is
   pr META-LEVEL .
-  pr MOVE-DOWN .
-
-
+  pr TERMSET .
+  pr CONVERSION .
 
   sort NzNat* .
   subsort Nat < NzNat* .

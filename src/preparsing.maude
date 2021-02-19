@@ -1,0 +1,187 @@
+fmod PREPARSING is
+ pr QID-LIST .
+ pr EXT-BOOL .
+ pr LEXICAL .
+
+
+ vars QIL QIL' QIL'' QIL1 QIL2 QIL3 ACC ACC' : QidList .
+ vars S S' S'' : String .
+ vars Q Q' : Qid .
+ var  N : Nat .
+
+ sort NormRes .
+ op <<<_,_>>> : QidList QidList -> NormRes [ctor] .
+
+ op normalizeCafeOBJ : QidList -> QidList .
+ ceq normalizeCafeOBJ(QIL Q Q' QIL') = normalizeCafeOBJ(QIL Q '. Q' QIL')
+  if Q =/= '. /\ Q =/= '`, /\ Q =/= '`] /\ Q =/= '* /\ Q =/= '`) /\ Q =/= 'proof /\
+    (Q' == 'eq or-else Q' == 'ceq or-else Q' == 'cq or-else
+     Q' == 'op or-else Q' == 'ops or-else Q' == 'bop or-else
+     Q' == 'bops or-else Q' == 'var or-else
+     Q' == 'vars or-else Q' == 'beq or-else Q' == 'bceq or-else
+     Q' == 'bcq or-else Q' == 'trans or-else Q' == 'btrans or-else
+     Q' == 'ctrans or-else Q' == 'bctrans or-else Q' == 'trns or-else
+     Q' == 'ctrns or-else Q' == 'btrns or-else Q' == 'bctrns or-else
+     Q' == 'pred or-else Q' == 'red or-else Q' == 'reduce) .
+ eq normalizeCafeOBJ(QIL Q '`}) = if Q =/= '. and Q =/= '`] and
+                                     Q =/= '* and Q =/= '`) and Q =/= 'proof
+                                  then normalizeImports(QIL Q '. '`})
+                                  else normalizeImports(QIL Q '`})
+                                  fi [owise] .
+ eq normalizeCafeOBJ(QIL) = normalizeImports(QIL) [owise] .
+
+ op normalizeImports : QidList -> QidList .
+ eq normalizeImports(QIL) = normalizeImports(QIL, nil) .
+
+ op normalizeImports : QidList QidList -> QidList .
+ eq normalizeImports(nil, QIL) = QIL .
+ ceq normalizeImports('protecting '`( QIL, QIL') = normalizeImports(QIL3, QIL' 'pr '`( QIL2)
+  if <<< QIL2, QIL3 >>> := normalizeImp(QIL, nil, 0) .
+ ceq normalizeImports('pr '`( QIL, QIL') = normalizeImports(QIL3, QIL' 'pr '`( QIL2)
+  if <<< QIL2, QIL3 >>> := normalizeImp(QIL, nil, 0) .
+ ceq normalizeImports('including '`( QIL, QIL') = normalizeImports(QIL3, QIL' 'inc '`( QIL2)
+  if <<< QIL2, QIL3 >>> := normalizeImp(QIL, nil, 0) .
+ ceq normalizeImports('inc '`( QIL, QIL') = normalizeImports(QIL3, QIL' 'inc '`( QIL2)
+  if <<< QIL2, QIL3 >>> := normalizeImp(QIL, nil, 0) .
+ ceq normalizeImports('extending '`( QIL, QIL') = normalizeImports(QIL3, QIL' 'ex '`( QIL2)
+  if <<< QIL2, QIL3 >>> := normalizeImp(QIL, nil, 0) .
+ ceq normalizeImports('ex '`( QIL, QIL') = normalizeImports(QIL3, QIL' 'ex '`( QIL2)
+  if <<< QIL2, QIL3 >>> := normalizeImp(QIL, nil, 0) .
+ ceq normalizeImports('using '`( QIL, QIL') = normalizeImports(QIL3, QIL' 'us '`( QIL2)
+  if <<< QIL2, QIL3 >>> := normalizeImp(QIL, nil, 0) .
+ ceq normalizeImports('us '`( QIL, QIL') = normalizeImports(QIL3, QIL' 'us '`( QIL2)
+  if <<< QIL2, QIL3 >>> := normalizeImp(QIL, nil, 0) .
+ eq normalizeImports(Q QIL, QIL') = normalizeImports(QIL, QIL' Q) [owise] .
+
+ op normalizeImp : QidList QidList Nat -> NormRes .
+ eq normalizeImp('`) QIL, QIL', 0) = <<< QIL' '`), QIL >>> .
+ eq normalizeImp('`) QIL, QIL', s(N)) = normalizeImp(QIL, QIL' '`), N) .
+ eq normalizeImp('`( QIL, QIL', N) = normalizeImp(QIL, QIL' '`(, s(N)) .
+ ceq normalizeImp('`{ QIL, QIL', N) = normalizeImp(QIL3, QIL' '`{ QIL2, N)
+  if <<< QIL2, QIL3 >>> := otfView(QIL, 0) .
+ eq normalizeImp(Q QIL, QIL', N) = normalizeImp(QIL, QIL' Q, N) [owise] .
+
+
+ op normalizeCafeOBJView : QidList -> QidList .
+ ceq normalizeCafeOBJView(QIL '`, Q QIL') = normalizeCafeOBJView(QIL '. Q QIL')
+  if Q == 'sort or-else Q == 'hsort or-else Q == 'op or-else
+     Q == 'bop or-else Q == 'vvar or-else Q == 'vvars .
+ eq normalizeCafeOBJView(QIL 'var QIL') = normalizeCafeOBJView(QIL 'vvar QIL') .
+ eq normalizeCafeOBJView(QIL 'vars QIL') = normalizeCafeOBJView(QIL 'vvars QIL') .
+ eq normalizeCafeOBJView(QIL) = QIL [owise] .
+
+ op otfView : QidList Nat -> NormRes .
+ eq otfView(QIL, N) = otfView(QIL, nil, N) .
+
+ op otfView : QidList QidList Nat -> NormRes .
+ eq otfView('`} QIL, QIL', 0) = <<< normalizeCafeOBJView(QIL' '. '`}), QIL >>> .
+ eq otfView('`} QIL, QIL', s(N)) = otfView(QIL, QIL' '`}, N) .
+ eq otfView('`{ QIL, QIL', N) = otfView(QIL, QIL' '`{, s(N)) .
+ eq otfView(Q QIL, QIL', N) = otfView(QIL, QIL' Q, N) [owise] .
+
+ op normalizeOpenClose : QidList -> QidList .
+ *** We look for the end of the module expression to place the dot
+ ceq normalizeOpenClose(Q Q' QIL) = Q '. normOpenCloseAux(Q' QIL)
+  if Q' == '`[ or-else Q == '* or-else
+     Q' == 'eq or-else Q' == 'ceq or-else Q' == 'cq or-else
+     Q' == 'op or-else Q' == 'ops or-else Q' == 'bop or-else
+     Q' == 'bops or-else Q' == 'var or-else
+     Q' == 'vars or-else Q' == 'beq or-else Q' == 'bceq or-else
+     Q' == 'bcq or-else Q' == 'trans or-else Q' == 'btrans or-else
+     Q' == 'ctrans or-else Q' == 'bctrans or-else Q' == 'trns or-else
+     Q' == 'ctrns or-else Q' == 'btrns or-else Q' == 'bctrns or-else
+     Q' == 'pred or-else Q' == 'red or-else Q' == 'reduce .
+ eq normalizeOpenClose(Q '. QIL) = Q '. normOpenCloseAux(QIL) .
+ eq normalizeOpenClose(Q Q' QIL) = Q normalizeOpenClose(Q' QIL) [owise] .
+
+
+ op normOpenCloseAux : QidList -> QidList .
+ ceq normOpenCloseAux(QIL Q Q' QIL') = normOpenCloseAux(QIL Q '. Q' QIL')
+  if Q =/= '. /\ Q =/= '`, /\ Q =/= '`] /\ Q =/= '* /\ Q =/= '`) /\ Q =/= '`{ /\
+     Q =/= '`} /\ Q =/= 'proof /\
+    (Q' == 'eq or-else Q' == 'ceq or-else Q' == 'cq or-else
+     Q' == 'op or-else Q' == 'ops or-else Q' == 'bop or-else
+     Q' == 'bops or-else Q' == 'var or-else
+     Q' == 'vars or-else Q' == 'beq or-else Q' == 'bceq or-else
+     Q' == 'bcq or-else Q' == 'trans or-else Q' == 'btrans or-else
+     Q' == 'ctrans or-else Q' == 'bctrans or-else Q' == 'trns or-else
+     Q' == 'ctrns or-else Q' == 'btrns or-else Q' == 'bctrns or-else
+     Q' == 'pred or-else Q' == 'red or-else Q' == 'reduce) .
+ eq normOpenCloseAux(QIL Q 'close) = if Q =/= '. and Q =/= '`] and
+                                        Q =/= '* and Q =/= '`) and
+                                        Q =/= '`} and Q =/= 'proof
+                                     then QIL Q '. 'close
+                                     else QIL Q 'close
+                                     fi [owise] .
+
+ op $prepareModule : QidList -> QidList .
+ eq $prepareModule('mod! QIL '`}) = $prepareModule(normalizeCafeOBJ('cmod! QIL '`})) .
+ eq $prepareModule('module! QIL '`}) = $prepareModule('mod! QIL '`}) .
+ eq $prepareModule('mod* QIL '`}) = $prepareModule(normalizeCafeOBJ('cmod* QIL '`})) .
+ eq $prepareModule('mod QIL '`}) = $prepareModule(normalizeCafeOBJ('cmod* QIL '`})) .
+ eq $prepareModule('module* QIL '`}) = $prepareModule('mod* QIL '`}) .
+ eq $prepareModule('module QIL '`}) = $prepareModule('mod* QIL '`}) .
+ eq $prepareModule('open QIL 'close) = $prepareModule('copen normalizeOpenClose(QIL 'close)) .
+ ceq $prepareModule('view QIL Q '`}) = $prepareModule(normalizeCafeOBJView('cview QIL Q '. '`}))
+  if Q =/= '`{ .
+ eq $prepareModule('view QIL '`{ '`}) = $prepareModule(normalizeCafeOBJView('cview QIL '`{ '`})) .
+ eq $prepareModule('make Q QIL) = $prepareModule('mod! Q '`{ 'pr QIL '`}) .
+ eq $prepareModule('cmod! Q 'principal-sort Q' '`{ QIL') = $prepareModule('cmod! Q '`[ Q' '`] '`{ QIL') .
+ eq $prepareModule('cmod* Q 'principal-sort Q' '`{ QIL') = $prepareModule('cmod* Q '`[ Q' '`] '`{ QIL') .
+ eq $prepareModule('cmod! Q '`( QIL '`) 'principal-sort Q' '`{ QIL') =
+    $prepareModule('cmod! Q '`{ QIL '| Q' '`} '`{ QIL') .
+ eq $prepareModule('cmod* Q '`( QIL '`) 'principal-sort Q' '`{ QIL') =
+    $prepareModule('cmod* Q '`{ QIL '| Q' '`} '`{ QIL') .
+ eq $prepareModule(QIL 'p-sort Q '`{ QIL') = $prepareModule(QIL 'principal-sort Q '`{ QIL') .
+ ceq $prepareModule(QIL 'eq '`[ Q '`] Q' QIL') = $prepareModule(QIL 'eq '`[ Q '`] ': Q' QIL')
+  if Q' =/= ': .
+ eq $prepareModule(QIL) = QIL [owise] .
+
+ op prepareModule : QidList -> QidList .
+ eq prepareModule(QIL) = prepareModule(QIL, nil, nil) .
+
+ op prepareModule : QidList QidList QidList -> QidList .
+ eq prepareModule(nil, ACC, ACC') = ACC' $prepareModule(ACC) .
+ ceq prepareModule(Q QIL', ACC, ACC') = prepareModule(QIL', Q, ACC' prepareModule(ACC))
+  if (Q == 'mod!) or (Q == 'module!) or (Q == 'mod*) or (Q == 'mod) or (Q == 'module*) or
+     (Q == 'module) or (Q == 'view) or (Q == 'make) .
+ eq prepareModule('`} 'open Q '. QIL', ACC, ACC') = prepareModule(QIL', 'open Q '. , ACC' prepareModule(ACC '`})) .
+ eq prepareModule('close 'open Q '. QIL', ACC, ACC') = prepareModule(QIL', 'open Q '. , ACC' prepareModule(ACC 'close)) .
+ eq prepareModule(QIL '. 'open Q '. QIL', ACC, ACC') = prepareModule(QIL', 'open Q '. , ACC' prepareModule(ACC '.)) .
+ eq prepareModule(Q QIL, ACC, ACC') = prepareModule(QIL, ACC Q, ACC') [owise] .
+
+
+ op transformText : String -> String .
+ ceq transformText(S) = S''
+  if S' := removeAfterEOF(S) /\
+     S'' := printTokens(prepareModule(tokenize(S'))) .
+
+ op removeAfterEOF : String -> String .
+ ceq removeAfterEOF(S) = S'
+  if N := find(S, "eof", 0) /\
+     S' := substr(S, 0, N) .
+ eq removeAfterEOF(S) = S [owise] .
+
+ op transformLine : String -> String .
+ ceq transformLine(S) = S'
+  if S' := removeComments(S) .
+
+ op removeComments : String -> String .
+ ceq removeComments(S) = removeComments(S')
+  if N := find(S, "--", 0) /\
+     S' := substr(S, 0, N) .
+ ceq removeComments(S) = removeComments(S')
+  if N := find(S, "-->", 0) /\
+     S' := substr(S, 0, N) .
+ ceq removeComments(S) = removeComments(S')
+  if N := find(S, "**", 0) /\
+     S' := substr(S, 0, N) .
+ ceq removeComments(S) = removeComments(S')
+  if N := find(S, "**>", 0) /\
+     S' := substr(S, 0, N) .
+ eq removeComments(S) = S [owise] .
+
+
+ *** TODO: metadata transformation
+endfm
+

@@ -1,0 +1,954 @@
+fmod CafePARSER is
+ pr PARSING-MODULE-AUXILIARY .
+ pr SEARCH_PREDICATE .
+ pr PARAMETER-CONFIG .
+*** pr FM-MOD-EXP-PARSING .
+ pr META-LEVEL .
+ pr CITP-AUX .
+
+
+ vars TM TM' FM FM' PU U U' M M' M'' M1 M2 M3 TOP TOP' TOP'' FLAT FLAT' FLAT'' : Module .
+ vars S S' S'' S''' St St' St'' St''' St1 St2 St3 : String .
+ vars TL TL' TL'' PL PL' TLR TL1 : TermList .
+ vars F Q Q' Q'' Q''' QI QI' TN ID CMD : Qid . *** TN: TheoryName
+ vars TSM TSM' HSM HSM' MSS : TheorySortMap .
+ vars PSM PSM' SM SM' VM VM' : SortMap . **** PSM: Principal Sort Map
+ vars T T' T'' T''' T1 T2 T3 TP : Term .
+ vars QIL QIL' QIL'' QIL''' : QidList .
+ vars DB DB' : ResDatabase .
+ vars ODS ODS' : OpDeclSet .
+ vars Ty Ty1 Ty2 : Type .
+ var  RS : RuleSet .
+ vars V V' V1 V2 V3 : Variable .
+ vars C C' : Constant .
+ *** TS: TheorySort
+ var  TS : Sort .
+ vars N N' N'' : Nat .
+ vars QS QS' : QidSet .
+ var  EqS EqS' : EquationSet .
+ var  SSDS : SubsortDeclSet .
+ vars SS SS' SSV : SortSet .
+ vars IL : ImportList .
+ vars AtS AtS' : AttrSet .
+ vars Srt Srt' : Sort .
+ var  H : Header .
+ var  I : Import .
+ var  TyL : TypeList .
+ vars B B' : Bool .
+ var  Eq : Equation .
+ vars ME ME' ME1 ME2 : ModuleExpression .
+ vars TrS TrS' : TermSet .
+ vars RenS RenS1 RenS2 : RenamingSet .
+ var  ParamL ParamL' : ParameterList .
+ var  RDB RDB' : ResDatabase .
+ var  StratMS : StratMappingSet .
+ vars VSM VSM' : SortMappingSet .
+ vars VOM VOM' : OpMappingSet .
+ var  PDL : ParameterDeclList .
+ vars VS VS' : VariableSet .
+ var  PMAP : ParameterMap .
+ vars PM PM' : PreModule .
+ var  MAS : MembAxSet .
+ var  VIEW : View .
+
+  op procCafeMod : Term SortMap TheorySortMap TheorySortMap ParameterMap TheorySortMap SortSet -> CafeParseResult .
+  eq procCafeMod(T, PSM, HSM, TSM, PMAP, MSS, SSV) = procCafeMod2(T, T, PSM, HSM, TSM, PMAP, MSS, SSV, mtRDB) .
+
+  op procCafeMod2 : Term Term SortMap TheorySortMap TheorySortMap ParameterMap TheorySortMap SortSet ResDatabase
+                    -> CafeParseResult .
+  eq procCafeMod2(T, 'cmod!_`{_`}['CafeToken[T'], T''], PSM, HSM, TSM, PMAP, MSS, SSV, DB) =
+                      procCafeMod3(T, 'CafeToken[T'], empty, T'',
+                                   emptyFModule, PSM, HSM, TSM, PMAP, MSS, SSV, DB) .
+  eq procCafeMod2(T, 'cmod!_`{_`}['_`(_`)[T', T''], T3], PSM, HSM, TSM, PMAP, MSS, SSV, DB) =
+                      procCafeMod3(T, T', T'', T3, emptyFModule, PSM, HSM, TSM, PMAP, MSS, SSV, DB) .
+  ceq procCafeMod2(T, 'cmod!_`{_`}['_`[_`]['CafeToken[T'], 'CafeToken[TP]], T3], PSM,
+                   HSM, TSM, PMAP, MSS, SSV, DB) =
+                 procCafeMod3(T, 'CafeToken[T'], empty, T3, emptyFModule, PSM', HSM, TSM, PMAP, MSS, SSV, DB)
+   if QI := downQid(T') /\
+      QI' := downQid(TP) /\
+      PSM' := add2PrincipalMap(QI, QI', PSM) .
+  ceq procCafeMod2(T, 'cmod!_`{_`}['_`{_|_`}['CafeToken[T'], T'', 'CafeToken[TP]], T3],
+                   PSM, HSM, TSM, PMAP, MSS, SSV, DB) =
+                      procCafeMod3(T, 'CafeToken[T'], T'', T3, emptyFModule, PSM', HSM, TSM, PMAP, MSS, SSV, DB)
+   if QI := downQid(T') /\
+      QI' := downQid(TP) /\
+      PSM' := add2PrincipalMap(QI, QI', PSM) .
+
+  ceq procCafeMod2(T, 'cmod*_`{_`}['CafeToken[T'], T''], PSM, HSM, TSM, PMAP, MSS, SSV, DB) =
+        if QIL == nil
+        then procCafeMod3(T, T3, empty, T'', emptyFModule, PSM', HSM', TSM, PMAP, MSS, SSV, DB')
+        else < DB', PSM', HSM', QIL >
+        fi
+   if < DB', PSM', HSM', QIL > := procCafeMod3(T, 'CafeToken[T'], empty, addBool(T''),
+                                         emptyFTheory, PSM, HSM, TSM, PMAP, MSS, SSV, DB) /\
+      QI := downQid(T') /\
+      QI' := qid(string(QI) + "-MODCAFE") /\
+      T3 := 'CafeToken[upTerm(QI')] .
+  ceq procCafeMod2(T, 'cmod*_`{_`}['_`[_`]['CafeToken[T'], 'CafeToken[TP]], T''], PSM,
+                   HSM, TSM, PMAP, MSS, SSV, DB) =
+        if QIL == nil
+        then procCafeMod3(T, T3, empty, T'', emptyFModule, PSM', HSM', TSM, PMAP, MSS, SSV, DB')
+        else < DB', PSM', HSM', QIL >
+        fi
+   if QI := downQid(T') /\
+      Q := downQid(TP) /\
+      QI' := qid(string(QI) + "-MODCAFE") /\
+      T3 := 'CafeToken[upTerm(QI')] /\
+      PSM' := add2PrincipalMap(QI, Q, PSM) /\
+      < DB', PSM', HSM', QIL > := procCafeMod3(T, 'CafeToken[T'], empty, addBool(T''),
+                                         emptyFTheory, PSM', HSM, TSM, PMAP, MSS, SSV, DB) .
+  ceq procCafeMod2(T, 'cmod*_`{_`}['_`{_|_`}['CafeToken[T'], T'','CafeToken[TP]], T3],
+                   PSM, HSM, TSM, PMAP, MSS, SSV, DB) =
+        if QIL == nil
+        then < DB', PSM', HSM', paramThWarn >
+        else < DB', PSM', HSM', QIL >
+        fi
+   if QI := downQid(T') /\
+      Q := downQid(TP) /\
+      PSM' := add2PrincipalMap(QI, Q, PSM) /\
+      < DB', PSM', HSM', QIL > := procCafeMod3(T, 'CafeToken[T'], T'', addBool(T3),
+                                         emptyFModule, PSM', HSM, TSM, PMAP, MSS, SSV, DB) .
+
+ op parseParList : Term -> ParameterDeclList .
+ eq parseParList('_::_['token[T], T']) = downQid(T) :: parseModExp(T') .
+ eq parseParList('_`,_[T, T']) = (parseParList(T), parseParList(T')) .
+
+ op procCafeMod3 : Term Term Term Term Module SortMap TheorySortMap TheorySortMap ParameterMap
+                   TheorySortMap SortSet ResDatabase -> CafeParseResult .
+ ceq procCafeMod3(T, 'CafeToken[T'], empty, T'', U, PSM, HSM, TSM, PMAP, MSS, SSV, DB) =
+        procCafeMod4(T'', preModule(predefinedCafeEqual(setName(U, QI)), emptyTermSet), PSM, HSM, TSM, PMAP, MSS, SSV, DB)
+  if QI := downQid(T') .
+ ceq procCafeMod3(T, 'CafeToken[T'], PL, T'', U, PSM, HSM, TSM, PMAP, MSS, SSV, DB) =
+        procCafeMod4(T3, preModule(predefinedCafeEqual(setPars(setName(U, QI), parseParList(PL'))), emptyTermSet), PSM, HSM, TSM, PMAP, MSS, SSV, DB)
+  if PL =/= empty /\
+     PL' := cafeParam2maudeParam(PL) /\
+     QI := downQid(T') /\
+     QIL := cafeParamNames(PL) /\
+     SM := cafeTheoryMap(PL) /\
+     TSM' := restrictTheorySortMap(TSM, SM) /\
+     T3 := paramSortsMap(T'', TSM', QIL) .
+
+ op restrictTheorySortMap : TheorySortMap SortMap -> TheorySortMap .
+ eq restrictTheorySortMap((Q -> SS, TSM), (Q' |-> Q, SM)) =
+                                      (Q' -> SS), restrictTheorySortMap(TSM, SM) .
+ eq restrictTheorySortMap(TSM, SM) = empty [owise] .
+
+ op cafeTheoryMap : Term -> SortMap .
+ eq cafeTheoryMap('_::_['CafeToken[T], 'token[T']]) = downQid(T) |-> downQid(T') .
+  ceq cafeTheoryMap('_`,_[T, T']) = SM, SM'
+   if SM := cafeTheoryMap(T) /\
+      SM' := cafeTheoryMap(T') .
+
+  eq procCafeMod3(T, T', PL, T'', U, PSM, HSM, TSM, PMAP, MSS, SSV, DB) = < DB, PSM, HSM, errModName > [owise] .
+
+  op cafeParam2maudeParam : Term -> Term .
+  eq cafeParam2maudeParam('_::_['CafeToken[T], T']) = '_::_['token[T], T'] .
+  ceq cafeParam2maudeParam('_`,_[T, T']) = '_`,_[T'', T3]
+   if T'' := cafeParam2maudeParam(T) /\
+      T3 := cafeParam2maudeParam(T') .
+
+  op cafeParamNames : Term -> QidList .
+  eq cafeParamNames('_::_['CafeToken[T], T']) = downQid(T) .
+  ceq cafeParamNames('_`,_[T, T']) = QIL QIL'
+   if QIL := cafeParamNames(T) /\
+      QIL' := cafeParamNames(T') .
+
+  op paramSortsMap : Term TheorySortMap QidList -> Term .
+  eq paramSortsMap(Q[TL], TSM, QIL) = Q[paramSortsMap*(TL, TSM, QIL)] .
+
+  eq paramSortsMap(V, TSM, QIL) = V .
+
+  ceq paramSortsMap(C, TSM, QIL) = upTerm(QI)
+   if C' := removeExtraQuotes(C) /\
+      Q := downQid(C') /\
+      St := string(Q) /\
+      find(St, ":", 0) == notFound /\
+      N := find(St, ".", 0) /\
+      St' := substr(St, 0, N) /\
+      St'' := substr(St, N + 1, length(St)) /\
+      Q' := qid(St'') /\
+      Q' in QIL /\
+      QI := qid(St'' + "$" + St') .
+
+  ceq paramSortsMap(C, (TN -> (TS ; SS), TSM), QIL) = upTerm(QI)
+   if TS := downQid(C) /\
+      St := string(TS) /\
+      QI := qid(string(TN) + "$" + St) .
+
+  ceq paramSortsMap(C, TSM, QIL) = upTerm(QI)
+   if C' := removeExtraQuotes(C) /\
+      Q := downQid(C') /\
+      St := string(Q) /\
+      find(St, ":", 0) == notFound /\
+      N := find(St, ".", 0) /\
+      St' := substr(St, 0, N) /\
+      St'' := substr(St, N + 1, length(St)) /\
+      Q' := qid(St'') /\
+      Q'' := paramSortsMap(upTerm(Q'), TSM, QIL) /\
+      QI := qid(St' + "." + string(Q'')) [owise] .
+
+***(%
+\end{verbatim}
+}
+
+When the constant stands for a variable, we proceed in a similar way but taking into
+account that the name of the variable must be placed first in both cases:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  ceq paramSortsMap(C, TSM, QIL) = upTerm(QI)
+   if C' := removeExtraQuotes(C) /\
+      Q := downQid(C') /\
+      St := string(Q) /\
+      N := find(St, ":", 0) /\
+      N' := find(St, ".", 0) /\
+      St' := substr(St, 0, N + 1) /\
+      St'' := substr(St, N + 1, _-_(N', N + 1)) /\
+      St''' := substr(St, N' + 1, length(St)) /\
+      Q' := qid(St''') /\
+      Q' in QIL /\
+      QI := qid(St' + St''' + "$" + St'') .
+
+  ceq paramSortsMap(C, (TN -> (TS ; SS), TSM), QIL) = upTerm(QI)
+   if C' := removeExtraQuotes(C) /\
+      Q := downQid(C') /\
+      St := string(Q) /\
+      N := find(St, ":", 0) /\
+      St' := substr(St, 0, N + 1) /\
+      St'' := substr(St, N + 1, length(St)) /\
+      TS := qid(St'') /\
+      QI := qid(St' + string(TN) + "$" + St'') .
+  eq paramSortsMap(C, TSM, QIL) = C [owise] .
+
+***(%
+\end{verbatim}
+}
+
+\item
+\verb"paramSortsMap*", which just traverses the list, applying
+\texttt{paramSortsMap} to each element:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op paramSortsMap* : TermList TheorySortMap QidList -> TermList .
+  eq paramSortsMap*(empty, TSM, QIL) = empty .
+  eq paramSortsMap*((T, TL), TSM, QIL) = paramSortsMap(T, TSM, QIL),
+                                         paramSortsMap*(TL, TSM, QIL) .
+
+  op removeExtraQuotes : Term -> Term .
+  ceq removeExtraQuotes(C) = qid(St')
+   if St := string(C) /\
+      St' := removeExtraQuotes(St) .
+  eq removeExtraQuotes(T) = T [owise] .
+
+  op removeExtraQuotes : String -> String .
+  ceq removeExtraQuotes(St) = St' + St'' + removeExtraQuotes(St''')
+   if N := find(St, ".'", 0) /\
+      St' := substr(St, 0, N + 1) /\
+      St1 := substr(St, N + 2, length(St)) /\
+      N' := find(St1, ".", 0) /\
+      St'' := substr(St1, 0, N') /\
+      St2 := substr(St1, N' + 1, length(St1)) /\
+      N'' := find(St2, ".", 0) /\
+      St''' := substr(St2, N'', length(St2)) .
+  eq removeExtraQuotes(St) = St [owise] .
+
+  op _in_ : Qid QidList -> Bool .
+  eq Q in nil = false .
+  eq Q in Q QIL = true .
+  eq Q in Q' QIL = Q in QIL [owise] .
+
+  op procCafeMod4 : Term PreModule SortMap TheorySortMap TheorySortMap
+                    ParameterMap TheorySortMap SortSet ResDatabase -> CafeParseResult .
+  ceq procCafeMod4('__[T', T''], preModule(M, TrS), PSM, HSM, TSM, PMAP, MSS, SSV, DB) =
+        if QIL == nil
+        then procCafeMod4(T'', PM', PSM, HSM', TSM, PMAP, MSS, SSV, DB DB')
+        else < DB, PSM, HSM', QIL >
+        fi
+   if < PM', SS, QIL, DB' > := parseCafeDecl(preModule(M, TrS), T', PSM, TSM, PMAP, MSS, SSV) /\
+      HSM' := addHiddenSort(HSM, getName(M), SS) .
+  ceq procCafeMod4(F[TL], preModule(M, TrS), PSM, HSM, TSM, PMAP, MSS, SSV, DB) = < DB DB' PM', PSM, HSM', nil >
+   if F =/= '__ /\
+      < PM', SS, nil, DB' > := parseCafeDecl(preModule(M, TrS), F[TL], PSM, TSM, PMAP, MSS, SSV) /\
+      HSM' := addHiddenSort(HSM, getName(M), SS) .
+  ceq procCafeMod4(C, preModule(M, TrS), PSM, HSM, TSM, PMAP, MSS, SSV, DB) = < DB DB' PM', PSM, HSM', nil >
+   if < PM', SS, nil, DB' > := parseCafeDecl(preModule(M, TrS), C, PSM, TSM, PMAP, MSS, SSV) /\
+      HSM' := addHiddenSort(HSM, getName(M), SS) .
+  ceq procCafeMod4(F[TL], preModule(M, TrS), PSM, HSM, TSM, PMAP, MSS, SSV, DB) = < DB DB' PM', PSM, HSM', QIL >
+   if F =/= '__ /\
+      < PM', SS, QIL, DB' > := parseCafeDecl(preModule(M, TrS), F[TL], PSM, TSM, PMAP, MSS, SSV) /\
+      QIL =/= nil /\
+      HSM' := addHiddenSort(HSM, getName(M), SS) .
+
+  op parseCafeDecl : PreModule Term SortMap TheorySortMap ParameterMap TheorySortMap SortSet -> CafeParseResult .
+  ceq parseCafeDecl(preModule(M, TrS), 'protecting`(_`)[T], PSM, TSM, PMAP, MSS, SSV) = < preModule(M', TrS), none, nil, DB >
+   if T1 := changeTheoryByModule(T, isATheory(M), TSM) /\
+      < ME, DB > := parseCafeModExp(T1, PSM, TSM, PMAP, MSS, SSV) /\
+      M' := addImports(M, modifyImport(protecting ME ., TSM)) .
+  ceq parseCafeDecl(preModule(M, TrS), 'pr`(_`)[T], PSM, TSM, PMAP, MSS, SSV) = < preModule(M', TrS), none, nil, DB >
+   if T1 := changeTheoryByModule(T, isATheory(M), TSM) /\
+      < ME, DB > := parseCafeModExp(T1, PSM, TSM, PMAP, MSS, SSV) /\
+      M' := addImports(M, modifyImport(protecting ME ., TSM)) .
+  ceq parseCafeDecl(preModule(M, TrS), 'including`(_`)[T], PSM, TSM, PMAP, MSS, SSV) = < preModule(M', TrS), none, nil, DB >
+   if T1 := changeTheoryByModule(T, isATheory(M), TSM) /\
+      < ME, DB > := parseCafeModExp(T1, PSM, TSM, PMAP, MSS, SSV) /\
+      M' := addImports(M, including ME .) .
+  ceq parseCafeDecl(preModule(M, TrS), 'inc`(_`)[T], PSM, TSM, PMAP, MSS, SSV) = < preModule(M', TrS), none, nil, DB >
+   if T1 := changeTheoryByModule(T, isATheory(M), TSM) /\
+      < ME, DB > := parseCafeModExp(T1, PSM, TSM, PMAP, MSS, SSV) /\
+      M' := addImports(M, including ME .) .
+  ceq parseCafeDecl(preModule(M, TrS), 'using`(_`)[T], PSM, TSM, PMAP, MSS, SSV) = < preModule(M', TrS), none, nil, DB >
+   if T1 := changeTheoryByModule(T, isATheory(M), TSM) /\
+      < ME, DB > := parseCafeModExp(T1, PSM, TSM, PMAP, MSS, SSV) /\
+      M' := addImports(M, including ME .) .
+  ceq parseCafeDecl(preModule(M, TrS), 'us`(_`)[T], PSM, TSM, PMAP, MSS, SSV) = < preModule(M', TrS), none, nil, DB >
+   if T1 := changeTheoryByModule(T, isATheory(M), TSM) /\
+      < ME, DB > := parseCafeModExp(T1, PSM, TSM, PMAP, MSS, SSV) /\
+      M' := addImports(M, including ME .) .
+  ceq parseCafeDecl(preModule(M, TrS), 'extending`(_`)[T], PSM, TSM, PMAP, MSS, SSV) = < preModule(M', TrS), none, nil, DB >
+   if T1 := changeTheoryByModule(T, isATheory(M), TSM) /\
+      < ME, DB > := parseCafeModExp(T1, PSM, TSM, PMAP, MSS, SSV) /\
+      M' := addImports(M, modifyImport(extending ME ., TSM)) .
+  ceq parseCafeDecl(preModule(M, TrS), 'ex`(_`)[T], PSM, TSM, PMAP, MSS, SSV) = < preModule(M', TrS), none, nil, DB >
+   if T1 := changeTheoryByModule(T, isATheory(M), TSM) /\
+      < ME, DB > := parseCafeModExp(T1, PSM, TSM, PMAP, MSS, SSV) /\
+      M' := addImports(M, modifyImport(extending ME ., TSM)) .
+  ceq parseCafeDecl(preModule(M, TrS), '*`[_`]*['CafeToken[T]], PSM, TSM, PMAP, MSS, SSV) = < preModule(M', TrS), Q, nil, mtRDB >
+   if Q := downQid(T) /\
+      M' := addSorts(M, Q) .
+  eq parseCafeDecl(preModule(M, TrS), T, PSM, TSM, PMAP, MSS, SSV) = < preModule(M, TrS | T), none, nil, mtRDB > [owise] .
+
+  op parseCafeModExp : Term SortMap TheorySortMap ParameterMap TheorySortMap SortSet -> ParseResult .
+  eq parseCafeModExp('CafeToken[T], PSM, TSM, PMAP, MSS, SSV) = < downQid(T), mtRDB > .
+  eq parseCafeModExp('token[T], PSM, TSM, PMAP, MSS, SSV) = < downQid(T), mtRDB > .
+  ceq parseCafeModExp('_+_[T, T'], PSM, TSM, PMAP, MSS, SSV) = < ME1 + ME2, DB DB' >
+   if < ME1, DB > := parseCafeModExp(T, PSM, TSM, PMAP, MSS, SSV) /\
+      < ME2, DB' > := parseCafeModExp(T', PSM, TSM, PMAP, MSS, SSV) .
+  ceq parseCafeModExp('_*`{_`}[T, T'], PSM, TSM, PMAP, MSS, SSV) = < ME * (RenS), DB' >
+   if < ME, DB' > := parseCafeModExp(T, PSM, TSM, PMAP, MSS, SSV) /\
+      RenS := parseCafeRen(T') .
+  ceq parseCafeModExp('_`(_`)[T, T'], PSM, TSM, PMAP, MSS, SSV) = < Q{ParamL}, DB DB' >
+   if < Q, DB > := parseCafeModExp(T, PSM, TSM, PMAP, MSS, SSV) /\
+      PDL := PMAP[Q] /\
+      < ParamL, DB' > := parseCafeViewExp(PDL, sortViewId(PDL, T'), TSM, PSM, MSS, SSV) .
+
+  op parseCafeRen : Term -> RenamingSet .
+  ceq parseCafeRen('__[T, T']) = RenS1, RenS2
+   if RenS1 := parseCafeRen(T) /\
+      RenS2 := parseCafeRen(T') .
+  ceq parseCafeRen('sort_->_.[T, T']) = sort Srt to Srt'
+   if Srt := sort2sort(T) /\
+      Srt' := sort2sort(T') .
+  ceq parseCafeRen('hsort_->_.[T, T']) = sort Srt to Srt'
+   if Srt := sort2sort(T) /\
+      Srt' := sort2sort(T') .
+  ceq parseCafeRen('op_->_.[T, T']) = op Q to Q' [none]
+   if Q := opNameFromBubble(T) /\
+      Q' := opNameFromBubble(T') .
+  ceq parseCafeRen('bop_->_.['CafeBubble[T], 'CafeBubble[T']]) = op Q to Q' [none]
+   if Q := opNameFromBubble(T) /\
+      Q' := opNameFromBubble(T') .
+
+
+  op parseCafeViewExp : ParameterDeclList Term TheorySortMap SortMap TheorySortMap SortSet -> ParseResult .
+  eq parseCafeViewExp(PDL, '_<=_[T, T'], TSM, PSM, MSS, SSV) = parseCafeViewExp(PDL, T', TSM, PSM, MSS, SSV) .
+  ceq parseCafeViewExp(PDL, '_`,_[TL], TSM, PSM, MSS, SSV) = < ParamL, DB' >
+   if < ParamL, DB' > := parseCafeViewExp*(PDL, TL, TSM, PSM, MSS, SSV) .
+  ceq parseCafeViewExp(PDL, 'token[T], TSM, PSM, MSS, SSV) = < Q, mtRDB >
+   if Q := downQid(T) /\
+      isParamName(Q, PDL) .
+  ceq parseCafeViewExp(PDL, 'token[T], TSM, PSM, MSS, SSV) = < Q, mtRDB >
+   if Q := downQid(T) /\
+      viewInSet(Q, SSV) .
+  ceq parseCafeViewExp(Q :: ME, 'token[T], TSM, PSM, MSS, SSV) = < Q', VIEW >
+   if Q' := downQid(T) /\
+      viewInSet(Q, SSV) /\
+      SS := MSS[ME] /\
+      SS' := MSS[Q'] /\
+      Srt := removePredef(SS) /\
+      Srt' := removePredef(SS') /\
+      VSM := sort Srt to Srt' . /\
+      VIEW := view Q' from ME to Q' is VSM none none endv .
+  ceq parseCafeViewExp(Q :: ME, 'token[T], TSM, PSM, MSS, SSV) = < Q', VIEW >
+   if Q' := downQid(T) /\
+      not viewInSet(Q, SSV) /\
+      SS := MSS[ME] /\
+      Srt := removePredef(SS) /\
+      (Q' |-> Srt', PSM') := PSM /\
+      VSM := sort Srt to Srt' . /\
+      VIEW := view Q' from ME to Q' is VSM none none endv .
+  ceq parseCafeViewExp(Q :: ME, 'view`to_`{_`}['token[T], T'], TSM, PSM, MSS, SSV) = < Q', VIEW >
+   if Q'' := downQid(T) /\
+      Q' := getNewName(SSV, 0) /\
+      Q''' := newName(TSM, Q'') /\
+      < VSM, VOM > := maps2maps(T') /\
+      VIEW := view Q' from ME to Q''' is VSM VOM none endv .
+  ceq parseCafeViewExp(Q :: ME, '_`{_`}['token[T], T'], TSM, PSM, MSS, SSV) = < Q', VIEW >
+   if Q'' := downQid(T) /\
+      Q' := getNewName(SSV, 0) /\
+      Q''' := newName(TSM, Q'') /\
+      < VSM, VOM > := maps2maps(T') /\
+      VIEW := view Q' from ME to Q''' is VSM VOM none endv .
+  *** The names of the sorts and ops are the same, so it is enough to use the module name.
+  ceq parseCafeViewExp(Q :: ME, 'token[T], TSM, PSM, MSS, SSV) = < Q'', VIEW >
+   if Q' := downQid(T) /\
+      not viewInSet(Q, SSV) /\
+      SS := MSS[ME] /\
+      SS' := removePredef(SS) /\
+      Q'' := newName(TSM, Q') /\
+      VSM := createMapsForSorts(SS') /\
+      VIEW := view Q'' from ME to Q'' is VSM none none endv [owise] .
+
+
+  op parseCafeViewExp* : ParameterDeclList Term TheorySortMap SortMap TheorySortMap SortSet -> ParseResult .
+  eq parseCafeViewExp*(PDL, empty, TSM, PSM, MSS, SSV) = < empty, mtRDB > .
+  ceq parseCafeViewExp*((Q :: ME, PDL), (T, TL), TSM, PSM, MSS, SSV) = < (ParamL, ParamL'), DB DB' >
+   if < ParamL, DB > := parseCafeViewExp(Q :: ME, T, TSM, PSM, MSS, SSV) /\
+      < ParamL', DB' > := parseCafeViewExp(PDL, TL, TSM, PSM, MSS, SSV) .
+
+
+  sort MappingPair .
+  op <_,_> : SortMappingSet OpMappingSet -> MappingPair [ctor] .
+
+  op maps2maps : Term -> MappingPair .
+  ceq maps2maps(T) = maps2maps(T', SM, VM)
+   if SM := getSortMap(T) /\
+      VM := getVarMap(T) /\
+      T' := removeVarDecls(T) .
+
+
+  op removeVarDecls : Term -> Term .
+  eq removeVarDecls(T) = buildNotVarDecl(getNotVarDecl(T)) .
+
+  op getSortMap : Term -> SortMap .
+  ceq getSortMap('__[T, T']) = SM, SM'
+   if SM := getSortMap(T) /\
+      SM' := getSortMap(T') .
+  eq getSortMap('sort_->_.[T, T']) = getSort(T) |-> getSort(T') .
+  eq getSortMap('hsort_->_.[T, T']) = getSort(T) |-> getSort(T') .
+  eq getSortMap(T) = empty [owise] .
+
+  op isParamName : Qid ParameterDeclList -> Bool .
+  eq isParamName(Q, nil) = false .
+  eq isParamName(Q, (Q' :: ME, PDL)) = if Q == Q'
+                                       then true
+                                       else isParamName(Q, PDL)
+                                       fi .
+
+  op removePredef : SortSet -> SortSet .
+  eq removePredef('Bool ; SS) = removePredef(SS) .
+  eq removePredef('Nat ; SS) = removePredef(SS) .
+  eq removePredef('NzNat ; SS) = removePredef(SS) .
+  eq removePredef('Zero ; SS) = removePredef(SS) .
+  eq removePredef(SS) = SS [owise] .
+
+  op createMapsForSorts : SortSet ~> SortMapping .
+  eq createMapsForSorts(Srt) = sort Srt to Srt . .
+  ceq createMapsForSorts(Srt ; SS) = sort Srt to Srt . createMapsForSorts(SS)
+   if SS =/= none .
+
+  op getVarMap : Term -> SortMap .
+  ceq getVarMap('__[T, T']) = VM, VM'
+   if VM := getVarMap(T) /\
+      VM' := getVarMap(T') .
+  ceq getVarMap('vvar_:_.['neCafeTokenList[T], 'CafeToken[T']]) =
+                                                          createMap*(QIL, Q)
+   if QIL := downQidList(T) /\
+      Q := downQid(T') .
+  ceq getVarMap('vvars_:_.['neCafeTokenList[T], 'CafeToken[T']]) =
+                                                          createMap*(QIL, Q)
+   if QIL := downQidList(T) /\
+      Q := downQid(T') .
+  eq getVarMap(T) = empty [owise] .
+
+***(%
+\end{verbatim}
+}
+
+\noindent
+where \verb"createMap*" just maps all the variables in the first argument to the sort
+given as second argument:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op createMap* : QidList Qid -> SortMap .
+  eq createMap*(nil, Q) = empty .
+  eq createMap*(Q QIL, Q') = Q |-> Q', createMap*(QIL, Q') .
+
+  op maps2maps : Term SortMap SortMap -> MappingPair .
+  ceq maps2maps('__[T, T'], SM, VM) = < VSM VSM', VOM VOM' >
+   if < VSM, VOM > := maps2maps(T, SM, VM) /\
+      < VSM', VOM' >  := maps2maps(T', SM, VM) .
+  ceq maps2maps('sort_->_.[T, T'], SM, VM) = < sort Srt to Srt' ., none >
+   if Srt := sort2sort(T) /\
+      Srt' := sort2sort(T') .
+  ceq maps2maps('hsort_->_.[T, T'], SM, VM) = < sort Srt to Srt' ., none >
+   if Srt := sort2sort(T) /\
+      Srt' := sort2sort(T') .
+
+
+***(%
+\end{verbatim}
+}
+
+\item
+The function \verb"getNotVarDecl" checks that the operator at the top
+is not a variable declaration:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op getNotVarDecl : Term -> TermList .
+  ceq getNotVarDecl('__[Q[TL], Q'[TL']]) = T, T'
+   if Q =/= 'vvar_:_. /\
+      Q =/= 'vvars_:_. /\
+      Q' =/= 'vvar_:_. /\
+      Q' =/= 'vvars_:_. /\
+      T := getNotVarDecl(Q[TL]) /\
+      T' := getNotVarDecl(Q'[TL']) .
+  ceq getNotVarDecl('__[Q[TL], Q'[TL']]) = T
+   if Q == 'vvar_:_. or-else Q == 'vvars_:_. /\
+      Q' =/= 'vvarrs_:_. /\
+      Q' =/= 'vvars_:_. /\
+      T := getNotVarDecl(Q'[TL']) .
+  ceq getNotVarDecl('__[Q[TL], Q'[TL']]) = T
+   if Q =/= 'vvarrs_:_. /\
+      Q =/= 'vvars_:_. /\
+      Q' == 'vvar_:_. or-else Q' == 'vvars_:_. /\
+      T := getNotVarDecl(Q[TL]) .
+  eq getNotVarDecl(T) = T [owise] .
+
+***(%
+\end{verbatim}
+}
+
+\item
+The function \verb"buildNotVarDecl" distinguishes whether the argument is
+a singleton list or not, in order to use the \verb"__" operator:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op buildNotVarDecl : TermList ~> Term .
+  eq buildNotVarDecl(T) = T .
+  ceq buildNotVarDecl((T, TL)) = '__[T, buildNotVarDecl(TL)]
+   if TL =/= empty .
+
+***(%
+\end{verbatim}
+}
+
+However, mapping operators might require a more complex translation, because
+they can include mappings to terms. We check whether the lefthand side contains
+variables. If it does not contain, then it is translated as an operator mapping;
+otherwise, it is mapped to a term:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  ceq maps2maps('op_->_.['CafeBubble[T], 'CafeBubble[T']], SM, VM) =
+                        if T == T''
+                        then < none, op downQid(T) to downQid(T3) . >
+                        else < none, op 'bubble[T''] to term 'bubble[T3] . >
+                        fi
+   if T'' := updateTermLHS(T, SM, VM) /\
+      T3 := updateTermRHS(T', SM, VM) .
+
+***(%
+\end{verbatim}
+}
+
+Finally, behavioral operators are transformed into standard operators:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  ceq maps2maps('bop_->_.['CafeBubble[T], 'CafeBubble[T']], SM, VM) =
+                        if T == T''
+                        then < none, op downQid(T) to downQid(T3) . >
+                        else < none, op 'bubble[T''] to term 'bubble[T3] . >
+                        fi
+   if T'' := updateTermLHS(T, SM, VM) /\
+      T3 := updateTermRHS(T', SM, VM) .
+  eq maps2maps(T, SM, VM) = < none, none > [owise] .
+
+***(%
+\end{verbatim}
+}
+
+\item
+The function \verb"updateTermLHS" traverses the constants in the term and,
+if we find a variable previously defined, its sort is attached:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op updateTermLHS : Term SortMap SortMap -> Term .
+  eq updateTermLHS(Q[TL], SM, VM) = Q[updateTermLHS*(TL, SM, VM)] .
+  eq updateTermLHS(V, SM, VM) = V .
+  ceq updateTermLHS(C, SM, VM) = upTerm(Q')
+   if Q := downQid(C) /\
+      VM[Q] =/= undefined /\
+      Q' := qid(string(Q) + ":" + string(VM[Q])) .
+  eq updateTermLHS(T, SM, VM) = T [owise] .
+
+***(%
+\end{verbatim}
+}
+
+\item
+The function \verb"updateTermRHS" also attaches the sort of the variables,
+but it takes into account that \emph{the names of the sorts might have changed
+due to the mappings}. Hence, it looks for the sort name in the sort mapping and
+replaces it if required:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  op updateTermRHS : Term SortMap SortMap -> Term .
+  eq updateTermRHS(Q[TL], SM, VM) = Q[updateTermRHS*(TL, SM, VM)] .
+  eq updateTermRHS(V, SM, VM) = V .
+  ceq updateTermRHS(C, SM, VM) = upTerm(Q')
+   if Q := downQid(C) /\
+      VM[Q] =/= undefined /\
+      SM[VM[Q]] == undefined /\
+      Q' := qid(string(Q) + ":" + string(VM[Q])) .
+  ceq updateTermRHS(C, SM, VM) = upTerm(Q')
+   if Q := downQid(C) /\
+      VM[Q] =/= undefined /\
+      SM[VM[Q]] =/= undefined /\
+      Q' := qid(string(Q) + ":" + string(SM[VM[Q]])) .
+  eq updateTermRHS(T, SM, VM) = T [owise] .
+
+***(%
+\end{verbatim}
+}
+
+\item
+The functions \verb"updateTermLHS*" and \verb"updateTermRHS*" just traverse
+the list, applying the appropriate function to each element:
+
+{\codesize
+\begin{verbatim}
+%)
+
+  ops updateTermLHS* : TermList SortMap SortMap -> TermList .
+  eq updateTermLHS*(empty, SM, VM) = empty .
+  eq updateTermLHS*((T, TL), SM, VM) = updateTermLHS(T, SM, VM),
+                                       updateTermLHS*(TL, SM, VM) .
+
+  op updateTermRHS* : TermList SortMap SortMap -> TermList .
+  eq updateTermRHS*(empty, SM, VM) = empty .
+  eq updateTermRHS*((T, TL), SM, VM) = updateTermRHS(T, SM, VM),
+                                       updateTermRHS*(TL, SM, VM) .
+
+  op parseBubbles : TermSet Module Module -> BubbleParsing .
+  eq parseBubbles(TrS, TOP, FLAT) = parseBubbles(TrS, TOP, FLAT, none) .
+
+  op parseBubbles : TermSet Module Module VariableSet -> BubbleParsing .
+  ceq parseBubbles(('`[_`]['CafeToken[T]]) | TrS, TOP, FLAT, VS) = parseBubbles(TrS, TOP', FLAT', VS)
+   if Q := downQid(T) /\
+      TOP' := addSorts(TOP, Q) /\
+      FLAT' := addSorts(FLAT, Q) .
+  ceq parseBubbles(('`[_`]['__[TL]]) | TrS, TOP, FLAT, VS) = parseBubbles(TrS, TOP', FLAT', VS)
+   if SS := getSorts(TL, getSorts(FLAT)) /\
+      TOP' := addSorts(TOP, SS) /\
+      FLAT' := addSorts(FLAT, SS) .
+  ceq parseBubbles(('`[_`]['_<_[T,T']]) | TrS, TOP, FLAT, VS) = parseBubbles(TrS, TOP'', FLAT'', VS)
+   if SS := getSorts((T, T'), getSorts(FLAT)) /\
+      TOP' := addSorts(TOP, SS) /\
+      FLAT' := addSorts(FLAT, SS) /\
+      SSDS := computeSubsorts('_<_[T,T']) /\
+      TOP'' := addSubsorts(TOP', SSDS) /\
+      FLAT'' := addSubsorts(FLAT', SSDS) .
+
+  op computeSubsorts : Term ~> SubsortDeclSet .
+  ceq computeSubsorts('_<_[T,T']) = SSDS computeSubsorts(T')
+   if SS := getSorts(T) /\
+      SS' := getFirstSorts(T') /\
+      SSDS := computeSubsorts*(SS, SS') .
+  eq computeSubsorts(TL) = none [owise] .
+
+  op computeSubsorts : Sort SortSet -> SubsortDeclSet .
+  eq computeSubsorts(Srt, none) = none .
+  eq computeSubsorts(Srt, Srt' ; SS) = subsort Srt < Srt' . computeSubsorts(Srt, SS) .
+
+  op computeSubsorts* : SortSet SortSet -> SubsortDeclSet .
+  eq computeSubsorts*(none, SS') = none .
+  eq computeSubsorts*(Srt ; SS, SS') = computeSubsorts(Srt, SS')
+                                       computeSubsorts*(SS, SS') .
+
+  op getFirstSorts : Term -> SortSet .
+  op getFirstSorts : TermList ~> SortSet .
+  eq getFirstSorts(empty) = none .
+  eq getFirstSorts('__[TL]) = getFirstSorts(TL) .
+  eq getFirstSorts('CafeToken[T]) = downQid(T) .
+  eq getFirstSorts((T, TL)) = getFirstSorts(T) ; getFirstSorts(TL) .
+  eq getFirstSorts('_<_[TL,TL']) = getFirstSorts(TL) .
+
+  op getSorts : TermList ~> SortSet .
+  eq getSorts(empty) = none .
+  eq getSorts('__[TL]) = getSorts(TL) .
+  eq getSorts('CafeToken[T]) = downQid(T) .
+  eq getSorts((T, TL)) = getSorts(T) ; getSorts(TL) [owise] .
+
+  ceq parseBubbles(('ops_:`->_`{_`}.['neCafeTokenList[T], T', T'']) | TrS, TOP, FLAT, VS) =
+                                                             parseBubbles(TrS | TrS', TOP, FLAT, VS)
+   if TrS' := createOps('op_:`->_`{_`}., T, (T', T'')) .
+  ceq parseBubbles(('ops_:_->_`{_`}.['neCafeTokenList[T], T', T'', T''']) | TrS, TOP, FLAT, VS) =
+                                                             parseBubbles(TrS | TrS', TOP, FLAT, VS)
+   if TrS' := createOps('ops_:_->_`{_`}., T, (T', T'', T''')) .
+  ceq parseBubbles(('ops_:`->_.['neCafeTokenList[T], T']) | TrS, TOP, FLAT, VS) = parseBubbles(TrS | TrS', TOP, FLAT, VS)
+   if TrS' := createOps('op_:`->_., T, (T')) .
+  ceq parseBubbles(('ops_:_->_.['neCafeTokenList[T], T', T'']) | TrS, TOP, FLAT, VS) = parseBubbles(TrS | TrS', TOP, FLAT, VS)
+   if TrS' := createOps('op_:_->_., T, (T', T'')) .
+
+  ceq parseBubbles(('op_:_->_.[T, T', 'CafeToken[T'']]) | TrS, TOP, FLAT, VS) = parseBubbles(TrS, TOP', FLAT', VS)
+   if Q := opNameFromBubble(T) /\
+      TyL := downTypeList(T') /\
+      Q' := downQid(T'') /\
+      ODS := op Q : TyL -> Q' [none] . /\
+      TOP' := addOps(TOP, ODS) /\
+      FLAT' := addOps(FLAT, ODS) .
+  ceq parseBubbles(('op_:`->_.[T, 'CafeToken[T'']]) | TrS, TOP, FLAT, VS) = parseBubbles(TrS, TOP', FLAT', VS)
+   if Q := opNameFromBubble(T) /\
+      Q' := downQid(T'') /\
+      ODS := op Q : nil -> Q' [none] . /\
+      TOP' := addOps(TOP, ODS) /\
+      FLAT' := addOps(FLAT, ODS) .
+  ceq parseBubbles(('op_:`->_`{_`}.[T, 'CafeToken[T''], T''']) | TrS, TOP, FLAT, VS) = parseBubbles(TrS, TOP', FLAT', VS)
+   if Q := opNameFromBubble(T) /\
+      Q' := downQid(T'') /\
+      AtS := downAttributes(FLAT, T''') /\
+      ODS := op Q : nil -> Q' [AtS] . /\
+      TOP' := addOps(TOP, ODS) /\
+      FLAT' := addOps(FLAT, ODS) .
+  ceq parseBubbles(('op_:_->_`{_`}.[T, T', 'CafeToken[T''], T''']) | TrS, TOP, FLAT, VS) = parseBubbles(TrS, TOP', FLAT', VS)
+   if Q := opNameFromBubble(T) /\
+      TyL := downTypeList(T') /\
+      Q' := downQid(T'') /\
+      AtS := downAttributes(FLAT, T''') /\
+      ODS := op Q : TyL -> Q' [AtS] . /\
+      TOP' := addOps(TOP, ODS) /\
+      FLAT' := addOps(FLAT, ODS) .
+  ceq parseBubbles(('var_:_.['neCafeTokenList[TL],'CafeToken[T]]) | TrS, TOP, FLAT, VS) = parseBubbles(TrS, TOP, FLAT, VS ; VS')
+   if VS' := createVars(TL, string(downQid(T))) .
+  ceq parseBubbles(('vars_:_.['neCafeTokenList[TL],'CafeToken[T]]) | TrS, TOP, FLAT, VS) = parseBubbles(TrS, TOP, FLAT, VS ; VS')
+   if VS' := createVars(TL, string(downQid(T))) .
+
+  ceq parseBubbles(('eq_=_.['CafeBubble[T],'CafeBubble[T']]) | TrS, TOP, FLAT, VS) = parseBubbles(TrS, TOP', FLAT', VS)
+   if [ QIL, AtS' ] := improveLabel(downQidList(T)) /\
+      VS' := varsFromQidList(QIL) /\
+      {T1, Srt} := metaParse(FLAT, VS ; VS', QIL, anyType) /\
+      < T'', AtS > := cafeEqAtS2maudeEqAts(T') /\
+      T2 := getTerm(metaParse(FLAT, VS ; VS', downQidList(T''), Srt)) /\
+      EqS := eq T1 = T2 [AtS AtS'] . /\
+      TOP' := addEqs(TOP, EqS) /\
+      FLAT' := addEqs(FLAT, EqS) .
+  ceq parseBubbles(('ceq_=_if_.['CafeBubble[T],'CafeBubble[T'],'CafeBubble[T'']]) | TrS, TOP, FLAT, VS) = parseBubbles(TrS, TOP', FLAT', VS)
+   if [ QIL, AtS' ] := improveLabel(downQidList(T)) /\
+      VS' := varsFromQidList(QIL) /\
+      {T1, Srt} := metaParse(FLAT, VS, QIL, anyType) /\
+      < T''', AtS > := cafeEqAtS2maudeEqAts(T') /\
+      T2 := getTerm(metaParse(FLAT, VS, downQidList(T'''), Srt)) /\
+      T3 := getTerm(metaParse(FLAT, VS, downQidList(T''), 'Bool)) /\
+      EqS := ceq T1 = T2 if T3 = 'true.Bool [AtS AtS'] . /\
+      TOP' := addEqs(TOP, EqS) /\
+      FLAT' := addEqs(FLAT, EqS) .
+  eq parseBubbles(('bceq_=_if_.['CafeBubble[T],'CafeBubble[T'],'CafeBubble[T'']]) | TrS, TOP, FLAT, VS) =
+                                    parseBubbles(('ceq_=_if_.['CafeBubble[T],'CafeBubble[T'],'CafeBubble[T'']]) | TrS, TOP, FLAT, VS) .
+  eq parseBubbles(('bcq_=_if_.['CafeBubble[T],'CafeBubble[T'],'CafeBubble[T'']]) | TrS, TOP, FLAT, VS) =
+                                    parseBubbles(('ceq_=_if_.['CafeBubble[T],'CafeBubble[T'],'CafeBubble[T'']]) | TrS, TOP, FLAT, VS) .
+  eq parseBubbles(('cq_=_if_.['CafeBubble[T],'CafeBubble[T'],'CafeBubble[T'']]) | TrS, TOP, FLAT, VS) =
+                                    parseBubbles(('ceq_=_if_.['CafeBubble[T],'CafeBubble[T'],'CafeBubble[T'']]) | TrS, TOP, FLAT, VS) .
+
+  eq parseBubbles(emptyTermSet, TOP, FLAT, VS) = < addEqual&SearchEqs(TOP), addEqual&SearchEqs(FLAT), VS, nil > .
+  eq parseBubbles(T | TrS, TOP, FLAT, VS) = parseBubbles(TrS, TOP, FLAT, VS) [owise print "Owise: " T] .
+
+  op parseBubblesView : View Module Module -> CafeParseResult .
+  ceq parseBubblesView(view H from ME to ME' is VSM VOM StratMS endv, M, M') =
+                                       < view H from ME to ME' is VSM VOM' StratMS endv, QIL >
+   if < VOM', QIL > := parseBubblesView(VOM, M, M') .
+
+  op parseBubblesView : OpMappingSet Module Module -> BubbleParsing .
+  ceq parseBubblesView((op 'bubble[T] to term 'bubble[T'] .) VOM, M, M') = < op T1 to term T' . VOM, QIL >
+   if T1 := getTerm(metaParse(M, downQidList(T), anyType)) /\
+      < VOM', QIL > := parseBubblesView(VOM, M, M') .
+  eq parseBubblesView(VOM, M, M') = < VOM, nil > [owise] .
+
+  op cafeEqAtS2maudeEqAts : Term -> BubbleParsing .
+  ceq cafeEqAtS2maudeEqAts('__[TL]) = < rebuild(TL'), AtS >
+   if < TL', AtS > := cafeEqAtS2maudeEqAts*(TL) .
+  eq cafeEqAtS2maudeEqAts(T) = < T, none > [owise] .
+
+  op procCafeView : Term SortMap Module Module -> CafeParseResult .
+  ceq procCafeView('cview_from_to_`{`}[T, T', 'token[T'']], PSM, M, M') =
+           procCafeView('cview_from_to_`{_`}[T, T', 'token[T''], T3], PSM, M, M')
+   if Q' := downQid(T'') /\
+      (Q' |-> QI, PSM') := PSM /\
+      'Bool ; Srt := getSorts(M) /\
+      QI =/= Srt /\
+      T3 := 'sort_->_.['CafeToken[upTerm(Srt)], 'CafeToken[upTerm(QI)]] .
+  ceq procCafeView(T, PSM, M, M') = < VIEW, nil >
+   if VIEW := view2view(T, M, M') [owise] .
+
+  op view2view : Term Module Module -> View .
+  ceq view2view('cview_from_to_`{_`}['CafeToken[T], 'token[T'], 'token[T''], T3], M, M') = view Q from Q' to Q'' is VSM VOM' none endv
+   if Q := downQid(T) /\
+      Q' := downQid(T') /\
+      Q'' := downQid(T'') /\
+      < VSM, VOM > := maps2maps(T3) /\
+      < VOM', QIL > := parseBubblesView(VOM, M, M') .
+
+  ceq view2view('cview_from_to_`{`}['CafeToken[T], 'token[T'], 'token[T'']], M, M') = view Q from Q' to Q'' is none none none endv
+   if Q := downQid(T) /\
+      Q' := downQid(T') /\
+      Q'' := downQid(T'') .
+
+  op varsFromQidList : QidList -> VariableSet .
+  eq varsFromQidList(nil) = none .
+  eq varsFromQidList(V QIL) = V ; varsFromQidList(QIL) .
+  eq varsFromQidList(Q QIL) = varsFromQidList(QIL) [owise] .
+
+  op addEqual&SearchEqs : Module -> Module .
+  ceq addEqual&SearchEqs(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm) =
+                         fmod H is IL sorts SS . SSDS ODS MAS (EqS EqS') endfm
+   if EqS' := createEqsFromSorts(SS) createEqsFromImports(IL) .
+  ceq addEqual&SearchEqs(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm) =
+                         mod H is IL sorts SS . SSDS ODS MAS (EqS EqS') RS endm
+   if EqS' := createEqsFromSorts(SS) createEqsFromImports(IL) .
+  ceq addEqual&SearchEqs(fth H is IL sorts SS . SSDS ODS MAS EqS endfth) =
+                         fth H is IL sorts SS . SSDS ODS MAS (EqS EqS') endfth
+   if EqS' := createEqsFromSorts(SS) createEqsFromImports(IL) .
+  ceq addEqual&SearchEqs(th H is IL sorts SS . SSDS ODS MAS EqS RS endth) =
+                         th H is IL sorts SS . SSDS ODS MAS (EqS EqS') RS endth
+   if EqS' := createEqsFromSorts(SS) createEqsFromImports(IL) .
+
+  op createEqsFromSorts : SortSet -> EquationSet .
+  eq createEqsFromSorts(none) = none .
+  ceq createEqsFromSorts(Srt ; SS) = eq '_=_[V, V] = 'true.Bool [metadata("built-in in CafeOBJ")] .
+                                     createEqsFromSorts(SS)
+   if V := qid("V:" + string(Srt)) /\
+      V' := qid("V':" + string(Srt)) .
+
+  op createEqsFromImports : ImportList -> EquationSet .
+  eq createEqsFromImports(nil) = none .
+  eq createEqsFromImports(I IL) = createEqsFromImport(I) createEqsFromImports(IL) .
+
+  op createEqsFromImport : Import -> EquationSet .
+  eq createEqsFromImport(protecting ME .) = createEqsFromME(ME) .
+  eq createEqsFromImport(extending ME .) = createEqsFromME(ME) .
+  eq createEqsFromImport(including ME .) = createEqsFromME(ME) .
+
+  op createEqsFromME : ModuleExpression -> EquationSet .
+  eq createEqsFromME(Q) = getEqs4Predefined(Q) .
+  eq createEqsFromME(ME + ME') = createEqsFromME(ME) createEqsFromME(ME') .
+  eq createEqsFromME(ME * (RenS)) = createEqsFromME(ME) .
+  eq createEqsFromME(ME{ParamL}) = createEqsFromME(ME) .
+
+  op getEqs4Predefined : Qid -> EquationSet .
+  ceq getEqs4Predefined('NAT) =
+                eq '_=_[V1, V1] = 'true.Bool [metadata("built-in in CafeOBJ")] .
+                eq '_=_[V2, V2] = 'true.Bool [metadata("built-in in CafeOBJ")] .
+                eq '_=_[V3, V3] = 'true.Bool [metadata("built-in in CafeOBJ")] .
+   if V1 := 'V:Zero /\
+      V2 := 'V:NzNat /\
+      V3 := 'V:Nat .
+  eq getEqs4Predefined(Q) = none [owise] .
+
+  var STR : String .
+
+  sort LabelPair .
+  op [_,_] : QidList AttrSet -> LabelPair [ctor] .
+
+  op improveLabel : QidList -> LabelPair .
+  ceq improveLabel('`[ QIL ':nonexec QIL' '`] ': QIL'') = [ QIL''', nonexec AtS ]
+   if [ QIL''', AtS ] := $improveLabel('`[ QIL QIL' '`] ': QIL'') .
+  eq improveLabel(QIL) = [ QIL, none ] [owise] .
+
+  op $improveLabel : QidList -> LabelPair .
+  eq $improveLabel('`[ '`] ': QIL') = [ QIL', none ] .
+  ceq $improveLabel('`[ Q Q' QIL '`] ': QIL') = $improveLabel('`[ Q'' QIL '`] ': QIL')
+   if Q' =/= '`] /\
+      Q'' := qid(string(Q) + "-" + string(Q')) .
+  eq $improveLabel('`[ Q '`] ': QIL) = [ QIL, label(startsByLetterOrNumber(Q)) ] .
+  eq $improveLabel(QIL) = [ QIL, none ] [owise] .
+
+  op startsByLetterOrNumber : Qid -> Qid .
+  ceq startsByLetterOrNumber(Q) = startsByLetterOrNumber(STR)
+   if STR := string(Q) .
+  eq startsByLetterOrNumber(Q) = Q [owise] .
+
+  op startsByLetterOrNumber : String -> Qid .
+  ceq startsByLetterOrNumber(STR) =
+            if (N >= 65 and N <= 90) or (N >= 97 and N <= 122)
+            then qid(STR)
+            else qid("cafe-label-" + STR)
+            fi
+   if N := ascii(substr(STR, 0, 1)) .
+
+  *** From Full Maude
+  op parseModExp : Term -> ModuleExpression .
+  eq parseModExp('token[T]) = downQid(T) .
+  eq parseModExp('`(_`)[T]) = parseModExp(T) .
+  eq parseModExp('_`{_`}[T, T'])
+    = _`{_`}(parseModExp(T), parseParameterList(T')) .
+  eq parseModExp('_*`(_`)[T, T']) = _*`(_`)(parseModExp(T), parseMaps(T')) .
+  eq parseModExp('_+_[T, T']) = parseModExp(T) + parseModExp(T') .
+  eq parseModExp('TUPLE`[_`]['token[T]]) = TUPLE[parseNat(T)] .
+  eq parseModExp('POWER`[_`]['token[T]]) = POWER[parseNat(T)] .
+
+  op parseParameterList : Term ~> ParameterList .
+  eq parseParameterList('_`,_[T, T'])
+    = parseViewExpression(T), parseParameterList(T') .
+  eq parseParameterList(T) = parseViewExpression(T) [owise] .
+
+  op parseViewExpression : Term ~> ViewExpression .
+  eq parseViewExpression('viewToken[T])
+    = if downQid(T) :: Sort
+      then downQid(T)
+      else qidError('\r 'Warning: '\o downQid(T) 'is 'not 'a 'valid 'sort. '\n)
+      fi .
+  eq parseViewExpression('_`{_`}[T, T'])
+    = parseViewExpression(T){parseParameterList(T')} .
+  eq parseViewExpression(T)
+    = qidError('\r 'Warning: '\o 'invalid 'view 'expression. '\n)
+    [owise] .
+
+  op parseNat : Term -> Nat .
+  eq parseNat(C)
+    = downNat(
+        qid(substr(string(getName(C)), 1, length(string(getName(C))))
+            + ".Nat")) .
+
+  op parseMaps : Term -> RenamingSet .
+  eq parseMaps('_`,_[T, T']) = (parseMaps(T), parseMaps(T')) .
+
+  eq parseMaps('sort_to_[T, T']) = (sort parseSort(T) to parseSort(T')) .
+  eq parseMaps('op_to_['token[T], 'token[T']])
+    = (op downQid(T) to downQid(T') [none]) .
+
+  op parseSort : Term ~> Sort .
+  eq parseSort('sortToken[T])
+    = if downQid(T) :: Type
+      then downQid(T)
+      else qidError('\r 'Warning: '\o downQid(T) 'is 'not 'a 'valid 'sort. '\n)
+      fi .
+  eq parseSort('_`{_`}[T, T'])
+    = qid(string(parseSort(T))
+          + "{" + string(parameterList2Qid(parseParameterList(T'))) + "}") .
+  eq parseSort(T) = qidError('\r 'Warning: '\o 'invalid 'sort. '\n) [owise] .
+
+endfm

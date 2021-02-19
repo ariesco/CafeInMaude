@@ -1,0 +1,566 @@
+load full-maude_lite.maude
+load cimpg_defs.maude
+load metaInterpreter.maude
+load aux-modules.maude
+load search_predicate.maude
+load predefined.maude
+load predefined_core.maude
+load preparsing.maude
+load grammar.maude
+load file.maude
+load parameter_config.maude
+load citp_aux.maude
+load cimpg_defs.maude
+load module_parser.maude
+load open_close_parsing.maude
+
+fmod COMMAND-PARSING is
+ pr META-LEVEL .
+
+ var  TL : TermList .
+ var  T : Term .
+
+ op extractTerms : Term -> TermList .
+ eq extractTerms('__[TL]) = extractTerms*(TL) .
+ eq extractTerms(T) = T [owise] .
+
+ op extractTerms* : TermList -> TermList .
+ eq extractTerms*(empty) = empty .
+ eq extractTerms*((T, TL)) = extractTerms(T), extractTerms*(TL) .
+endfm
+
+mod MTP is
+ pr (MAYBE * (op maybe to null)){Oid} .
+ pr ATTRIBUTE-UPDATING .
+ pr OPEN-CLOSE-PARSER .
+ inc META-INTERPRETER .
+ pr COMMAND-PARSING .
+ pr META-CIM-SIGN .
+ pr PRELOAD-LIST .
+ inc STD-STREAM .
+ pr PREPARSING .
+ pr LEXICAL .
+ inc FILE .
+
+ vars TSM TSM' HSM HSM' MS : TheorySortMap .
+ vars M M' M'' TOP FLAT FROM TO : Module .
+ vars TL IN REDS THCOMMS : TermList .
+ vars ME ME' : ModuleExpression .
+ var  PDL : ParameterDeclList .
+ var  SIM SIM' : ScoreInfoMap .
+ vars T T' T1 T2 T3 T4 : Term .
+ vars RDB RDB' : ResDatabase .
+ vars S Text Read : String .
+ var  SMS : SortMappingSet .
+ var  OMS : OpMappingSet .
+ var  PSM PSM' : SortMap .
+ var  AtS : AttributeSet .
+ var  LP : List{Preload} .
+ var  QIL IDS : QidList .
+ vars MI MI' FHIn : Oid .
+ var  PM : ParameterMap .
+ var  VS : VariableSet .
+ vars VIEWS : SortSet .
+ var  TS : TermSet .
+ var  H : Header .
+ var  Ty : Type .
+ var  V : View .
+ var  N : Nat .
+ var  Q : Qid .
+ *** For testing
+ var CPR : [CafeParseResult] .
+
+ sort State .
+ *** Initial state, meta-interpreter for parsing and  is created.
+ op init : -> State [ctor] .
+ *** Loading modules required by the meta-interpreter for parsing.
+ op loading-UMI : -> State [ctor] .
+ *** Waiting for commands.
+ op idle : -> State [ctor] .
+ *** For printing and waiting for more input.
+ op print&idle : -> State [ctor] .
+ *** Executing commands.
+ op executeComm : -> State [ctor] .
+ *** Loading file.
+ op loading : -> State [ctor] .
+ *** The text file has been completely read and now it has to be parsed.
+ op parseTextFileContents : -> State [ctor] .
+ *** Parsing module
+ op parsingModule : -> State [ctor] .
+ *** Parsing premodule: inserting premodule.
+ op insertingPremod : -> State [ctor] .
+ *** Parsing premodule: waiting for top module.
+ op waitingTop : -> State [ctor] .
+ *** Parsing premodule: waiting for flat module.
+ op waitingFlat : -> State [ctor] .
+ *** Parsing previews: retrieving "from" module.
+ op waitingFrom : -> State [ctor] .
+ *** Parsing previews: retrieving "to" module.
+ op waitingTo : -> State [ctor] .
+ *** Parsing previews: retrieving "from" module.
+ op waitingFromPre : -> State [ctor] .
+ *** Parsing previews: retrieving "to" module.
+ op waitingToPre : -> State [ctor] .
+ *** Parse has finished.
+ op parseFinished : -> State [ctor] .
+ *** Write result from open-close environments
+ op write&parsingModule : -> State [ctor] .
+
+ op foo : -> State [ctor] .
+
+
+ *** Object and class definition
+ op cafeInMaude : -> Oid [ctor] .
+ op CIM : -> Cid [ctor] .
+
+ ***            ***
+ *** Attributes ***
+ ***            ***
+
+ *** Predefined modules for parsing
+ op pload:_ : List{Preload} -> Attribute [ctor gather (&)] .
+ *** Predefined modules for the user
+ op uload:_ : List{Preload} -> Attribute [ctor gather (&)] .
+ *** Current state
+ op state:_ : State -> Attribute [ctor] .
+ *** Meta-interpreter with user information.
+ op mi:_ : Oid -> Attribute [ctor] .
+ *** List of
+ op input:_ : TermList -> Attribute [ctor gather (&)] .
+ *** Text file being read
+ op file:_ : Maybe{Oid} -> Attribute [ctor] .
+ *** Text file read thus far
+ op out:_ : String -> Attribute [ctor] .
+ *** Mapping between theories and sorts
+ op tsm:_ : TheorySortMap -> Attribute [ctor gather (&)] .
+ *** Mapping between modules and hidden sorts
+ op hsm:_ : TheorySortMap -> Attribute [ctor gather (&)] .
+ *** Mapping for principal sorts
+ op psorts:_ : SortMap -> Attribute [ctor gather (&)] .
+ *** Mapping from module name to parameters
+ op params:_ : ParameterMap -> Attribute [ctor gather (&)] .
+ *** Mapping from
+ op msorts:_ : TheorySortMap -> Attribute [ctor gather (&)] .
+ *** Set of views
+ op views:_ : SortSet -> Attribute [ctor gather (&)] .
+ *** List of preparsed modules and views.
+ op preparsed:_ : ResDatabase -> Attribute [ctor gather (&)] .
+ *** Module "from" for view.
+ op fromModule:_ : Module -> Attribute [ctor gather (&)] .
+ *** Module "from" for view.
+ op topModule:_ : Module -> Attribute [ctor gather (&)] .
+ ***
+ op scoreinfo:_ : ScoreInfoMap -> Attribute [ctor gather (&)] .
+
+ ***                           ***
+ ***       User command        ***
+ ***                           ***
+ crl [parseComm] :
+     gotLine(cafeInMaude, stdin, Text)
+     < cafeInMaude : CIM | state: idle, input: IN, AtS >
+  => < cafeInMaude : CIM | state: executeComm, input: TL, AtS >
+  if {T, Ty} := metaParse(GRAMMAR, tokenize(Text), '@Input@) /\
+     TL := extractTerms(T) .
+
+ ***                        ***
+ ***          ERROR         ***
+ ***                        ***
+
+ crl [parseCommError] :
+     gotLine(cafeInMaude, stdin, Text)
+     < cafeInMaude : CIM | state: idle, AtS >
+  => < cafeInMaude : CIM | state: print&idle, AtS >
+     write(stdout, cafeInMaude, "The introduced command does not exit.\n")
+  if noParse(N) := metaParse(GRAMMAR, tokenize(Text), '@Input@) .
+
+ ***                        ***
+ ***          MOD*          ***
+ ***                        ***
+ crl [mod*] :
+     < cafeInMaude : CIM | state: executeComm, input: ('cmod*_`{_`}[T,T'], TL),
+                           tsm: TSM, hsm: HSM, psorts: PSM, params: PM, views: VIEWS,
+                           msorts: MS, preparsed: RDB, AtS >
+  => < cafeInMaude : CIM | state: parsingModule, input: TL, tsm: TSM, hsm: HSM',
+                           psorts: PSM', params: PM, views: VIEWS, msorts: MS,
+                           preparsed: RDB', AtS >
+  if < RDB', PSM', HSM', QIL > := procCafeMod('cmod*_`{_`}[T,T'], PSM, HSM, TSM, PM, MS, VIEWS) .
+
+ crl [mod!] :
+     < cafeInMaude : CIM | state: executeComm, input: ('cmod!_`{_`}[T,T'], TL),
+                           tsm: TSM, hsm: HSM, psorts: PSM, params: PM, views: VIEWS,
+                           msorts: MS, preparsed: RDB, AtS >
+  => < cafeInMaude : CIM | state: parsingModule, input: TL, tsm: TSM, hsm: HSM',
+                           psorts: PSM', params: PM, views: VIEWS, msorts: MS,
+                           preparsed: RDB', AtS >
+  if < RDB', PSM', HSM', QIL > := procCafeMod('cmod!_`{_`}[T,T'], PSM, HSM, TSM, PM, MS, VIEWS) .
+
+ ***                        ***
+ ***          VIEW          ***
+ ***                        ***
+ rl [viewsWithMaps] :
+    < cafeInMaude : CIM | state: executeComm, input: ('cview_from_to_`{_`}[T1,'token[T2],T3,T4], TL),
+                          mi: MI, AtS >
+ => < cafeInMaude : CIM | state: waitingFromPre, input: ('cview_from_to_`{_`}[T1,'token[T2],T3,T4], TL),
+                          mi: MI, AtS >
+    showModule(MI, cafeInMaude, downQid(T2), true) .
+
+ ***                        ***
+ ***          OPEN          ***
+ ***                        ***
+ crl [openEnv] :
+     < cafeInMaude : CIM | state: executeComm, input: ('copen_._close[T1, T2], TL),
+                           tsm: TSM, hsm: HSM, psorts: PSM, params: PM, views: VIEWS,
+                           msorts: MS, preparsed: RDB, AtS >
+  => < cafeInMaude : CIM | state: parsingModule, input: TL, tsm: TSM, hsm: HSM,
+                           psorts: PSM, params: PM, views: VIEWS, msorts: MS,
+                           preparsed: RDB RDB', AtS >
+  if < RDB', QIL > := procOpenCloseEnv('copen_._close[T1, T2], PSM, TSM, PM, MS, VIEWS) .
+
+ ***                                ***
+ ***          PROCESS VIEW          ***
+ ***                                ***
+ rl [viewsWithoutMaps] :
+    < cafeInMaude : CIM | state: executeComm, input: ('cview_from_to_`{`}[T1,'token[T2],T3], TL),
+                          mi: MI, AtS >
+ => < cafeInMaude : CIM | state: waitingFromPre, input: ('cview_from_to_`{`}[T1,'token[T2],T3], TL),
+                          mi: MI, AtS >
+    showModule(MI, cafeInMaude, downQid(T2), true) .
+
+ rl [viewsWithMapsFrom] :
+    showingModule(cafeInMaude, MI, FROM)
+    < cafeInMaude : CIM | state: waitingFromPre, input: ('cview_from_to_`{_`}[T1,T2,'token[T3],T4], TL),
+                          mi: MI, AtS >
+ => < cafeInMaude : CIM | state: waitingToPre, input: ('cview_from_to_`{_`}[T1,T2,'token[T3],T4], TL),
+                          mi: MI, fromModule: FROM, AtS >
+    showModule(MI, cafeInMaude, downQid(T3), true) .
+
+ rl [viewsWithoutMapsFrom] :
+    showingModule(cafeInMaude, MI, FROM)
+    < cafeInMaude : CIM | state: waitingFromPre, input: ('cview_from_to_`{`}[T1,T2,'token[T3]], TL),
+                          mi: MI, AtS >
+ => < cafeInMaude : CIM | state: waitingToPre, input: ('cview_from_to_`{`}[T1,T2,'token[T3]], TL),
+                          mi: MI, fromModule: FROM, AtS >
+    showModule(MI, cafeInMaude, downQid(T3), true) .
+
+ crl [preViewWithMapsFrom] :
+     showingModule(cafeInMaude, MI, TO)
+     < cafeInMaude : CIM | state: waitingToPre, input: ('cview_from_to_`{_`}[T1,T2,T3,T4], TL),
+                           mi: MI, psorts: PSM, views: VIEWS, fromModule: FROM, AtS >
+  => < cafeInMaude : CIM | state: parseFinished, input: TL, mi: MI, psorts: PSM,
+                           views: (VIEWS ; getName(V)), AtS >
+     insertView(MI, cafeInMaude, V)
+  if < V, QIL > := procCafeView('cview_from_to_`{_`}[T1,T2,T3,T4], PSM, FROM, TO) .
+
+ crl [preViewWithoutMapsFrom] :
+     showingModule(cafeInMaude, MI, TO)
+     < cafeInMaude : CIM | state: waitingToPre, input: ('cview_from_to_`{`}[T1,T2,T3], TL),
+                           mi: MI, psorts: PSM, views: VIEWS, fromModule: FROM, AtS >
+  => < cafeInMaude : CIM | state: parseFinished, input: TL, mi: MI, psorts: PSM,
+                           views: (VIEWS ; getName(V)), AtS >
+     insertView(MI, cafeInMaude, V)
+  if < V, QIL > := procCafeView('cview_from_to_`{`}[T1,T2,T3], PSM, FROM, TO) .
+
+ ***                              ***
+ ***          Premodules          ***
+ ***                              ***
+  rl [insetPreopen] :
+     < cafeInMaude : CIM | state: parsingModule, preparsed: preOpen(M, IDS, TS, REDS, THCOMMS) RDB, mi: MI, AtS >
+  => < cafeInMaude : CIM | state: insertingPremod, preparsed: preOpen(M, IDS, TS, REDS, THCOMMS) RDB, mi: MI, AtS >
+     insertModule(MI, cafeInMaude, M) .
+
+  rl [insertedPreopen] :
+     insertedModule(cafeInMaude, MI)
+     < cafeInMaude : CIM | state: insertingPremod, preparsed: preOpen(M, IDS, TS, REDS, THCOMMS) RDB,
+                           mi: MI, AtS >
+  => < cafeInMaude : CIM | state: waitingTop, preparsed: preOpen(M, IDS, TS, REDS, THCOMMS) RDB,
+                           mi: MI, AtS >
+     showModule(MI, cafeInMaude, getName(M), false) .
+
+  rl [getTopOpen] :
+     showingModule(cafeInMaude, MI, M)
+     < cafeInMaude : CIM | state: waitingTop, preparsed: preOpen(M, IDS, TS, REDS, THCOMMS) RDB,
+                           mi: MI, AtS >
+  => < cafeInMaude : CIM | state: waitingFlat, preparsed: preOpen(M, IDS, TS, REDS, THCOMMS) RDB,
+                           mi: MI, topModule: M, AtS >
+     showModule(MI, cafeInMaude, getName(M), true) .
+
+  crl [getFlatOpen] :
+      showingModule(cafeInMaude, MI, FLAT)
+      < cafeInMaude : CIM | state: waitingFlat, preparsed: preOpen(M, IDS, TS, REDS, THCOMMS) RDB,
+                            mi: MI, topModule: TOP, scoreinfo: SIM, AtS >
+   => < cafeInMaude : CIM | state: write&parsingModule, preparsed: RDB, mi: MI, scoreinfo: SIM', AtS >
+      write(stdout, cafeInMaude, printTokens(QIL))
+   if < SIM' | nil | QIL > := parseOpenEnv(TOP, FLAT, IDS, TS, REDS, THCOMMS, SIM) .
+
+ ***                              ***
+ ***          Premodules          ***
+ ***                              ***
+  rl [insetPremodule] :
+     < cafeInMaude : CIM | state: parsingModule, preparsed: preModule(M, TS) RDB, mi: MI, AtS >
+  => < cafeInMaude : CIM | state: insertingPremod, preparsed: preModule(M, TS) RDB, mi: MI, AtS >
+     insertModule(MI, cafeInMaude, M) .
+
+  rl [insertedPremodule] :
+     insertedModule(cafeInMaude, MI)
+     < cafeInMaude : CIM | state: insertingPremod, preparsed: preModule(M, TS) RDB,
+                           mi: MI, AtS >
+  => < cafeInMaude : CIM | state: waitingTop, preparsed: preModule(M, TS) RDB,
+                           mi: MI, AtS >
+     showModule(MI, cafeInMaude, getName(M), false) .
+
+  rl [getTop] :
+     showingModule(cafeInMaude, MI, M)
+     < cafeInMaude : CIM | state: waitingTop, preparsed: preModule(M, TS) RDB,
+                           mi: MI, AtS >
+  => < cafeInMaude : CIM | state: waitingFlat, preparsed: preModule(M, TS) RDB,
+                           mi: MI, topModule: M, AtS >
+     showModule(MI, cafeInMaude, getName(M), true) .
+
+  crl [getFlatParam] :
+      showingModule(cafeInMaude, MI, FLAT)
+      < cafeInMaude : CIM | state: waitingFlat, preparsed: preModule(M, TS) RDB,
+                            mi: MI, topModule: TOP, tsm: TSM, params: PM, msorts: MS, AtS >
+   => < cafeInMaude : CIM | state: parseFinished, preparsed: RDB, mi: MI,
+                            params: (PM, getName(M) |-> PDL), tsm: TSM',
+                            msorts: (MS, getName(M) -> getSorts(M')), AtS >
+      insertModule(MI, cafeInMaude, M')
+   if < M', M'', VS, QIL > := parseBubbles(TS, TOP, FLAT) /\
+      TSM' := updateTSM(M', TSM) /\
+      PDL := getPDL(M') .
+
+  crl [getFlatNoParam] :
+      showingModule(cafeInMaude, MI, FLAT)
+      < cafeInMaude : CIM | state: waitingFlat, preparsed: preModule(M, TS) RDB,
+                            mi: MI, topModule: TOP, tsm: TSM, msorts: MS, AtS >
+   => < cafeInMaude : CIM | state: parseFinished, preparsed: RDB, mi: MI,
+                            tsm: TSM', msorts: (MS, getName(M) -> getSorts(M')), AtS >
+      insertModule(MI, cafeInMaude, M')
+   if < M', M'', VS, QIL > := parseBubbles(TS, TOP, FLAT) /\
+      TSM' := updateTSM(M', TSM) /\
+      not (getPDL(M') :: ParameterDeclList) .
+
+ rl [moduleParsed&Introduced] :
+    insertedModule(cafeInMaude, MI)
+    < cafeInMaude : CIM | state: parseFinished, mi: MI, AtS >
+ => < cafeInMaude : CIM | state: parsingModule, mi: MI, AtS > .
+
+ rl [viewParsed&Introduced] :
+    insertedView(cafeInMaude, MI)
+    < cafeInMaude : CIM | state: parseFinished, mi: MI, AtS >
+ => < cafeInMaude : CIM | state: parsingModule, mi: MI, AtS > .
+
+ ***                            ***
+ ***          Previews          ***
+ ***                            ***
+ rl [askForFrom] :
+    < cafeInMaude : CIM | state: parsingModule, preparsed: (view H from ME to ME' is SMS OMS none endv) RDB,
+                          mi: MI, AtS >
+ => < cafeInMaude : CIM | state: waitingFrom, preparsed: (view H from ME to ME' is SMS OMS none endv) RDB,
+                          mi: MI, AtS >
+    showModule(MI, cafeInMaude, ME, true) .
+
+ rl [askForTo] :
+    showingModule(cafeInMaude, MI, FROM)
+    < cafeInMaude : CIM | state: waitingFrom, preparsed: (view H from ME to ME' is SMS OMS none endv) RDB,
+                          mi: MI, AtS >
+ => < cafeInMaude : CIM | state: waitingTo, preparsed: (view H from ME to ME' is SMS OMS none endv) RDB,
+                          mi: MI, fromModule: FROM, AtS >
+    showModule(MI, cafeInMaude, ME', true) .
+
+ crl [solveBubblesView] :
+     showingModule(cafeInMaude, MI, TO)
+     < cafeInMaude : CIM | state: waitingTo, preparsed: (view H from ME to ME' is SMS OMS none endv) RDB,
+                           mi: MI, fromModule: FROM, views: VIEWS, AtS >
+  => < cafeInMaude : CIM | state: parseFinished, preparsed: RDB, mi: MI, views: (VIEWS ; getName(V)), AtS >
+     insertView(MI, cafeInMaude, V)
+  if < V, QIL >  := parseBubblesView(view H from ME to ME' is SMS OMS none endv, FROM, TO)  .
+
+ ***                      ***
+ ***   No more premodules ***
+ ***                      ***
+ rl [premodulesFinished] :
+     < cafeInMaude : CIM | state: parsingModule, preparsed: mtRDB, AtS >
+  => < cafeInMaude : CIM | state: executeComm, preparsed: mtRDB, AtS > .
+
+ ***                        ***
+ ***          LOAD          ***
+ ***                        ***
+ crl [load] :
+     < cafeInMaude : CIM | state: executeComm, input: ('load_.['token[T]], TL), AtS >
+  => < cafeInMaude : CIM | state: loading, input: TL, AtS >
+     openFile(fileManager, cafeInMaude, S, "r")
+  if S := string(downQid(T)) .
+
+ rl [openedFile] :
+    openedFile(cafeInMaude, fileManager, FHIn)
+    < cafeInMaude : CIM | file: null, state: loading, AtS >
+ => < cafeInMaude : CIM | file: FHIn, state: loading, AtS >
+    getLine(FHIn, cafeInMaude) .
+
+ rl [readingModule] :
+    gotLine(cafeInMaude, FHIn, Text)
+    < cafeInMaude : CIM | file: FHIn, out: Read, state: loading, AtS >
+ => if Text == ""
+    then < cafeInMaude : CIM | file: FHIn, out: Read, state: loading, AtS >
+         closeFile(FHIn, cafeInMaude)
+    else < cafeInMaude : CIM | file: FHIn, out: (Read + transformLine(Text)),
+                         state: loading, AtS >
+         getLine(FHIn, cafeInMaude)
+    fi .
+
+ rl [closedFile] :
+    closedFile(cafeInMaude, FHIn)
+    < cafeInMaude : CIM | file: FHIn, state: loading, out: Read, AtS >
+ => < cafeInMaude : CIM | file: null, state: parseTextFileContents,
+                          out: transformText(Read), AtS > .
+
+ ***                                ***
+ ***         PARSING FILE           ***
+ ***                                ***
+
+ crl [parseTextFile] :
+     < cafeInMaude : CIM | out: Read, state: parseTextFileContents, input: IN, AtS >
+  => < cafeInMaude : CIM | out: "", state: executeComm, input: (IN, TL), AtS >
+  if QIL := tokenize(Read) /\
+     {T, Ty} := metaParse(GRAMMAR, QIL, '@Input@) /\
+     TL := extractTerms(T) .
+
+ crl [textFileNoParse] :
+     < cafeInMaude : CIM | out: Read, state: parseTextFileContents, AtS >
+  => < cafeInMaude : CIM | out: "", state: print&idle, AtS >
+     write(stdout, cafeInMaude, "No parse for file.\n")
+  if QIL := tokenize(Read) /\
+     noParse(N) := metaParse(GRAMMAR, QIL, '@Input@) .
+
+ crl [parseTextFile] :
+     < cafeInMaude : CIM | out: Read, state: parseTextFileContents, AtS >
+  => < cafeInMaude : CIM | out: "", AtS >
+  if QIL := tokenize(Read) /\
+     RP?:[ResultPair] := metaParse(GRAMMAR, QIL, '@Input@) [print RP?:[ResultPair]] .
+
+ ***                        ***
+ ***          QUIT          ***
+ ***                        ***
+ rl [quit] :
+    < cafeInMaude : CIM | state: executeComm, input: ('q.@Command@, TL), AtS >
+ => write(stdout, cafeInMaude, "Thanks for using CafeInMaude!\n") .
+
+ ***                           ***
+ ***          NO COMM          ***
+ ***                           ***
+
+ rl [emptyCommList] :
+    < cafeInMaude : CIM | state: executeComm, input: empty, AtS >
+ => < cafeInMaude : CIM | state: idle, input: empty, AtS >
+    getLine(stdin, cafeInMaude, "CafeInMaude> ") .
+
+ ***                           ***
+ *** meta-interpreters created ***
+ ***                           ***
+ crl [mis-created] :
+     createdInterpreter(cafeInMaude, interpreterManager, MI)
+     < cafeInMaude : CIM | state: init, uload: module(Q) LP, msorts: MS, AtS >
+  => < cafeInMaude : CIM | state: loading-UMI, mi: MI, uload: LP,
+                           msorts: (MS, getName(M) -> getSorts(M)), AtS >
+     insertModule(MI, cafeInMaude, M)
+  if M := upModule(Q, false) .
+
+ ***                          ***
+ *** Inserted module for user ***
+ ***                          ***
+ crl [uload-mod-mod] :
+     insertedModule(cafeInMaude, MI')
+     < cafeInMaude : CIM | state: loading-UMI, uload: module(Q) LP, mi: MI,
+                           msorts: MS, AtS >
+ =>  < cafeInMaude : CIM | state: loading-UMI, uload: LP, mi: MI,
+                           msorts: (MS, getName(M) -> getSorts(M)), AtS >
+     insertModule(MI, cafeInMaude, M)
+ if M := upModule(Q, false) .
+
+ rl [uload-mod-view] :
+    insertedModule(cafeInMaude, MI')
+    < cafeInMaude : CIM | state: loading-UMI, uload: view(Q) LP, mi: MI, AtS >
+ => < cafeInMaude : CIM | state: loading-UMI, uload: LP, mi: MI, AtS >
+    insertView(MI, cafeInMaude, upView(Q)) .
+
+ crl [uload-view-mod] :
+     insertedView(cafeInMaude, MI')
+     < cafeInMaude : CIM | state: loading-UMI, uload: module(Q) LP, mi: MI,
+                           msorts: MS, AtS >
+  => < cafeInMaude : CIM | state: loading-UMI, uload: LP, mi: MI,
+                           msorts: (MS, getName(M) -> getSorts(M)), AtS >
+     insertModule(MI, cafeInMaude, M)
+  if M := upModule(Q, false) .
+
+ rl [uload-view-view] :
+    insertedView(cafeInMaude, MI')
+    < cafeInMaude : CIM | state: loading-UMI, uload: view(Q) LP, mi: MI, AtS >
+ => < cafeInMaude : CIM | state: loading-UMI, uload: LP, mi: MI, AtS >
+    insertView(MI, cafeInMaude, upView(Q)) .
+
+ rl [uload-mod-finish] :
+    insertedModule(cafeInMaude, MI)
+    < cafeInMaude : CIM | state: loading-UMI, uload: nil, mi: MI, AtS >
+ => < cafeInMaude : CIM | state: idle, mi: MI, AtS >
+    getLine(stdin, cafeInMaude, "CafeInMaude> ") .
+
+ rl [uload-view-finish] :
+    insertedView(cafeInMaude, MI)
+    < cafeInMaude : CIM | state: loading-UMI, uload: nil, mi: MI, AtS >
+ => < cafeInMaude : CIM | state: idle, mi: MI, AtS >
+    getLine(stdin, cafeInMaude, "CafeInMaude> ") .
+
+ ***                                    ***
+ ***          PRINT & CONTINUE          ***
+ ***                                    ***
+
+ rl [print&idle] : wrote(cafeInMaude, stdout)
+    < cafeInMaude : CIM | state: print&idle, AtS >
+ => < cafeInMaude : CIM | state: idle, AtS >
+    getLine(stdin, cafeInMaude, "CafeInMaude> ") .
+
+ rl [print&idle] : wrote(cafeInMaude, stdout)
+    < cafeInMaude : CIM | state: write&parsingModule, AtS >
+ => < cafeInMaude : CIM | state: parsingModule, AtS > .
+
+ ***                                  ***
+ *** List of initial principal sorts. ***
+ ***                                  ***
+ op initialPrincipalSorts : -> SortMap .
+ eq initialPrincipalSorts = ('NAT |-> 'Nat) .
+
+ op initialParameterMap : -> ParameterMap .
+ eq initialParameterMap = ('3TUPLE |-> ('C1 :: 'TRIV, 'C2 :: 'TRIV, 'C3 :: 'TRIV)) .
+
+ ***                        ***
+ ***   List of modules for  ***
+ ***            user        ***
+ ***                        ***
+ op umod : -> List{Preload} .
+ eq umod = module('TRUTH-VALUE) module('BOOL-OPS) module('TRUTH) module('BOOL)
+           module('EXT-BOOL) module('NAT) module('INT) module('RAT) module('FLOAT)
+           module('STRING) module('CONVERSION) module('QID) module('TRIV)
+           view('Qid) module('3TUPLE) module('EQL) .
+
+ ***                        ***
+ ***          RUN           ***
+ ***                        ***
+ op run : -> Configuration [ctor] .
+ eq run =
+    <> < cafeInMaude : CIM | state: init, uload: umod, input: empty,
+                             file: null, out: "", tsm: ('TRIV -> 'Elt), hsm: empty,
+                             psorts: initialPrincipalSorts, msorts: empty,
+                             params: initialParameterMap, views: 'Qid,
+                             preparsed: mtRDB, scoreinfo: mtSIM >
+    createInterpreter(interpreterManager, cafeInMaude, none) .
+endm
+
+*** set print conceal on .
+*** print conceal module:_ .
+
+set print attribute on .
+set show advisories on .
+
+erew run .
+
+*** maude -allow-files cafeInMaude.maude

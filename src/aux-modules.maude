@@ -1,0 +1,544 @@
+view Oid from TRIV to CONFIGURATION is
+ sort Elt to Oid .
+endv
+
+view Module from TRIV to META-MODULE is
+ sort Elt to Module .
+endv
+
+view SortSet from TRIV to META-LEVEL is
+ sort Elt to SortSet .
+endv
+
+view ParameterDeclList from TRIV to META-LEVEL is
+ sort Elt to ParameterDeclList .
+endv
+
+fmod MAYBE{X :: TRIV} is
+ sort Maybe{X} .
+ subsort X$Elt < Maybe{X} .
+ op maybe : -> Maybe{X} [ctor] .
+endfm
+
+fmod PRELOAD is
+ pr QID .
+
+ sort Preload .
+
+ op module : Qid -> Preload [ctor] .
+ op view : Qid -> Preload [ctor] .
+endfm
+
+view Preload from TRIV to PRELOAD is
+ sort Elt to Preload .
+endv
+
+fmod PRELOAD-LIST is
+ pr LIST{Preload} .
+endfm
+
+fmod AUX-MODULE-OPS is
+ pr META-LEVEL .
+
+ vars SSDS SSDS' : SubsortDeclSet .
+ var  PDL : ParameterDeclList .
+ vars EqS EqS' : EquationSet .
+ vars ODS ODS' : OpDeclSet .
+ vars IL IL' : ImportList .
+ var  PL : ParameterList .
+ vars TL TL' : TermList .
+ vars SS SS' : SortSet .
+ vars RS RS' : RuleSet .
+ var  MAS : MembAxSet .
+ var  TyL : TypeList .
+ var  Ct : Constant .
+ var  M? : Module .
+ var  M : Module .
+ var  H : Header .
+ var  Ty : Type .
+ var  T : Term .
+ var  Q : Qid .
+
+ op nullHeader : -> Header .
+
+ op emptyFTheory : -> FModule .
+ eq emptyFTheory
+    = fth nullHeader is nil sorts none . none none none none endfth .
+
+ op emptySTheory : -> SModule .
+ eq emptySTheory
+    = th nullHeader is nil sorts none . none none none none none endth .
+
+ op setImports : Module ImportList -> Module .
+ eq setImports(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, IL')
+    = fmod H is IL' sorts SS . SSDS ODS MAS EqS endfm .
+ eq setImports(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, IL')
+    = mod H is IL' sorts SS . SSDS ODS MAS EqS RS endm .
+ eq setImports(fth H is IL sorts SS . SSDS ODS MAS EqS endfth, IL')
+    = fth H is IL' sorts SS . SSDS ODS MAS EqS endfth .
+ eq setImports(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, IL')
+    = th H is IL' sorts SS . SSDS ODS MAS EqS RS endth .
+
+ op setSorts : Module SortSet -> Module .
+ eq setSorts(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, SS')
+    = fmod H is IL sorts SS' . SSDS ODS MAS EqS endfm .
+ eq setSorts(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, SS')
+    = mod H is IL sorts SS' . SSDS ODS MAS EqS RS endm .
+ eq setSorts(fth H is IL sorts SS . SSDS ODS MAS EqS endfth, SS')
+    = fth H is IL sorts SS' . SSDS ODS MAS EqS endfth .
+ eq setSorts(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, SS')
+    = th H is IL sorts SS' . SSDS ODS MAS EqS RS endth .
+
+ op setSubsorts : Module SubsortDeclSet -> Module .
+ eq setSubsorts(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, SSDS')
+    = fmod H is IL sorts SS . SSDS' ODS MAS EqS endfm .
+ eq setSubsorts(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, SSDS')
+    = mod H is IL sorts SS . SSDS' ODS MAS EqS RS endm .
+ eq setSubsorts(fth H is IL sorts SS . SSDS ODS MAS EqS endfth, SSDS')
+    = fth H is IL sorts SS . SSDS' ODS MAS EqS endfth .
+ eq setSubsorts(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, SSDS')
+    = th H is IL sorts SS . SSDS' ODS MAS EqS RS endth .
+
+ op setOps : Module OpDeclSet -> Module .
+ eq setOps(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, ODS')
+    = fmod H is IL sorts SS . SSDS ODS' MAS EqS endfm .
+ eq setOps(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, ODS')
+    = mod H is IL sorts SS . SSDS ODS' MAS EqS RS endm .
+ eq setOps(fth H is IL sorts SS . SSDS ODS MAS EqS endfth, ODS')
+    = fth H is IL sorts SS . SSDS ODS' MAS EqS endfth .
+ eq setOps(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, ODS')
+    = th H is IL sorts SS . SSDS ODS' MAS EqS RS endth .
+
+ op setEqs : Module EquationSet -> Module .
+ eq setEqs(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, EqS')
+    = fmod H is IL sorts SS . SSDS ODS MAS EqS' endfm .
+ eq setEqs(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, EqS')
+    = mod H is IL sorts SS . SSDS ODS MAS EqS' RS endm .
+ eq setEqs(fth H is IL sorts SS . SSDS ODS MAS EqS endfth, EqS')
+    = fth H is IL sorts SS . SSDS ODS MAS EqS' endfth .
+ eq setEqs(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, EqS')
+    = th H is IL sorts SS . SSDS ODS MAS EqS' RS endth .
+
+ op setRls : Module RuleSet -> Module .
+ eq setRls(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, RS')
+    = fmod H is IL sorts SS . SSDS ODS MAS EqS endfm .
+ eq setRls(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, RS')
+    = mod H is IL sorts SS . SSDS ODS MAS EqS RS' endm .
+ eq setRls(fth H is IL sorts SS . SSDS ODS MAS EqS endfth, RS')
+    = fth H is IL sorts SS . SSDS ODS MAS EqS endfth .
+ eq setRls(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, RS')
+    = th H is IL sorts SS . SSDS ODS MAS EqS RS' endth .
+
+ op addImports : Module ImportList -> Module .
+ eq addImports(M, IL) = setImports(M, (getImports(M) IL)) .
+
+ op addSorts : Module SortSet -> Module .
+ eq addSorts(M, SS) = setSorts(M, getSorts(M) ; SS) .
+
+ op addSubsorts : Module SubsortDeclSet -> Module .
+ eq addSubsorts(M, SSDS) = setSubsorts(M, getSubsorts(M) SSDS) .
+
+ op addOps : Module OpDeclSet -> Module .
+ eq addOps(M, ODS) = setOps(M, getOps(M) ODS) .
+
+ op addEqs : Module EquationSet -> Module .
+ eq addEqs(M, EqS) = setEqs(M, getEqs(M) EqS) .
+
+ op addRls : Module RuleSet -> Module .
+ eq addRls(M, RS) = setRls(M, getRls(M) RS) .
+
+ op downQid : Term -> [Qid] [memo] .
+ eq downQid(Ct) = qid(substr(string(getName(Ct)), 1, length(string(getName(Ct))))) .
+
+ op downQidList : Term ~> QidList .
+ eq downQidList('nil.TypeList) = nil .
+ eq downQidList(('__[TL], TL')) = (downQidList(TL) downQidList(TL')) .
+ eq downQidList((Q, TL)) = (downQid(Q) downQidList(TL)) .
+ eq downQidList(empty) = nil .
+
+ op downQid : Term ~> Qid [memo] .
+ eq downQid(Ct) = qid(substr(string(getName(Ct)), 1, length(string(getName(Ct))))) .
+
+ op isSystem : Module -> Bool .
+ eq isSystem(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm) = true .
+ eq isSystem(th H is IL sorts SS . SSDS ODS MAS EqS RS endth) = true .
+ eq isSystem(M) = false [owise] .
+
+ op isATheory : [Module] -> Bool .
+ eq isATheory(fth Q is IL sorts SS . SSDS ODS MAS EqS endfth) = true .
+ eq isATheory(th Q is IL sorts SS . SSDS ODS MAS EqS RS endth) = true .
+ eq isATheory(emptyFTheory) = true .
+ eq isATheory(emptySTheory) = true .
+ eq isATheory(M?) = false [owise] .
+
+ op getPDL : Module ~> ParameterDeclList .
+ eq getPDL(fmod Q{PDL} is IL sorts SS . SSDS ODS MAS EqS endfm) = PDL .
+ eq getPDL(mod Q{PDL} is IL sorts SS . SSDS ODS MAS EqS RS endm) = PDL .
+
+
+ op predefinedCafeEqual : Module -> Module .
+ ceq predefinedCafeEqual(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm) =
+                         fmod H is IL' sorts SS . SSDS ODS MAS EqS endfm
+  if IL' := (IL protecting 'BOOL . protecting 'EQL .) .
+ ceq predefinedCafeEqual(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm) =
+                         mod H is IL' sorts SS . SSDS ODS MAS EqS RS endm
+  if IL' := (IL protecting 'BOOL . protecting 'EQL . protecting 'RWL .) .
+ ceq predefinedCafeEqual(fth H is IL sorts SS . SSDS ODS MAS EqS endfth) =
+                         fth H is IL' sorts SS . SSDS ODS MAS EqS endfth
+  if IL' := (IL protecting 'EQL .) .
+ ceq predefinedCafeEqual(th H is IL sorts SS . SSDS ODS MAS EqS RS endth) =
+                         th H is IL' sorts SS . SSDS ODS MAS EqS RS endth
+  if IL' := (IL protecting 'EQL . protecting 'RWL .) .
+ eq predefinedCafeEqual(M?) = M? [owise] .
+endfm
+
+fmod TERMSET is
+  protecting META-TERM .
+
+  sort TermSet .
+  subsort Term < TermSet .
+  op emptyTermSet : -> TermSet [ctor] .
+  op _|_ : TermSet TermSet -> TermSet
+    [ctor assoc comm id: emptyTermSet format (d n d d)] .
+  eq X:Term | X:Term = X:Term .
+
+  op _in_ : Term TermSet -> Bool .
+  eq T:Term in (T:Term | TS:TermSet) = true .
+  eq T:Term in TS:TermSet = false [owise] .
+
+  op TermSet : TermList -> TermSet .
+  eq TermSet(empty)
+   = emptyTermSet .
+  eq TermSet((T:Term,TL:TermList))
+   = T:Term | TermSet(TL:TermList) .
+
+endfm
+
+fmod PARSING-SORTS is
+ pr MAP{Qid, SortSet} * (op _|->_ to _->_, sort Map{Qid, SortSet} to TheorySortMap) .
+ pr MAP{Qid, Qid} * (sort Map{Qid, Qid} to SortMap, op undefined to undefinedQQ) .
+ pr TERMSET .
+ pr SCORE-INFO-MAP .
+ pr META-LEVEL .
+
+ sort BubbleParsing .
+ op <_,_,_,_> : Module Module VariableSet QidList -> BubbleParsing [ctor] .
+ op <_,_> : OpMappingSet QidList -> BubbleParsing [ctor] .
+ op <_,_> : TermList AttrSet -> BubbleParsing [ctor] .
+
+ sort ParseResult .
+ op <_,_> : ModuleExpression ResDatabase -> ParseResult [ctor] .
+ op <_,_> : ViewExpression ResDatabase -> ParseResult [ctor] .
+ op <_,_> : NeParameterList ResDatabase -> ParseResult [ctor] .
+
+
+ sort CafeParseResult .
+ op <_,_> : ResDatabase QidList -> CafeParseResult [ctor] .
+ op <_,_,_,_> : ResDatabase SortMap TheorySortMap QidList -> CafeParseResult [ctor] .
+ op <_,_,_,_> : PreModule SortSet QidList ResDatabase -> CafeParseResult [ctor] .
+
+ op <_|_|_> : ScoreInfoMap QidList QidList -> CafeParseResult [ctor] .
+ op <_|_|_|_> : ResDatabase ScoreInfoMap QidList QidList -> CafeParseResult [ctor] .
+
+ sorts PreModule PreOpen ResDatabase .
+ subsort PreModule PreOpen View < ResDatabase .
+
+ op preModule : Module TermSet -> PreModule [ctor] .
+ op preOpen : Module QidList TermSet TermList TermList -> PreOpen [ctor] .
+
+ op mtRDB : -> ResDatabase [ctor] .
+ op __ : ResDatabase ResDatabase -> ResDatabase [ctor assoc id: mtRDB] .
+
+ var  DB : ResDatabase .
+ var  V : View .
+ *** For duplicated views when parsing theory and module
+ eq V DB V = V DB .
+
+ sort OpenTraverse .
+ op <_,_,_,_> : QidList TermSet TermList TermList -> OpenTraverse [ctor] .
+endfm
+
+fmod PARSING-MODULE-AUXILIARY is
+  pr MAP{Qid, ParameterDeclList} * (sort Map{Qid, ParameterDeclList} to ParameterMap) .
+  pr AUX-MODULE-OPS .
+  pr PARSING-SORTS .
+  pr CONVERSION .
+
+ vars ME ME' : ModuleExpression .
+ vars TSM HSM : TheorySortMap .
+ var  PDL : ParameterDeclList .
+ vars TL TL' TL'' : TermList .
+ var  NPL : NeParameterList .
+ vars T T' T'' T''' : Term .
+ vars Q Q' QI QI' : Qid .
+ vars SS SS' : SortSet .
+ var  RS : RenamingSet .
+ var  QIL : QidList .
+ var  PSM : SortMap .
+ var  AtS : AttrSet .
+ var  S St : String .
+ var  V : Variable .
+ var  M : Module .
+ var  I : Import .
+ var  B : Bool .
+ var  N : Nat .
+
+ *** Simplification for ParameterMap
+ eq (Q |-> (nil).ParameterDeclList) = empty .
+
+ op isATheory : Qid TheorySortMap -> Bool .
+ eq isATheory(Q, (TSM, Q -> SS)) = true .
+ eq isATheory(Q, TSM) = false [owise] .
+
+ op changeTheoryByModule : Term Bool TheorySortMap -> ModuleExpression .
+ ceq changeTheoryByModule(Q[TL], B, TSM) = Q[TL']
+  if Q =/= 'token /\
+     TL' := changeTheoryByModule*(TL, B, TSM) .
+ ceq changeTheoryByModule('token[T], B, TSM) = T'
+  if not B /\
+     Q := downQid(T) /\
+     isATheory(Q, TSM) /\
+     Q' := qid(string(Q) + "-MODCAFE") /\
+     T' := 'token[upTerm(Q')] .
+ eq changeTheoryByModule(T, B, TSM) = T [owise] .
+
+ op changeTheoryByModule* : TermList Bool TheorySortMap -> TermList .
+ eq changeTheoryByModule*(empty, B, TSM) = empty .
+ eq changeTheoryByModule*((T, TL), B, TSM) = changeTheoryByModule(T, B, TSM),
+                                             changeTheoryByModule*(TL, B, TSM) .
+
+ op viewInSet : Qid SortSet -> Bool .
+ eq viewInSet(Q, Q ; SS) = true .
+ eq viewInSet(Q, SS) = false [owise] .
+
+ op addHiddenSort : TheorySortMap Qid SortSet -> TheorySortMap .
+ eq addHiddenSort((Q -> SS, HSM), Q, SS') = (Q -> (SS ; SS'), HSM) .
+ eq addHiddenSort(HSM, Q, SS) = Q -> SS, HSM [owise] .
+
+ op sort2sort : Term ~> Sort .
+ eq sort2sort('CafeToken[T]) = downQid(T) .
+ eq sort2sort('token[T]) = downQid(T) .
+
+ op sortViewId : ParameterDeclList Term -> Term .
+ ceq sortViewId(PDL, Q[T, TL]) = Q[T, TL]
+  if Q =/= '_`,_ or-else not usesSugar(T) .
+ eq sortViewId(PDL, Q[TL]) = sortViewIdAux(PDL, TL) .
+
+ op sortViewIdAux : ParameterDeclList TermList -> TermList .
+ eq sortViewIdAux(nil, TL) = empty .
+ ceq sortViewIdAux((Q :: ME, PDL), TL) = find(Q, TL), sortViewIdAux(PDL, TL)
+  if PDL == nil .
+ eq sortViewIdAux((Q :: ME, PDL), TL) = '_`,_[find(Q, TL),
+                                        sortViewIdAux(PDL, TL)] [owise] .
+
+ op usesSugar : Term -> Bool .
+ eq usesSugar('_<=_[TL]) = true .
+ eq usesSugar(T) = false [owise] .
+
+ op find : Qid TermList -> Term .
+ eq find(Q, ('_`,_[T, T'], TL)) = find(Q, (T, T', TL)) .
+ eq find(Q, ('_<=_['token[T], T'], TL)) = if Q == downQid(T)
+                                          then T'
+                                          else find(Q, TL)
+                                          fi .
+
+ op addBool : Term -> Term .
+ eq addBool(T) = if addsBool?(T)
+                 then T
+                 else '__['inc`(_`)['token[''BOOL.Qid]], T]
+                 fi .
+
+ op addsBool? : Term -> Bool .
+ eq addsBool?('__[TL]) = addsBool?*(TL) .
+ eq addsBool?('pr`(_`)[Q[''BOOL.Qid]]) = true .
+ eq addsBool?('protecting`(_`)[Q[''BOOL.Qid]]) = true .
+ eq addsBool?('inc`(_`)[Q[''BOOL.Qid]]) = true .
+ eq addsBool?('including`(_`)[Q[''BOOL.Qid]]) = true .
+ eq addsBool?('ex`(_`)[Q[''BOOL.Qid]]) = true .
+ eq addsBool?('extending`(_`)[Q[''BOOL.Qid]]) = true .
+ eq addsBool?('us`(_`)[Q[''BOOL.Qid]]) = true .
+ eq addsBool?('using`(_`)[Q[''BOOL.Qid]]) = true .
+ eq addsBool?(T) = false [owise] .
+
+ op addsBool?* : TermList -> Bool .
+ eq addsBool?*((T, TL)) = addsBool?(T) or addsBool?*(TL) .
+ eq addsBool?*(empty) = false .
+
+ op add2PrincipalMap : Qid Qid SortMap -> SortMap .
+ eq add2PrincipalMap(QI, QI', (QI |-> Q, PSM)) = QI |-> QI', PSM .
+ eq add2PrincipalMap(QI, QI', PSM) = QI |-> QI', PSM [owise] .
+
+ op opNameFromBubble : Term -> Qid .
+ ceq opNameFromBubble('neCafeTokenList[T]) = qid(S)
+  if QIL := downQidList(T) /\
+     S := qidlist2string(QIL) .
+
+ op qidlist2string : QidList -> String .
+ eq qidlist2string(nil) = "" .
+ eq qidlist2string(Q QIL) = string(Q) + qidlist2string(QIL) .
+
+ op _in_ : Qid SortSet -> Bool .
+ eq Q in (Q ; SS) = true .
+ eq Q in SS = false [owise] .
+
+ op _in_ : Qid TheorySortMap -> Bool .
+ eq Q in (Q -> SS, TSM) = true .
+ eq Q in TSM = false [owise] .
+
+ op getSort : Term ~> Term .
+ eq getSort('CafeToken[T]) = downQid(T) .
+
+ op getNewName : SortSet Nat -> Qid .
+ ceq getNewName(SS, N) = if Q in SS
+                         then getNewName(SS, s(N))
+                         else Q
+                         fi
+  if Q := createViewName(N) .
+
+ op createViewName : Nat -> Qid .
+ eq createViewName(N) = qid("OTF-VIEW" + string(N, 10)) .
+
+ op newName : TheorySortMap Qid -> Qid .
+ eq newName((Q -> SS, TSM), Q) = qid(string(Q) + "-MODCAFE") .
+ eq newName(TSM, Q) = Q [owise] .
+
+ op getSorts : TermList SortSet -> SortSet .
+ eq getSorts(empty, SS) = none .
+ eq getSorts('__[TL], SS) = getSorts(TL, SS) .
+ eq getSorts('_<_[TL], SS) = getSorts(TL, SS) .
+ eq getSorts(('__[TL], TL'), SS) = getSorts((TL, TL'), SS) .
+ ceq getSorts(('CafeToken[T], TL), SS) = getSorts(TL, SS)
+  if Q := downQid(T) /\
+     Q in SS .
+ ceq getSorts(('CafeToken[T], TL), SS) = Q ; getSorts(TL, SS)
+  if Q := downQid(T) /\
+     not (Q in SS) .
+
+ op createOps : Qid TermList TermList -> TermSet .
+ eq createOps(Q, '__[TL], TL') = createOps(Q, TL, TL') .
+ eq createOps(Q, (T, TL), TL') = (Q['neCafeTokenList[T], TL']) | createOps(Q, TL, TL') .
+ eq createOps(Q, empty, TL) = emptyTermSet .
+
+ op downTypeList : TermList -> TypeList .
+ eq downTypeList('__[TL]) = downTypeList(TL) .
+ eq downTypeList(('CafeToken[T], TL)) = downQid(T) downTypeList(TL) .
+ eq downTypeList(empty) = nil .
+
+ op downAttributes : Module TermList -> AttrSet .
+ eq downAttributes(M, '__[TL]) = downAttributes(M, TL) .
+ eq downAttributes(M, (T, TL)) = downAttribute(M, T) downAttributes(M, TL) .
+ eq downAttributes(M, empty) = none .
+
+ op downAttribute : Module Term -> AttrSet .
+ eq downAttribute(M, 'constr.@CafeAttr@) = ctor .
+ eq downAttribute(M, 'assoc.@CafeAttr@) = assoc .
+ eq downAttribute(M, 'associative.@CafeAttr@) = assoc .
+ eq downAttribute(M, 'comm.@CafeAttr@) = comm .
+ eq downAttribute(M, 'commutative.@CafeAttr@) = comm .
+ eq downAttribute(M, 'nonexec.@CafeAttr@) = nonexec .
+ eq downAttribute(M, ':nonexec.@CafeAttr@) = nonexec .
+ eq downAttribute(M, 'owise.@CafeAttr@) = owise .
+ eq downAttribute(M, 'idem.@CafeAttr@) = idem .
+ eq downAttribute(M, 'idempotent.@CafeAttr@) = idem .
+ eq downAttribute(M, 'l-assoc.@CafeAttr@) = gather('E 'e) .
+ eq downAttribute(M, 'r-assoc.@CafeAttr@) = gather('e 'E) .
+ ceq downAttribute(M, 'id:_['CafeBubble[T]]) = id(T')
+  if T' := getTerm(metaParse(M, downQidList(T), anyType)) .
+ ceq downAttribute(M, 'idr:_['CafeBubble[T]]) = right-id(T')
+  if T' := getTerm(metaParse(M, downQidList(T), anyType)) .
+ ceq downAttribute(M, 'prec:_['CafeToken[T]]) = prec(N)
+  if Q := downQid(T) /\
+     N := rat(string(Q), 10) .
+
+ op modifyImport : Import TheorySortMap -> Import .
+ ceq modifyImport(protecting ME ., TSM) = including ME .
+  if atLeastOneTheory(ME, TSM) .
+ ceq modifyImport(extending ME ., TSM) = including ME .
+  if atLeastOneTheory(ME, TSM) .
+ ceq modifyImport(extending ME ., TSM) = including ME .
+  if atLeastOneTheory(ME, TSM) .
+ eq modifyImport(I, TSM) = I [owise] .
+
+ op atLeastOneTheory : ModuleExpression TheorySortMap -> Bool .
+ eq atLeastOneTheory(Q, TSM) = Q in TSM .
+ eq atLeastOneTheory(ME + ME', TSM) = atLeastOneTheory(ME, TSM) or
+                                      atLeastOneTheory(ME', TSM) .
+ eq atLeastOneTheory(ME{NPL}, TSM) = getModuleExpressionName(ME) in TSM .
+ eq atLeastOneTheory(ME * (RS), TSM) = getModuleExpressionName(ME) in TSM .
+ eq atLeastOneTheory(ME, TSM) = false [owise] .
+
+ op getModuleExpressionName : ModuleExpression ~> Qid .
+ eq getModuleExpressionName(Q) = Q .
+ eq getModuleExpressionName(ME{NPL}) = getModuleExpressionName(ME) .
+ eq getModuleExpressionName(ME * (RS)) = getModuleExpressionName(ME) .
+
+ op createVars : TermList String -> VariableSet .
+ eq createVars('__[TL], S) = createVars(TL, S) .
+ eq createVars(empty, S) = none .
+ ceq createVars((T, TL), S) = V ; createVars(TL, S)
+  if Q := downQid(T) /\
+     V := qid(string(Q) + ":" + S) .
+
+ op rebuild : TermList -> Term .
+ eq rebuild(T) = T .
+ eq rebuild(TL) = '__[TL] .
+
+ op cafeEqAtS2maudeEqAts* : TermList -> BubbleParsing .
+ ceq cafeEqAtS2maudeEqAts*((TL, ''`{.Qid, ''owise.Qid, TL'', ''`}.Qid)) = < TL, owise AtS >
+  if AtS := getAts(TL'') .
+ ceq cafeEqAtS2maudeEqAts*((TL, ''`{.Qid, ''nonexec.Qid, TL'', ''`}.Qid)) = < TL, nonexec AtS >
+  if AtS := getAts(TL'') .
+ ceq cafeEqAtS2maudeEqAts*((TL, ''`{.Qid, ''metadata.Qid, TL'', ''`}.Qid)) = < TL, metadata(St) >
+  if St := metadataString(TL'') .
+ eq cafeEqAtS2maudeEqAts*(TL) = < TL, none > [owise] .
+
+ op getAts : TermList -> AttrSet .
+ eq getAts((''owise.Qid, TL'')) = owise .
+ eq getAts((''nonexec.Qid, TL'')) = nonexec .
+ ceq getAts((''metadata.Qid, TL'')) = metadata(St)
+  if St := metadataString(TL'') .
+ eq getAts(empty) = none .
+
+ op metadataString : TermList -> String .
+ eq metadataString(empty) = "" .
+ eq metadataString((T, TL)) = string(downQid(T)) + metadataString(TL) .
+
+ op errModName : -> QidList .
+ eq errModName = '\n '\r 'ERROR: '\o 'The 'module 'name 'is 'not 'a
+                'valid 'identifier. .
+
+ op paramThWarn : -> QidList .
+ eq paramThWarn = '\n '\r 'Warning: '\o 'Parameterized 'theories 'are 'not 'allowed
+                  'in 'Maude. '\n 'The 'module 'was 'introduced 'with '\g 'tight '\o
+                  'semantics. '\n .
+endfm
+
+fmod ATTRIBUTE-UPDATING is
+  pr PARSING-MODULE-AUXILIARY .
+
+  var TSM : TheorySortMap .
+  var M : Module .
+
+  op updateTSM : Module TheorySortMap -> TheorySortMap .
+  ceq updateTSM(M, TSM) = TSM, getName(M) -> getSorts(M)
+   if isATheory(M) .
+  eq updateTSM(M, TSM) = TSM [owise] .
+endfm
+
+fmod OPEN-CLOSE-AUX is
+ pr PARSING-MODULE-AUXILIARY .
+
+ var  VS : VariableSet .
+ var  TL : TermList .
+ var  M : Module .
+ vars T T' : Term .
+
+ op parseRedTerms : Module TermList VariableSet -> TermList .
+ eq parseRedTerms(M, (T, TL), VS) = parseRedTerm(M, T, VS), parseRedTerms(M, TL, VS) .
+ eq parseRedTerms(M, empty, VS) = empty .
+
+ op parseRedTerm : Module Term VariableSet -> TermList .
+ ceq parseRedTerm(M, 'red_.['CafeBubble[T]], VS) = T'
+  if T' := getTerm(metaParse(M, VS, downQidList(T), anyType)) .
+ eq parseRedTerm(M, T, VS) = empty [owise] .
+endfm

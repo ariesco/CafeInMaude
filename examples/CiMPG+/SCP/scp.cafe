@@ -88,13 +88,13 @@ mod! SCP {
   pr(BCELL)
   pr(PSEQ)
   [Sys]
+  op init : -> Sys {constr}
+  op snd1 : Sys -> Sys {constr}
+  op rec1 : Sys -> Sys {constr}
+  op snd2 : Sys -> Sys {constr}
+  op rec2 : Sys -> Sys {constr}
   op drp1 : Sys -> Sys {constr}
   op drp2 : Sys -> Sys {constr}
-  op init : -> Sys {constr}
-  op rec1 : Sys -> Sys {constr}
-  op rec2 : Sys -> Sys {constr}
-  op snd1 : Sys -> Sys {constr}
-  op snd2 : Sys -> Sys {constr}
   op sb : Sys -> Bit
   op p2s : Sys -> Packet
   op rb : Sys -> Bit
