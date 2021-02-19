@@ -28,7 +28,9 @@ The code of 'CafeInMaude' is contained in a GIT repository on GitHub, whose URL 
 https://github.com/ariesco/CafeInMaude. To get a copy of the repository you only
 have to write in your Linux/MacOS console:
 
+```
     $ git clone https://github.com/ariesco/CafeInMaude
+```
 
 This will create a CafeInMaude folder containing the source code of the tool as well as
 several examples.
@@ -38,11 +40,15 @@ Using the tool
 
 1. The tool is started by just loading the **CafeInMaude.maude** file into the Maude system:
 
+```
     $ maude src/CafeInMaude.maude
+```
 
 Once the tool is started, the **load** command can be used for loading files:
 
+```
     $ CafeInMaude> load examples/abp.cafe .
+```
 
 The CafeInMaude Proof Assistant (CiMPA)
 ---------------------------------------
