@@ -40,6 +40,8 @@ mod! PAIR(FE :: TRIV,SE :: TRIV) {
   -- ceq (P1 = P2) = true if 1st(P1) = 1st(P2) and 2nd(P1) = 2nd(P2) .
 }
 
+
+
 mod! PBPAIR principal-sort PBPair {
   pr(PAIR(PACKET,BIT) * {sort Pair -> PBPair})
 }
@@ -244,7 +246,7 @@ mod* ABP {
       implies (rb(S) = B) .
   eq inv6(S,P,B)
     = ((not (dc(S) = e)) and rb(S) = 2nd(hd(dc(S))) and < P,B > \in dc(S))
-      implies < P,B > = hd(dc(S)) .
+      implies (< P,B > = hd(dc(S))) .
   eq inv7(S,P,B)
     = ((not (dc(S) = e)) and < P,B > \in dc(S) and rb(S) = B)
       implies (p2s(S) = P and sb(S) = B) .

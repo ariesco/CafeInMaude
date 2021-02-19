@@ -244,7 +244,7 @@ mod* ABP {
       implies (rb(S) = B) .
   eq inv6(S,P,B)
     = ((not (dc(S) = e)) and rb(S) = 2nd(hd(dc(S))) and < P,B > \in dc(S))
-      implies < P,B > = hd(dc(S)) .
+      implies (< P,B > = hd(dc(S))) .
   eq inv7(S,P,B)
     = ((not (dc(S) = e)) and < P,B > \in dc(S) and rb(S) = B)
       implies (p2s(S) = P and sb(S) = B) .
