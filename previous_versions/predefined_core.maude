@@ -1,0 +1,131 @@
+fmod EQL is
+  op _=_ : Universal Universal -> Bool [comm poly(1 2) prec 54] .
+
+  eq (true = false) = false .
+  eq (B:Bool = B:Bool) = true .
+endfm
+
+fmod RWL is
+  pr NAT .
+
+  sort NzNat* .
+  subsort NzNat < NzNat* .
+
+  op * : -> NzNat* [ctor] .
+
+  op _`{_`} : Bool Universal ~> Bool [poly(2) strat(0) prec 61] .
+
+  op _==>_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 55] .
+  op _=`(_`,_`)=>*_ : Universal NzNat* NzNat* Universal -> Bool
+                                         [poly(1 4) strat(0) prec 55] .
+  op _=`(_`,_`)=>+_ : Universal NzNat* NzNat* Universal -> Bool
+                                         [poly(1 4) strat(0) prec 55] .
+  op _=`(_`,_`)=>!_ : Universal NzNat* NzNat* Universal -> Bool
+                                         [poly(1 4) strat(0) prec 55] .
+  op _=`(_`,_`)=>*_suchThat_ : Universal NzNat* NzNat* Universal Bool -> Bool
+                                         [poly(1 4) strat(0) prec 55] .
+  op _=`(_`,_`)=>+_suchThat_ : Universal NzNat* NzNat* Universal Bool -> Bool
+                                         [poly(1 4) strat(0) prec 55] .
+  op _=`(_`,_`)=>!_suchThat_ : Universal NzNat* NzNat* Universal Bool -> Bool
+                                         [poly(1 4) strat(0) prec 55] .
+  op _=`(_`,_`)=>*_withStateEq_ : Universal NzNat* NzNat* Universal Bool -> Bool
+                                         [poly(1 4) strat(0) prec 55] .
+  op _=`(_`,_`)=>+_withStateEq_ : Universal NzNat* NzNat* Universal Bool -> Bool
+                                         [poly(1 4) strat(0) prec 55] .
+  op _=`(_`,_`)=>!_withStateEq_ : Universal NzNat* NzNat* Universal Bool -> Bool
+                                         [poly(1 4) strat(0) prec 55] .
+  op _==>*_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 55] .
+  op _==>+_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 55] .
+  op _==>!_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 55] .
+  op _==>1_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 55] .
+  op _==>*_withStateEq_ : Universal Universal Bool -> Bool
+                                         [poly(1 2) strat(0) prec 55] .
+  op _==>+_withStateEq_ : Universal Universal Bool -> Bool
+                                         [poly(1 2) strat(0) prec 55] .
+  op _==>!_withStateEq_ : Universal Universal Bool -> Bool
+                                         [poly(1 2) strat(0) prec 55] .
+  op _==>1_withStateEq_ : Universal Universal Bool -> Bool
+                                         [poly(1 2) strat(0) prec 55] .
+  op _==>*_suchThat_ : Universal Universal Bool -> Bool
+                                         [poly(1 2) strat(0) prec 55] .
+  op _==>+_suchThat_ : Universal Universal Bool -> Bool
+                                         [poly(1 2) strat(0) prec 55] .
+  op _==>!_suchThat_ : Universal Universal Bool -> Bool
+                                         [poly(1 2) strat(0) prec 55] .
+  op _==>1_suchThat_ : Universal Universal Bool -> Bool
+                                         [poly(1 2) strat(0) prec 55] .
+  op _==>*_suchThat_withStateEq_ : Universal Universal Bool Bool -> Bool
+                                         [poly(1 2) strat(0) prec 55] .
+  op _==>1_suchThat_withStateEq_ : Universal Universal Bool Bool -> Bool
+                                         [poly(1 2) strat(0) prec 55] .
+  op _==>!_suchThat_withStateEq_ : Universal Universal Bool Bool -> Bool
+                                         [poly(1 2) strat(0) prec 55] .
+  op _==>+_suchThat_withStateEq_ : Universal Universal Bool Bool -> Bool
+                                         [poly(1 2) strat(0) prec 55] .
+  op _=`(_`,_`)=>*_suchThat_withStateEq_ : Universal NzNat* NzNat* Universal Bool Bool -> Bool
+                                         [poly(1 4) strat(0) prec 55] .
+  op _=`(_`,_`)=>1_suchThat_withStateEq_ : Universal NzNat* NzNat* Universal Bool Bool -> Bool
+                                         [poly(1 4) strat(0) prec 55] .
+  op _=`(_`,_`)=>+_suchThat_withStateEq_ : Universal NzNat* NzNat* Universal Bool Bool -> Bool
+                                         [poly(1 4) strat(0) prec 55] .
+  op _=`(_`,_`)=>!_suchThat_withStateEq_ : Universal NzNat* NzNat* Universal Bool Bool -> Bool
+                                         [poly(1 4) strat(0) prec 55] .
+  op _=`(`,_`)=>1_ : Universal NzNat* Universal -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(`,_`)=>*_ : Universal NzNat* Universal -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(`,_`)=>+_ : Universal NzNat* Universal -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(`,_`)=>!_ : Universal NzNat* Universal -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(`,_`)=>*_withStateEq_ : Universal NzNat* Universal Bool -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(`,_`)=>+_withStateEq_ : Universal NzNat* Universal Bool -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(`,_`)=>!_withStateEq_ : Universal NzNat* Universal Bool -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(`,_`)=>*_suchThat_ : Universal NzNat* Universal Bool -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(`,_`)=>+_suchThat_ : Universal NzNat* Universal Bool -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(`,_`)=>!_suchThat_ : Universal NzNat* Universal Bool -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(`,_`)=>*_suchThat_withStateEq_ : Universal NzNat* Universal Bool Bool -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(`,_`)=>1_suchThat_withStateEq_ : Universal NzNat* Universal Bool Bool -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(`,_`)=>+_suchThat_withStateEq_ : Universal NzNat* Universal Bool Bool -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(`,_`)=>!_suchThat_withStateEq_ : Universal NzNat* Universal Bool Bool -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(_`)=>*_ : Universal NzNat* Universal -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(_`)=>+_ : Universal NzNat* Universal -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(_`)=>!_ : Universal NzNat* Universal -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(_`)=>*_withStateEq_ : Universal NzNat* Universal Bool -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(_`)=>+_withStateEq_ : Universal NzNat* Universal Bool -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(_`)=>!_withStateEq_ : Universal NzNat* Universal Bool -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(_`)=>*_suchThat_ : Universal NzNat* Universal Bool -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(_`)=>+_suchThat_ : Universal NzNat* Universal Bool -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(_`)=>!_suchThat_ : Universal NzNat* Universal Bool -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(_`)=>*_suchThat_withStateEq_ : Universal NzNat* Universal Bool Bool -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(_`)=>+_suchThat_withStateEq_ : Universal NzNat* Universal Bool Bool -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  op _=`(_`)=>!_suchThat_withStateEq_ : Universal NzNat* Universal Bool Bool -> Bool
+                                         [poly(1 3) strat(0) prec 55] .
+  *** Different syntax with info
+  op _=`(_`,_`)=>+_if_suchThat_ : Universal NzNat* NzNat* Universal Bool Bool
+                                       -> Bool [poly(1 4) strat(0) prec 55] .
+
+  *** Standard rule
+  *** op _=>_ : Universal Universal -> Bool [poly(1 2) strat(0) prec 55] .
+endfm
