@@ -6,7 +6,7 @@ mod! LABELC {
 
 mod! LABELP {
   [LabelP]
-  ops idlep gotval updated : -> LabelP
+  ops idlep gotval updated : -> LabelP {constr}
   eq (idlep = gotval) = false .
   eq (idlep = updated) = false .
   eq (gotval = updated) = false .
@@ -18,7 +18,7 @@ mod* CLIENT {
 
 mod* VALUE {
   [Value]
-  op mv : -> Value .
+  op mv : -> Value {constr}
   op _<=_ : Value Value -> Bool .
   var V : Value
   eq (V <= V) = true .
@@ -49,10 +49,10 @@ mod* CLOUD {
   vars I J : Client .
   --
   -- A new value is generated based on a system state and a client.
-  -- 
+  --
   op new : Sys Client -> Value
   --
-  -- init 
+  -- init
   eq statusc(init) = idlec .
   eq statusp(init,I) = idlep .
   --
