@@ -1,0 +1,35 @@
+open INV .
+  :id(proofMCS)
+
+  ops p q r : -> Pid .
+
+***(
+  red mutex(S:Sys,p,q) .
+  red inv1(S:Sys,p,q) .
+  red inv2(S:Sys,p,q) .
+  red inv3(S:Sys,p) .
+  red inv4(S:Sys,p) .
+  red inv5(S:Sys,p,q) .
+  red inv6(S:Sys,p,q) .
+  red inv7(S:Sys,p,q) .
+)
+
+ op S#Sys : -> Sys .
+ ops p@Pid P#Pid : -> Pid .
+ red inv4(S#Sys, p@Pid) implies (inv4(S#Sys, p@Pid) implies inv4(chglk(S#Sys,P#Pid),p@Pid)) .
+close
+
+open INV .
+  :infer(proofMCS)
+close
+
+***(Suggested configuration:
+  eq backtrackLevels = 6 .
+  eq numInstVars = 2 .
+  eq extraImpLevels = 1 .
+)
+
+***(
+ red inv4(S#Sys, P#Pid) implies (inv4(S#Sys, p@Pid) implies inv4(chglk(S#Sys,P#Pid),p@Pid)) .
+)
+

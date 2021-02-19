@@ -31,14 +31,13 @@ mod* CLOUD {
   pr(CLIENT)
   pr(VALUE)
   [Sys]
-  -- transitions
-  op getval : Sys Client -> Sys  {constr}
-  op gotoidle : Sys Client -> Sys {constr}
   -- initial states
   op init : -> Sys {constr}
   -- transitions
   op modval : Sys Client -> Sys {constr}
+  op getval : Sys Client -> Sys {constr}
   op update : Sys Client -> Sys {constr}
+  op gotoidle : Sys Client -> Sys {constr}
   -- observers
   op statusc : Sys -> LabelC
   op valc : Sys -> Value
