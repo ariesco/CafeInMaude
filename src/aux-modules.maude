@@ -542,3 +542,18 @@ fmod OPEN-CLOSE-AUX is
   if T' := getTerm(metaParse(M, VS, downQidList(T), anyType)) .
  eq parseRedTerm(M, T, VS) = empty [owise] .
 endfm
+
+fmod COMMAND-PARSING is
+ pr META-LEVEL .
+
+ var  TL : TermList .
+ var  T : Term .
+
+ op extractTerms : Term -> TermList .
+ eq extractTerms('__[TL]) = extractTerms*(TL) .
+ eq extractTerms(T) = T [owise] .
+
+ op extractTerms* : TermList -> TermList .
+ eq extractTerms*(empty) = empty .
+ eq extractTerms*((T, TL)) = extractTerms(T), extractTerms*(TL) .
+endfm

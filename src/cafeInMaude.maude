@@ -14,21 +14,6 @@ load cimpg_defs.maude
 load module_parser.maude
 load open_close_parsing.maude
 
-fmod COMMAND-PARSING is
- pr META-LEVEL .
-
- var  TL : TermList .
- var  T : Term .
-
- op extractTerms : Term -> TermList .
- eq extractTerms('__[TL]) = extractTerms*(TL) .
- eq extractTerms(T) = T [owise] .
-
- op extractTerms* : TermList -> TermList .
- eq extractTerms*(empty) = empty .
- eq extractTerms*((T, TL)) = extractTerms(T), extractTerms*(TL) .
-endfm
-
 mod MTP is
  pr (MAYBE * (op maybe to null)){Oid} .
  pr ATTRIBUTE-UPDATING .
@@ -397,6 +382,13 @@ mod MTP is
  => < cafeInMaude : CIM | file: FHIn, state: loading, AtS >
     getLine(FHIn, cafeInMaude) .
 
+ crl [fileError] :
+     fileError(cafeInMaude, fileManager, Text)
+     < cafeInMaude : CIM | state: loading, AtS >
+  => < cafeInMaude : CIM | state: print&idle, AtS >
+     write(stdout, cafeInMaude, S)
+  if S := "\nError: " + Text + "\n\n" .
+
  rl [readingModule] :
     gotLine(cafeInMaude, FHIn, Text)
     < cafeInMaude : CIM | file: FHIn, out: Read, state: loading, AtS >
@@ -514,7 +506,8 @@ mod MTP is
  ***          PRINT & CONTINUE          ***
  ***                                    ***
 
- rl [print&idle] : wrote(cafeInMaude, stdout)
+ rl [print&idle] :
+    wrote(cafeInMaude, stdout)
     < cafeInMaude : CIM | state: print&idle, AtS >
  => < cafeInMaude : CIM | state: idle, AtS >
     getLine(stdin, cafeInMaude, "CafeInMaude> ") .
