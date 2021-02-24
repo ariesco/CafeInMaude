@@ -3,63 +3,57 @@ fmod OPEN-CLOSE-PARSER is
  pr OPEN-CLOSE-AUX .
  pr CafePARSER .
 
-
  vars M M' M'' M''' M1 M2 M3 TOP TOP' FLAT FLAT' : Module .
- vars T T' T'' T''' T1 T2 T3 T4 T5 T6 T7 TP TI : Term .
- vars TL TL' TL'' TLR TL1 TL2 TL3 : TermList .
- vars STR STR' S S' S'' S''' St St' St'' : String .
+ vars PSM SM VM : SortMap . **** PSM: Principal Sort Map
+ vars T T' T'' T''' T1 T2 T3 T4 T5 T6 T7 TP : Term .
  vars PrL PrL' PrL'' PrL1 PrL2 : ProofTreeList .
- vars F Q Q' Q'' Q''' QI QI' ID CMD : Qid .
- vars TSM MSS : TheorySortMap .
+ vars STR STR' S S' S'' S''' St St' : String .
+ vars TL TL' TL'' TLR TL1 TL2 : TermList .
  vars SIS SIS' SIS1 SIS2 : ScoreInfoSet .
- vars PSM SM SM' VM : SortMap . **** PSM: Principal Sort Map
+ vars F Q Q' Q'' QI QI' ID CMD : Qid .
  vars QIL QIL' QIL'' QILR : QidList .
- vars DB DB' DB'' DB3 : ResDatabase .
- vars ODS ODS' : OpDeclSet .
- var  T? : [Term] .
- vars V V' : Variable .
- vars C C' : Constant .
- vars Ty Ty1 Ty2 : Type .
- vars N N' N'' INDENT : Nat .
- vars QS QS' : QidSet .
  vars ST ST' ST'' : SharingTable .
  vars PO PO' PO'' : ProofOrder .
+ vars SIM SIM' : ScoreInfoMap .
+ vars TSM MSS : TheorySortMap .
  vars EqS EqS' : EquationSet .
  var  SSDS : SubsortDeclSet .
- vars SS SS' SSV : SortSet .
- vars CND COND : Condition .
- vars MACS MACS' : Macros .
- vars IL IL' : ImportList .
- vars AtS AtS' : AttrSet .
- vars Srt Srt' : Sort .
- var  MAS : MembAxSet .
- var  M? : [Module] .
- var  RS : RuleSet .
- var  OD : OpDecl .
- var  H : Header .
- var  I : Import .
- vars G G' G'' : Goal .
- var  TyL : TypeList .
- vars SIM SIM' : ScoreInfoMap .
  vars B B' CURR PRVN : Bool .
- vars P P' P'' : ProofTree .
- vars Eq Eq' : Equation .
- vars NL NL' : NatList .
- var  SR : SearchRes .
- vars CS CS' : ConsSub .
- var  ML : MList .
- vars ME ME' : ModuleExpression .
- vars TrS TrS' : TermSet .
  vars MLb MLb' : MacroLabel .
- var  SB : Substitution .
- var  SISP : SISPair .
- var  IPL : ImpPairList .
- var  Ren : Renaming .
- vars PM PM' : PreModule .
- var  PMAP : ParameterMap .
- var  PDL : ParameterDeclList .
- vars VS VS' : VariableSet .
  vars OT OT' : OpenTraverse .
+ var  ME : ModuleExpression .
+ vars P P' P'' : ProofTree .
+ vars VS VS' : VariableSet .
+ vars CND COND : Condition .
+ vars ODS ODS' : OpDeclSet .
+ vars MACS MACS' : Macros .
+ var  PMAP : ParameterMap .
+ vars TrS TrS' : TermSet .
+ vars AtS AtS' : AttrSet .
+ vars Eq Eq' : Equation .
+ var  IPL : ImpPairList .
+ var  SB : Substitution .
+ vars Ty Ty1 Ty2 : Type .
+ vars N N' INDENT : Nat .
+ var  DB : ResDatabase .
+ vars CS CS' : ConsSub .
+ vars NL NL' : NatList .
+ vars SS SSV : SortSet .
+ var  IL : ImportList .
+ vars Srt Srt' : Sort .
+ vars G G' G'' : Goal .
+ var  MAS : MembAxSet .
+ vars V V' : Variable .
+ vars C C' : Constant .
+ vars QS QS' : QidSet .
+ var  SR : SearchRes .
+ var  SISP : SISPair .
+ var  TyL : TypeList .
+ var  RS : RuleSet .
+ var  T? : [Term] .
+ var  OD : OpDecl .
+ var  ML : MList .
+ var  H : Header .
 
 
  op openCloseModName : -> Qid .
