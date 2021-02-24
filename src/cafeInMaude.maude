@@ -13,19 +13,16 @@ load citp_aux.maude
 load cimpg_defs.maude
 load module_parser.maude
 load open_close_parsing.maude
+load io.maude
 
 mod MTP is
  pr (MAYBE * (op maybe to null)){Oid} .
- pr ATTRIBUTE-UPDATING .
- pr OPEN-CLOSE-PARSER .
  inc META-INTERPRETER .
- pr COMMAND-PARSING .
  pr META-CIM-SIGN .
- pr PRELOAD-LIST .
- inc STD-STREAM .
  pr PREPARSING .
+ pr PARSER-IO .
+ pr CIMPA-IO .
  pr LEXICAL .
- inc FILE .
 
  vars TSM TSM' HSM HSM' MS : TheorySortMap .
  vars M M' M'' TOP FLAT FROM TO : Module .
@@ -55,17 +52,12 @@ mod MTP is
  *** For testing
  var CPR : [CafeParseResult] .
 
- sort State .
- *** Initial state, meta-interpreter for parsing and  is created.
- op init : -> State [ctor] .
  *** Loading modules required by the meta-interpreter for parsing.
  op loading-UMI : -> State [ctor] .
  *** Waiting for commands.
  op idle : -> State [ctor] .
  *** For printing and waiting for more input.
  op print&idle : -> State [ctor] .
- *** Executing commands.
- op executeComm : -> State [ctor] .
  *** Loading file.
  op loading : -> State [ctor] .
  *** The text file has been completely read and now it has to be parsed.
@@ -91,13 +83,6 @@ mod MTP is
  *** Write result from open-close environments
  op write&parsingModule : -> State [ctor] .
 
- op foo : -> State [ctor] .
-
-
- *** Object and class definition
- op cafeInMaude : -> Oid [ctor] .
- op CIM : -> Cid [ctor] .
-
  ***            ***
  *** Attributes ***
  ***            ***
@@ -106,36 +91,18 @@ mod MTP is
  op pload:_ : List{Preload} -> Attribute [ctor gather (&)] .
  *** Predefined modules for the user
  op uload:_ : List{Preload} -> Attribute [ctor gather (&)] .
- *** Current state
- op state:_ : State -> Attribute [ctor] .
  *** Meta-interpreter with user information.
  op mi:_ : Oid -> Attribute [ctor] .
- *** List of
- op input:_ : TermList -> Attribute [ctor gather (&)] .
  *** Text file being read
  op file:_ : Maybe{Oid} -> Attribute [ctor] .
  *** Text file read thus far
  op out:_ : String -> Attribute [ctor] .
- *** Mapping between theories and sorts
- op tsm:_ : TheorySortMap -> Attribute [ctor gather (&)] .
- *** Mapping between modules and hidden sorts
- op hsm:_ : TheorySortMap -> Attribute [ctor gather (&)] .
- *** Mapping for principal sorts
- op psorts:_ : SortMap -> Attribute [ctor gather (&)] .
- *** Mapping from module name to parameters
- op params:_ : ParameterMap -> Attribute [ctor gather (&)] .
- *** Mapping from
- op msorts:_ : TheorySortMap -> Attribute [ctor gather (&)] .
- *** Set of views
- op views:_ : SortSet -> Attribute [ctor gather (&)] .
  *** List of preparsed modules and views.
  op preparsed:_ : ResDatabase -> Attribute [ctor gather (&)] .
  *** Module "from" for view.
  op fromModule:_ : Module -> Attribute [ctor gather (&)] .
  *** Module "from" for view.
  op topModule:_ : Module -> Attribute [ctor gather (&)] .
- ***
- op scoreinfo:_ : ScoreInfoMap -> Attribute [ctor gather (&)] .
 
  ***                           ***
  ***       User command        ***
@@ -430,17 +397,9 @@ mod MTP is
   if QIL := tokenize(Read) /\
      RP?:[ResultPair] := metaParse(GRAMMAR, QIL, '@Input@) [print RP?:[ResultPair]] .
 
- ***                        ***
- ***          QUIT          ***
- ***                        ***
- rl [quit] :
-    < cafeInMaude : CIM | state: executeComm, input: ('q.@Command@, TL), AtS >
- => write(stdout, cafeInMaude, "Thanks for using CafeInMaude!\n") .
-
  ***                           ***
  ***          NO COMM          ***
  ***                           ***
-
  rl [emptyCommList] :
     < cafeInMaude : CIM | state: executeComm, input: empty, AtS >
  => < cafeInMaude : CIM | state: idle, input: empty, AtS >
@@ -516,35 +475,13 @@ mod MTP is
     < cafeInMaude : CIM | state: write&parsingModule, AtS >
  => < cafeInMaude : CIM | state: parsingModule, AtS > .
 
- ***                                  ***
- *** List of initial principal sorts. ***
- ***                                  ***
- op initialPrincipalSorts : -> SortMap .
- eq initialPrincipalSorts = ('NAT |-> 'Nat) .
-
- op initialParameterMap : -> ParameterMap .
- eq initialParameterMap = ('3TUPLE |-> ('C1 :: 'TRIV, 'C2 :: 'TRIV, 'C3 :: 'TRIV)) .
-
- ***                        ***
- ***   List of modules for  ***
- ***            user        ***
- ***                        ***
- op umod : -> List{Preload} .
- eq umod = module('TRUTH-VALUE) module('BOOL-OPS) module('TRUTH) module('BOOL)
-           module('EXT-BOOL) module('NAT) module('INT) module('RAT) module('FLOAT)
-           module('STRING) module('CONVERSION) module('QID) module('TRIV)
-           view('Qid) module('3TUPLE) module('EQL) .
-
  ***                        ***
  ***          RUN           ***
  ***                        ***
  op run : -> Configuration [ctor] .
  eq run =
-    <> < cafeInMaude : CIM | state: init, uload: umod, input: empty,
-                             file: null, out: "", tsm: ('TRIV -> 'Elt), hsm: empty,
-                             psorts: initialPrincipalSorts, msorts: empty,
-                             params: initialParameterMap, views: 'Qid,
-                             preparsed: mtRDB, scoreinfo: mtSIM >
+    <> < cafeInMaude : CIM | initAtS, uload: umod, file: null, out: "",
+                             preparsed: mtRDB, initParsing-AtS, initCiMPA-AtS >
     createInterpreter(interpreterManager, cafeInMaude, none) .
 endm
 

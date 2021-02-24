@@ -1,0 +1,134 @@
+mod IO is
+ pr COMMAND-PARSING .
+ inc STD-STREAM .
+ inc FILE .
+
+ var AtS : AttributeSet .
+ var TL : TermList .
+
+ sort State .
+
+ *** Initial state, meta-interpreter for parsing is created.
+ op init : -> State [ctor] .
+ *** Executing commands.
+ op executeComm : -> State [ctor] .
+
+ ***            ***
+ *** Attributes ***
+ ***            ***
+
+ *** List of parsed inputs
+ op input:_ : TermList -> Attribute [ctor gather (&)] .
+ *** Current state
+ op state:_ : State -> Attribute [ctor] .
+ *** Current module
+ op current:_ : Module -> Attribute [ctor] .
+
+ ***           ***
+ *** CID & OID ***
+ ***           ***
+
+ *** Object and class definition
+ op cafeInMaude : -> Oid [ctor] .
+ op CIM : -> Cid [ctor] .
+
+ ***                              ***
+ *** Initial value for attributes ***
+ ***                              ***
+ op initAtS : -> AttributeSet .
+ eq initAtS = state: init, input: empty, current: upModule('NAT, true) .
+
+ ***                        ***
+ ***          QUIT          ***
+ ***                        ***
+ rl [quit] :
+    < cafeInMaude : CIM | state: executeComm, input: ('q.@Command@, TL), AtS >
+ => write(stdout, cafeInMaude, "Thanks for using CafeInMaude!\n") .
+endm
+
+mod PARSER-IO is
+ pr ATTRIBUTE-UPDATING .
+ pr PRELOAD-LIST .
+ pr IO .
+
+ ***            ***
+ *** Attributes ***
+ ***            ***
+
+ *** Mapping between theories and sorts
+ op tsm:_ : TheorySortMap -> Attribute [ctor gather (&)] .
+ *** Mapping between modules and hidden sorts
+ op hsm:_ : TheorySortMap -> Attribute [ctor gather (&)] .
+ *** Mapping for principal sorts
+ op psorts:_ : SortMap -> Attribute [ctor gather (&)] .
+ *** Mapping from module name to parameters
+ op params:_ : ParameterMap -> Attribute [ctor gather (&)] .
+ *** Mapping from
+ op msorts:_ : TheorySortMap -> Attribute [ctor gather (&)] .
+ *** Set of views
+ op views:_ : SortSet -> Attribute [ctor gather (&)] .
+
+ ***                                  ***
+ *** List of initial principal sorts. ***
+ ***                                  ***
+ op initialPrincipalSorts : -> SortMap .
+ eq initialPrincipalSorts = ('NAT |-> 'Nat) .
+
+ ***                                        ***
+ *** List of initial parameterized modules. ***
+ ***                                        ***
+ op initialParameterMap : -> ParameterMap .
+ eq initialParameterMap = ('3TUPLE |-> ('C1 :: 'TRIV, 'C2 :: 'TRIV, 'C3 :: 'TRIV)) .
+
+ ***                        ***
+ ***   List of modules for  ***
+ ***            user        ***
+ ***                        ***
+ op umod : -> List{Preload} .
+ eq umod = module('TRUTH-VALUE) module('BOOL-OPS) module('TRUTH) module('BOOL)
+           module('EXT-BOOL) module('NAT) module('INT) module('RAT) module('FLOAT)
+           module('STRING) module('CONVERSION) module('QID) module('TRIV)
+           view('Qid) module('3TUPLE) module('EQL) .
+
+ ***                               ***
+ *** Initial value for attributes. ***
+ ***                               ***
+ op initParsing-AtS : -> AttributeSet .
+ eq initParsing-AtS = psorts: initialPrincipalSorts, tsm: ('TRIV -> 'Elt), hsm: empty,
+                      msorts: empty, params: initialParameterMap, views: 'Qid .
+endm
+
+mod CIMPA-IO is
+ pr OPEN-CLOSE-PARSER .
+ pr IO .
+
+ vars PO PO' : ProofOrder .
+ var  AtS : AttributeSet .
+ vars PT PT' : ProofTree .
+ var  TL : TermList .
+ vars T T' : Term .
+
+ ***            ***
+ *** Attributes ***
+ ***            ***
+ *** Set of open-close environments. Map with id as key.
+ op scoreinfo:_ : ScoreInfoMap -> Attribute [ctor gather (&)] .
+ *** Proof tree
+ op ptree:_ : ProofTree -> Attribute [ctor] .
+ *** Proof order.
+ op po:_ : ProofOrder -> Attribute [ctor] .
+
+ ***                               ***
+ *** Initial value for attributes. ***
+ ***                               ***
+ op initCiMPA-AtS : -> AttributeSet .
+ eq initCiMPA-AtS = scoreinfo: mtSIM, ptree: mtPT, po: finished .
+
+ ***                        ***
+ ***          GOAL          ***
+ ***                        ***
+ crl [goal] :
+     < cafeInMaude : CIM | state: executeComm, input: ('goal[T,T'], TL), AtS >
+  => < cafeInMaude : CIM | state: executeComm, input: TL, AtS >
+  if true .
+endm
