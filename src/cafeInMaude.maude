@@ -26,7 +26,7 @@ mod MTP is
 
  vars TSM TSM' HSM HSM' MS : TheorySortMap .
  vars M M' M'' TOP FLAT FROM TO : Module .
- vars TL IN REDS THCOMMS : TermList .
+ vars TL TL' IN REDS THCOMMS : TermList .
  vars ME ME' : ModuleExpression .
  var  PDL : ParameterDeclList .
  var  SIM SIM' : ScoreInfoMap .
@@ -337,6 +337,11 @@ mod MTP is
  ***                        ***
  ***          LOAD          ***
  ***                        ***
+ crl [load] :
+     < cafeInMaude : CIM | state: executeComm, input: ('load_.['neTokenList[T]], TL), AtS >
+  => < cafeInMaude : CIM | state: executeComm, input: (TL', TL), AtS >
+  if TL' := generateLoadList(T) .
+
  crl [load] :
      < cafeInMaude : CIM | state: executeComm, input: ('load_.['token[T]], TL), AtS >
   => < cafeInMaude : CIM | state: loading, input: TL, AtS >

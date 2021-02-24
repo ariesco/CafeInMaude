@@ -547,7 +547,7 @@ fmod COMMAND-PARSING is
  pr META-LEVEL .
 
  var  TL : TermList .
- var  T : Term .
+ vars T T' : Term .
 
  op extractTerms : Term -> TermList .
  eq extractTerms('__[TL]) = extractTerms*(TL) .
@@ -556,4 +556,8 @@ fmod COMMAND-PARSING is
  op extractTerms* : TermList -> TermList .
  eq extractTerms*(empty) = empty .
  eq extractTerms*((T, TL)) = extractTerms(T), extractTerms*(TL) .
+
+ op generateLoadList : Term -> TermList .
+ eq generateLoadList('__[T, T']) = generateLoadList(T), generateLoadList(T') .
+ eq generateLoadList(T) = 'load_.['token[T]] [owise] .
 endfm
