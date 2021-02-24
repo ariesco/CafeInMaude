@@ -235,18 +235,18 @@ It first defines all the required sorts, and the subsort relations between them:
   subsort @CafeToken@  < @CafeInterface@ .
   subsort @CafeViewDecl@ < @CafeViewDeclList@ .
 
-  op __ : @CafeDeclList@ @CafeDeclList@ -> @CafeDeclList@ [assoc prec 10] .
-  op __ : @CafeLDeclList@ @CafeLDeclList@ -> @CafeLDeclList@ [assoc prec 10] .
-  op __ : @CafeTypeList@ @CafeTypeList@ -> @CafeTypeList@ [assoc prec 10] .
-  op _,_ : @CafeParameters@ @CafeParameters@ -> @CafeParameters@ [assoc prec 45] .
+  op __ : @CafeDeclList@ @CafeDeclList@ -> @CafeDeclList@ [ctor assoc prec 10] .
+  op __ : @CafeLDeclList@ @CafeLDeclList@ -> @CafeLDeclList@ [ctor assoc prec 10] .
+  op __ : @CafeTypeList@ @CafeTypeList@ -> @CafeTypeList@ [ctor assoc prec 10] .
+  op _,_ : @CafeParameters@ @CafeParameters@ -> @CafeParameters@ [ctor assoc prec 45] .
   op none : -> @CafeViewDeclList@ [ctor] .
-  op __ : @CafeViewDeclList@ @CafeViewDeclList@ -> @CafeViewDeclList@ [assoc id: none] .
+  op __ : @CafeViewDeclList@ @CafeViewDeclList@ -> @CafeViewDeclList@ [ctor assoc id: none] .
 
-  op _::_ : @CafeToken@ @CafeModExp@ -> @CafeParameter@ [prec 5 gather (e &)] .
+  op _::_ : @CafeToken@ @CafeModExp@ -> @CafeParameter@ [ctor prec 5 gather (e &)] .
 
-  op _`(_`) : @CafeToken@ @CafeParameters@ -> @CafeInterface@ .
-  op _`[_`] : @CafeToken@ @CafeToken@ -> @CafeInterface@ .
-  op _`{_|_`} : @CafeToken@ @CafeParameters@ @CafeToken@ -> @CafeInterface@ .
+  op _`(_`) : @CafeToken@ @CafeParameters@ -> @CafeInterface@ [ctor] .
+  op _`[_`] : @CafeToken@ @CafeToken@ -> @CafeInterface@ [ctor] .
+  op _`{_|_`} : @CafeToken@ @CafeParameters@ @CafeToken@ -> @CafeInterface@ [ctor] .
 
 ***(%
 \end{comment}
@@ -600,9 +600,9 @@ fmod INPUT is
 
 
  sort @Input@ .
- subsort @Command@ @CafeMODULE@ @OpenCloseEnv@ @ReqProvDecl@ < @Input@ .
+ subsort @Command@ @CafeMODULE@ @OpenCloseEnv@ @ReqProvDecl@ @OpenCloseDeclList@ < @Input@ .
 
- op __ : @Input@ @Input@ -> @Input@ [ctor assoc] .
+ op __ : @Input@ @Input@ -> @Input@ [ctor assoc prec 10] .
 
 endfm
 
