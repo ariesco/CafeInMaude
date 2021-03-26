@@ -360,7 +360,7 @@ open INV .
   eq key(cipher1(r3)) = r1 .
   eq principal(cipher1(r3)) = sender(r3) .
   eq r2 \in ur(s) = false .
- 
+
   eq p = intruder .
   red inv190(s,p,q,r,n) implies inv190(sdm2(s,r1,r2,r3),p,q,r,n) .
 close
@@ -381,7 +381,7 @@ open INV .
   eq key(cipher1(r3)) = r1 .
   eq principal(cipher1(r3)) = sender(r3) .
   eq r2 \in ur(s) = false .
- 
+
   eq (p = intruder) = false .
 
   eq r = r2 .
@@ -398,7 +398,7 @@ open INV .
 	op r2 : -> Rand .
 	op r3 : -> Msg .
 	op s : -> Sys .
-  
+
   	eq r3 \in nw(s) = true .
   	eq m1?(r3) = true .
   	eq receiver(r3) = r1 .
@@ -457,7 +457,7 @@ open INV .
     eq key(cipher1(r3)) = r1 .
     eq principal(cipher1(r3)) = sender(r3) .
     eq r2 \in ur(s) = false .
-  
+
   	eq (p = intruder) = false .
   	eq (r = r2) = false .
   	eq r \in ur(s) = false .
@@ -494,7 +494,7 @@ open INV .
   	eq q = r1 .
   	eq r1 = intruder .
   	eq sender(r3) = p .
-  	eq (n(p,intruder,r) = nonce(cipher1(r3))) = false . 
+  	eq (n(p,intruder,r) = nonce(cipher1(r3))) = false .
   	red inv190(s,p,q,r,n) implies inv190(sdm2(s,r1,r2,r3),p,q,r,n) .
 close
 
@@ -502,7 +502,7 @@ open INV .
   :id(inv19)
 	op p : -> Prin .
     op q : -> Prin .
-    op r : -> Rand . 
+    op r : -> Rand .
 	op n : -> Nonce .
 	op r1 : -> Prin .
 	op r2 : -> Rand .
@@ -605,7 +605,7 @@ open INV .
     eq (p = intruder) = false .
     eq (r = r2) = false .
     eq r \in ur(s) = false .
-  
+
   	eq q = r1 .
   	eq (r1 = intruder) = false .
 
@@ -613,7 +613,7 @@ open INV .
   	eq (n(p,r1,r) = nonce(cipher1(r3))) = false .
   red inv190(s,p,q,r,n) implies inv190(sdm2(s,r1,r2,r3),p,q,r,n) .
 close
-   
+
 open INV .
   :id(inv19)
 	op p : -> Prin .
@@ -662,7 +662,7 @@ open INV .
   	eq (p = intruder) = false .
   	eq (r = r2) = false .
   	eq r \in ur(s) = false .
-  
+
   	eq (q = r1) = false .
   	red inv190(s,p,q,r,n) implies inv190(sdm2(s,r1,r2,r3),p,q,r,n) .
 close
@@ -1075,8 +1075,4 @@ open INV .
 	op s : -> Sys .
 	eq (r3 \in nw(s)) = false .
 	red inv190(s,p,q,r,n) implies inv190(sdm3(s,r1,r2,r3,r4),p,q,r,n) .
-close
-
-open INV .
-  :proof(inv19)
 close

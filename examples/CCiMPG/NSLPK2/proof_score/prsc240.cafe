@@ -540,7 +540,7 @@ open INV .
 
   eq (sender(r4) = intruder) = false .
   eq sender(r4) = q .
-  eq nonce2(cipher2(r4)) = n(q,p,r) .
+  eq n(q,p,r) = nonce2(cipher2(r4)) .
   eq r \in ur(s) = true .
   red inv240(s,p,q,r) implies inv240(sdm3(s,r1,r2,r3,r4),p,q,r) .
 close
@@ -608,7 +608,7 @@ open INV .
   eq n(q,p,r) = nonce2(cipher2(r4)) .
   eq r \in ur(s) = false .
   eq (r1 = intruder) = false .
-  red inv250(s,r1,p,q,r,nonce1(cipher2(r4))) 
+  red inv250(s,r1,p,q,r,nonce1(cipher2(r4)))
   implies inv240(s,p,q,r) implies inv240(sdm3(s,r1,r2,r3,r4),p,q,r) .
 close
 
@@ -899,7 +899,7 @@ open INV .
 close
 
 open INV .
-  :id(inv24)	
+  :id(inv24)
   op p : -> Prin .
   op q : -> Prin .
   op r : -> Rand .
@@ -932,7 +932,7 @@ open INV .
 close
 
 open INV .
-  :id(inv24)	
+  :id(inv24)
   op p : -> Prin .
   op q : -> Prin .
   op r : -> Rand .
@@ -947,7 +947,7 @@ open INV .
 close
 
 open INV .
-  :id(inv24)	
+  :id(inv24)
   op p : -> Prin .
   op q : -> Prin .
   op r : -> Rand .
@@ -958,8 +958,4 @@ open INV .
 	op s : -> Sys .
   eq (r3 \in nw(s)) = false .
 	red inv240(s,p,q,r) implies inv240(sdm3(s,r1,r2,r3,r4),p,q,r) .
-close
-
-open INV .
-  :proof(inv24)
 close

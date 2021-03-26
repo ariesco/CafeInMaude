@@ -1,22 +1,25 @@
 load ../examples/CCiMPG/NSLPK2/nslpk.cafe .
-load ../examples/CCiMPG/NSLPK2/proof_score/prsc160.cafe .
+load ../examples/CCiMPG/NSLPK2/proof_score/prsc230.cafe .
 
 set-cores 4 .
 
-set-output ../examples/CCiMPG/NSLPK2/generated_proofs/proof16.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs/proof23.cafe .
 
+:proven(inv130(S:Sys, N:Nonce))
+:proven(inv170(S:Sys, P1:Prin, P2:Prin, P3:Prin, R:Rand, N:Nonce))
+:proven(inv260(S:Sys, P1:Prin, P2:Prin, N1:Nonce, N2:Nonce))
 
-:proven(inv100(S:Sys, C:Cipher1))
-:proven(inv110(S:Sys, C:Cipher2))
-:proven(inv120(S:Sys, C:Cipher3))
-
-:infer-proof inv16 .
+:infer-proof inv23 .
 
 :save-proof .
 
 eof
 
 load ../examples/CCiMPG/NSLPK2/commands_cimpg.cafe .
+
+Proofs finished: 100, 110, 120, 130, 140, 150, 160, 170, 190, 200, 210, 220, 240, 250, and 260.
+Order: {100, 110, 120, 260} -> 160 -> {140, 150} -> {130, 210} -> {200, 250}
+-> {190,240} -> 220 -> 170 -> 230 -> 180
 
 - Proof score 100 -> Standalone (4 m 55 s)
 
@@ -36,16 +39,140 @@ load ../examples/CCiMPG/NSLPK2/proof_score/prsc120.cafe .
 set-output ../examples/CCiMPG/NSLPK2/generated_proofs/proof12.cafe .
 :infer-proof inv12 .
 
-- Proof score 130 ->
+- Proof score 130 -> inv100, inv110, inv120, inv140, inv150 (8 m 33 s)
+
+load ../examples/CCiMPG/NSLPK2/proof_score/prsc130.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs/proof13.cafe .
 
 :proven(inv100(S:Sys, r:Cipher1))
+:proven(inv110(S:Sys, C:Cipher2))
+:proven(inv120(S:Sys, C:Cipher3))
+:proven(inv140(S:Sys, C:Cipher1))
+:proven(inv150(S:Sys, C:Cipher2))
 
-- Proof score 160 ->
+:infer-proof inv13 .
 
-:proven(inv100(S:Sys, r:Cipher1))
-:proven(inv110(S:Sys, r:Cipher2))
+- Proof score 140 -> Dependencies: inv100, inv110, inv120, inv160 (6 m 56 s)
 
-- Proof score 260 -> Standalone (XXX)
+load ../examples/CCiMPG/NSLPK2/proof_score/prsc140.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs/proof14.cafe .
+
+:proven(inv100(S:Sys, C:Cipher1))
+:proven(inv110(S:Sys, C:Cipher2))
+:proven(inv120(S:Sys, C:Cipher3))
+:proven(inv160(S:Sys, N:Nonce))
+
+:infer-proof inv14 .
+
+- Proof score 150 -> Dependencies: inv100 (6 m 46 s)
+
+load ../examples/CCiMPG/NSLPK2/proof_score/prsc150.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs/proof15.cafe .
+
+:proven(inv100(S:Sys, C:Cipher1))
+:proven(inv110(S:Sys, C:Cipher2))
+:proven(inv120(S:Sys, C:Cipher3))
+:proven(inv160(S:Sys, N:Nonce))
+
+:infer-proof inv15 .
+
+- Proof score 160 -> Dependencies: inv100, inv110, inv120 (6 m 28 s)
+
+load ../examples/CCiMPG/NSLPK2/proof_score/prsc160.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs/proof16.cafe .
+
+:proven(inv100(S:Sys, C:Cipher1))
+:proven(inv110(S:Sys, C:Cipher2))
+:proven(inv120(S:Sys, C:Cipher3))
+
+:infer-proof inv16 .
+
+- Proof score 170 -> Dependencies: inv130, inv190, inv220 (4 m 52 s)
+
+load ../examples/CCiMPG/NSLPK2/proof_score/prsc170.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs/proof17.cafe .
+
+:proven(inv130(S:Sys, N:Nonce))
+:proven(inv190(S:Sys, P1:Prin, P2:Prin, R:Rand, N:Nonce))
+:proven(inv220(S:Sys, P1:Prin, P2:Prin, R:Rand, N:Nonce))
+
+:infer-proof inv17 .
+
+- Proof score 190 -> Dependencies: inv130, inv230, inv240
+
+:proven(inv130(S:Sys, N:Nonce))
+:proven(inv230(S:Sys, P1:Prin, P2:Prin, R:Rand))
+:proven(inv240(S:Sys, P1:Prin, P2:Prin, R:Rand))
+
+- Proof score 190 -> Dependencies: inv200, inv210 (8 m 48 s)
+
+load ../examples/CCiMPG/NSLPK2/proof_score/prsc190.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs/proof19.cafe .
+
+:proven(inv200(S:Sys, P1:Prin, P2:Prin, R:Rand))
+:proven(inv210(S:Sys, P1:Prin, P2:Prin, R:Rand))
+
+:infer-proof inv19 .
+
+- Proof score 200 -> Dependencies: inv210 (4 m 33 s)
+
+load ../examples/CCiMPG/NSLPK2/proof_score/prsc200.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs/proof20.cafe .
+
+:proven(inv210(S:Sys, P1:Prin, P2:Prin, R:Rand))
+
+:infer-proof inv20 .
+
+- Proof score 210 -> Dependencies: inv100, inv110, inv120, inv140, inv150 (8 m 26 s)
+
+load ../examples/CCiMPG/NSLPK2/proof_score/prsc210.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs/proof21.cafe .
+
+:proven(inv100(S:Sys, C:Cipher1))
+:proven(inv110(S:Sys, C:Cipher2))
+:proven(inv120(S:Sys, C:Cipher3))
+:proven(inv140(S:Sys, C:Cipher1))
+:proven(inv150(S:Sys, C:Cipher2))
+
+:infer-proof inv21 .
+
+- Proof score 220 -> Dependencies: inv130, inv190 (4 m 43 s)
+
+load ../examples/CCiMPG/NSLPK2/proof_score/prsc220.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs/proof22.cafe .
+
+:proven(inv130(S:Sys, N:Nonce))
+:proven(inv190(S:Sys, P1:Prin, P2:Prin, R:Rand, N:Nonce))
+
+:infer-proof inv22 .
+
+- Proof score 230 -> Dependencies: inv130, inv170, inv260
+
+:proven(inv130(S:Sys, N:Nonce))
+:proven(inv170(S:Sys, P1:Prin, P2:Prin, P3:Prin, R:Rand, N:Nonce))
+:proven(inv260(S:Sys, P1:Prin, P2:Prin, N1:Nonce, N2:Nonce))
+
+- Proof score 240 -> Dependencies: inv210, inv250 (11 m 30 s)
+** nonce2(cipher2(r4)) = n(q,p,r) to n(q,p,r) = nonce2(cipher2(r4))
+
+load ../examples/CCiMPG/NSLPK2/proof_score/prsc240.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs/proof24.cafe .
+
+:proven(inv210(S:Sys, P1:Prin, P2:Prin, R:Rand))
+:proven(inv250(S:Sys, P1:Prin, P2:Prin, P3:Prin, R:Rand, N:Nonce))
+
+:infer-proof inv24 .
+
+- Proof score 250 -> Dependencias: inv210 (4 m 32 s)
+
+load ../examples/CCiMPG/NSLPK2/proof_score/prsc250.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs/proof25.cafe .
+
+:proven(inv210(S:Sys, P1:Prin, P2:Prin, R:Rand))
+
+:infer-proof inv25 .
+
+- Proof score 260 -> Standalone (4 m 27 s)
 
 load ../examples/CCiMPG/NSLPK2/proof_score/prsc260.cafe .
 set-output ../examples/CCiMPG/NSLPK2/generated_proofs/proof26.cafe .

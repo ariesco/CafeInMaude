@@ -53,7 +53,7 @@ open INV .
 	op s : -> Sys .
 	eq (r3 \in cnonce(nw(s))) = true .
     eq r2 = intruder .
-    eq nonce2(c) = r3 . 
+    eq nonce2(c) = r3 .
 	red inv150(s,c) implies inv150(fkm12(s,r1,r2,r3),c) .
 close
 
@@ -66,7 +66,7 @@ open INV .
 	op s : -> Sys .
 	eq (r3 \in cnonce(nw(s))) = true .
     eq r2 = intruder .
-    eq (nonce2(c) = r3) = false . 
+    eq (nonce2(c) = r3) = false .
 	red inv150(s,c) implies inv150(fkm12(s,r1,r2,r3),c) .
 close
 
@@ -78,7 +78,7 @@ open INV .
 	op r3 : -> Nonce .
 	op s : -> Sys .
 	eq (r3 \in cnonce(nw(s))) = true .
-    eq (r2 = intruder) = false . 
+    eq (r2 = intruder) = false .
 	red inv150(s,c) implies inv150(fkm12(s,r1,r2,r3),c) .
 close
 
@@ -156,7 +156,7 @@ open INV .
 	eq (r4 \in cnonce(nw(s))) = true .
 
     eq c = enc2(r2,r3,r4,r1) .
-	
+
     eq r1 = intruder .
     eq r2 = intruder .
 	red inv150(s,c) implies inv150(fkm22(s,r1,r2,r3,r4),c) .
@@ -342,7 +342,7 @@ open INV .
 	op s : -> Sys .
 	eq (r3 \in cnonce(nw(s))) = true .
     eq r2 = intruder .
-    eq nonce2(c) = r3 . 
+    eq nonce2(c) = r3 .
 	red inv150(s,c) implies inv150(fkm32(s,r1,r2,r3),c) .
 close
 
@@ -355,7 +355,7 @@ open INV .
 	op s : -> Sys .
 	eq (r3 \in cnonce(nw(s))) = true .
     eq r2 = intruder .
-    eq (nonce2(c) = r3) = false . 
+    eq (nonce2(c) = r3) = false .
 	red inv150(s,c) implies inv150(fkm32(s,r1,r2,r3),c) .
 close
 
@@ -367,7 +367,7 @@ open INV .
 	op r3 : -> Nonce .
 	op s : -> Sys .
 	eq (r3 \in cnonce(nw(s))) = true .
-    eq (r2 = intruder) = false . 
+    eq (r2 = intruder) = false .
 	red inv150(s,c) implies inv150(fkm32(s,r1,r2,r3),c) .
 close
 
@@ -464,7 +464,7 @@ open INV .
   	eq r2 \in ur(s) = false .
 
   	eq c = enc2(sender(r3),nonce(cipher1(r3)),n(r1,sender(r3),r2),r1) .
-  
+
   	eq sender(r3) = intruder .
 	red inv150(s,c) implies inv150(sdm2(s,r1,r2,r3),c) .
 close
@@ -484,7 +484,7 @@ open INV .
   	eq r2 \in ur(s) = false .
 
   	eq c = enc2(sender(r3),nonce(cipher1(r3)),n(r1,sender(r3),r2),r1) .
-  
+
   	eq (sender(r3) = intruder) = false .
   	eq r1 = intruder .
   	eq n(intruder,sender(r3),r2) \in cnonce(nw(s)) = true .
@@ -506,7 +506,7 @@ open INV .
   	eq r2 \in ur(s) = false .
 
   	eq c = enc2(sender(r3),nonce(cipher1(r3)),n(r1,sender(r3),r2),r1) .
-  
+
   	eq (sender(r3) = intruder) = false .
   	eq r1 = intruder .
   	eq n(intruder,sender(r3),r2) \in cnonce(nw(s)) = false .
@@ -528,7 +528,7 @@ open INV .
   	eq r2 \in ur(s) = false .
 
   	eq c = enc2(sender(r3),nonce(cipher1(r3)),n(r1,sender(r3),r2),r1) .
-  
+
   	eq (sender(r3) = intruder) = false .
   	eq (r1 = intruder) = false .
 	red inv150(s,c) implies inv150(sdm2(s,r1,r2,r3),c) .
@@ -1021,8 +1021,4 @@ open INV .
 	op s : -> Sys .
 	eq (r3 \in nw(s)) = false .
 	red inv150(s,c) implies inv150(sdm3(s,r1,r2,r3,r4),c) .
-close
-
-open INV .
-  :proof(inv15)
 close

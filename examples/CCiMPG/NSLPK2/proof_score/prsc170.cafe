@@ -1067,7 +1067,3 @@ open INV .
   eq (r3 \in nw(s)) = false .
 	red inv170(s,p,q,q1,r,n) implies inv170(sdm3(s,r1,r2,r3,r4),p,q,q1,r,n) .
 close
-
-open INV .
-  :proof(inv17)
-close

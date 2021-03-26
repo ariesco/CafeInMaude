@@ -682,7 +682,7 @@ open INV .
 close
 
 open INV .
-  :id(inv20)	
+  :id(inv20)
     op p : -> Prin .
     op q : -> Prin .
     op r : -> Rand .
@@ -715,7 +715,7 @@ open INV .
 close
 
 open INV .
-  :id(inv20)	
+  :id(inv20)
     op p : -> Prin .
     op q : -> Prin .
     op r : -> Rand .
@@ -730,7 +730,7 @@ open INV .
 close
 
 open INV .
-  :id(inv20)	
+  :id(inv20)
     op p : -> Prin .
     op q : -> Prin .
     op r : -> Rand .
@@ -741,8 +741,4 @@ open INV .
 	op s : -> Sys .
 	eq (r3 \in nw(s)) = false .
 	red inv200(s,p,q,r) implies inv200(sdm3(s,r1,r2,r3,r4),p,q,r) .
-close
-
-open INV .
-  :proof(inv20)
 close

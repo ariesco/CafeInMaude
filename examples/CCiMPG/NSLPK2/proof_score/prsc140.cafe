@@ -412,7 +412,7 @@ open INV .
     eq (r2 = intruder) = false .
 	eq r1 = intruder .
 	eq n(intruder,r2,r3) \in cnonce(nw(s)) = false .
-	red inv160(s,n(intruder,r2,r3)) 
+	red inv160(s,n(intruder,r2,r3))
 	implies inv140(s,c) implies inv140(sdm1(s,r1,r2,r3),c) .
 close
 
@@ -967,8 +967,4 @@ open INV .
 	op s : -> Sys .
 	eq (r3 \in nw(s)) = false .
 	red inv140(s,c) implies inv140(sdm3(s,r1,r2,r3,r4),c) .
-close
-
-open INV .
-  :proof(inv14)
 close

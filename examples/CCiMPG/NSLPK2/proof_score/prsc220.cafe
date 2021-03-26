@@ -1117,7 +1117,3 @@ open INV .
 	eq (r3 \in nw(s)) = false .
 	red inv220(s,p,q,r,n) implies inv220(sdm3(s,r1,r2,r3,r4),p,q,r,n) .
 close
-
-open INV .
-  :proof(inv22)
-close

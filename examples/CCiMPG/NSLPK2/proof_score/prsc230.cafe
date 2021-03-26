@@ -742,7 +742,7 @@ open INV .
   eq (creator(r3) = intruder) = false .
 
   eq m2(sender(r4),sender(r4),creator(r3),enc2(creator(r3),
-    n(creator(r3),sender(r4),r2), n(sender(r4),p,r),sender(r4))) 
+    n(creator(r3),sender(r4),r2), n(sender(r4),p,r),sender(r4)))
     \in nw(s) = true .
   red inv260(s,q,r1,n(r1,q,r2),n(q,p,r))
   implies inv230(s,p,q,r) implies inv230(sdm3(s,r1,r2,r3,r4),p,q,r) .
@@ -785,7 +785,7 @@ open INV .
   eq (creator(r3) = intruder) = false .
 
   eq m2(sender(r4),sender(r4),creator(r3),enc2(creator(r3),
-    n(creator(r3),sender(r4),r2), n(sender(r4),p,r),sender(r4))) 
+    n(creator(r3),sender(r4),r2), n(sender(r4),p,r),sender(r4)))
     \in nw(s) = false .
 
   red inv170(s,r1,sender(r4),creator(r4),r2,n(sender(r4),p,r))
@@ -1197,8 +1197,4 @@ open INV .
   op s : -> Sys .
   eq (r3 \in nw(s)) = false .
   red inv230(s,p,q,r) implies inv230(sdm3(s,r1,r2,r3,r4),p,q,r) .
-close
-
-open INV .
-  :proof(inv23)
 close

@@ -748,7 +748,7 @@ mod CIMPA-IO is
      Q := getName(C) /\
      ODS op Q : nil -> Ty [AttS] . := getOps(M) /\
      EqS' := subsituteIndVar(EqS, V, C, 0) /\
-     M' := addHyp(M, EqS') [print "Terms " EqS'] .
+     M' := addHyp(M, EqS') .
  eq addProvenGoals(M, EqS, V) = M [owise] .
 
  op subsituteIndVar : EquationSet Variable Constant Nat -> EquationSet .

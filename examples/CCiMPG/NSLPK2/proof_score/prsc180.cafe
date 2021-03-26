@@ -1060,7 +1060,3 @@ open INV .
 	eq (r3 \in nw(s)) = false .
 	red inv180(s,p,q,p1,r,n) implies inv180(sdm3(s,r1,r2,r3,r4),p,q,p1,r,n) .
 close
-
-open INV .
-  :proof(inv18)
-close
