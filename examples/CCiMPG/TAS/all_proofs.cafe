@@ -1,0 +1,344 @@
+-- I) Base case
+open TAS .
+ :id(tas)
+-- fresh constants
+  ops i j : -> Pid .
+-- |-
+  red inv1(init,i,j) .
+close
+--
+-- II) Induction cases
+-- 1) enter(s,k)
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+-- assumptions
+  eq pc(s,k) = rs .
+  eq lock(s) = open .
+  eq i = k .
+  eq j = k .
+-- |-
+  red inv1(enter(s,k),i,j) .
+close
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+  eq pc(s,k) = rs .
+  eq lock(s) = open .
+  eq i = k .
+  eq (j = k) = false .
+  eq pc(s,j) = cs .
+-- |-
+  red inv2(s,j) implies inv1(enter(s,k),i,j) .
+close
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+  eq pc(s,k) = rs .
+  eq lock(s) = open .
+  eq i = k .
+  eq (j = k) = false .
+  eq (pc(s,j) = cs) = false .
+-- |-
+  red inv1(enter(s,k),i,j) .
+close
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+  eq pc(s,k) = rs .
+  eq lock(s) = open .
+  eq (i = k) = false .
+  eq j = k .
+  eq pc(s,i) = cs .
+-- |-
+  red inv2(s,i) implies inv1(enter(s,k),i,j) .
+close
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+  eq pc(s,k) = rs .
+  eq lock(s) = open .
+  eq (i = k) = false .
+  eq j = k .
+  eq (pc(s,i) = cs) = false .
+-- |-
+  red inv1(enter(s,k),i,j) .
+close
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+  eq pc(s,k) = rs .
+  eq lock(s) = open .
+  eq (i = k) = false .
+  eq (j = k) = false .
+-- |-
+  red inv1(s,i,j) implies inv1(enter(s,k),i,j) .
+close
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+  eq pc(s,k) = rs .
+  eq lock(s) = close .
+-- |-
+  red inv1(s,i,j) implies inv1(enter(s,k),i,j) .
+close
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+  eq (pc(s,k) = rs) = false .
+  eq lock(s) = open .
+-- |-
+  red inv1(s,i,j) implies inv1(enter(s,k),i,j) .
+close
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+  eq (pc(s,k) = rs) = false .
+  eq lock(s) = close .
+-- |-
+  red inv1(s,i,j) implies inv1(enter(s,k),i,j) .
+close
+--
+-- 2) leave(s,k)
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+  eq pc(s,k) = cs .
+  eq i = k .
+-- |-
+  red inv1(leave(s,k),i,j) .
+close
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+  eq pc(s,k) = cs .
+  eq (i = k) = false .
+  eq j = k .
+-- |-
+  red inv1(leave(s,k),i,j) .
+close
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+  eq pc(s,k) = cs .
+  eq (i = k) = false .
+  eq (j = k) = false .
+-- |-
+  red inv1(s,i,j) implies inv1(leave(s,k),i,j) .
+close
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+  eq (pc(s,k) = cs) = false .
+-- |-
+  red inv1(s,i,j) implies inv1(leave(s,k),i,j) .
+close
+--
+-- QED
+--
+
+-- I) Base case
+open TAS .
+ :id(tas)
+-- fresh constants
+  op i : -> Pid .
+-- |-
+  red inv2(init,i) .
+close
+--
+-- II) Induction cases
+-- 1) enter(s,k)
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+  eq pc(s,k) = rs .
+  eq lock(s) = open .
+-- |-
+  red inv2(enter(s,k),i) .
+close
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+  eq pc(s,k) = rs .
+  eq lock(s) = close .
+-- |-
+  red inv2(s,i) implies inv2(enter(s,k),i) .
+close
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+  eq (pc(s,k) = rs) = false .
+  eq lock(s) = open .
+-- |-
+  red inv2(s,i) implies inv2(enter(s,k),i) .
+close
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+  eq (pc(s,k) = rs) = false .
+  eq lock(s) = close .
+-- |-
+  red inv2(s,i) implies inv2(enter(s,k),i) .
+close
+--
+-- 2) leave(s,k)
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+  eq pc(s,k) = cs .
+  eq i = k .
+-- |-
+  red inv2(leave(s,k),i) .
+close
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+  eq pc(s,k) = cs .
+  eq (i = k) = false .
+  eq pc(s,i) = cs .
+-- |-
+  red inv1(s,i,k) implies inv2(leave(s,k),i) .
+close
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+  eq pc(s,k) = cs .
+  eq (i = k) = false .
+  eq (pc(s,i) = cs) = false .
+-- |-
+  red inv2(leave(s,k),i) .
+close
+open TAS .
+ :id(tas)
+-- fresh constants
+  op s : -> Sys .
+  ops i k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+  eq (pc(s,k) = cs) = false .
+-- |-
+  red inv2(s,i) implies inv2(leave(s,k),i) .
+close
+--
+-- QED
+--

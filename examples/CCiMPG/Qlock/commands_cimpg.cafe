@@ -1,0 +1,18 @@
+load ../examples/CCiMPG/Qlock/qlock.cafe .
+load ../examples/CCiMPG/Qlock/all_proofs.cafe .
+
+set-cores 4 .
+
+set-output ../examples/CCiMPG/Qlock/qlock-proof.cafe .
+
+eof
+
+:infer-proof qlock .
+
+:save-proof .
+
+load ../examples/CCiMPG/Qlock/qlock-proof.cafe .
+
+eof
+
+load ../examples/CCiMPG/Qlock/commands_cimpg.cafe .

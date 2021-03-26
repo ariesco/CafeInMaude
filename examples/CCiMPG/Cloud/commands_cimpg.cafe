@@ -1,0 +1,18 @@
+load ../examples/CCiMPG/Cloud/cloud.cafe .
+load ../examples/CCiMPG/Cloud/all_proofs.cafe .
+
+set-cores 4 .
+
+set-output ../examples/CCiMPG/Cloud/cloud-proof.cafe .
+
+eof
+
+:infer-proof cloud .
+
+:save-proof .
+
+load ../examples/CCiMPG/Cloud/cloud-proof.cafe .
+
+eof
+
+load ../examples/CCiMPG/Cloud/commands_cimpg.cafe .

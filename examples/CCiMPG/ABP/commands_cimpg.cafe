@@ -1,0 +1,19 @@
+load ../examples/CCiMPG/ABP/abp.cafe .
+load ../examples/CCiMPG/ABP/all_proofs.cafe .
+
+set-cores 4 .
+
+set-output ../examples/CCiMPG/ABP/abp-proof.cafe .
+
+eof
+
+:infer-proof proofABP .
+
+:save-proof .
+
+load ../examples/CCiMPG/ABP/abp-proof.cafe .
+
+eof
+
+load ../examples/CCiMPG/ABP/commands_cimpg.cafe .
+

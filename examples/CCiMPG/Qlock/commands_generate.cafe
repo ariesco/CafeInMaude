@@ -1,0 +1,30 @@
+load ../examples/CCiMPG/Qlock/qlock.cafe .
+
+set-cores 4 .
+
+set-output ../examples/CCiMPG/Qlock/qlock-proof-generate.cafe .
+
+open QLOCK .
+  :id(qlock)
+
+  ops i j k : -> Pid .
+
+  red inv1(S:Sys, i, j) .
+  red inv2(S:Sys, k) .
+close
+
+:infer-proof qlock .
+
+:save-proof .
+
+eof
+
+load ../examples/CCiMPG/Qlock/qlock-proof-generate.cafe .
+
+eof
+
+load ../examples/CCiMPG/Qlock/commands_generate.cafe .
+
+open QLOCK .
+  :infer(qlock)
+close

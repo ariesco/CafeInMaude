@@ -1,0 +1,33 @@
+load ../examples/CCiMPG/MCS/mcs.cafe .
+load ../examples/CCiMPG/MCS/mixed_proofs.cafe .
+
+set-cores 4 .
+
+set-output ../examples/CCiMPG/MCS/mcs-proof-generate.cafe .
+
+open INV .
+  :id(mcs)
+
+  ops p q r : -> Pid .
+
+  red inv1(S:Sys,p,q) .
+  red inv2(S:Sys,p,q) .
+  red inv3(S:Sys,p) .
+  red inv4(S:Sys,p) .
+  red inv5(S:Sys,p,q) .
+  red inv6(S:Sys,p,q) .
+  red inv7(S:Sys,p,q) .
+  red mutex(S:Sys,p,q) .
+close
+
+:infer-proof mcs .
+
+:save-proof .
+
+eof
+
+load ../examples/CCiMPG/MCS/mcs-proof-generate.cafe .
+
+eof
+
+load ../examples/CCiMPG/MCS/commands_generate.cafe .

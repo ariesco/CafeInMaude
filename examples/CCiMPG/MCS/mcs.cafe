@@ -1,0 +1,342 @@
+mod! LABEL {
+   [Label]
+   ops l1 l2 l3 l4 l5 l6 l7 l8 l9 l10 l11 l12 rs cs : -> Label {constr} .
+   eq (l1 = l2) = false .
+   eq (l1 = l3) = false .
+   eq (l1 = l4) = false .
+   eq (l1 = l5) = false .
+   eq (l1 = l6) = false .
+   eq (l1 = l7) = false .
+   eq (l1 = l8) = false .
+   eq (l1 = l9) = false .
+   eq (l1 = l10) = false .
+   eq (l1 = l11) = false .
+   eq (l1 = l12) = false .
+   eq (l1 = rs) = false .
+   eq (l1 = cs) = false .
+   eq (l2 = l3) = false .
+   eq (l2 = l4) = false .
+   eq (l2 = l5) = false .
+   eq (l2 = l6) = false .
+   eq (l2 = l7) = false .
+   eq (l2 = l8) = false .
+   eq (l2 = l9) = false .
+   eq (l2 = l10) = false .
+   eq (l2 = l11) = false .
+   eq (l2 = l12) = false .
+   eq (l2 = rs) = false .
+   eq (l2 = cs) = false .
+   eq (l3 = l4) = false .
+   eq (l3 = l5) = false .
+   eq (l3 = l6) = false .
+   eq (l3 = l7) = false .
+   eq (l3 = l8) = false .
+   eq (l3 = l9) = false .
+   eq (l3 = l10) = false .
+   eq (l3 = l11) = false .
+   eq (l3 = l12) = false .
+   eq (l3 = rs) = false .
+   eq (l3 = cs) = false .
+   eq (l4 = l5) = false .
+   eq (l4 = l6) = false .
+   eq (l4 = l7) = false .
+   eq (l4 = l8) = false .
+   eq (l4 = l9) = false .
+   eq (l4 = l10) = false .
+   eq (l4 = l11) = false .
+   eq (l4 = l12) = false .
+   eq (l4 = rs) = false .
+   eq (l4 = cs) = false .
+   eq (l5 = l6) = false .
+   eq (l5 = l7) = false .
+   eq (l5 = l8) = false .
+   eq (l5 = l9) = false .
+   eq (l5 = l10) = false .
+   eq (l5 = l11) = false .
+   eq (l5 = l12) = false .
+   eq (l5 = rs) = false .
+   eq (l5 = cs) = false .
+   eq (l6 = l7) = false .
+   eq (l6 = l8) = false .
+   eq (l6 = l9) = false .
+   eq (l6 = l10) = false .
+   eq (l6 = l11) = false .
+   eq (l6 = l12) = false .
+   eq (l6 = rs) = false .
+   eq (l6 = cs) = false .
+   eq (l7 = l8) = false .
+   eq (l7 = l9) = false .
+   eq (l7 = l10) = false .
+   eq (l7 = l11) = false .
+   eq (l7 = l12) = false .
+   eq (l7 = rs) = false .
+   eq (l7 = cs) = false .
+   eq (l8 = l9) = false .
+   eq (l8 = l10) = false .
+   eq (l8 = l11) = false .
+   eq (l8 = l12) = false .
+   eq (l8 = rs) = false .
+   eq (l8 = cs) = false .
+   eq (l9 = l10) = false .
+   eq (l9 = l11) = false .
+   eq (l9 = l12) = false .
+   eq (l9 = rs) = false .
+   eq (l9 = cs) = false .
+   eq (l10 = l11) = false .
+   eq (l10 = l12) = false .
+   eq (l10 = rs) = false .
+   eq (l10 = cs) = false .
+   eq (l11 = l12) = false .
+   eq (l11 = rs) = false .
+   eq (l11 = cs) = false .
+   eq (l12 = rs) = false .
+   eq (l12 = cs) = false .
+   eq (rs = cs) = false .
+}
+
+mod* PID {
+   [Nop Pid < Pid&Nop]
+   op nop : -> Nop {constr} .
+   var P : Pid .
+   eq (P = nop) = false .
+}
+
+mod* MCS {
+   pr(LABEL)
+   pr(PID)
+   [Sys]
+
+   -- initial states
+   op init : -> Sys {constr} .
+
+   -- transitions
+   -- st: set, ch: check, nxt: next, prd: prede, lck: lock
+   -- npr: next & prede, glk: glock, lnx; lock & next
+   op want : Sys Pid -> Sys   {constr} . *** proof score
+   op stnxt : Sys Pid -> Sys  {constr} .
+   op stprd : Sys Pid -> Sys  {constr} .
+   op chprd : Sys Pid -> Sys  {constr} .
+   op stlck : Sys Pid -> Sys  {constr} .
+   op stnpr : Sys Pid -> Sys  {constr} .
+   op chlck : Sys Pid -> Sys  {constr} .
+   op exit : Sys Pid -> Sys   {constr} .
+   op chnxt : Sys Pid -> Sys  {constr} .
+   op chglk : Sys Pid -> Sys  {constr} .
+   op go2rs : Sys Pid -> Sys  {constr} .
+   op chnxt2 : Sys Pid -> Sys {constr} .
+   op stlnx : Sys Pid -> Sys  {constr} .
+   op go2rs2 : Sys Pid -> Sys {constr} .
+
+   -- observers
+   op glock : Sys -> Pid&Nop .
+   op pc : Sys Pid -> Label .
+   op next : Sys Pid -> Pid&Nop .
+   op lock : Sys Pid -> Bool .
+   op prede : Sys Pid -> Pid&Nop .
+
+   -- variables
+   var S : Sys .
+   vars P Q : Pid .
+
+   -- init
+   eq glock(init) = nop .
+   eq pc(init,P) = rs .
+   eq next(init,P) = nop .
+   eq lock(init,P) = false .
+   eq prede(init,P) = nop .
+
+   -- want
+   eq glock(want(S,P)) = glock(S) .
+   ceq pc(want(S,P),Q) = (if P = Q then l1 else pc(S,Q) fi)
+      if pc(S,P) = rs .
+   eq next(want(S,P),Q) = next(S,Q) .
+   eq lock(want(S,P),Q) = lock(S,Q) .
+   eq prede(want(S,P),Q) = prede(S,Q) .
+   ceq want(S,P) = S if (pc(S,P) = rs) = false .
+
+   -- stnxt
+   eq glock(stnxt(S,P)) = glock(S) .
+   ceq pc(stnxt(S,P),Q) = (if P = Q then l2 else pc(S,Q) fi)
+      if pc(S,P) = l1 .
+   ceq next(stnxt(S,P),Q) = (if P = Q then nop else next(S,Q) fi)
+      if pc(S,P) = l1 .
+   eq lock(stnxt(S,P),Q) = lock(S,Q) .
+   eq prede(stnxt(S,P),Q) = prede(S,Q) .
+   ceq stnxt(S,P) = S if (pc(S,P) = l1) = false .
+
+   -- stprd
+   ceq pc(stprd(S,P),Q) = (if P = Q then l3 else pc(S,Q) fi)
+      if pc(S,P) = l2 .
+   eq next(stprd(S,P),Q) = next(S,Q) .
+   eq lock(stprd(S,P),Q) = lock(S,Q) .
+   ceq prede(stprd(S,P),Q) = (if P = Q then glock(S) else prede(S,Q) fi)
+      if pc(S,P) = l2 .
+   ceq glock(stprd(S,P)) = P if pc(S,P) = l2 .
+   ceq stprd(S,P) = S if (pc(S,P) = l2) = false .
+
+   -- chprd
+   eq glock(chprd(S,P)) = glock(S) .
+   ceq pc(chprd(S,P),Q)
+      = (if P = Q then
+            (if prede(S,P) = nop then cs else l4 fi)
+         else pc(S,Q)
+         fi)
+      if pc(S,P) = l3 .
+   eq next(chprd(S,P),Q) = next(S,Q) .
+   eq lock(chprd(S,P),Q) = lock(S,Q) .
+   eq prede(chprd(S,P),Q) = prede(S,Q) .
+   ceq chprd(S,P) = S if (pc(S,P) = l3) = false .
+
+   -- stlck
+   eq glock(stlck(S,P)) = glock(S) .
+   ceq pc(stlck(S,P),Q) = (if P = Q then l5 else pc(S,Q) fi)
+      if pc(S,P) = l4 .
+   eq next(stlck(S,P),Q) = next(S,Q) .
+   ceq lock(stlck(S,P),Q) = (if P = Q then true else lock(S,Q) fi )
+      if pc(S,P) = l4 .
+   eq prede(stlck(S,P),Q) = prede(S,Q) .
+   ceq stlck(S,P) = S if (pc(S,P) = l4) = false .
+
+   -- stnpr
+   eq glock(stnpr(S,P)) = glock(S) .
+   ceq pc(stnpr(S,P),Q) = (if P = Q then l6 else pc(S,Q) fi)
+      if pc(S,P) = l5 .
+   ceq next(stnpr(S,P),Q) = (if prede(S,P) = Q then P else next(S,Q) fi)
+      if pc(S,P) = l5 .
+   eq lock(stnpr(S,P),Q) = lock(S,Q) .
+   eq prede(stnpr(S,P),Q) = prede(S,Q) .
+   ceq stnpr(S,P) = S if (pc(S,P) = l5) = false .
+
+   -- chlck
+   eq glock(chlck(S,P)) = glock(S) .
+   ceq pc(chlck(S,P),Q)
+      = (if P = Q then
+            (if lock(S,P) then l6 else cs fi)
+         else pc(S,Q)
+         fi)
+      if pc(S,P) = l6 .
+   eq next(chlck(S,P),Q) = next(S,Q) .
+   eq lock(chlck(S,P),Q) = lock(S,Q) .
+   eq prede(chlck(S,P),Q) = prede(S,Q) .
+   ceq chlck(S,P) = S if (pc(S,P) = l6) = false .
+
+   -- exit
+   eq glock(exit(S,P)) = glock(S) .
+   ceq pc(exit(S,P),Q) = (if P = Q then l7 else pc(S,Q) fi)
+      if pc(S,P) = cs .
+   eq next(exit(S,P),Q) = next(S,Q) .
+   eq lock(exit(S,P),Q) = lock(S,Q) .
+   eq prede(exit(S,P),Q) = prede(S,Q) .
+   ceq exit(S,P) = S if (pc(S,P) = cs) = false .
+
+   -- chnxt
+   eq glock(chnxt(S,P)) = glock(S) .
+   ceq pc(chnxt(S,P),Q)
+      = (if P = Q then
+            (if next(S,P) = nop then l8 else l11 fi)
+         else pc(S,Q)
+         fi)
+      if pc(S,P) = l7 .
+   eq next(chnxt(S,P),Q) = next(S,Q) .
+   eq lock(chnxt(S,P),Q) = lock(S,Q) .
+   eq prede(chnxt(S,P),Q) = prede(S,Q) .
+   ceq chnxt(S,P) = S if (pc(S,P) = l7) = false .
+
+   -- chglk
+   ceq glock(chglk(S,P)) = (if P = glock(S) then nop else glock(S) fi)
+      if pc(S,P) = l8 .
+   ceq pc(chglk(S,P),Q)
+      = (if P = Q then
+            (if P = glock(S) then l9 else l10 fi)
+         else pc(S,Q)
+         fi)
+      if pc(S,P) = l8 .
+   eq next(chglk(S,P),Q) = next(S,Q) .
+   eq lock(chglk(S,P),Q) = lock(S,Q) .
+   eq prede(chglk(S,P),Q) = prede(S,Q) .
+   ceq chglk(S,P) = S if (pc(S,P) = l8) = false .
+
+   -- go2rs
+   eq glock(go2rs(S,P)) = glock(S) .
+   ceq pc(go2rs(S,P),Q) = (if P = Q then rs else pc(S,Q) fi)
+      if pc(S,P) = l9 .
+   eq next(go2rs(S,P),Q) = next(S,Q) .
+   eq lock(go2rs(S,P),Q) = lock(S,Q) .
+   eq prede(go2rs(S,P),Q) = prede(S,Q) .
+   ceq go2rs(S,P) = S if (pc(S,P) = l9) = false .
+
+   -- chnxt2
+   eq glock(chnxt2(S,P)) = glock(S) .
+   ceq pc(chnxt2(S,P),Q)
+      = (if P = Q then
+            (if next(S,P) = nop then l10 else l11 fi)
+         else pc(S,Q)
+         fi)
+      if pc(S,P) = l10 .
+   eq next(chnxt2(S,P),Q) = next(S,Q) .
+   eq lock(chnxt2(S,P),Q) = lock(S,Q) .
+   eq prede(chnxt2(S,P),Q) = prede(S,Q) .
+   ceq chnxt2(S,P) = S if (pc(S,P) = l10) = false .
+
+   -- stlnx
+   eq glock(stlnx(S,P)) = glock(S) .
+   ceq pc(stlnx(S,P),Q) = (if P = Q then l12 else pc(S,Q) fi)
+      if pc(S,P) = l11 .
+   eq next(stlnx(S,P),Q) = next(S,Q) .
+   ceq lock(stlnx(S,P),Q) = (if Q = next(S,P) then false else lock(S,Q) fi)
+      if pc(S,P) = l11 .
+   eq prede(stlnx(S,P),Q) = prede(S,Q) .
+   ceq stlnx(S,P) = S if (pc(S,P) = l11) = false .
+
+   -- go2rs2
+   eq glock(go2rs2(S,P)) = glock(S) .
+   ceq pc(go2rs2(S,P),Q) = (if P = Q then rs else pc(S,Q) fi)
+      if pc(S,P) = l12 .
+   eq next(go2rs2(S,P),Q) = next(S,Q) .
+   eq lock(go2rs2(S,P),Q) = lock(S,Q) .
+   eq prede(go2rs2(S,P),Q) = prede(S,Q) .
+   ceq go2rs2(S,P) = S if (pc(S,P) = l12) = false .
+}
+
+mod! INV {
+   pr(MCS)
+
+   var S : Sys
+   vars P Q R : Pid
+
+   -- invariants
+   op mutex : Sys Pid Pid -> Bool
+   op inv1 : Sys Pid Pid -> Bool
+   op inv2 : Sys Pid Pid -> Bool
+   op inv3 : Sys Pid -> Bool
+   op inv4 : Sys Pid -> Bool
+   op inv5 : Sys Pid Pid -> Bool
+   op inv6 : Sys Pid Pid -> Bool
+   op inv7 : Sys Pid Pid -> Bool
+
+   eq mutex(S,P,Q) = (pc(S,P) = cs and pc(S,Q) = cs implies (P = Q)) .
+
+   eq inv1(S,P,Q) = ((pc(S,Q) = l3 and prede(S,Q) = nop and (P = Q) = false) implies
+      ((pc(S,P) = cs or pc(S,P) = l7 or pc(S,P) = l8 or pc(S,P) = l10 or pc(S,P) = l11 or
+      (pc(S,P) = l6 and lock(S,P) = false)) = false)) .
+
+   eq inv2(S,P,Q) = ((pc(S,P) = l3 and prede(S,P) = nop and pc(S,Q) = l3 and (P = Q) = false)
+      implies (prede(S,Q) = nop) = false) .
+
+   eq inv3(S,P) = (pc(S,P) = l5 implies lock(S,P) = true) .
+
+   eq inv4(S,P) = (((pc(S,P) = l6 and lock(S,P) = false) or (pc(S,P) = l3 and prede(S,P) = nop)
+      or pc(S,P) = cs or pc(S,P) = l7 or pc(S,P) = l8 or pc(S,P) = l10 or pc(S,P) = l11)
+      implies (glock(S) = nop) = false) .
+
+   eq inv5(S,P,Q) = (((pc(S,Q) = l12 or pc(S,Q) = l1 or pc(S,Q) = rs) = false and (P = Q) = false and
+      next(S,Q) = P) implies (pc(S,P) = l6 and lock(S,P) = true and prede(S,P) = Q)) .
+
+   eq inv6(S,P,Q) = ((pc(S,Q) = l6 and lock(S,Q) = false and (P = Q) = false) implies
+      ((pc(S,P) = cs or pc(S,P) = l7 or pc(S,P) = l8 or pc(S,P) = l10 or pc(S,P) = l11 or
+      (pc(S,P) = l6 and lock(S,P) = false)) = false)) .
+
+   eq inv7(S,P,Q) = (((pc(S,Q) = l11 or pc(S,Q) = l10 or pc(S,Q) = l8 or pc(S,Q) = l7 or
+      pc(S,Q) = cs) and (P = Q) = false) implies ((pc(S,P) = cs or pc(S,P) = l7 or pc(S,P) = l8
+      or pc(S,P) = l10 or pc(S,P) = l11 or (pc(S,P) = l6 and lock(S,P) = false)) = false)) .
+}

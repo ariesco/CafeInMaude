@@ -1,0 +1,773 @@
+
+:goal{
+eq [cloud :nonexec] : inv1(S:Sys, C:Client)  = true .
+ eq [cloud1 :nonexec] : inv2(S:Sys, C:Client)  = true .
+ eq [cloud3 :nonexec] : inv3(S:Sys, C:Client, C0:Client)  = true .
+ eq [cloud4 :nonexec] : inv4(S:Sys, C:Client, C0:Client)  = true .
+ eq [cloud5 :nonexec] : inv5(S:Sys, C:Client)  = true .
+ eq [cloud2 :nonexec] : inv6(S:Sys, C:Client)  = true .
+ eq [cloud6 :nonexec] : inv7(S:Sys, C:Client, C0:Client)  = true .
+}
+:ind on (S:Sys)
+:apply(si)
+:sel(3)
+	:apply(tc)
+
+	:apply (rd)
+
+	:apply (rd)
+
+	:apply (rd)
+
+	:apply (rd)
+
+	:apply (rd)
+
+	:apply (rd)
+
+	:apply (rd)
+
+
+:sel(4)
+	:apply(tc)
+
+	:def csb1#4 = :ctf {eq statusp(S#Sys, C#Client)  = idlep .}
+
+	:apply(csb1#4)
+
+	:def csb2#4 = :ctf {eq C@Client  = C#Client .}
+
+	:apply(csb2#4)
+
+	:imp [cloud]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb3#4 = :ctf {eq statusp(S#Sys, C#Client)  = idlep .}
+
+	:apply(csb3#4)
+
+	:imp [cloud1]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud1]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb4#4 = :ctf {eq statusp(S#Sys, C#Client)  = idlep .}
+
+	:apply(csb4#4)
+
+	:imp [cloud3]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud3]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb5#4 = :ctf {eq statusp(S#Sys, C#Client)  = idlep .}
+
+	:apply(csb5#4)
+
+	:imp [cloud4]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud4]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb6#4 = :ctf {eq statusp(S#Sys, C#Client)  = idlep .}
+
+	:apply(csb6#4)
+
+	:imp [cloud5]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud5]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb7#4 = :ctf {eq statusp(S#Sys, C#Client)  = idlep .}
+
+	:apply(csb7#4)
+
+	:imp [cloud2]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud2]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb8#4 = :ctf {eq statusp(S#Sys, C#Client)  = idlep .}
+
+	:apply(csb8#4)
+
+	:imp [cloud6]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud6]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+
+:sel(2)
+	:apply(tc)
+
+	:def csb1#2 = :ctf {eq statusc(S#Sys)  = busy .}
+
+	:apply(csb1#2)
+
+	:def csb2#2 = :ctf {eq statusp(S#Sys, C#Client)  = updated .}
+
+	:apply(csb2#2)
+
+	:def csb3#2 = :ctf {eq C@Client  = C#Client .}
+
+	:apply(csb3#2)
+
+	:imp [cloud]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb4#2 = :ctf {eq statusc(S#Sys)  = busy .}
+
+	:apply(csb4#2)
+
+	:def csb5#2 = :ctf {eq statusp(S#Sys, C#Client)  = updated .}
+
+	:apply(csb5#2)
+
+	:def csb6#2 = :ctf {eq C@Client  = C#Client .}
+
+	:apply(csb6#2)
+
+	:imp [cloud1]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud1]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud1]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud1]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb7#2 = :ctf {eq statusc(S#Sys)  = busy .}
+
+	:apply(csb7#2)
+
+	:def csb8#2 = :ctf {eq statusp(S#Sys, C#Client)  = updated .}
+
+	:apply(csb8#2)
+
+	:def csb9#2 = :ctf {eq C0@Client  = C#Client .}
+
+	:apply(csb9#2)
+
+	:imp [cloud3]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud3]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:imp [cloud3]  by {C0:Client <- C0@Client ; C:Client <- C#Client ;}
+
+	:apply (rd)
+
+	:imp [cloud3]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud3]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb10#2 = :ctf {eq statusc(S#Sys)  = busy .}
+
+	:apply(csb10#2)
+
+	:def csb11#2 = :ctf {eq statusp(S#Sys, C#Client)  = updated .}
+
+	:apply(csb11#2)
+
+	:def csb12#2 = :ctf {eq C0@Client  = C#Client .}
+
+	:apply(csb12#2)
+
+	:imp [cloud4]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud4]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:imp [cloud3]  by {C0:Client <- C0@Client ; C:Client <- C#Client ;}
+
+	:apply (rd)
+
+	:imp [cloud4]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud4]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb13#2 = :ctf {eq statusc(S#Sys)  = busy .}
+
+	:apply(csb13#2)
+
+	:def csb14#2 = :ctf {eq statusp(S#Sys, C#Client)  = updated .}
+
+	:apply(csb14#2)
+
+	:def csb15#2 = :ctf {eq C@Client  = C#Client .}
+
+	:apply(csb15#2)
+
+	:imp [cloud5]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud5]  by {C:Client <- C@Client ;}
+
+	:imp [cloud6]  by {C0:Client <- C#Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud5]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud5]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb16#2 = :ctf {eq statusc(S#Sys)  = busy .}
+
+	:apply(csb16#2)
+
+	:def csb17#2 = :ctf {eq statusp(S#Sys, C#Client)  = updated .}
+
+	:apply(csb17#2)
+
+	:def csb18#2 = :ctf {eq C@Client  = C#Client .}
+
+	:apply(csb18#2)
+
+	:imp [cloud2]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud2]  by {C:Client <- C@Client ;}
+
+	:imp [cloud3]  by {C0:Client <- C@Client ; C:Client <- C#Client ;}
+
+	:apply (rd)
+
+	:imp [cloud2]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud2]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb19#2 = :ctf {eq statusc(S#Sys)  = busy .}
+
+	:apply(csb19#2)
+
+	:def csb20#2 = :ctf {eq statusp(S#Sys, C#Client)  = updated .}
+
+	:apply(csb20#2)
+
+	:def csb21#2 = :ctf {eq C0@Client  = C#Client .}
+
+	:apply(csb21#2)
+
+	:imp [cloud6]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud6]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:imp [cloud6]  by {C0:Client <- C0@Client ; C:Client <- C#Client ;}
+
+	:apply (rd)
+
+	:imp [cloud6]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud6]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+
+:sel(1)
+	:apply(tc)
+
+	:def csb1#1 = :ctf {eq statusp(S#Sys, C#Client)  = idlep .}
+
+	:apply(csb1#1)
+
+	:def csb2#1 = :ctf {eq statusc(S#Sys)  = idlec .}
+
+	:apply(csb2#1)
+
+	:def csb3#1 = :ctf {eq C@Client  = C#Client .}
+
+	:apply(csb3#1)
+
+	:imp [cloud]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb4#1 = :ctf {eq statusp(S#Sys, C#Client)  = idlep .}
+
+	:apply(csb4#1)
+
+	:def csb5#1 = :ctf {eq statusc(S#Sys)  = idlec .}
+
+	:apply(csb5#1)
+
+	:def csb6#1 = :ctf {eq C@Client  = C#Client .}
+
+	:apply(csb6#1)
+
+	:imp [cloud1]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud1]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud1]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud1]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb7#1 = :ctf {eq statusp(S#Sys, C#Client)  = idlep .}
+
+	:apply(csb7#1)
+
+	:def csb8#1 = :ctf {eq statusc(S#Sys)  = idlec .}
+
+	:apply(csb8#1)
+
+	:def csb9#1 = :ctf {eq C@Client  = C#Client .}
+
+	:apply(csb9#1)
+
+	:imp [cloud3]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud3]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:imp [cloud5]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud3]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud3]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb10#1 = :ctf {eq statusp(S#Sys, C#Client)  = idlep .}
+
+	:apply(csb10#1)
+
+	:def csb11#1 = :ctf {eq statusc(S#Sys)  = idlec .}
+
+	:apply(csb11#1)
+
+	:def csb12#1 = :ctf {eq C0@Client  = C#Client .}
+
+	:apply(csb12#1)
+
+	:def csb13#1 = :ctf {eq C@Client  = C#Client .}
+
+	:apply(csb13#1)
+
+	:imp [cloud4]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud4]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:imp [cloud2]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud4]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:imp [cloud2]  by {C:Client <- C0@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud4]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud4]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb14#1 = :ctf {eq statusp(S#Sys, C#Client)  = idlep .}
+
+	:apply(csb14#1)
+
+	:def csb15#1 = :ctf {eq statusc(S#Sys)  = idlec .}
+
+	:apply(csb15#1)
+
+	:imp [cloud5]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud5]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud5]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb16#1 = :ctf {eq statusp(S#Sys, C#Client)  = idlep .}
+
+	:apply(csb16#1)
+
+	:def csb17#1 = :ctf {eq statusc(S#Sys)  = idlec .}
+
+	:apply(csb17#1)
+
+	:imp [cloud2]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud2]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud2]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb18#1 = :ctf {eq statusp(S#Sys, C#Client)  = idlep .}
+
+	:apply(csb18#1)
+
+	:def csb19#1 = :ctf {eq statusc(S#Sys)  = idlec .}
+
+	:apply(csb19#1)
+
+	:def csb20#1 = :ctf {eq C0@Client  = C#Client .}
+
+	:apply(csb20#1)
+
+	:imp [cloud6]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb21#1 = :ctf {eq C@Client  = C#Client .}
+
+	:apply(csb21#1)
+
+	:imp [cloud6]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud6]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud6]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud6]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+
+:sel(5)
+	:apply(tc)
+
+	:def csb1#5 = :ctf {eq statusc(S#Sys)  = busy .}
+
+	:apply(csb1#5)
+
+	:def csb2#5 = :ctf {eq statusp(S#Sys, C#Client)  = gotval .}
+
+	:apply(csb2#5)
+
+	:def csb3#5 = :ctf {eq C@Client  = C#Client .}
+
+	:apply(csb3#5)
+
+	:def csb4#5 = :ctf [tmp(S#Sys, C#Client) <= valp(S#Sys, C#Client)  .]
+
+	:apply(csb4#5)
+
+	:imp [cloud]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud]  by {C:Client <- C@Client ;}
+
+	:imp [cloud1]  by {C:Client <- C#Client ;}
+
+	:apply (rd)
+
+	:def csb5#5 = :ctf [tmp(S#Sys, C#Client) <= valp(S#Sys, C#Client)  .]
+
+	:apply(csb5#5)
+
+	:def csb6#5 = :ctf {eq valp(S#Sys, C@Client)  = valp(S#Sys, C#Client) .}
+
+	:apply(csb6#5)
+
+	:imp [cloud]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud]  by {C:Client <- C@Client ;}
+
+	:imp [cloud3]  by {C0:Client <- C#Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [cloud]  by {C:Client <- C@Client ;}
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	:imp [cloud]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb7#5 = :ctf {eq statusc(S#Sys)  = busy .}
+
+	:apply(csb7#5)
+
+	:def csb8#5 = :ctf {eq statusp(S#Sys, C#Client)  = gotval .}
+
+	:apply(csb8#5)
+
+	:def csb9#5 = :ctf {eq C@Client  = C#Client .}
+
+	:apply(csb9#5)
+
+	:imp [cloud1]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud1]  by {C:Client <- C@Client ;}
+
+	:imp [cloud4]  by {C0:Client <- C#Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud1]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud1]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb10#5 = :ctf {eq statusc(S#Sys)  = busy .}
+
+	:apply(csb10#5)
+
+	:def csb11#5 = :ctf {eq statusp(S#Sys, C#Client)  = gotval .}
+
+	:apply(csb11#5)
+
+	:def csb12#5 = :ctf {eq C0@Client  = C#Client .}
+
+	:apply(csb12#5)
+
+	:imp [cloud3]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud3]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:imp [cloud4]  by {C0:Client <- C0@Client ; C:Client <- C#Client ;}
+
+	:apply (rd)
+
+	:imp [cloud3]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud3]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb13#5 = :ctf {eq statusc(S#Sys)  = busy .}
+
+	:apply(csb13#5)
+
+	:def csb14#5 = :ctf {eq statusp(S#Sys, C#Client)  = gotval .}
+
+	:apply(csb14#5)
+
+	:def csb15#5 = :ctf {eq C0@Client  = C#Client .}
+
+	:apply(csb15#5)
+
+	:imp [cloud4]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud4]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:imp [cloud4]  by {C0:Client <- C#Client ; C:Client <- C0@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud4]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud4]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb16#5 = :ctf {eq statusc(S#Sys)  = busy .}
+
+	:apply(csb16#5)
+
+	:def csb17#5 = :ctf {eq statusp(S#Sys, C#Client)  = gotval .}
+
+	:apply(csb17#5)
+
+	:imp [cloud5]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud5]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud5]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb18#5 = :ctf {eq statusc(S#Sys)  = busy .}
+
+	:apply(csb18#5)
+
+	:def csb19#5 = :ctf {eq statusp(S#Sys, C#Client)  = gotval .}
+
+	:apply(csb19#5)
+
+	:imp [cloud2]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud2]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud2]  by {C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:def csb20#5 = :ctf {eq statusc(S#Sys)  = busy .}
+
+	:apply(csb20#5)
+
+	:def csb21#5 = :ctf {eq statusp(S#Sys, C#Client)  = gotval .}
+
+	:apply(csb21#5)
+
+	:def csb22#5 = :ctf {eq C0@Client  = C#Client .}
+
+	:apply(csb22#5)
+
+	:def csb23#5 = :ctf {eq C@Client  = C#Client .}
+
+	:apply(csb23#5)
+
+	:imp [cloud6]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud6]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:imp [cloud3]  by {C0:Client <- C#Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud6]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:imp [cloud3]  by {C0:Client <- C#Client ; C:Client <- C0@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud6]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+
+	:imp [cloud6]  by {C0:Client <- C0@Client ; C:Client <- C@Client ;}
+
+	:apply (rd)
+

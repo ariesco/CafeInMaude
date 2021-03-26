@@ -133,7 +133,7 @@ fmod OPEN-CLOSE-PARSER is
            QIL processRedThCommands(M, TL, P, V, MACS, PO, VS, SIM)
   if QIL := evalRedCommand(M, T, VS) .
  ceq processRedThCommands(M, (':goal`{_`}[T], TL), P, V, MACS, PO, VS, SIM) =
-           QIL processRedThCommands(M, TL, P, V, MACS, PO, VS, SIM)
+           QIL processRedThCommands(M, TL, P', V, MACS, PO', VS, SIM)
   if [P', PO', QIL] := evalGoalCommand(M, T, VS) .
  ceq processRedThCommands(M, (':ind`on`(_`)[T], TL), P, V, MACS, PO, VS, SIM) =
            QIL processRedThCommands(M, TL, P, T', MACS, PO, VS, SIM)
@@ -233,10 +233,10 @@ fmod OPEN-CLOSE-PARSER is
       # M', Q - T2 # := parseTermMacro(P, Q, T') /\
       subsortUnaryBinaryOpConstraints(M', T2) /\
       QIL := '\n Q 'defined 'as ':csvs ' '`[ ' metaPrettyPrint(M', T2, po) ' '`] '\n .
-  ceq processRedThCommands(M, (':show`proof.@CafeInductiveComm@, TL), P, V, MACS, PO, VS, SIM) =
+  ceq processRedThCommands(M, (':show`proof`..@CafeInductiveComm@, TL), P, V, MACS, PO, VS, SIM) =
            QIL processRedThCommands(M, TL, P, V, MACS, PO, VS, SIM)
    if QIL := '\n 'Current 'goals: printGoals(P) .
-  ceq processRedThCommands(M, (':desc`proof.@CafeInductiveComm@, TL), P, V, MACS, PO, VS, SIM) =
+  ceq processRedThCommands(M, (':desc`proof`..@CafeInductiveComm@, TL), P, V, MACS, PO, VS, SIM) =
            QIL processRedThCommands(M, TL, P, V, MACS, PO, VS, SIM)
    if QIL := '\n 'Current 'proof: printProofTree(P) .
   ceq processRedThCommands(M, (':desc`..@CafeInductiveComm@, TL), P, V, MACS, PO, VS, SIM) =
@@ -284,32 +284,6 @@ fmod OPEN-CLOSE-PARSER is
   op getGoalEqs : Term -> TermSet .
   eq getGoalEqs('__[T, T']) = T | getGoalEqs(T') .
   eq getGoalEqs(T) = T [owise] .
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   op evalApply : Module Qid ProofTree Variable Macros ProofOrder -> GoalRes .
   ceq evalApply(M, 'si, P, V, MACS, PO) = [P', PO', QIL]
@@ -425,20 +399,21 @@ fmod OPEN-CLOSE-PARSER is
    if TL := buildArgs(TyL, empty, STR) [owise] .
 
   op procImpSub : Module Term ~> Substitution .
-  eq procImpSub(M, '__[TL]) = $procImpSub(getOps(M), TL) .
+  eq procImpSub(M, '__[TL]) = $procImpSub(M, getOps(M), TL) .
 
-  op $procImpSub : OpDeclSet TermList ~> Substitution .
-  eq $procImpSub(ODS, empty) = none .
-  ceq $procImpSub(ODS, (T, ''<-.Qid, T', '';.Qid, TL)) = V <- C ; $procImpSub(ODS, TL)
+  op $procImpSub : Module OpDeclSet TermList ~> Substitution .
+  eq $procImpSub(M, ODS, empty) = none .
+  ceq $procImpSub(M, ODS, (T, ''<-.Qid, T', '';.Qid, TL)) = V <- C ; $procImpSub(M, ODS, TL)
    if V := downQid(T) /\
       Q := downQid(T') /\
       op Q : nil -> Ty [AtS] . ODS' := ODS /\
+      sameKind(M, Ty, getType(V)) /\
       C := qid(string(Q) + "." + string(Ty)) .
-  ceq $procImpSub(ODS, (T, ''<-.Qid, T', '';.Qid, TL)) = V <- C ; $procImpSub(ODS, TL)
+  ceq $procImpSub(M, ODS, (T, ''<-.Qid, T', '';.Qid, TL)) = V <- C ; $procImpSub(M, ODS, TL)
    if V := downQid(T) /\
       C := downQid(T') .
-  ceq $procImpSub(ODS, (T, ''<-.Qid, T', ''`(.Qid, TL, ''`).Qid,  '';.Qid, TL')) =
-                                                      V <- Q[TL''] ; $procImpSub(ODS, TL')
+  ceq $procImpSub(M, ODS, (T, ''<-.Qid, T', ''`(.Qid, TL, ''`).Qid,  '';.Qid, TL')) =
+                                                      V <- Q[TL''] ; $procImpSub(M, ODS, TL')
    if V := downQid(T) /\
       Q := downQid(T') /\
       TL'' := parseSubList(ODS, TL) .
@@ -471,7 +446,7 @@ fmod OPEN-CLOSE-PARSER is
   ceq $applyTermMacro(| M, [NL, CMD, EqS, true, PRVN], mtPT, N' |, PO, Q, T, Ty) =
                                [| M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, PO']
    if ODS := getCtors(M, Ty) /\
-      TL := ordTrueFalse(buildTermsCtors(ODS, "CS")) /\
+      TL := ordTrueFalse(buildTermsCtors(ODS, "CS" + natlist2string(NL))) /\
       ML := createModules(M, T, TL) /\
       PrL' := createCTFTerm(ML, NL, Q, EqS) /\
       PO' := indProofOrder(fst(PO), size(TL)) y pop(PO) .
@@ -1160,6 +1135,15 @@ fmod OPEN-CLOSE-PARSER is
   eq natlist2string(N) = string(N, 10) + "." .
   eq natlist2string(N NL) = string(N, 10) + "-" + natlist2string(NL) [owise] .
 
+  op printIndexNoDot : NatList -> QidList .
+  eq printIndexNoDot(nil) = nil .
+  eq printIndexNoDot(NL) = qid(natlist2stringNoDot(NL)) .
+
+  op natlist2stringNoDot : NatList -> String .
+  eq natlist2stringNoDot(nil) = "" .
+  eq natlist2stringNoDot(N) = string(N, 10) .
+  eq natlist2stringNoDot(N NL) = string(N, 10) + "-" + natlist2stringNoDot(NL) [owise] .
+
   op printEqS : Module EquationSet QidList -> QidList .
   eq printEqS(M, none, QIL) = nil .
   eq printEqS(M, Eq EqS, QIL) = printEq(M, Eq) '\n QIL printEqS(M, EqS, QIL) .
@@ -1416,7 +1400,7 @@ fmod OPEN-CLOSE-PARSER is
              then selectGoal(P', fst(PO))
              else P'
              fi /\
-      QIL := '\t '*** 'The 'corresponding 'proof 'score 'was 'not 'present. '\n
+      QIL := '\t '-- 'The 'corresponding 'proof 'score 'was 'not 'present. '\n
              '\t ':apply ' '`( 'rd '`) '\n '\n [print "Red forgotten\n"] .
   ceq inferNewProof(P, NL y PO, SIS, MACS) = QIL developProof(P', PO, SIS, MACS)
    if eq T = 'true.Bool [AtS] . := getGoal(P, NL) /\
@@ -1454,7 +1438,7 @@ fmod OPEN-CLOSE-PARSER is
              then selectGoal(P', fst(PO))
              else P'
              fi /\
-      QIL   := '\t '*** 'The 'corresponding 'proof 'score 'was 'not 'present. '\n
+      QIL   := '\t '-- 'The 'corresponding 'proof 'score 'was 'not 'present. '\n
                '\t ':apply ' '`( 'rd '`) '\n '\n /\
       QIL'  := createNewProof(P'', PO, SIS, MACS, s(N)) /\
       QIL'' := if B' or QIL' =/= nil
@@ -1533,7 +1517,7 @@ fmod OPEN-CLOSE-PARSER is
   op tryCaseSplitting : IT Macros QidList String Nat NatList -> IR .
   ceq tryCaseSplitting([M, T, N], MACS, QILR, S, INDENT, NL) = [QILR QIL, MACS, true]
    if redForgotten(M, T) /\
-      QIL := indent(INDENT) '*** qid(S) 'Success 'by 'reduction '\n
+      QIL := indent(INDENT) '-- qid(S) 'Success 'by 'reduction '\n
              indent(INDENT) ':apply ' '`( 'rd '`) '\n '\n .
   ceq tryCaseSplitting([M, T, N], MACS, QILR, S, INDENT, NL) = [QILR QIL, MACS, true]
    if not redForgotten(M, T) /\
@@ -1544,7 +1528,7 @@ fmod OPEN-CLOSE-PARSER is
    if not redForgotten(M, T) /\
       TL := getHypotheses(M) /\
       [IPL, false] := tryImplication(M, T, TL) /\
-      QIL := indent(INDENT) '*** qid(S) 'cannot 'be 'discharged.
+      QIL := indent(INDENT) '-- qid(S) 'cannot 'be 'discharged.
                             'Maximum 'depth 'reached. '\n '\n [print "Max depth"] .
   ceq tryCaseSplitting([M, T, s(N)], MACS, QILR, S, INDENT, NL) =
                  $tryCaseSplitting([M, T, s(N)], MACS, QILR, TPS, TPS'', S, INDENT, 1, NL)
@@ -1554,7 +1538,7 @@ fmod OPEN-CLOSE-PARSER is
       TrS' := getEqTermsWithImps(M, T) /\
       TPS := processEqualityTerm*(M, TrS) /\
       TPS' := processEqualityTerm*(M, TrS' - TrS) /\
-      TPS'' := (TPS' - TPS) [print "TPS " TPS "\nTPS' " TPS'' "\ninit-term " T] .
+      TPS'' := (TPS' - TPS) [print "\nTrS " TrS "\n TrS'" TrS' "\nTPS " TPS "\nTPS' " TPS'' "\ninit-term " T] .
 
 *** For testing purposes, inv9 - rec2
   op prior : TrialPairSet -> TrialPairSet .
@@ -1652,8 +1636,8 @@ fmod OPEN-CLOSE-PARSER is
                                               MACS', S, s(INDENT), 1, NL) /\
       QIL'' := indent(INDENT)
                if B
-               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
-               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
+               then '-- qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
+               else QILR '-- qid(S) '`, 'Try qid(string(N', 10)) '- '
                     metaPrettyPrint(M, T, po) ' '- 'Failure '\n
                fi
                QIL QIL' [print "Case splitting true-false 1 applied " Eq " - " B] .
@@ -1666,7 +1650,7 @@ fmod OPEN-CLOSE-PARSER is
       | MACS', Q | := addNewMac(MACS, M, T') /\
       Ty := getType(metaReduce(M, T')) /\
       ODS := getCtors(M, Ty) /\
-      TL := ordTrueFalse(buildTermsCtors(ODS, "CS" + natlist2string(NL s(N')))) /\
+      TL := ordTrueFalse(buildTermsCtors(ODS, "CS" + natlist2string(NL))) /\ ***  s(N')
       TL =/= empty /\
       ML := createModules(M, T', TL) /\
       ITL := createITL(ML, T, N) /\
@@ -1675,8 +1659,8 @@ fmod OPEN-CLOSE-PARSER is
       EqS := getEqs(M) /\
       QIL'' := indent(INDENT)
                if B
-               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
-               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
+               then '-- qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
+               else QILR '-- qid(S) '`, 'Try qid(string(N', 10)) '- '
                     metaPrettyPrint(M, T, po) ' '- 'Failure '\n
                fi
                QIL QIL' [print "Case splitting term applied " T' " - " B " " TPS " - " TPS'] .
@@ -1697,8 +1681,8 @@ fmod OPEN-CLOSE-PARSER is
       EqS := getEqs(M') /\
       QIL'' := indent(INDENT)
                if B
-               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
-               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
+               then '-- qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
+               else QILR '-- qid(S) '`, 'Try qid(string(N', 10)) '- '
                     metaPrettyPrint(M, T, po) ' '- 'Failure '\n
                fi
                QIL QIL' [print "Case splitting true-false 2 applied " Eq " - " B " - " TPS] .
@@ -1711,7 +1695,7 @@ fmod OPEN-CLOSE-PARSER is
       | MACS', Q | := addNewMac(MACS, M, T') /\
       Ty := getType(metaReduce(M, T')) /\
       ODS := getCtors(M, Ty) /\
-      TL := ordTrueFalse(buildTermsCtors(ODS, "CS" + natlist2string(NL s(N')))) /\
+      TL := ordTrueFalse(buildTermsCtors(ODS, "CS" + natlist2string(NL))) /\ ***  s(N')
       TL =/= empty /\
       ML := createModules(M, T', TL) /\
       ITL := createITL(ML, T, N) /\
@@ -1720,8 +1704,8 @@ fmod OPEN-CLOSE-PARSER is
       EqS := getEqs(M) /\
       QIL'' := indent(INDENT)
                if B
-               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
-               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
+               then '-- qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
+               else QILR '-- qid(S) '`, 'Try qid(string(N', 10)) '- '
                     metaPrettyPrint(M, T, po) ' '- 'Failure '\n
                fi
                QIL QIL' [print "Case splitting term applied " T' " - " B] .
@@ -1743,8 +1727,8 @@ fmod OPEN-CLOSE-PARSER is
       EqS := getEqs(M) /\
       QIL'' := indent(INDENT)
                if B
-               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
-               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
+               then '-- qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
+               else QILR '-- qid(S) '`, 'Try qid(string(N', 10)) '- '
                     metaPrettyPrint(M, T, po) ' '- 'Failure '\n
                fi
                QIL QIL' [print "Case splitting cevs term applied " T' " - " B " - " TL'] .
@@ -1763,8 +1747,8 @@ fmod OPEN-CLOSE-PARSER is
       [QIL', MACS'', B] := tryCaseSplitting*(ITL, MACS', S, s(INDENT), 1, NL) /\
       QIL'' := indent(INDENT)
                if B
-               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
-               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
+               then '-- qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
+               else QILR '-- qid(S) '`, 'Try qid(string(N', 10)) '- '
                     metaPrettyPrint(M, T, po) ' '- 'Failure '\n
                fi
                QIL QIL' [print "Case splitting cevs term applied " T' " - " B] .
@@ -1786,8 +1770,8 @@ fmod OPEN-CLOSE-PARSER is
       EqS := getEqs(M) /\
       QIL'' := indent(INDENT)
                if B
-               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
-               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
+               then '-- qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
+               else QILR '-- qid(S) '`, 'Try qid(string(N', 10)) '- '
                     metaPrettyPrint(M, T, po) ' '- 'Failure '\n
                fi
                QIL QIL' [print "Case splitting cevs term applied " T' " - " B " - " TL'] .
@@ -1806,8 +1790,8 @@ fmod OPEN-CLOSE-PARSER is
       [QIL', MACS'', B] := tryCaseSplitting*(ITL, MACS', S, s(INDENT), 1, NL) /\
       QIL'' := indent(INDENT)
                if B
-               then '*** qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
-               else QILR '*** qid(S) '`, 'Try qid(string(N', 10)) '- '
+               then '-- qid(S) ' '- ' metaPrettyPrint(M, T, po) ' '- 'Success '\n
+               else QILR '-- qid(S) '`, 'Try qid(string(N', 10)) '- '
                     metaPrettyPrint(M, T, po) ' '- 'Failure '\n
                fi
                QIL QIL' [print "Case splitting cevs term applied " T' " - " B] .
@@ -1847,7 +1831,7 @@ fmod OPEN-CLOSE-PARSER is
   ceq processEqualityTerm(M, '_=_[T, T']) = mtTPS
    if subterm(T, T') .
   ceq processEqualityTerm(M, Q[TL]) = processEqualityTerm*(M, tl2ts(TL))
-   if containsBoolOps*(TL) . *** [print "Equality Bools " Q "(" TL ")"] .
+   if containsBoolOps*(TL) [print "Equality Bools " Q "(" TL ")"] .
   eq processEqualityTerm(M, '_=_[T, T]) = mtTPS .
   *** Built-in strategies for sequences: built sequences with same top constructor
   ceq processEqualityTerm(M, '_=_[T, T']) = seqEqualities(M, T, T')
@@ -1911,7 +1895,7 @@ fmod OPEN-CLOSE-PARSER is
       not es&esCheck(M, T, T') /\
       not seese&seCheck(M, T, T') /\
       not es&esCheck(M, T', T) [print "es&es 2 " T " = " T'] .
-  eq processEqualityTerm(M, T) = $processEqualityTerm(M, T) [owise] . *** print "Eq terms owise " T] .
+  eq processEqualityTerm(M, T) = $processEqualityTerm(M, T) [owise print "Eq terms owise " T] .
 
   op subterm : Term Term -> Bool .
   eq subterm(T, Q[TL, T, TL']) = true .
@@ -1947,7 +1931,7 @@ fmod OPEN-CLOSE-PARSER is
       allCtor(M, T2) . *** [print "Equality term 3 " T1 " = " T2] .
   ceq $processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T1, T2], ctf] *** cevs?
    if isFreshCons(M, T1) /\
-      isFreshCons(M, T2) . *** [print "Equality term 4 " T1 " = " T2] .
+      isFreshCons(M, T2) [print "Equality term 4 " T1 " = " T2] .
   ceq $processEqualityTerm(M, '_=_[T1, T2]) =  $processEqualityTerm(M, T1)
    if not (allCtor(M, T1) or isFreshCons(M, T1)) /\
       allCtor(M, T2) . *** [print "Equality term 5 " T1 " = " T2] .
@@ -1962,16 +1946,16 @@ fmod OPEN-CLOSE-PARSER is
    if isFreshCons(M, T1) /\
       hasVars(T2) /\
       not (allCtor(M, T2) or isFreshCons(M, T2)) .
-  ceq $processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T1, T2], ctf] *** ['_=_[T2, T1], ctf]
+  ceq $processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T2, T1], ctf] *** ['_=_[T1, T2], ctf]
                                               $processEqualityTerm(M, T2)
    if isFreshCons(M, T1) /\
       not hasVars(T2) /\
-      not (allCtor(M, T2) or isFreshCons(M, T2)) . *** [print "Equality term 8 " T1 " = " T2] .
+      not (allCtor(M, T2) or isFreshCons(M, T2)) [print "Equality term 8 " T1 " = " T2] .
   ceq $processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T1, T2], ctf] *** !!! Seq
                                               processEqualityTerm*(M, T1 | T2)
    if not (allCtor(M, T1) or isFreshCons(M, T1)) /\
       not (allCtor(M, T2) or isFreshCons(M, T2)) /\
-      noneCtor(M, T1) /\ noneCtor(M, T2) . *** [print "Equality term 9 " T1 " = " T2] .
+      noneCtor(M, T1) /\ noneCtor(M, T2) [print "Equality term 9 " T1 " = " T2] .
   ceq $processEqualityTerm(M, '_=_[T1, T2]) = processEqualityTerm*(M, T1 | T2)
    if not (allCtor(M, T1) or isFreshCons(M, T1)) /\
       not (allCtor(M, T2) or isFreshCons(M, T2)) /\
@@ -2335,7 +2319,7 @@ and \verb"sizeTL" just computes the size of a list of terms:
   ceq getEqTermsWithImps*(M, T, (T', TL)) = getEqTermWithImpsInst(M, T, TSPS) |
                                             getEqTermsWithImps*(M, T, TL)
    if numVars(T') <= numInstVars /\
-      TSPS := allIns(M, [T', none, getLabel(M, T')]) .
+      TSPS := allIns(M, [T', none, getLabel(M, T')]) [owise] .
   ceq getEqTermsWithImps*(M, T, (T', TL)) = getEqualityTerms(M, T1, T) |
                                             getEqTermsWithImps*(M, T, TL)
    if T1 := reduce(M, '_implies_[T', T]) [owise] . *** print "Implication owise with " T' " - " T1] .
@@ -2497,41 +2481,7 @@ and \verb"sizeTL" just computes the size of a list of terms:
   var  IP : ImpPair .
 
   op tryImplication : Module Term TermList -> ImpTryRes .
-  eq tryImplication(M, T, TL) = if preinstantiationOn
-                                then tryImplication(M, T, TL, extraImpLevels)
-                                else trySimpleImplication(M, T, TL, extraImpLevels)
-                                fi .
-
-
-  --- Preinstantiation off
-  op trySimpleImplication : Module Term TermList Nat -> ImpTryRes .
-  ceq trySimpleImplication(M, Q[TL], (TL1, Q[TL'], TL2), N) =
-                                    if T'' == 'true.Bool
-                                    then [IP, true]
-                                    else $trySimpleImplication(M, '_implies_[T', Q[TL]],
-                                                         (TL1, Q[TL'], TL2),
-                                                         (TL1, Q[TL'], TL2), IP, N)
-                                    fi
-   if SB := basicSB*(TL', TL) /\
-      T' := substitute(Q[TL'], SB) /\
-      T'' := reduce(M, '_implies_[T', Q[TL]]) /\
-      Q' := getLabel(M, Q[TL']) /\
-      IP := [T', Q', SB] .
-
-  op $trySimpleImplication : Module Term TermList TermList ImpPair Nat -> ImpTryRes .
-  eq $trySimpleImplication(M, T, empty, TL, IP, N) = [nilIPL, false] .
-  eq $trySimpleImplication(M, T, TL, TL', IP, 0) = [nilIPL, false] .
-  ceq $trySimpleImplication(M, T, (T', TL), TL', IP, s(0)) = [IP [T'', Q, SB'], true]
-   if numVars(T') <= numInstVars /\
-      [T'', SB', Q] TSPS := allIns(M, [T', none, getLabel(M, T')]) /\
-      reduce(M, '_implies_[T'', T]) == 'true.Bool [print "D " TSPS] .
-  ceq $trySimpleImplication(M, T, (T', TL), TL', IP, s(s(N))) = [IP [T'', Q, SB'], true]
-   if numVars(T') <= numInstVars /\
-      [T'', SB', Q] TSPS := allIns(M, [T', none, getLabel(M, T')]) /\
-      [IPL, true] := $trySimpleImplication(M, '_implies_[T'', T], TL', TL', IP, s(N)) [print "C " TSPS] .
-  eq $trySimpleImplication(M, T, (T', TL), TL', IP, s(N)) = $trySimpleImplication(M, T, TL, TL', IP, s(N)) [owise print "B " TL "\nCon " T] .
-
-  --- Preinstantiation on
+  eq tryImplication(M, T, TL) = tryImplication(M, T, TL, extraImpLevels) .
 
   op tryImplication : Module Term TermList Nat -> ImpTryRes .
   ceq tryImplication(M, Q[TL], (TL1, Q[TL'], TL2), N) =
@@ -2672,10 +2622,10 @@ and \verb"sizeTL" just computes the size of a list of terms:
   *** We assume it reduces the term to true, so the last command is a reduction.
   op printImpCom : ImpPairList -> QidList .
   eq printImpCom(nilIPL) =
-             '\t '*** 'The 'corresponding 'proof 'score 'was 'not 'present. '\n
+             '\t '-- 'The 'corresponding 'proof 'score 'was 'not 'present. '\n
              '\t ':apply ' '`( 'rd '`) '\n '\n .
   eq printImpCom([T, Q, SB] IPL) =
-             '\t '*** 'The 'corresponding 'proof 'score 'was 'not 'present. '\n
+             '\t '-- 'The 'corresponding 'proof 'score 'was 'not 'present. '\n
              if SB == none
              then '\t ':imp ' '`[ Q '`] ' '. '\n '\n
              else '\t ':imp ' '`[ Q '`] ' 'by ' '`{ printSub(SB) '`} '\n '\n
@@ -2685,7 +2635,7 @@ and \verb"sizeTL" just computes the size of a list of terms:
   *** We assume it reduces the term to true, so the last command is a reduction.
   op printImpCom : ImpPairList String Nat -> QidList .
   eq printImpCom(IPL, S, INDENT) =
-             indent(INDENT) '*** qid(S) 'Success 'by 'implication 'and 'reduction. '\n
+             indent(INDENT) '-- qid(S) 'Success 'by 'implication 'and 'reduction. '\n
              printImpCom(IPL, INDENT) .
 
   op printImpCom : ImpPairList Nat -> QidList .
@@ -3295,7 +3245,7 @@ and \verb"sizeTL" just computes the size of a list of terms:
 
   op numReps : Term Variable -> Nat .
   eq numReps(C, V) = 0 .
-  eq numReps(V, V') = if V == V'
+  eq numReps(V, V') = if getName(V) == getName(V')
                       then 1
                       else 0
                       fi .

@@ -1,0 +1,33 @@
+load ../examples/CCiMPG/NSLPK/nslpk.cafe .
+
+set-cores 4 .
+
+set-output ../examples/CCiMPG/NSLPK/nslpk-proof-generate.cafe .
+
+open NSLPK .
+  :id(proofNSLPK)
+
+  ops n1 n2 : -> Nonce .
+  op  q : -> Prin .
+
+  red inv1(S:Sys, n1) .
+  red inv2(S:Sys, n1, q) .
+  red inv3(S:Sys, n1, n2, q) .
+close
+
+:infer-proof proofNSLPK .
+
+eof
+
+:save-proof .
+
+load ../examples/CCiMPG/NSLPK/nslpk-proof-generate.cafe .
+
+eof
+
+load ../examples/CCiMPG/NSLPK/commands_generate.cafe .
+
+Suggested configuration:
+  eq backtrackLevels = 6 .
+  eq numInstVars = 2 .
+  eq extraImpLevels = 1 .

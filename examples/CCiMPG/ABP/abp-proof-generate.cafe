@@ -1,0 +1,522 @@
+
+:goal{
+eq [proofABP :nonexec] : inv1(S:Sys)  = true .
+ eq [proofABP9 :nonexec] : inv10(S:Sys, b1:Bit)  = true .
+ eq [proofABP10 :nonexec] : inv11(S:Sys, b1:Bit, p1:Packet)  = true .
+ eq [proofABP1 :nonexec] : inv2(S:Sys)  = true .
+ eq [proofABP2 :nonexec] : inv3(S:Sys)  = true .
+ eq [proofABP3 :nonexec] : inv4(S:Sys, b1:Bit)  = true .
+ eq [proofABP4 :nonexec] : inv5(S:Sys, b1:Bit)  = true .
+ eq [proofABP5 :nonexec] : inv6(S:Sys, p1:Packet, b1:Bit)  = true .
+ eq [proofABP6 :nonexec] : inv7(S:Sys, p1:Packet, b1:Bit)  = true .
+ eq [proofABP7 :nonexec] : inv8(S:Sys, b1:Bit, b2:Bit, b3:Bit, bs1:BSeq, bs2:BSeq)  = true .
+ eq [proofABP8 :nonexec] : inv9(S:Sys, b1:Bit, b2:Bit, b3:Bit, p1:Packet, p2:Packet, p3:Packet, pbps1:PBPSeq, pbps2:PBPSeq)  = true .
+}
+:ind on (S:Sys)
+:apply(si)
+:sel(1)
+	:apply(tc)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP10]  by {b1:Bit <- b1@Bit ; p1:Packet <- p1@Packet ;}
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP1]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP3]  by {b1:Bit <- b1@Bit ;}
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP4]  by {b1:Bit <- b1@Bit ;}
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+
+:sel(4)
+	:apply(tc)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP10]  by {b1:Bit <- b1@Bit ; p1:Packet <- p1@Packet ;}
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP1]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP3]  by {b1:Bit <- b1@Bit ;}
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP4]  by {b1:Bit <- b1@Bit ;}
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+
+:sel(3)
+	:apply(tc)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP10]  by {b1:Bit <- b1@Bit ; p1:Packet <- p1@Packet ;}
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP1]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP3]  by {b1:Bit <- b1@Bit ;}
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP4]  by {b1:Bit <- b1@Bit ;}
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+
+:sel(2)
+	:apply(tc)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP10]  by {b1:Bit <- b1@Bit ; p1:Packet <- p1@Packet ;}
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP1]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP3]  by {b1:Bit <- b1@Bit ;}
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP4]  by {b1:Bit <- b1@Bit ;}
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+
+:sel(5)
+	:apply(tc)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+
+:sel(8)
+	:apply(tc)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP10]  by {b1:Bit <- b1@Bit ; p1:Packet <- p1@Packet ;}
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP1]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP3]  by {b1:Bit <- b1@Bit ;}
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP4]  by {b1:Bit <- b1@Bit ;}
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+
+:sel(7)
+	:apply(tc)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP10]  by {b1:Bit <- b1@Bit ; p1:Packet <- p1@Packet ;}
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP1]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP3]  by {b1:Bit <- b1@Bit ;}
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP4]  by {b1:Bit <- b1@Bit ;}
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+
+:sel(6)
+	:apply(tc)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP10]  by {b1:Bit <- b1@Bit ; p1:Packet <- p1@Packet ;}
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP1]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP3]  by {b1:Bit <- b1@Bit ;}
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP4]  by {b1:Bit <- b1@Bit ;}
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+
+:sel(9)
+	:apply(tc)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP10]  by {b1:Bit <- b1@Bit ; p1:Packet <- p1@Packet ;}
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP1]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP3]  by {b1:Bit <- b1@Bit ;}
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofABP4]  by {b1:Bit <- b1@Bit ;}
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+

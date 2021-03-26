@@ -1,0 +1,31 @@
+load ../examples/CCiMPG/Cloud/cloud.cafe .
+
+set-cores 4 .
+
+set-output ../examples/CCiMPG/Cloud/cloud-proof-generate.cafe .
+
+open CLOUD .
+  :id(cloud)
+
+  ops i j : -> Client .
+
+  red inv1(S:Sys, i) .
+  red inv2(S:Sys, i) .
+  red inv3(S:Sys, i, j) .
+  red inv4(S:Sys, i, j) .
+  red inv5(S:Sys, i) .
+  red inv6(S:Sys, i) .
+  red inv7(S:Sys, i, j) .
+close
+
+:infer-proof cloud .
+
+:save-proof .
+
+eof
+
+load ../examples/CCiMPG/Cloud/cloud-proof-generate.cafe .
+
+eof
+
+load ../examples/CCiMPG/Cloud/commands_generate.cafe .

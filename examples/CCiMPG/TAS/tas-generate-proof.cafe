@@ -1,0 +1,190 @@
+
+:goal{
+eq [tas :nonexec] : inv1(S:Sys, i:Pid, j:Pid)  = true .
+ eq [tas1 :nonexec] : inv2(S:Sys, i:Pid)  = true .
+}
+:ind on (S:Sys)
+:apply(si)
+:sel(2)
+	:apply(tc)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+
+:sel(1)
+	:apply(tc)
+
+	-- Goal`1-1  -  inv1(enter(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+	:def csb1#1 = :ctf {eq i@Pid  = j@Pid .}
+
+	:apply(csb1#1)
+
+		-- Goal`1-1-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`1-1-2  -  inv1(enter(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+		:def csb2#1 = :ctf [lock(S#Sys)  .]
+
+		:apply(csb2#1)
+
+			-- Goal`1-1-2-1 Success by implication and reduction.
+			:imp [tas]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+			:apply (rd)
+
+			-- Goal`1-1-2-2  -  inv1(enter(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+			:def csb3#1 = :ctf [pc(S#Sys, P#Pid)  .]
+
+			:apply(csb3#1)
+
+				-- Goal`1-1-2-2-1 Success by implication and reduction.
+				:imp [tas]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+				:apply (rd)
+
+				-- Goal`1-1-2-2-2  -  inv1(enter(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+				:def csb4#1 = :ctf {eq P#Pid  = i@Pid .}
+
+				:apply(csb4#1)
+
+					-- Goal`1-1-2-2-2-1  -  inv1(enter(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+					:def csb5#1 = :ctf [pc(S#Sys, i@Pid)  .]
+
+					:apply(csb5#1)
+
+						-- Goal`1-1-2-2-2-1-1 Success by implication and reduction.
+						:imp [tas]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+						:apply (rd)
+
+						-- Goal`1-1-2-2-2-1-2 Success by implication and reduction.
+						:imp [tas]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+						:imp [tas1]  by {i:Pid <- j@Pid ;}
+
+						:apply (rd)
+
+					-- Goal`1-1-2-2-2-2 Success by implication and reduction.
+					:imp [tas]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+					:imp [tas1]  by {i:Pid <- i@Pid ;}
+
+					:apply (rd)
+
+	-- Goal`1-2  -  inv2(enter(S#Sys, P#Pid), i@Pid)  - Success
+	:def csb6#1 = :ctf [lock(S#Sys)  .]
+
+	:apply(csb6#1)
+
+		-- Goal`1-2-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`1-2-2  -  inv2(enter(S#Sys, P#Pid), i@Pid)  - Success
+		:def csb7#1 = :ctf [pc(S#Sys, P#Pid)  .]
+
+		:apply(csb7#1)
+
+			-- Goal`1-2-2-1 Success by implication and reduction.
+			:imp [tas1]  by {i:Pid <- i@Pid ;}
+
+			:apply (rd)
+
+			-- Goal`1-2-2-2 Success by reduction
+			:apply (rd)
+
+
+:sel(3)
+	:apply(tc)
+
+	-- Goal`3-1  -  inv1(leave(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+	:def csb1#3 = :ctf {eq i@Pid  = j@Pid .}
+
+	:apply(csb1#3)
+
+		-- Goal`3-1-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`3-1-2  -  inv1(leave(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+		:def csb2#3 = :ctf [pc(S#Sys, P#Pid)  .]
+
+		:apply(csb2#3)
+
+			-- Goal`3-1-2-1  -  inv1(leave(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+			:def csb3#3 = :ctf {eq P#Pid  = i@Pid .}
+
+			:apply(csb3#3)
+
+				-- Goal`3-1-2-1-1  -  inv1(leave(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+				:def csb4#3 = :ctf [pc(S#Sys, i@Pid)  .]
+
+				:apply(csb4#3)
+
+					-- Goal`3-1-2-1-1-1 Success by reduction
+					:apply (rd)
+
+					-- Goal`3-1-2-1-1-2 Success by reduction
+					:apply (rd)
+
+				-- Goal`3-1-2-1-2  -  inv1(leave(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+				:def csb5#3 = :ctf {eq P#Pid  = j@Pid .}
+
+				:apply(csb5#3)
+
+					-- Goal`3-1-2-1-2-1  -  inv1(leave(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+					:def csb6#3 = :ctf [pc(S#Sys, j@Pid)  .]
+
+					:apply(csb6#3)
+
+						-- Goal`3-1-2-1-2-1-1 Success by reduction
+						:apply (rd)
+
+						-- Goal`3-1-2-1-2-1-2 Success by reduction
+						:apply (rd)
+
+					-- Goal`3-1-2-1-2-2 Success by implication and reduction.
+					:imp [tas]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+					:apply (rd)
+
+			-- Goal`3-1-2-2 Success by implication and reduction.
+			:imp [tas]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+			:apply (rd)
+
+	-- Goal`3-2  -  inv2(leave(S#Sys, P#Pid), i@Pid)  - Success
+	:def csb7#3 = :ctf [pc(S#Sys, P#Pid)  .]
+
+	:apply(csb7#3)
+
+		-- Goal`3-2-1  -  inv2(leave(S#Sys, P#Pid), i@Pid)  - Success
+		:def csb8#3 = :ctf {eq P#Pid  = i@Pid .}
+
+		:apply(csb8#3)
+
+			-- Goal`3-2-1-1  -  inv2(leave(S#Sys, P#Pid), i@Pid)  - Success
+			:def csb9#3 = :ctf [pc(S#Sys, i@Pid)  .]
+
+			:apply(csb9#3)
+
+				-- Goal`3-2-1-1-1 Success by reduction
+				:apply (rd)
+
+				-- Goal`3-2-1-1-2 Success by reduction
+				:apply (rd)
+
+			-- Goal`3-2-1-2 Success by implication and reduction.
+			:imp [tas1]  by {i:Pid <- i@Pid ;}
+
+			:imp [tas]  by {i:Pid <- i@Pid ; j:Pid <- P#Pid ;}
+
+			:apply (rd)
+
+		-- Goal`3-2-2 Success by implication and reduction.
+		:imp [tas1]  by {i:Pid <- i@Pid ;}
+
+		:apply (rd)
+

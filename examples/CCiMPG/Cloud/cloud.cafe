@@ -1,0 +1,126 @@
+mod! LABELC {
+  [LabelC]
+  ops idlec busy : -> LabelC {constr}
+  eq (idlec = busy) = false .
+}
+
+mod! LABELP {
+  [LabelP]
+  ops idlep gotval updated : -> LabelP {constr}
+  eq (idlep = gotval) = false .
+  eq (idlep = updated) = false .
+  eq (gotval = updated) = false .
+}
+
+mod* CLIENT {
+  [Client]
+}
+
+mod* VALUE {
+  [Value]
+  op mv : -> Value {constr}
+  op _<=_ : Value Value -> Bool .
+  var V : Value
+  eq (V <= V) = true .
+  eq (mv <= V) = true .
+}
+
+mod* CLOUD {
+  pr(LABELP)
+  pr(LABELC)
+  pr(CLIENT)
+  pr(VALUE)
+  [Sys]
+  -- initial states
+  op init : -> Sys {constr}
+  -- transitions
+  op modval : Sys Client -> Sys {constr}
+  op getval : Sys Client -> Sys {constr}
+  op update : Sys Client -> Sys {constr}
+  op gotoidle : Sys Client -> Sys {constr}
+  -- observers
+  op statusc : Sys -> LabelC
+  op valc : Sys -> Value
+  op statusp : Sys Client -> LabelP
+  op valp : Sys Client -> Value
+  op tmp : Sys Client -> Value
+  --
+  var S : Sys
+  vars I J : Client .
+  --
+  -- A new value is generated based on a system state and a client.
+  --
+  op new : Sys Client -> Value
+  --
+  -- init
+  eq statusc(init) = idlec .
+  eq statusp(init,I) = idlep .
+  --
+  -- We do not care about what valc(init), valp(init,I) and tmp(init,I) are.
+  --
+  -- modval
+  --
+  eq statusc(modval(S,I)) = statusc(S) .
+  eq valc(modval(S,I)) = valc(S) .
+  eq statusp(modval(S,I),J) = statusp(S,J) .
+  ceq valp(modval(S,I),J) = (if I = J then new(S,I) else valp(S,J) fi)
+    if statusp(S,I) = idlep .
+  eq tmp(modval(S,I),J) = tmp(S,J) .
+  ceq modval(S,I) = S if not(statusp(S,I) = idlep) .
+  --
+  -- getval
+  --
+  ceq statusc(getval(S,I)) = busy if statusp(S,I) = idlep and statusc(S) = idlec .
+  eq valc(getval(S,I)) = valc(S) .
+  ceq statusp(getval(S,I),J) = (if I = J then gotval else statusp(S,J) fi)
+    if statusp(S,I) = idlep and statusc(S) = idlec .
+  eq valp(getval(S,I),J) = valp(S,J) .
+  ceq tmp(getval(S,I),J) = (if I = J then valc(S) else tmp(S,J) fi)
+    if statusp(S,I) = idlep and statusc(S) = idlec .
+  ceq getval(S,I) = S if not(statusp(S,I) = idlep and statusc(S) = idlec) .
+  --
+  -- update
+  --
+  eq statusc(update(S,I)) = statusc(S) .
+  ceq valc(update(S,I)) = (if tmp(S,I) <= valp(S,I) then valp(S,I) else valc(S) fi)
+    if statusc(S) = busy and statusp(S,I) = gotval .
+  ceq statusp(update(S,I),J)= (if I = J then updated else statusp(S,J) fi)
+    if statusc(S) = busy and statusp(S,I) = gotval .
+  ceq valp(update(S,I),J)
+    = (if I = J then (if tmp(S,I) <= valp(S,I) then valp(S,I) else tmp(S,I) fi) else valp(S,J) fi)
+    if statusc(S) = busy and statusp(S,I) = gotval .
+  ceq tmp(update(S,I),J)
+    = (if I = J then (if tmp(S,I) <= valp(S,I) then valp(S,I) else tmp(S,I) fi) else tmp(S,J) fi)
+    if statusc(S) = busy and statusp(S,I) = gotval .
+  ceq update(S,I) = S if not(statusc(S) = busy and statusp(S,I) = gotval) .
+  --
+  -- gotoidle
+  --
+  ceq statusc(gotoidle(S,I)) = idlec
+    if statusc(S) = busy and statusp(S,I) = updated .
+  eq valc(gotoidle(S,I)) = valc(S) .
+  ceq statusp(gotoidle(S,I),J) = (if I = J then idlep else statusp(S,J) fi)
+    if statusc(S) = busy and statusp(S,I) = updated .
+  eq valp(gotoidle(S,I),J) = valp(S,J) .
+  ceq tmp(gotoidle(S,I),J) = (if I = J then mv else tmp(S,J) fi)
+    if statusc(S) = busy and statusp(S,I) = updated .
+  ceq gotoidle(S,I) = S if not(statusc(S) = busy and statusp(S,I) = updated) .
+--
+  --
+  -- Properties to be verified
+  --
+  op inv1 : Sys Client -> Bool
+  op inv2 : Sys Client -> Bool
+  op inv3 : Sys Client Client -> Bool
+  op inv4 : Sys Client Client -> Bool
+  op inv5 : Sys Client -> Bool
+  op inv6 : Sys Client -> Bool
+  op inv7 : Sys Client Client -> Bool
+  eq inv1(S,I) = (statusp(S,I) = updated implies valp(S,I) = valc(S)) .
+  eq inv2(S,I) = (statusp(S,I) = gotval implies tmp(S,I) = valc(S)) .
+  eq inv3(S,I,J) = (statusp(S,I) = updated and statusp(S,J) = gotval implies I = J) .
+  eq inv4(S,I,J) = (statusp(S,I) = gotval and statusp(S,J) = gotval implies I = J) .
+  eq inv5(S,I) = not(statusp(S,I) = updated and statusc(S) = idlec) .
+  eq inv6(S,I) = not(statusp(S,I) = gotval and statusc(S) = idlec) .
+  eq inv7(S,I,J) = (statusp(S,I) = updated and statusp(S,J) = updated implies I = J) .
+}

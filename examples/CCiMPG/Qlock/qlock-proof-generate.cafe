@@ -1,0 +1,410 @@
+
+:goal{
+eq [qlock :nonexec] : inv1(S:Sys, i:Pid, j:Pid)  = true .
+ eq [qlock1 :nonexec] : inv2(S:Sys, k:Pid)  = true .
+}
+:ind on (S:Sys)
+:apply(si)
+:sel(2)
+	:apply(tc)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+
+:sel(3)
+	:apply(tc)
+
+	-- Goal`3-1  -  inv1(try(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+	:def csb1#3 = :ctf {eq i@Pid  = j@Pid .}
+
+	:apply(csb1#3)
+
+		-- Goal`3-1-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`3-1-2  -  inv1(try(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+		:def csb2#3 = :ctf {eq top(queue(S#Sys))  = P#Pid .}
+
+		:apply(csb2#3)
+
+			-- Goal`3-1-2-1  -  inv1(try(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+			:def csb3#3 = :ctf [pc(S#Sys, P#Pid)  .]
+
+			:apply(csb3#3)
+
+				-- Goal`3-1-2-1-1 Success by implication and reduction.
+				:imp [qlock]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+				:apply (rd)
+
+				-- Goal`3-1-2-1-2 Success by implication and reduction.
+				:imp [qlock]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+				:apply (rd)
+
+				-- Goal`3-1-2-1-3  -  inv1(try(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+				:def csb4#3 = :ctf {eq P#Pid  = i@Pid .}
+
+				:apply(csb4#3)
+
+					-- Goal`3-1-2-1-3-1  -  inv1(try(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+					:def csb5#3 = :ctf [pc(S#Sys, i@Pid)  .]
+
+					:apply(csb5#3)
+
+						-- Goal`3-1-2-1-3-1-1 Success by implication and reduction.
+						:imp [qlock]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+						:apply (rd)
+
+						-- Goal`3-1-2-1-3-1-2 Success by reduction
+						:apply (rd)
+
+						-- Goal`3-1-2-1-3-1-3 Success by implication and reduction.
+						:imp [qlock]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+						:imp [qlock1]  by {k:Pid <- j@Pid ;}
+
+						:apply (rd)
+
+					-- Goal`3-1-2-1-3-2 Success by implication and reduction.
+					:imp [qlock]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+					:imp [qlock1]  by {k:Pid <- i@Pid ;}
+
+					:apply (rd)
+
+			-- Goal`3-1-2-2 Success by implication and reduction.
+			:imp [qlock]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+			:apply (rd)
+
+	-- Goal`3-2  -  inv2(try(S#Sys, P#Pid), k@Pid)  - Success
+	:def csb6#3 = :ctf {eq top(queue(S#Sys))  = P#Pid .}
+
+	:apply(csb6#3)
+
+		-- Goal`3-2-1  -  inv2(try(S#Sys, P#Pid), k@Pid)  - Success
+		:def csb7#3 = :ctf {eq P#Pid  = k@Pid .}
+
+		:apply(csb7#3)
+
+			-- Goal`3-2-1-1 Success by reduction
+			:apply (rd)
+
+			-- Goal`3-2-1-2  -  inv2(try(S#Sys, P#Pid), k@Pid)  - Success
+			:def csb8#3 = :ctf [pc(S#Sys, P#Pid)  .]
+
+			:apply(csb8#3)
+
+				-- Goal`3-2-1-2-1 Success by implication and reduction.
+				:imp [qlock1]  by {k:Pid <- k@Pid ;}
+
+				:apply (rd)
+
+				-- Goal`3-2-1-2-2 Success by implication and reduction.
+				:imp [qlock1]  by {k:Pid <- k@Pid ;}
+
+				:apply (rd)
+
+				-- Goal`3-2-1-2-3 Success by implication and reduction.
+				:imp [qlock1]  by {k:Pid <- k@Pid ;}
+
+				:apply (rd)
+
+		-- Goal`3-2-2 Success by implication and reduction.
+		:imp [qlock1]  by {k:Pid <- k@Pid ;}
+
+		:apply (rd)
+
+
+:sel(1)
+	:apply(tc)
+
+	-- Goal`1-1  -  inv1(exit(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+	:def csb1#1 = :ctf {eq i@Pid  = j@Pid .}
+
+	:apply(csb1#1)
+
+		-- Goal`1-1-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`1-1-2  -  inv1(exit(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+		:def csb2#1 = :ctf [pc(S#Sys, P#Pid)  .]
+
+		:apply(csb2#1)
+
+			-- Goal`1-1-2-1  -  inv1(exit(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+			:def csb3#1 = :ctf {eq P#Pid  = i@Pid .}
+
+			:apply(csb3#1)
+
+				-- Goal`1-1-2-1-1  -  inv1(exit(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+				:def csb4#1 = :ctf [pc(S#Sys, i@Pid)  .]
+
+				:apply(csb4#1)
+
+					-- Goal`1-1-2-1-1-1 Success by reduction
+					:apply (rd)
+
+					-- Goal`1-1-2-1-1-2 Success by reduction
+					:apply (rd)
+
+					-- Goal`1-1-2-1-1-3 Success by reduction
+					:apply (rd)
+
+				-- Goal`1-1-2-1-2  -  inv1(exit(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+				:def csb5#1 = :ctf {eq P#Pid  = j@Pid .}
+
+				:apply(csb5#1)
+
+					-- Goal`1-1-2-1-2-1  -  inv1(exit(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+					:def csb6#1 = :ctf [pc(S#Sys, j@Pid)  .]
+
+					:apply(csb6#1)
+
+						-- Goal`1-1-2-1-2-1-1 Success by reduction
+						:apply (rd)
+
+						-- Goal`1-1-2-1-2-1-2 Success by reduction
+						:apply (rd)
+
+						-- Goal`1-1-2-1-2-1-3 Success by reduction
+						:apply (rd)
+
+					-- Goal`1-1-2-1-2-2 Success by implication and reduction.
+					:imp [qlock]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+					:apply (rd)
+
+			-- Goal`1-1-2-2 Success by implication and reduction.
+			:imp [qlock]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+			:apply (rd)
+
+			-- Goal`1-1-2-3 Success by implication and reduction.
+			:imp [qlock]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+			:apply (rd)
+
+	-- Goal`1-2  -  inv2(exit(S#Sys, P#Pid), k@Pid)  - Success
+	:def csb7#1 = :ctf {eq top(queue(exit(S#Sys, P#Pid)))  = k@Pid .}
+
+	:apply(csb7#1)
+
+		-- Goal`1-2-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`1-2-2  -  inv2(exit(S#Sys, P#Pid), k@Pid)  - Success
+		:def csb8#1 = :ctf [pc(S#Sys, P#Pid)  .]
+
+		:apply(csb8#1)
+
+			-- Goal`1-2-2-1  -  inv2(exit(S#Sys, P#Pid), k@Pid)  - Success
+			:def csb9#1 = :ctf {eq P#Pid  = k@Pid .}
+
+			:apply(csb9#1)
+
+				-- Goal`1-2-2-1-1  -  inv2(exit(S#Sys, P#Pid), k@Pid)  - Success
+				:def csb10#1 = :ctf {eq top(queue(exit(S#Sys, k@Pid)))  = k@Pid .}
+
+				:apply(csb10#1)
+
+					-- Goal`1-2-2-1-1-1 Success by reduction
+					:apply (rd)
+
+					-- Goal`1-2-2-1-1-2  -  inv2(exit(S#Sys, P#Pid), k@Pid)  - Success
+					:def csb11#1 = :ctf [pc(S#Sys, k@Pid)  .]
+
+					:apply(csb11#1)
+
+						-- Goal`1-2-2-1-1-2-1 Success by reduction
+						:apply (rd)
+
+						-- Goal`1-2-2-1-1-2-2 Success by reduction
+						:apply (rd)
+
+						-- Goal`1-2-2-1-1-2-3 Success by reduction
+						:apply (rd)
+
+				-- Goal`1-2-2-1-2 Success by implication and reduction.
+				:imp [qlock1]  by {k:Pid <- k@Pid ;}
+
+				:imp [qlock]  by {i:Pid <- k@Pid ; j:Pid <- P#Pid ;}
+
+				:apply (rd)
+
+			-- Goal`1-2-2-2 Success by implication and reduction.
+			:imp [qlock1]  by {k:Pid <- k@Pid ;}
+
+			:apply (rd)
+
+			-- Goal`1-2-2-3 Success by implication and reduction.
+			:imp [qlock1]  by {k:Pid <- k@Pid ;}
+
+			:apply (rd)
+
+
+:sel(4)
+	:apply(tc)
+
+	-- Goal`4-1  -  inv1(want(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+	:def csb1#4 = :ctf {eq i@Pid  = j@Pid .}
+
+	:apply(csb1#4)
+
+		-- Goal`4-1-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`4-1-2  -  inv1(want(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+		:def csb2#4 = :ctf [pc(S#Sys, P#Pid)  .]
+
+		:apply(csb2#4)
+
+			-- Goal`4-1-2-1 Success by implication and reduction.
+			:imp [qlock]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+			:apply (rd)
+
+			-- Goal`4-1-2-2  -  inv1(want(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+			:def csb3#4 = :ctf {eq P#Pid  = i@Pid .}
+
+			:apply(csb3#4)
+
+				-- Goal`4-1-2-2-1  -  inv1(want(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+				:def csb4#4 = :ctf [pc(S#Sys, i@Pid)  .]
+
+				:apply(csb4#4)
+
+					-- Goal`4-1-2-2-1-1 Success by implication and reduction.
+					:imp [qlock]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+					:apply (rd)
+
+					-- Goal`4-1-2-2-1-2 Success by reduction
+					:apply (rd)
+
+					-- Goal`4-1-2-2-1-3 Success by reduction
+					:apply (rd)
+
+				-- Goal`4-1-2-2-2  -  inv1(want(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+				:def csb5#4 = :ctf {eq P#Pid  = j@Pid .}
+
+				:apply(csb5#4)
+
+					-- Goal`4-1-2-2-2-1  -  inv1(want(S#Sys, P#Pid), i@Pid, j@Pid)  - Success
+					:def csb6#4 = :ctf [pc(S#Sys, j@Pid)  .]
+
+					:apply(csb6#4)
+
+						-- Goal`4-1-2-2-2-1-1 Success by implication and reduction.
+						:imp [qlock]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+						:apply (rd)
+
+						-- Goal`4-1-2-2-2-1-2 Success by reduction
+						:apply (rd)
+
+						-- Goal`4-1-2-2-2-1-3 Success by reduction
+						:apply (rd)
+
+					-- Goal`4-1-2-2-2-2 Success by implication and reduction.
+					:imp [qlock]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+					:apply (rd)
+
+			-- Goal`4-1-2-3 Success by implication and reduction.
+			:imp [qlock]  by {i:Pid <- i@Pid ; j:Pid <- j@Pid ;}
+
+			:apply (rd)
+
+	-- Goal`4-2  -  inv2(want(S#Sys, P#Pid), k@Pid)  - Success
+	:def csb7#4 = :ctf {eq top(queue(want(S#Sys, P#Pid)))  = k@Pid .}
+
+	:apply(csb7#4)
+
+		-- Goal`4-2-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`4-2-2  -  inv2(want(S#Sys, P#Pid), k@Pid)  - Success
+		:def csb8#4 = :ctf [pc(S#Sys, P#Pid)  .]
+
+		:apply(csb8#4)
+
+			-- Goal`4-2-2-1 Success by implication and reduction.
+			:imp [qlock1]  by {k:Pid <- k@Pid ;}
+
+			:apply (rd)
+
+			-- Goal`4-2-2-2  -  inv2(want(S#Sys, P#Pid), k@Pid)  - Success
+			:def csb9#4 = :ctf {eq P#Pid  = k@Pid .}
+
+			:apply(csb9#4)
+
+				-- Goal`4-2-2-2-1  -  inv2(want(S#Sys, P#Pid), k@Pid)  - Success
+				:def csb10#4 = :ctf {eq top(queue(want(S#Sys, k@Pid)))  = k@Pid .}
+
+				:apply(csb10#4)
+
+					-- Goal`4-2-2-2-1-1 Success by reduction
+					:apply (rd)
+
+					-- Goal`4-2-2-2-1-2  -  inv2(want(S#Sys, P#Pid), k@Pid)  - Success
+					:def csb11#4 = :ctf [pc(S#Sys, k@Pid)  .]
+
+					:apply(csb11#4)
+
+						-- Goal`4-2-2-2-1-2-1 Success by implication and reduction.
+						:imp [qlock1]  by {k:Pid <- k@Pid ;}
+
+						:apply (rd)
+
+						-- Goal`4-2-2-2-1-2-2 Success by reduction
+						:apply (rd)
+
+						-- Goal`4-2-2-2-1-2-3 Success by reduction
+						:apply (rd)
+
+				-- Goal`4-2-2-2-2  -  inv2(want(S#Sys, P#Pid), k@Pid)  - Success
+				:def csb12#4 = :ctf {eq top(enq(queue(S#Sys), P#Pid))  = k@Pid .}
+
+				:apply(csb12#4)
+
+					-- Goal`4-2-2-2-2-1 Success by reduction
+					:apply (rd)
+
+					-- Goal`4-2-2-2-2-2  -  inv2(want(S#Sys, P#Pid), k@Pid)  - Success
+					:def csb13#4 = :ctf [pc(S#Sys, k@Pid)  .]
+
+					:apply(csb13#4)
+
+						-- Goal`4-2-2-2-2-2-1  -  inv2(want(S#Sys, P#Pid), k@Pid)  - Success
+						:def csb14#4 = :ctf [queue(S#Sys)  .]
+
+						:apply(csb14#4)
+
+							-- Goal`4-2-2-2-2-2-1-1 Success by implication and reduction.
+							:imp [qlock1]  by {k:Pid <- k@Pid ;}
+
+							:apply (rd)
+
+							-- Goal`4-2-2-2-2-2-1-2 Success by implication and reduction.
+							:imp [qlock1]  by {k:Pid <- k@Pid ;}
+
+							:apply (rd)
+
+						-- Goal`4-2-2-2-2-2-2 Success by reduction
+						:apply (rd)
+
+						-- Goal`4-2-2-2-2-2-3 Success by reduction
+						:apply (rd)
+
+			-- Goal`4-2-2-3 Success by implication and reduction.
+			:imp [qlock1]  by {k:Pid <- k@Pid ;}
+
+			:apply (rd)
+

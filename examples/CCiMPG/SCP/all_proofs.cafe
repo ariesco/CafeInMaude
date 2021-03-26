@@ -1,0 +1,668 @@
+-- init
+open SCP .
+  :id(proofSCP)
+  red inv1(init) .
+close
+
+-- snd1(s)
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  red inv1(s) implies inv1(snd1(s)) .
+close
+
+-- rec1(s)
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = e .
+  red inv1(s) implies inv1(rec1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 0 .
+  eq sb(s) = 0 .
+  red inv1(s) implies inv1(rec1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 0 .
+  eq (sb(s) = 0) = false .
+  eq rb(s) = 0 .
+  eq psr(s) = mksq(p2s(s)) .
+  red inv1(s) implies inv1(rec1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 0 .
+  eq (sb(s) = 0) = false .
+  eq rb(s) = 0 .
+  eq (psr(s) = mksq(p2s(s))) = false .
+  red inv1(s) implies inv1(rec1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 0 .
+  eq (sb(s) = 0) = false .
+  eq (rb(s) = 0) = false .
+  red inv2(s) implies inv1(s) implies inv1(rec1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 1 .
+  eq sb(s) = 1 .
+  red inv1(s) implies inv1(rec1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 1 .
+  eq (sb(s) = 1) = false .
+  eq rb(s) = 1 .
+  eq psr(s) = mksq(p2s(s)) .
+  red inv1(s) implies inv1(rec1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 1 .
+  eq (sb(s) = 1) = false .
+  eq rb(s) = 1 .
+  eq (psr(s) = mksq(p2s(s))) = false .
+  red inv1(s) implies inv1(rec1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 1 .
+  eq (sb(s) = 1) = false .
+  eq (rb(s) = 1) = false .
+  red inv2(s) implies inv1(s) implies inv1(rec1(s)) .
+close
+
+-- snd2(s)
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  red inv1(s) implies inv1(snd2(s)) .
+close
+
+-- rec2(s)
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq dc(s) = e .
+  red inv1(s) implies inv1(rec2(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq dc(s) = < p10,b10 > .
+  eq rb(s) = b10 .
+  eq (p2s(s) = p10) = false .
+  red inv3(s) implies inv1(s) implies inv1(rec2(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq dc(s) = < p10,b10 > .
+  eq rb(s) = b10 .
+  eq p2s(s) = p10 .
+  eq sb(s) = b10 .
+  red inv1(s) implies inv1(rec2(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq dc(s) = < p10,b10 > .
+  eq rb(s) = b10 .
+  eq p2s(s) = p10 .
+  eq (sb(s) = b10) = false .
+  red inv3(s) implies inv1(s) implies inv1(rec2(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq dc(s) = < p10,b10 > .
+  eq (rb(s) = b10) = false .
+  red inv1(s) implies inv1(rec2(s)) .
+close
+
+
+
+
+
+*******
+
+-- drp1(s)
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq dc(s) = e .
+  red inv1(s) implies inv1(drp1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq dc(s) = < p10,b10 > .
+  red inv1(s) implies inv1(drp1(s)) .
+close
+
+-- drp2(s)
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = e .
+  red inv1(s) implies inv1(drp2(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 0 .
+  red inv1(s) implies inv1(drp2(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 1 .
+  red inv1(s) implies inv1(drp2(s)) .
+close
+
+-- init
+open SCP .
+  :id(proofSCP)
+  red inv2(init) .
+close
+
+-- snd1(s)
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  red inv2(s) implies inv2(snd1(s)) .
+close
+
+-- rec1(s)
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = e .
+  red inv2(s) implies inv2(rec1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 0 .
+  red inv2(s) implies inv2(rec1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 1 .
+  red inv2(s) implies inv2(rec1(s)) .
+close
+
+-- snd2(s)
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = e .
+  red inv2(s) implies inv2(snd2(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  op b10 : -> Bit .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 0 .
+  red inv2(s) implies inv2(snd2(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  op b10 : -> Bit .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 1 .
+  red inv2(s) implies inv2(snd2(s)) .
+close
+
+-- rec2(s)
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq dc(s) = e .
+  red inv2(s) implies inv2(rec2(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq dc(s) = < p10,b10 > .
+  eq rb(s) = b10 .
+  eq sb(s) = b10 .
+  red inv2(s) implies inv2(rec2(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq dc(s) = < p10,b10 > .
+  eq rb(s) = b10 .
+  eq (sb(s) = b10) = false .
+  red inv3(s) implies inv2(s) implies inv2(rec2(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq dc(s) = < p10,b10 > .
+  eq (rb(s) = b10) = false .
+  red inv2(s) implies inv2(rec2(s)) .
+close
+
+-- drp1(s)
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq dc(s) = e .
+  red inv2(s) implies inv2(drp1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq dc(s) = < p10,b10 > .
+  red inv2(s) implies inv2(drp1(s)) .
+close
+
+-- drp2(s)
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = e .
+  red inv2(s) implies inv2(drp2(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 0 .
+  red inv2(s) implies inv2(drp2(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 1 .
+  red inv2(s) implies inv2(drp2(s)) .
+close
+
+-- init
+open SCP .
+  :id(proofSCP)
+  red inv3(init) .
+close
+
+-- snd1(s)
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq dc(s) = e .
+  red inv3(s) implies inv3(snd1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq dc(s) = < p10,b10 > .
+  red inv3(s) implies inv3(snd1(s)) .
+close
+
+-- rec1(s)
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = e .
+  red inv3(s) implies inv3(rec1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 0 .
+  eq sb(s) = 0 .
+  red inv3(s) implies inv3(rec1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 0 .
+  eq (sb(s) = 0) = false .
+  eq rb(s) = 0 .
+  eq p2s(s) = 1st(hd(dc(s))) .
+  eq 2nd(hd(dc(s))) = sb(s) .
+  red inv3(s) implies inv3(rec1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 0 .
+  eq (sb(s) = 0) = false .
+  eq rb(s) = 0 .
+  eq p2s(s) = 1st(hd(dc(s))) .
+  eq (2nd(hd(dc(s))) = sb(s)) = false .
+  red inv3(s) implies inv3(rec1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 0 .
+  eq (sb(s) = 0) = false .
+  eq rb(s) = 0 .
+  eq (p2s(s) = 1st(hd(dc(s)))) = false .
+  red inv3(s) implies inv3(rec1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 0 .
+  eq (sb(s) = 0) = false .
+  eq (rb(s) = 0) = false .
+  red inv2(s) implies inv3(s) implies inv3(rec1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 1 .
+  eq sb(s) = 1 .
+  red inv3(s) implies inv3(rec1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 1 .
+  eq (sb(s) = 1) = false .
+  eq rb(s) = 1 .
+  eq p2s(s) = 1st(hd(dc(s))) .
+  eq 2nd(hd(dc(s))) = sb(s) .
+  red inv3(s) implies inv3(rec1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 1 .
+  eq (sb(s) = 1) = false .
+  eq rb(s) = 1 .
+  eq p2s(s) = 1st(hd(dc(s))) .
+  eq (2nd(hd(dc(s))) = sb(s)) = false .
+  red inv3(s) implies inv3(rec1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 1 .
+  eq (sb(s) = 1) = false .
+  eq rb(s) = 1 .
+  eq (p2s(s) = 1st(hd(dc(s)))) = false .
+  red inv3(s) implies inv3(rec1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 1 .
+  eq (sb(s) = 1) = false .
+  eq (rb(s) = 1) = false .
+  red inv2(s) implies inv3(s) implies inv3(rec1(s)) .
+close
+
+
+-- snd2(s)
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  red inv3(s) implies inv3(snd2(s)) .
+close
+
+-- rec2(s)
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq dc(s) = e .
+  red inv3(s) implies inv3(rec2(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq dc(s) = < p10,b10 > .
+  red inv3(s) implies inv3(rec2(s)) .
+close
+
+-- drp1(s)
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq dc(s) = e .
+  red inv3(s) implies inv3(drp1(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  op p10 : -> Packet .
+  op b10 : -> Bit .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq dc(s) = < p10,b10 > .
+  red inv3(s) implies inv3(drp1(s)) .
+close
+
+-- drp2(s)
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = e .
+  red inv3(s) implies inv3(drp2(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 0 .
+  red inv3(s) implies inv3(drp2(s)) .
+close
+open SCP .
+  :id(proofSCP)
+  op s : -> Sys .
+  eq [inv1 :nonexec] : inv1(s) = true .
+  eq [inv2 :nonexec] : inv2(s) = true .
+  eq [inv3 :nonexec] : inv3(s) = true .
+  eq ac(s) = 1 .
+  red inv3(s) implies inv3(drp2(s)) .
+close
+
+--
+-- QED
+--

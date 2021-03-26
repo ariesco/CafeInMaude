@@ -1,0 +1,39 @@
+load ../examples/CCiMPG/ABP/abp2.cafe .
+
+set-cores 4 .
+
+set-output ../examples/CCiMPG/ABP/abp-proof-generate.cafe .
+
+open ABP .
+  :id(proofABP)
+
+  ops b1 b2 b3 : -> Bit .
+  ops p1 p2 p3 : -> Packet .
+  ops bs1 bs2 : -> BSeq .
+  ops pbps1 pbps2 : -> PBPSeq .
+
+  red inv1(S:Sys) .
+  red inv2(S:Sys) .
+  red inv3(S:Sys) .
+  red inv4(S:Sys, b1) .
+  red inv5(S:Sys, b1) .
+  red inv6(S:Sys, p1, b1) .
+  red inv7(S:Sys, p1, b1) .
+  red inv8(S:Sys, b1, b2, b3, bs1, bs2) .
+  red inv9(S:Sys, b1, b2, b3, p1, p2, p3, pbps1, pbps2) .
+  red inv10(S:Sys, b1) .
+  red inv11(S:Sys, b1, p1) .
+close
+
+:infer-proof proofABP .
+
+:save-proof .
+
+eof
+
+load ../examples/CCiMPG/ABP/abp-proof-generate.cafe .
+
+eof
+
+load ../examples/CCiMPG/ABP/commands_generate.cafe .
+

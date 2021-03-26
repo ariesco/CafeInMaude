@@ -1,0 +1,2685 @@
+
+:goal{
+eq [proofABP :nonexec] : inv1(S:Sys)  = true .
+ eq [proofABP3 :nonexec] : inv10(S:Sys, B:Bit)  = true .
+ eq [proofABP6 :nonexec] : inv11(S:Sys, B:Bit, P:Packet)  = true .
+ eq [proofABP1 :nonexec] : inv2(S:Sys)  = true .
+ eq [proofABP2 :nonexec] : inv3(S:Sys)  = true .
+ eq [proofABP4 :nonexec] : inv4(S:Sys, B:Bit)  = true .
+ eq [proofABP5 :nonexec] : inv5(S:Sys, B:Bit)  = true .
+ eq [proofABP7 :nonexec] : inv6(S:Sys, P:Packet, B:Bit)  = true .
+ eq [proofABP8 :nonexec] : inv7(S:Sys, P:Packet, B:Bit)  = true .
+ eq [proofABP9 :nonexec] : inv8(S:Sys, B:Bit, B1:Bit, B0:Bit, B10:BSeq, B00:BSeq)  = true .
+ eq [proofABP10 :nonexec] : inv9(S:Sys, B:Bit, B1:Bit, B0:Bit, P:Packet, P1:Packet, P0:Packet, P10:PBPSeq, P00:PBPSeq)  = true .
+}
+:ind on (S:Sys)
+:apply(si)
+:sel(4)
+	:apply(tc)
+
+	:def csb1#4 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb1#4)
+
+	:imp [proofABP]  .
+
+	:apply (rd)
+
+	:imp [proofABP]  .
+
+	:apply (rd)
+
+	:def csb2#4 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb2#4)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb3#4 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb3#4)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb4#4 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb4#4)
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:def csb5#4 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb5#4)
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:def csb6#4 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb6#4)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb7#4 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb7#4)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb8#4 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb8#4)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb9#4 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb9#4)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb10#4 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb10#4)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb11#4 = :cvs [B10@BSeq  .]
+
+	:apply(csb11#4)
+
+	:def csb12#4 = :ctf {eq B@Bit  = B0EVS4-10.Bit .}
+
+	:apply(csb12#4)
+
+	:def csb13#4 = :ctf {eq B1@Bit  = B0EVS4-10.Bit .}
+
+	:apply(csb13#4)
+
+	:def csb14#4 = :ctf {eq B00@BSeq  = B0#EVS4-10.BSeq .}
+
+	:apply(csb14#4)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb15#4 = :ctf {eq B0EVS4-10-2.Bit  = B0EVS4-10.Bit .}
+
+	:apply(csb15#4)
+
+	:def csb16#4 = :ctf {eq B0#EVS4-10-2.BSeq, B@Bit, B1@Bit, B00@BSeq  = B0EVS4-10.Bit, B0#EVS4-10.BSeq .}
+
+	:apply(csb16#4)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B0#EVS4-10-2.BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb17#4 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb17#4)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+
+:sel(3)
+	:apply(tc)
+
+	:def csb1#3 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb1#3)
+
+	:imp [proofABP]  .
+
+	:apply (rd)
+
+	:imp [proofABP]  .
+
+	:apply (rd)
+
+	:def csb2#3 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb2#3)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb3#3 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb3#3)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb4#3 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb4#3)
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:def csb5#3 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb5#3)
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:def csb6#3 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb6#3)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb7#3 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb7#3)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb8#3 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb8#3)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb9#3 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb9#3)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb10#3 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb10#3)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb11#3 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb11#3)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb12#3 = :cvs [P10@PBPSeq  .]
+
+	:apply(csb12#3)
+
+	:def csb13#3 = :ctf {eq < P@Packet, B@Bit >  = < P#EVS3-11.SubPacket, B#EVS3-11.SubBit > .}
+
+	:apply(csb13#3)
+
+	:def csb14#3 = :ctf {eq < P1@Packet, B1@Bit >  = < P#EVS3-11.SubPacket, B#EVS3-11.SubBit > .}
+
+	:apply(csb14#3)
+
+	:def csb15#3 = :ctf {eq P00@PBPSeq  = P0#EVS3-11.PBPSeq .}
+
+	:apply(csb15#3)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb16#3 = :ctf {eq < P#EVS3-11-2.SubPacket, B#EVS3-11-2.SubBit >  = < P#EVS3-11.SubPacket, B#EVS3-11.SubBit > .}
+
+	:apply(csb16#3)
+
+	:def csb17#3 = :ctf {eq P0#EVS3-11-2.PBPSeq, < P@Packet, B@Bit >, < P1@Packet, B1@Bit >, P00@PBPSeq  = < P#EVS3-11.SubPacket, B#EVS3-11.SubBit >, P0#EVS3-11.PBPSeq .}
+
+	:apply(csb17#3)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P0#EVS3-11-2.PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+
+:sel(5)
+	:apply(tc)
+
+	:apply (rd)
+
+	:apply (rd)
+
+	:apply (rd)
+
+	:apply (rd)
+
+	:apply (rd)
+
+	:apply (rd)
+
+	:apply (rd)
+
+	:apply (rd)
+
+	:apply (rd)
+
+	:apply (rd)
+
+	:apply (rd)
+
+
+:sel(2)
+	:apply(tc)
+
+	:def csb1#2 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb1#2)
+
+	:imp [proofABP]  .
+
+	:apply (rd)
+
+	:imp [proofABP]  .
+
+	:apply (rd)
+
+	:def csb2#2 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb2#2)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb3#2 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb3#2)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb4#2 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb4#2)
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:def csb5#2 = :cvs [B0#EVS2-4.BSeq  .]
+
+	:apply(csb5#2)
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:imp [proofABP1]  .
+
+	:imp [proofABP5]  by {B:Bit <- B0EVS2-4-2.Bit ;}
+
+	:apply (rd)
+
+	:def csb6#2 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb6#2)
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:def csb7#2 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb7#2)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb8#2 = :cvs [B0#EVS2-6.BSeq  .]
+
+	:apply(csb8#2)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb9#2 = :ctf {eq B@Bit  = B0EVS2-6-2.Bit .}
+
+	:apply(csb9#2)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb10#2 = :ctf [B@Bit \in B0#EVS2-6-2.BSeq  .]
+
+	:apply(csb10#2)
+
+	:def csb11#2 = :ctf {eq B0EVS2-6.Bit  = B0EVS2-6-2.Bit .}
+
+	:apply(csb11#2)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:imp [proofABP9]  by {B00:BSeq <- B0#EVS2-6-2.BSeq ; B0:Bit <- B@Bit ; B10:BSeq <- e ; B1:Bit <- B0EVS2-6-2.Bit ; B:Bit <- B0EVS2-6.Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb12#2 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb12#2)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb13#2 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb13#2)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb14#2 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb14#2)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb15#2 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb15#2)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb16#2 = :cvs [B10@BSeq  .]
+
+	:apply(csb16#2)
+
+	:def csb17#2 = :ctf {eq B0#EVS2-10.BSeq  = B@Bit, B1@Bit, B00@BSeq .}
+
+	:apply(csb17#2)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B0EVS2-10.Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb18#2 = :ctf {eq B0#EVS2-10.BSeq  = B0EVS2-10-2.Bit, B0#EVS2-10-2.BSeq, B@Bit, B1@Bit, B00@BSeq .}
+
+	:apply(csb18#2)
+
+	:def csb19#2 = :ctf {eq B@Bit  = B1@Bit .}
+
+	:apply(csb19#2)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb20#2 = :ctf {eq rb(S#Sys)  = B1@Bit .}
+
+	:apply(csb20#2)
+
+	:def csb21#2 = :ctf {eq B0@Bit  = B1@Bit .}
+
+	:apply(csb21#2)
+
+	:def csb22#2 = :ctf [B1@Bit \in B00@BSeq  .]
+
+	:apply(csb22#2)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb23#2 = :ctf [B0@Bit \in B00@BSeq  .]
+
+	:apply(csb23#2)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; B10:BSeq <- _`,_(B0EVS2-10.Bit, B10@BSeq) ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; B10:BSeq <- _`,_(B0EVS2-10.Bit, B10@BSeq) ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb24#2 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb24#2)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+
+:sel(8)
+	:apply(tc)
+
+	:imp [proofABP]  .
+
+	:apply (rd)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb1#8 = :ctf {eq sb(S#Sys)  = rb(S#Sys) .}
+
+	:apply(csb1#8)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb2#8 = :ctf {eq B@Bit  = sb(S#Sys) .}
+
+	:apply(csb2#8)
+
+	:def csb3#8 = :ctf {eq P@Packet  = p2s(S#Sys) .}
+
+	:apply(csb3#8)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:def csb4#8 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb4#8)
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb5#8 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb5#8)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb6#8 = :ctf {eq P#EVS8-8.SubPacket  = P@Packet .}
+
+	:apply(csb6#8)
+
+	:def csb7#8 = :ctf {eq B#EVS8-8.SubBit  = B@Bit .}
+
+	:apply(csb7#8)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb8#8 = :ctf [< P@Packet, B@Bit > \in P0#EVS8-8.PBPSeq  .]
+
+	:apply(csb8#8)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb9#8 = :ctf {eq rb(S#Sys)  = B#EVS8-8.SubBit .}
+
+	:apply(csb9#8)
+
+	:def csb10#8 = :ctf {eq sb(S#Sys)  = B@Bit .}
+
+	:apply(csb10#8)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb11#8 = :ctf [< P@Packet, B@Bit > \in P0#EVS8-8.PBPSeq  .]
+
+	:apply(csb11#8)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb12#8 = :ctf {eq rb(S#Sys)  = B#EVS8-8.SubBit .}
+
+	:apply(csb12#8)
+
+	:def csb13#8 = :ctf {eq p2s(S#Sys)  = P@Packet .}
+
+	:apply(csb13#8)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb14#8 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb14#8)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb15#8 = :ctf {eq P#EVS8-9.SubPacket  = P@Packet .}
+
+	:apply(csb15#8)
+
+	:def csb16#8 = :ctf {eq B#EVS8-9.SubBit  = B@Bit .}
+
+	:apply(csb16#8)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb17#8 = :ctf [< P@Packet, B@Bit > \in P0#EVS8-9.PBPSeq  .]
+
+	:apply(csb17#8)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb18#8 = :ctf {eq p2s(S#Sys)  = P@Packet .}
+
+	:apply(csb18#8)
+
+	:def csb19#8 = :ctf {eq sb(S#Sys)  = B@Bit .}
+
+	:apply(csb19#8)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb20#8 = :ctf [< P@Packet, B@Bit > \in P0#EVS8-9.PBPSeq  .]
+
+	:apply(csb20#8)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb21#8 = :ctf {eq p2s(S#Sys)  = P@Packet .}
+
+	:apply(csb21#8)
+
+	:def csb22#8 = :ctf {eq sb(S#Sys)  = B@Bit .}
+
+	:apply(csb22#8)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb23#8 = :ctf {eq dc(S#Sys)  = P10@PBPSeq, < P@Packet, B@Bit > .}
+
+	:apply(csb23#8)
+
+	:def csb24#8 = :ctf {eq sb(S#Sys)  = B1@Bit .}
+
+	:apply(csb24#8)
+
+	:def csb25#8 = :ctf {eq p2s(S#Sys)  = P1@Packet .}
+
+	:apply(csb25#8)
+
+	:def csb26#8 = :cvs [P00@PBPSeq  .]
+
+	:apply(csb26#8)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb27#8 = :csv [P00@PBPSeq  .]
+
+	:apply(csb27#8)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb28#8 = :ctf {eq dc(S#Sys)  = P10@PBPSeq, < P@Packet, B@Bit >, < P1@Packet, B1@Bit >, P#ESV8-11-2.PBPSeq .}
+
+	:apply(csb28#8)
+
+	:def csb29#8 = :ctf {eq < P@Packet, B@Bit >  = < P1@Packet, B1@Bit > .}
+
+	:apply(csb29#8)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb30#8 = :ctf {eq < p2s(S#Sys), sb(S#Sys) >  = < P#ESV8-11-2.SubPacket, B#ESV8-11-2.SubBit > .}
+
+	:apply(csb30#8)
+
+	:def csb31#8 = :ctf {eq < P#ESV8-11-2.SubPacket, B#ESV8-11-2.SubBit >  = < P0@Packet, B0@Bit > .}
+
+	:apply(csb31#8)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P#ESV8-11-2.PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P#ESV8-11-2.PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+
+:sel(6)
+	:apply(tc)
+
+	:def csb1#6 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb1#6)
+
+	:imp [proofABP]  .
+
+	:apply (rd)
+
+	:def csb2#6 = :ctf {eq sb(S#Sys)  = B0EVS6-1.Bit .}
+
+	:apply(csb2#6)
+
+	:imp [proofABP]  .
+
+	:apply (rd)
+
+	:def csb3#6 = :ctf {eq rb(S#Sys)  = B0EVS6-1.Bit .}
+
+	:apply(csb3#6)
+
+	:def csb4#6 = :ctf {eq psr(S#Sys)  = mksq(p2s(S#Sys)) .}
+
+	:apply(csb4#6)
+
+	:imp [proofABP]  .
+
+	:apply (rd)
+
+	:imp [proofABP]  .
+
+	:apply (rd)
+
+	:imp [proofABP]  .
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:def csb5#6 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb5#6)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb6#6 = :ctf {eq sb(S#Sys)  = B@Bit .}
+
+	:apply(csb6#6)
+
+	:def csb7#6 = :ctf {eq B@Bit  = B0EVS6-2.Bit .}
+
+	:apply(csb7#6)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb8#6 = :ctf [B@Bit \in B0#EVS6-2.BSeq  .]
+
+	:apply(csb8#6)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb9#6 = :ctf {eq sb(S#Sys)  = B0EVS6-2.Bit .}
+
+	:apply(csb9#6)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb10#6 = :ctf [B@Bit \in B0#EVS6-2.BSeq  .]
+
+	:apply(csb10#6)
+
+	:def csb11#6 = :ctf {eq rb(S#Sys)  = sb(S#Sys) .}
+
+	:apply(csb11#6)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb12#6 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb12#6)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb13#6 = :ctf {eq rb(S#Sys)  = B0EVS6-3.Bit .}
+
+	:apply(csb13#6)
+
+	:def csb14#6 = :ctf {eq sb(S#Sys)  = B0EVS6-3.Bit .}
+
+	:apply(csb14#6)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb15#6 = :ctf {eq sb(S#Sys)  = B0EVS6-3.Bit .}
+
+	:apply(csb15#6)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:def csb16#6 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb16#6)
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:def csb17#6 = :cvs [B0#EVS6-4.BSeq  .]
+
+	:apply(csb17#6)
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:def csb18#6 = :ctf {eq sb(S#Sys)  = B0EVS6-4.Bit .}
+
+	:apply(csb18#6)
+
+	:imp [proofABP1]  .
+
+	:imp [proofABP5]  by {B:Bit <- B0EVS6-4-2.Bit ;}
+
+	:apply (rd)
+
+	:def csb19#6 = :ctf {eq rb(S#Sys)  = B0EVS6-4.Bit .}
+
+	:apply(csb19#6)
+
+	:imp [proofABP1]  .
+
+	:imp [proofABP4]  by {B:Bit <- B0EVS6-4-2.Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:def csb20#6 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb20#6)
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:def csb21#6 = :ctf {eq sb(S#Sys)  = B0EVS6-5.Bit .}
+
+	:apply(csb21#6)
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:def csb22#6 = :ctf {eq rb(S#Sys)  = B0EVS6-5.Bit .}
+
+	:apply(csb22#6)
+
+	:def csb23#6 = :ctf {eq p2s(S#Sys)  = 1st(hd(dc(S#Sys))) .}
+
+	:apply(csb23#6)
+
+	:def csb24#6 = :ctf {eq 2nd(hd(dc(S#Sys)))  = sb(S#Sys) .}
+
+	:apply(csb24#6)
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:imp [proofABP2]  .
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:def csb25#6 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb25#6)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb26#6 = :cvs [B0#EVS6-6.BSeq  .]
+
+	:apply(csb26#6)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb27#6 = :ctf {eq B@Bit  = B0EVS6-6-2.Bit .}
+
+	:apply(csb27#6)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb28#6 = :ctf [B@Bit \in B0#EVS6-6-2.BSeq  .]
+
+	:apply(csb28#6)
+
+	:def csb29#6 = :ctf {eq B0EVS6-6.Bit  = B0EVS6-6-2.Bit .}
+
+	:apply(csb29#6)
+
+	:def csb30#6 = :ctf {eq sb(S#Sys)  = B0EVS6-6-2.Bit .}
+
+	:apply(csb30#6)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:imp [proofABP9]  by {B00:BSeq <- B0#EVS6-6-2.BSeq ; B0:Bit <- B@Bit ; B10:BSeq <- e ; B1:Bit <- B0EVS6-6-2.Bit ; B:Bit <- B0EVS6-6.Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb31#6 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb31#6)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb32#6 = :cvs [B0#EVS6-7.BSeq  .]
+
+	:apply(csb32#6)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb33#6 = :ctf {eq sb(S#Sys)  = B0EVS6-7.Bit .}
+
+	:apply(csb33#6)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb34#6 = :ctf {eq B@Bit  = B0EVS6-7.Bit .}
+
+	:apply(csb34#6)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb35#6 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb35#6)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb36#6 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb36#6)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb37#6 = :ctf {eq sb(S#Sys)  = B0EVS6-9.Bit .}
+
+	:apply(csb37#6)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb38#6 = :ctf {eq B@Bit  = B0EVS6-9.Bit .}
+
+	:apply(csb38#6)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb39#6 = :ctf [< P@Packet, B@Bit > \in dc(S#Sys)  .]
+
+	:apply(csb39#6)
+
+	:def csb40#6 = :ctf {eq rb(S#Sys)  = B@Bit .}
+
+	:apply(csb40#6)
+
+	:def csb41#6 = :ctf {eq sb(S#Sys)  = B@Bit .}
+
+	:apply(csb41#6)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb42#6 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb42#6)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb43#6 = :ctf {eq B0#EVS6-10.BSeq  = B10@BSeq, B@Bit, B1@Bit, B00@BSeq .}
+
+	:apply(csb43#6)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; B10:BSeq <- _`,_(B0EVS6-10.Bit, B10@BSeq) ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb44#6 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb44#6)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb45#6 = :ctf {eq sb(S#Sys)  = B0EVS6-11.Bit .}
+
+	:apply(csb45#6)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb46#6 = :ctf {eq dc(S#Sys)  = P10@PBPSeq, < P@Packet, B@Bit >, < P1@Packet, B1@Bit >, P00@PBPSeq .}
+
+	:apply(csb46#6)
+
+	:def csb47#6 = :ctf {eq P@Packet  = p2s(S#Sys) .}
+
+	:apply(csb47#6)
+
+	:def csb48#6 = :ctf {eq B@Bit  = sb(S#Sys) .}
+
+	:apply(csb48#6)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb49#6 = :ctf {eq rb(S#Sys)  = B0EVS6-11.Bit .}
+
+	:apply(csb49#6)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP3]  by {B:Bit <- B0EVS6-11.Bit ;}
+
+	:apply (rd)
+
+	:def csb50#6 = :ctf {eq rb(S#Sys)  = B0EVS6-11.Bit .}
+
+	:apply(csb50#6)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP3]  by {B:Bit <- B0EVS6-11.Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+
+:sel(9)
+	:apply(tc)
+
+	:imp [proofABP]  .
+
+	:apply (rd)
+
+	:def csb1#9 = :ctf {eq sb(S#Sys)  = rb(S#Sys) .}
+
+	:apply(csb1#9)
+
+	:def csb2#9 = :ctf {eq B@Bit  = rb(S#Sys) .}
+
+	:apply(csb2#9)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb3#9 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb3#9)
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:def csb4#9 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb4#9)
+
+	:def csb5#9 = :ctf {eq rb(S#Sys)  = B@Bit .}
+
+	:apply(csb5#9)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb6#9 = :ctf {eq B0EVS9-6.Bit  = B@Bit .}
+
+	:apply(csb6#9)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb7#9 = :ctf [B@Bit \in B0#EVS9-6.BSeq  .]
+
+	:apply(csb7#9)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb8#9 = :ctf {eq rb(S#Sys)  = B@Bit .}
+
+	:apply(csb8#9)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb9#9 = :cvs [ac(S#Sys)  .]
+
+	:apply(csb9#9)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb10#9 = :ctf {eq B0EVS9-7.Bit  = B@Bit .}
+
+	:apply(csb10#9)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb11#9 = :ctf [B@Bit \in B0#EVS9-7.BSeq  .]
+
+	:apply(csb11#9)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb12#9 = :ctf {eq rb(S#Sys)  = B@Bit .}
+
+	:apply(csb12#9)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb13#9 = :ctf {eq ac(S#Sys)  = B10@BSeq, B@Bit .}
+
+	:apply(csb13#9)
+
+	:def csb14#9 = :ctf {eq rb(S#Sys)  = B1@Bit .}
+
+	:apply(csb14#9)
+
+	:def csb15#9 = :cvs [B00@BSeq  .]
+
+	:apply(csb15#9)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb16#9 = :csv [B00@BSeq  .]
+
+	:apply(csb16#9)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb17#9 = :ctf {eq ac(S#Sys)  = B10@BSeq, B@Bit, B1@Bit, B#ESV9-10-2.BSeq .}
+
+	:apply(csb17#9)
+
+	:def csb18#9 = :ctf {eq rb(S#Sys)  = B0ESV9-10-2.Bit .}
+
+	:apply(csb18#9)
+
+	:def csb19#9 = :ctf {eq B@Bit  = B1@Bit .}
+
+	:apply(csb19#9)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb20#9 = :ctf {eq B0ESV9-10-2.Bit  = B0@Bit .}
+
+	:apply(csb20#9)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:imp [proofABP9]  by {B00:BSeq <- B#ESV9-10-2.BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:imp [proofABP9]  by {B00:BSeq <- B#ESV9-10-2.BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+
+:sel(1)
+	:apply(tc)
+
+	:def csb1#1 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb1#1)
+
+	:imp [proofABP]  .
+
+	:apply (rd)
+
+	:imp [proofABP]  .
+
+	:apply (rd)
+
+	:def csb2#1 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb2#1)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb3#1 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb3#1)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb4#1 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb4#1)
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:def csb5#1 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb5#1)
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:def csb6#1 = :cvs [P0#EVS1-5.PBPSeq  .]
+
+	:apply(csb6#1)
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:imp [proofABP2]  .
+
+	:imp [proofABP8]  by {B:Bit <- B#EVS1-5-2.SubBit ; P:Packet <- P#EVS1-5-2.SubPacket ;}
+
+	:apply (rd)
+
+	:def csb7#1 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb7#1)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb8#1 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb8#1)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb9#1 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb9#1)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb10#1 = :cvs [P0#EVS1-8.PBPSeq  .]
+
+	:apply(csb10#1)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb11#1 = :ctf {eq P#EVS1-8-2.SubPacket  = P@Packet .}
+
+	:apply(csb11#1)
+
+	:def csb12#1 = :ctf {eq B#EVS1-8-2.SubBit  = B@Bit .}
+
+	:apply(csb12#1)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb13#1 = :ctf [< P@Packet, B@Bit > \in P0#EVS1-8-2.PBPSeq  .]
+
+	:apply(csb13#1)
+
+	:def csb14#1 = :ctf {eq P#EVS1-8.SubPacket  = P@Packet .}
+
+	:apply(csb14#1)
+
+	:def csb15#1 = :ctf {eq B#EVS1-8.SubBit  = B@Bit .}
+
+	:apply(csb15#1)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B@Bit ; B1:Bit <- B#EVS1-8-2.SubBit ; B:Bit <- B#EVS1-8.SubBit ; P00:PBPSeq <- P0#EVS1-8-2.PBPSeq ; P0:Packet <- P@Packet ; P10:PBPSeq <- e ; P1:Packet <- P#EVS1-8-2.SubPacket ; P:Packet <- P#EVS1-8.SubPacket ;}
+
+	:apply (rd)
+
+	:def csb16#1 = :ctf {eq B#EVS1-8.SubBit  = B#EVS1-8-2.SubBit .}
+
+	:apply(csb16#1)
+
+	:def csb17#1 = :ctf {eq rb(S#Sys)  = B#EVS1-8-2.SubBit .}
+
+	:apply(csb17#1)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B@Bit ; B1:Bit <- B#EVS1-8-2.SubBit ; B:Bit <- B#EVS1-8.SubBit ; P00:PBPSeq <- P0#EVS1-8-2.PBPSeq ; P0:Packet <- P@Packet ; P10:PBPSeq <- e ; P1:Packet <- P#EVS1-8-2.SubPacket ; P:Packet <- P#EVS1-8.SubPacket ;}
+
+	:apply (rd)
+
+	:def csb18#1 = :ctf {eq B#EVS1-8.SubBit  = B#EVS1-8-2.SubBit .}
+
+	:apply(csb18#1)
+
+	:def csb19#1 = :ctf {eq rb(S#Sys)  = B#EVS1-8-2.SubBit .}
+
+	:apply(csb19#1)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B@Bit ; B1:Bit <- B#EVS1-8-2.SubBit ; B:Bit <- B#EVS1-8.SubBit ; P00:PBPSeq <- P0#EVS1-8-2.PBPSeq ; P0:Packet <- P@Packet ; P10:PBPSeq <- e ; P1:Packet <- P#EVS1-8-2.SubPacket ; P:Packet <- P#EVS1-8.SubPacket ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb20#1 = :ctf [< P@Packet, B@Bit > \in P0#EVS1-8-2.PBPSeq  .]
+
+	:apply(csb20#1)
+
+	:def csb21#1 = :ctf {eq P#EVS1-8.SubPacket  = P@Packet .}
+
+	:apply(csb21#1)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B@Bit ; B1:Bit <- B#EVS1-8-2.SubBit ; B:Bit <- B#EVS1-8.SubBit ; P00:PBPSeq <- P0#EVS1-8-2.PBPSeq ; P0:Packet <- P@Packet ; P10:PBPSeq <- e ; P1:Packet <- P#EVS1-8-2.SubPacket ; P:Packet <- P#EVS1-8.SubPacket ;}
+
+	:apply (rd)
+
+	:def csb22#1 = :ctf {eq rb(S#Sys)  = B#EVS1-8-2.SubBit .}
+
+	:apply(csb22#1)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B@Bit ; B1:Bit <- B#EVS1-8-2.SubBit ; B:Bit <- B#EVS1-8.SubBit ; P00:PBPSeq <- P0#EVS1-8-2.PBPSeq ; P0:Packet <- P@Packet ; P10:PBPSeq <- e ; P1:Packet <- P#EVS1-8-2.SubPacket ; P:Packet <- P#EVS1-8.SubPacket ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb23#1 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb23#1)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb24#1 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb24#1)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb25#1 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb25#1)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb26#1 = :cvs [P10@PBPSeq  .]
+
+	:apply(csb26#1)
+
+	:def csb27#1 = :ctf {eq P0#EVS1-11.PBPSeq  = < P@Packet, B@Bit >, < P1@Packet, B1@Bit >, P00@PBPSeq .}
+
+	:apply(csb27#1)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ; P10:PBPSeq <- <_`,_>(P#EVS1-11.SubPacket, B#EVS1-11.SubBit) ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb28#1 = :ctf {eq P0#EVS1-11.PBPSeq  = < P#EVS1-11-2.SubPacket, B#EVS1-11-2.SubBit >, P0#EVS1-11-2.PBPSeq, < P@Packet, B@Bit >, < P1@Packet, B1@Bit >, P00@PBPSeq .}
+
+	:apply(csb28#1)
+
+	:def csb29#1 = :ctf {eq < P@Packet, B@Bit >  = < P1@Packet, B1@Bit > .}
+
+	:apply(csb29#1)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb30#1 = :ctf {eq < p2s(S#Sys), sb(S#Sys) >  = < P1@Packet, B1@Bit > .}
+
+	:apply(csb30#1)
+
+	:def csb31#1 = :ctf {eq < P0@Packet, B0@Bit >  = < P1@Packet, B1@Bit > .}
+
+	:apply(csb31#1)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb32#1 = :ctf [< P0@Packet, B0@Bit > \in P00@PBPSeq  .]
+
+	:apply(csb32#1)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ; P10:PBPSeq <- _`,_(<_`,_>(P#EVS1-11.SubPacket, B#EVS1-11.SubBit), P10@PBPSeq) ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ; P10:PBPSeq <- _`,_(<_`,_>(P#EVS1-11.SubPacket, B#EVS1-11.SubBit), P10@PBPSeq) ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+
+:sel(7)
+	:apply(tc)
+
+	:def csb1#7 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb1#7)
+
+	:imp [proofABP]  .
+
+	:apply (rd)
+
+	:def csb2#7 = :ctf {eq rb(S#Sys)  = B#EVS7-1.SubBit .}
+
+	:apply(csb2#7)
+
+	:def csb3#7 = :ctf {eq p2s(S#Sys)  = P#EVS7-1.SubPacket .}
+
+	:apply(csb3#7)
+
+	:def csb4#7 = :ctf {eq sb(S#Sys)  = B#EVS7-1.SubBit .}
+
+	:apply(csb4#7)
+
+	:imp [proofABP]  .
+
+	:apply (rd)
+
+	:imp [proofABP]  .
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:imp [proofABP]  .
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:imp [proofABP]  .
+
+	:apply (rd)
+
+	:def csb5#7 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb5#7)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb6#7 = :ctf {eq rb(S#Sys)  = B#EVS7-2.SubBit .}
+
+	:apply(csb6#7)
+
+	:def csb7#7 = :ctf {eq sb(S#Sys)  = B#EVS7-2.SubBit .}
+
+	:apply(csb7#7)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb8#7 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb8#7)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb9#7 = :ctf {eq rb(S#Sys)  = B#EVS7-3.SubBit .}
+
+	:apply(csb9#7)
+
+	:def csb10#7 = :ctf [< P@Packet, B@Bit > \in P0#EVS7-3.PBPSeq  .]
+
+	:apply(csb10#7)
+
+	:def csb11#7 = :ctf {eq sb(S#Sys)  = B#EVS7-3.SubBit .}
+
+	:apply(csb11#7)
+
+	:def csb12#7 = :ctf {eq B#EVS7-3.SubBit  = B@Bit .}
+
+	:apply(csb12#7)
+
+	:def csb13#7 = :ctf {eq p2s(S#Sys)  = P@Packet .}
+
+	:apply(csb13#7)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP6]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb14#7 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb14#7)
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:def csb15#7 = :ctf {eq rb(S#Sys)  = B#EVS7-4.SubBit .}
+
+	:apply(csb15#7)
+
+	:def csb16#7 = :ctf {eq sb(S#Sys)  = B#EVS7-4.SubBit .}
+
+	:apply(csb16#7)
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:imp [proofABP1]  .
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:imp [proofABP1]  .
+
+	:apply (rd)
+
+	:def csb17#7 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb17#7)
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:def csb18#7 = :cvs [P0#EVS7-5.PBPSeq  .]
+
+	:apply(csb18#7)
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:def csb19#7 = :ctf {eq rb(S#Sys)  = B#EVS7-5.SubBit .}
+
+	:apply(csb19#7)
+
+	:def csb20#7 = :ctf {eq P#EVS7-5.SubPacket  = P#EVS7-5-2.SubPacket .}
+
+	:apply(csb20#7)
+
+	:def csb21#7 = :ctf {eq B#EVS7-5.SubBit  = B#EVS7-5-2.SubBit .}
+
+	:apply(csb21#7)
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:imp [proofABP2]  .
+
+	:imp [proofABP7]  by {B:Bit <- B#EVS7-5-2.SubBit ; P:Packet <- P#EVS7-5-2.SubPacket ;}
+
+	:apply (rd)
+
+	:imp [proofABP2]  .
+
+	:imp [proofABP7]  by {B:Bit <- B#EVS7-5-2.SubBit ; P:Packet <- P#EVS7-5-2.SubPacket ;}
+
+	:apply (rd)
+
+	:def csb22#7 = :ctf {eq P#EVS7-5-2.SubPacket  = P#EVS7-5.SubPacket .}
+
+	:apply(csb22#7)
+
+	:def csb23#7 = :ctf {eq B#EVS7-5-2.SubBit  = B#EVS7-5.SubBit .}
+
+	:apply(csb23#7)
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:imp [proofABP2]  .
+
+	:imp [proofABP8]  by {B:Bit <- B#EVS7-5-2.SubBit ; P:Packet <- P#EVS7-5-2.SubPacket ;}
+
+	:apply (rd)
+
+	:imp [proofABP2]  .
+
+	:imp [proofABP8]  by {B:Bit <- B#EVS7-5-2.SubBit ; P:Packet <- P#EVS7-5-2.SubPacket ;}
+
+	:apply (rd)
+
+	:def csb24#7 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb24#7)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP4]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb25#7 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb25#7)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb26#7 = :ctf {eq rb(S#Sys)  = B#EVS7-7.SubBit .}
+
+	:apply(csb26#7)
+
+	:def csb27#7 = :ctf {eq sb(S#Sys)  = B#EVS7-7.SubBit .}
+
+	:apply(csb27#7)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:imp [proofABP2]  .
+
+	:apply (rd)
+
+	:imp [proofABP5]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb28#7 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb28#7)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb29#7 = :cvs [P0#EVS7-8.PBPSeq  .]
+
+	:apply(csb29#7)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb30#7 = :ctf {eq P#EVS7-8-2.SubPacket  = P@Packet .}
+
+	:apply(csb30#7)
+
+	:def csb31#7 = :ctf {eq B#EVS7-8-2.SubBit  = B@Bit .}
+
+	:apply(csb31#7)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb32#7 = :ctf [< P@Packet, B@Bit > \in P0#EVS7-8-2.PBPSeq  .]
+
+	:apply(csb32#7)
+
+	:def csb33#7 = :ctf {eq P#EVS7-8.SubPacket  = P@Packet .}
+
+	:apply(csb33#7)
+
+	:def csb34#7 = :ctf {eq B#EVS7-8.SubBit  = B@Bit .}
+
+	:apply(csb34#7)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B@Bit ; B1:Bit <- B#EVS7-8-2.SubBit ; B:Bit <- B#EVS7-8.SubBit ; P00:PBPSeq <- P0#EVS7-8-2.PBPSeq ; P0:Packet <- P@Packet ; P10:PBPSeq <- e ; P1:Packet <- P#EVS7-8-2.SubPacket ; P:Packet <- P#EVS7-8.SubPacket ;}
+
+	:apply (rd)
+
+	:def csb35#7 = :ctf {eq B#EVS7-8.SubBit  = B#EVS7-8-2.SubBit .}
+
+	:apply(csb35#7)
+
+	:def csb36#7 = :ctf {eq rb(S#Sys)  = B#EVS7-8-2.SubBit .}
+
+	:apply(csb36#7)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B@Bit ; B1:Bit <- B#EVS7-8-2.SubBit ; B:Bit <- B#EVS7-8.SubBit ; P00:PBPSeq <- P0#EVS7-8-2.PBPSeq ; P0:Packet <- P@Packet ; P10:PBPSeq <- e ; P1:Packet <- P#EVS7-8-2.SubPacket ; P:Packet <- P#EVS7-8.SubPacket ;}
+
+	:apply (rd)
+
+	:def csb37#7 = :ctf {eq B#EVS7-8.SubBit  = B#EVS7-8-2.SubBit .}
+
+	:apply(csb37#7)
+
+	:def csb38#7 = :ctf {eq rb(S#Sys)  = B#EVS7-8-2.SubBit .}
+
+	:apply(csb38#7)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B@Bit ; B1:Bit <- B#EVS7-8-2.SubBit ; B:Bit <- B#EVS7-8.SubBit ; P00:PBPSeq <- P0#EVS7-8-2.PBPSeq ; P0:Packet <- P@Packet ; P10:PBPSeq <- e ; P1:Packet <- P#EVS7-8-2.SubPacket ; P:Packet <- P#EVS7-8.SubPacket ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb39#7 = :ctf {eq B#EVS7-8.SubBit  = B#EVS7-8-2.SubBit .}
+
+	:apply(csb39#7)
+
+	:def csb40#7 = :ctf {eq rb(S#Sys)  = B#EVS7-8-2.SubBit .}
+
+	:apply(csb40#7)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B@Bit ; B1:Bit <- B#EVS7-8-2.SubBit ; B:Bit <- B#EVS7-8.SubBit ; P00:PBPSeq <- P0#EVS7-8-2.PBPSeq ; P0:Packet <- P@Packet ; P10:PBPSeq <- e ; P1:Packet <- P#EVS7-8-2.SubPacket ; P:Packet <- P#EVS7-8.SubPacket ;}
+
+	:apply (rd)
+
+	:def csb41#7 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb41#7)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb42#7 = :cvs [P0#EVS7-9.PBPSeq  .]
+
+	:apply(csb42#7)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb43#7 = :ctf {eq P#EVS7-9.SubPacket  = P#EVS7-9-2.SubPacket .}
+
+	:apply(csb43#7)
+
+	:def csb44#7 = :ctf {eq B#EVS7-9.SubBit  = B#EVS7-9-2.SubBit .}
+
+	:apply(csb44#7)
+
+	:def csb45#7 = :ctf {eq rb(S#Sys)  = B#EVS7-9-2.SubBit .}
+
+	:apply(csb45#7)
+
+	:def csb46#7 = :ctf {eq P@Packet  = P#EVS7-9-2.SubPacket .}
+
+	:apply(csb46#7)
+
+	:def csb47#7 = :ctf {eq B@Bit  = B#EVS7-9-2.SubBit .}
+
+	:apply(csb47#7)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP7]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb48#7 = :ctf {eq rb(S#Sys)  = B#EVS7-9-2.SubBit .}
+
+	:apply(csb48#7)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb49#7 = :ctf {eq P@Packet  = P#EVS7-9-2.SubPacket .}
+
+	:apply(csb49#7)
+
+	:def csb50#7 = :ctf {eq B@Bit  = B#EVS7-9-2.SubBit .}
+
+	:apply(csb50#7)
+
+	:def csb51#7 = :ctf {eq sb(S#Sys)  = B#EVS7-9-2.SubBit .}
+
+	:apply(csb51#7)
+
+	:def csb52#7 = :ctf {eq p2s(S#Sys)  = P#EVS7-9-2.SubPacket .}
+
+	:apply(csb52#7)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B@Bit ; B1:Bit <- B#EVS7-9-2.SubBit ; B:Bit <- B#EVS7-9.SubBit ; P00:PBPSeq <- P0#EVS7-9-2.PBPSeq ; P0:Packet <- P@Packet ; P10:PBPSeq <- e ; P1:Packet <- P#EVS7-9-2.SubPacket ; P:Packet <- P#EVS7-9.SubPacket ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B@Bit ; B1:Bit <- B#EVS7-9-2.SubBit ; B:Bit <- B#EVS7-9.SubBit ; P00:PBPSeq <- P0#EVS7-9-2.PBPSeq ; P0:Packet <- P@Packet ; P10:PBPSeq <- e ; P1:Packet <- P#EVS7-9-2.SubPacket ; P:Packet <- P#EVS7-9.SubPacket ;}
+
+	:apply (rd)
+
+	:def csb53#7 = :ctf {eq rb(S#Sys)  = B#EVS7-9.SubBit .}
+
+	:apply(csb53#7)
+
+	:def csb54#7 = :ctf {eq sb(S#Sys)  = B@Bit .}
+
+	:apply(csb54#7)
+
+	:def csb55#7 = :ctf {eq p2s(S#Sys)  = P@Packet .}
+
+	:apply(csb55#7)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B@Bit ; B1:Bit <- B#EVS7-9-2.SubBit ; B:Bit <- B#EVS7-9.SubBit ; P00:PBPSeq <- P0#EVS7-9-2.PBPSeq ; P0:Packet <- P@Packet ; P10:PBPSeq <- e ; P1:Packet <- P#EVS7-9-2.SubPacket ; P:Packet <- P#EVS7-9.SubPacket ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B@Bit ; B1:Bit <- B#EVS7-9-2.SubBit ; B:Bit <- B#EVS7-9.SubBit ; P00:PBPSeq <- P0#EVS7-9-2.PBPSeq ; P0:Packet <- P@Packet ; P10:PBPSeq <- e ; P1:Packet <- P#EVS7-9-2.SubPacket ; P:Packet <- P#EVS7-9.SubPacket ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B@Bit ; B1:Bit <- B#EVS7-9-2.SubBit ; B:Bit <- B#EVS7-9.SubBit ; P00:PBPSeq <- P0#EVS7-9-2.PBPSeq ; P0:Packet <- P@Packet ; P10:PBPSeq <- e ; P1:Packet <- P#EVS7-9-2.SubPacket ; P:Packet <- P#EVS7-9.SubPacket ;}
+
+	:apply (rd)
+
+	:def csb56#7 = :ctf {eq P@Packet  = P#EVS7-9-2.SubPacket .}
+
+	:apply(csb56#7)
+
+	:def csb57#7 = :ctf {eq B@Bit  = B#EVS7-9-2.SubBit .}
+
+	:apply(csb57#7)
+
+	:def csb58#7 = :ctf {eq rb(S#Sys)  = B#EVS7-9-2.SubBit .}
+
+	:apply(csb58#7)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B@Bit ; B1:Bit <- B#EVS7-9-2.SubBit ; B:Bit <- B#EVS7-9.SubBit ; P00:PBPSeq <- P0#EVS7-9-2.PBPSeq ; P0:Packet <- P@Packet ; P10:PBPSeq <- e ; P1:Packet <- P#EVS7-9-2.SubPacket ; P:Packet <- P#EVS7-9.SubPacket ;}
+
+	:apply (rd)
+
+	:def csb59#7 = :ctf {eq rb(S#Sys)  = B#EVS7-9-2.SubBit .}
+
+	:apply(csb59#7)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B@Bit ; B1:Bit <- B#EVS7-9-2.SubBit ; B:Bit <- B#EVS7-9.SubBit ; P00:PBPSeq <- P0#EVS7-9-2.PBPSeq ; P0:Packet <- P@Packet ; P10:PBPSeq <- e ; P1:Packet <- P#EVS7-9-2.SubPacket ; P:Packet <- P#EVS7-9.SubPacket ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B@Bit ; B1:Bit <- B#EVS7-9-2.SubBit ; B:Bit <- B#EVS7-9.SubBit ; P00:PBPSeq <- P0#EVS7-9-2.PBPSeq ; P0:Packet <- P@Packet ; P10:PBPSeq <- e ; P1:Packet <- P#EVS7-9-2.SubPacket ; P:Packet <- P#EVS7-9.SubPacket ;}
+
+	:apply (rd)
+
+	:def csb60#7 = :ctf {eq rb(S#Sys)  = B#EVS7-9-2.SubBit .}
+
+	:apply(csb60#7)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B@Bit ; B1:Bit <- B#EVS7-9-2.SubBit ; B:Bit <- B#EVS7-9.SubBit ; P00:PBPSeq <- P0#EVS7-9-2.PBPSeq ; P0:Packet <- P@Packet ; P10:PBPSeq <- e ; P1:Packet <- P#EVS7-9-2.SubPacket ; P:Packet <- P#EVS7-9.SubPacket ;}
+
+	:apply (rd)
+
+	:imp [proofABP8]  by {B:Bit <- B@Bit ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B@Bit ; B1:Bit <- B#EVS7-9-2.SubBit ; B:Bit <- B#EVS7-9.SubBit ; P00:PBPSeq <- P0#EVS7-9-2.PBPSeq ; P0:Packet <- P@Packet ; P10:PBPSeq <- e ; P1:Packet <- P#EVS7-9-2.SubPacket ; P:Packet <- P#EVS7-9.SubPacket ;}
+
+	:apply (rd)
+
+	:def csb61#7 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb61#7)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb62#7 = :ctf {eq rb(S#Sys)  = B#EVS7-10.SubBit .}
+
+	:apply(csb62#7)
+
+	:def csb63#7 = :ctf {eq ac(S#Sys)  = B10@BSeq, B@Bit, B1@Bit, B00@BSeq .}
+
+	:apply(csb63#7)
+
+	:def csb64#7 = :ctf {eq B@Bit  = B#EVS7-10.SubBit .}
+
+	:apply(csb64#7)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:imp [proofABP6]  by {B:Bit <- B#EVS7-10.SubBit ; P:Packet <- P#EVS7-10.SubPacket ;}
+
+	:imp [proofABP3]  by {B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:imp [proofABP9]  by {B00:BSeq <- B00@BSeq ; B0:Bit <- B0@Bit ; B10:BSeq <- B10@BSeq ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ;}
+
+	:apply (rd)
+
+	:def csb65#7 = :cvs [dc(S#Sys)  .]
+
+	:apply(csb65#7)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb66#7 = :ctf {eq P0#EVS7-11.PBPSeq  = P10@PBPSeq, < P@Packet, B@Bit >, < P1@Packet, B1@Bit >, P00@PBPSeq .}
+
+	:apply(csb66#7)
+
+	:def csb67#7 = :ctf {eq < P@Packet, B@Bit >  = < P1@Packet, B1@Bit > .}
+
+	:apply(csb67#7)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:def csb68#7 = :ctf {eq < P0@Packet, B0@Bit >  = < P1@Packet, B1@Bit > .}
+
+	:apply(csb68#7)
+
+	:def csb69#7 = :ctf [< P1@Packet, B1@Bit > \in P00@PBPSeq  .]
+
+	:apply(csb69#7)
+
+	:def csb70#7 = :ctf {eq < p2s(S#Sys), sb(S#Sys) >  = < P1@Packet, B1@Bit > .}
+
+	:apply(csb70#7)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ; P10:PBPSeq <- _`,_(<_`,_>(P#EVS7-11.SubPacket, B#EVS7-11.SubBit), P10@PBPSeq) ;}
+
+	:apply (rd)
+
+	:def csb71#7 = :ctf {eq < p2s(S#Sys), sb(S#Sys) >  = < P1@Packet, B1@Bit > .}
+
+	:apply(csb71#7)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ; P10:PBPSeq <- _`,_(<_`,_>(P#EVS7-11.SubPacket, B#EVS7-11.SubBit), P10@PBPSeq) ;}
+
+	:apply (rd)
+
+	:def csb72#7 = :ctf [< P0@Packet, B0@Bit > \in P00@PBPSeq  .]
+
+	:apply(csb72#7)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ; P10:PBPSeq <- _`,_(<_`,_>(P#EVS7-11.SubPacket, B#EVS7-11.SubBit), P10@PBPSeq) ;}
+
+	:apply (rd)
+
+	:def csb73#7 = :ctf {eq < p2s(S#Sys), sb(S#Sys) >  = < P1@Packet, B1@Bit > .}
+
+	:apply(csb73#7)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ; P10:PBPSeq <- _`,_(<_`,_>(P#EVS7-11.SubPacket, B#EVS7-11.SubBit), P10@PBPSeq) ;}
+
+	:apply (rd)
+
+	:imp [proofABP10]  by {B0:Bit <- B0@Bit ; B1:Bit <- B1@Bit ; B:Bit <- B@Bit ; P00:PBPSeq <- P00@PBPSeq ; P0:Packet <- P0@Packet ; P10:PBPSeq <- P10@PBPSeq ; P1:Packet <- P1@Packet ; P:Packet <- P@Packet ;}
+
+	:apply (rd)
+

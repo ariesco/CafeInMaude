@@ -1,0 +1,105 @@
+fmod COMMAND-PARSING is
+ pr OPEN-CLOSE-PARSER .
+ pr PRELOAD-LIST .
+ pr META-LEVEL .
+ pr MOVE-DOWN .
+ pr LEXICAL .
+
+ vars SIS SIS' : ScoreInfoSet .
+ var  EqS : EquationSet .
+ vars TL TL' : TermList .
+ var  PT : ProofTree .
+ vars M M' : Module .
+ var  AtS : AttrSet .
+ var  NL : NatList .
+ vars T T' : Term .
+ vars Q Q' : Qid .
+
+ op extractTerms : Term -> TermList .
+ eq extractTerms('__[TL]) = extractTerms*(TL) .
+ eq extractTerms(T) = T [owise] .
+
+ op extractTerms* : TermList -> TermList .
+ eq extractTerms*(empty) = empty .
+ eq extractTerms*((T, TL)) = extractTerms(T), extractTerms*(TL) .
+
+ op generateLoadList : Term -> TermList .
+ eq generateLoadList('__[T, T']) = generateLoadList(T), generateLoadList(T') .
+ eq generateLoadList(T) = 'load_.['token[T]] [owise] .
+
+ op createApplyComms : Term -> TermList .
+ eq createApplyComms('__[T, T']) = ':applyComm[T], createApplyComms(T') .
+ eq createApplyComms(T) = ':applyComm[T] [owise] .
+
+ op printGoal : TermList -> String .
+ eq printGoal('__[T, T']) = printGoal(T) + "\n" + printGoal(T') .
+ eq printGoal('eq_=_.['CafeBubble[T], 'CafeBubble[T']]) = "eq " + printTokens(downQidList(T)) + " = " +
+                                                                  printTokens(downQidList(T')) + " ." .
+
+ op printEqMacro : Term -> String .
+ eq printEqMacro('eq_=_.['CafeBubble[T],'CafeBubble[T']]) = "eq " + printTokens(downQidList(T)) + " = " +
+                                                                    printTokens(downQidList(T')) + " ." .
+ eq printEqMacro(T) = "" [owise] .
+
+ op printTokenDown : Term -> String .
+ eq printTokenDown(T) = printTokens(downQidList(T)) .
+
+ op getSIS : ProofTree NatList ScoreInfoSet -> ScoreInfoSet .
+ ceq getSIS(PT, NL, SIS) = $getSIS(Q', SIS, noScoreInfo)
+  if eq Q[TL] = 'true.Bool [AtS] . EqS := getGoal(PT, NL) /\
+     Q' := getInductiveCase(TL) .
+ eq getSIS(PT, NL, SIS) = SIS [owise] .
+
+ op getInductiveCase : TermList ~> Qid .
+ eq getInductiveCase((Q[TL], TL')) = Q .
+ eq getInductiveCase((T, TL)) = getInductiveCase(TL) [owise] .
+
+ op $getSIS : Qid ScoreInfoSet ScoreInfoSet -> ScoreInfoSet .
+ eq $getSIS(Q, $ M, M', T $ SIS, SIS') = if sameCase(Q, T)
+                                         then $getSIS(Q, SIS, SIS' $ M, M', T $ )
+                                         else $getSIS(Q, SIS, SIS')
+                                         fi .
+ eq $getSIS(Q, SIS, SIS') = SIS' [owise] .
+
+ op sameCase : Qid Term -> Bool .
+ eq sameCase(Q, '_implies_[T, T']) = sameCase(Q, T') .
+ eq sameCase(Q, Q'[TL]) = Q == getInductiveCase(TL) [owise] .
+endfm
+
+mod CIMPA-COMMANDS-PROCESSING is
+ pr COMMAND-PARSING .
+ pr TASKS .
+
+ vars T T' MPT MNL MSIS MMACS : Term .
+ vars QIL QIL' QIL'' : QidList .
+ vars SIS SIS' : ScoreInfoSet .
+ var  MIOS : MIOccupationSet .
+ vars PT PT' : ProofTree .
+ vars SIM : ScoreInfoMap .
+ vars PO : ProofOrder .
+ var  MACS : Macros .
+ var  NL : NatList .
+ var  S : String .
+ vars Q Q' : Qid .
+
+ op taskQueueForInductiveCases : ProofTree ProofOrder ScoreInfoSet Macros -> TaskQueue .
+ ceq taskQueueForInductiveCases(PT, NL y PO, SIS, MACS) = [NL, 'OPEN-CLOSE-PARSER, T]
+                                                          taskQueueForInductiveCases(PT, PO, SIS, MACS)
+  if SIS' := getSIS(PT, NL, SIS) /\
+     PT' := selectGoal(PT, NL) /\
+     MPT := upTerm(PT') /\
+     MNL := upTerm(NL) /\
+     MSIS := upTerm(SIS') /\
+     MMACS := upTerm(MACS) /\
+     T := 'developProof[MPT, MNL, MSIS, MMACS] .
+ eq taskQueueForInductiveCases(PT, finished, SIS, MACS) = mtTQueue .
+
+ op renameCTF : QidList String -> QidList .
+ eq renameCTF(QIL, S) = renameCTF(QIL, nil, S) .
+
+ op renameCTF : QidList QidList String -> QidList .
+ eq renameCTF(nil, QIL, S) = QIL .
+ ceq renameCTF(':def Q QIL Q QIL', QIL'', S) = renameCTF(QIL', QIL'' ':def Q' QIL Q', S)
+  if Q' := qid(string(Q) + S) .
+ eq renameCTF(Q QIL, QIL', S) = renameCTF(QIL, QIL' Q, S) [owise] .
+endm

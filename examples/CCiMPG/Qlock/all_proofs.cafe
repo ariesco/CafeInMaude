@@ -1,0 +1,446 @@
+-- I) Base case
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   ops i j : -> Pid .
+-- |-
+   red inv1(init,i,j) .
+close
+--
+-- II) Induction cases
+-- 1) want(s,k)
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+-- assumptions
+   eq pc(s,k) = rs .
+   eq i = k .
+-- |-
+   red inv1(s,i,j) implies inv1(want(s,k),i,j) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+-- assumptions
+   eq pc(s,k) = rs .
+   eq (i = k) = false .
+   eq j = k .
+-- |-
+   red inv1(s,i,j) implies inv1(want(s,k),i,j) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+-- assumptions
+   eq pc(s,k) = rs .
+   eq (i = k) = false .
+   eq (j = k) = false .
+-- |-
+   red inv1(s,i,j) implies inv1(want(s,k),i,j) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+-- assumptions
+   eq (pc(s,k) = rs) = false .
+-- |-
+   red inv1(s,i,j) implies inv1(want(s,k),i,j) .
+close
+-- 2) try(s,k)
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+-- assumptions
+   eq pc(s,k) = ws .
+   eq top(queue(s)) = k .
+   eq i = k .
+   eq j = k .
+-- |-
+   red inv1(s,i,j) implies inv1(try(s,k),i,j) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq pc(s,k) = ws .
+   eq top(queue(s)) = k .
+   eq i = k .
+   eq (j = k) = false .
+   eq pc(s,j) = cs .
+-- |-
+   red inv2(s,j) implies inv1(s,i,j) implies inv1(try(s,k),i,j) .
+   -- red inv2-0(s,i,j,k) implies inv1(try(s,k),i,j) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq pc(s,k) = ws .
+   eq top(queue(s)) = k .
+   eq i = k .
+   eq (j = k) = false .
+   eq (pc(s,j) = cs) = false .
+-- |-
+   red inv1(s,i,j) implies inv1(try(s,k),i,j) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq pc(s,k) = ws .
+   eq top(queue(s)) = k .
+   eq (i = k) = false .
+   eq j = k .
+   eq pc(s,i) = cs .
+-- |-
+   red inv2(s,i) implies inv1(s,i,j) implies inv1(try(s,k),i,j) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq pc(s,k) = ws .
+   eq top(queue(s)) = k .
+   eq (i = k) = false .
+   eq j = k .
+   eq (pc(s,i) = cs) = false .
+-- |-
+   red inv1(s,i,j) implies inv1(try(s,k),i,j) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq pc(s,k) = ws .
+   eq top(queue(s)) = k .
+   --
+   eq (i = k) = false .
+   eq (j = k) = false .
+-- |-
+   red inv1(s,i,j) implies inv1(try(s,k),i,j) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq pc(s,k) = ws .
+   eq (top(queue(s)) = k) = false .
+-- |-
+   red inv1(s,i,j) implies inv1(try(s,k),i,j) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq (pc(s,k) = ws) = false .
+-- |-
+   red inv1(s,i,j) implies inv1(try(s,k),i,j) .
+close
+-- 3) exit(s,k)
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq pc(s,k) = cs .
+   eq i = k .
+-- |-
+   red inv1(s,i,j) implies inv1(exit(s,k),i,j) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq pc(s,k) = cs .
+   eq (i = k) = false .
+   eq j = k .
+-- |-
+   red inv1(s,i,j) implies inv1(exit(s,k),i,j) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq pc(s,k) = cs .
+   eq (i = k) = false .
+   eq (j = k) = false .
+-- |-
+   red inv1(s,i,j) implies inv1(exit(s,k),i,j) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i j k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq (pc(s,k) = cs) = false .
+-- |-
+   red inv1(s,i,j) implies inv1(exit(s,k),i,j) .
+close
+--> Q.E.D.
+
+-----------------------------------------------------------------------
+-----------------------------------------------------------------------
+------------------------------- PROOF 2 -------------------------------
+-----------------------------------------------------------------------
+-----------------------------------------------------------------------
+
+-- I) Base case
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op i : -> Pid .
+-- |-
+   red inv2(init,i) .
+close
+--
+-- II) Induction cases
+-- 1) want(s,k)
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq pc(s,k) = rs .
+   eq i = k .
+-- |-
+   red inv2(s,i) implies inv2(want(s,k),i) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq pc(s,k) = rs .
+   eq (i = k) = false .
+   eq queue(s) = empty .
+-- |-
+   red inv2(s,i) implies inv2(want(s,k),i) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i k j : -> Pid .
+   op q : -> Queue .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq pc(s,k) = rs .
+   eq (i = k) = false .
+   eq queue(s) = j | q .
+-- |-
+   red inv2(s,i) implies inv2(want(s,k),i) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq (pc(s,k) = rs) = false .
+-- |-
+   red inv2(s,i) implies inv2(want(s,k),i) .
+close
+--> 2) try(s,k)
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq pc(s,k) = ws .
+   eq top(queue(s)) = k .
+   eq i = k .
+-- |-
+   red inv2(s,i) implies inv2(try(s,k),i) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq pc(s,k) = ws .
+   eq top(queue(s)) = k .
+   eq (i = k) = false .
+-- |-
+   red inv2(s,i) implies inv2(try(s,k),i) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq pc(s,k) = ws .
+   eq (top(queue(s)) = k) = false .
+-- |-
+   red inv2(s,i) implies inv2(try(s,k),i) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq (pc(s,k) = ws) = false .
+-- |-
+   red inv2(s,i) implies inv2(try(s,k),i) .
+close
+-- 3) exit(s,k)
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq pc(s,k) = cs .
+   eq i = k .
+-- |-
+   red inv2(s,i) implies inv2(exit(s,k),i) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq pc(s,k) = cs .
+   eq (i = k) = false .
+   eq pc(s,i) = cs .
+-- |-
+   red inv1(s,i,k) implies inv2(s,i) implies inv2(exit(s,k),i) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq pc(s,k) = cs .
+   eq (i = k) = false .
+   eq (pc(s,i) = cs) = false .
+-- |-
+   red inv2(s,i) implies inv2(exit(s,k),i) .
+close
+open QLOCK .
+  :id(qlock)
+-- fresh constants
+   op s : -> Sys .
+   ops i k : -> Pid .
+-- IH
+  eq [:nonexec] : inv1(s,I:Pid,J:Pid) = true .
+  eq [:nonexec] : inv2(s,I:Pid) = true .
+-- assumptions
+   eq (pc(s,k) = cs) = false .
+-- |-
+   red inv2(s,i) implies inv2(exit(s,k),i) .
+close
+--> Q.E.D
+

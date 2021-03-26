@@ -1,0 +1,65 @@
+
+:goal{
+eq [inv1 :nonexec] : inv1(S:Sys)  = true .
+}
+:ind on (S:Sys)
+:apply(si)
+:sel(3)
+	:apply (rd)
+
+
+:sel(1)
+	:def csb1#1 = :ctf {eq pc2(S#Sys)  = rs .}
+
+	:apply(csb1#1)
+
+	:imp [inv1]  .
+
+	:apply (rd)
+
+	:imp [inv1]  .
+
+	:apply (rd)
+
+
+:sel(2)
+	:def csb1#2 = :ctf {eq pc1(S#Sys)  = rs .}
+
+	:apply(csb1#2)
+
+	:imp [inv1]  .
+
+	:apply (rd)
+
+	:imp [inv1]  .
+
+	:apply (rd)
+
+
+:sel(4)
+	:def csb1#4 = :ctf {eq pc1(S#Sys)  = cs .}
+
+	:apply(csb1#4)
+
+	:imp [inv1]  .
+
+	:apply (rd)
+
+	:imp [inv1]  .
+
+	:apply (rd)
+
+
+:sel(5)
+	:def csb1#5 = :ctf {eq pc2(S#Sys)  = cs .}
+
+	:apply(csb1#5)
+
+	:imp [inv1]  .
+
+	:apply (rd)
+
+	:imp [inv1]  .
+
+	:apply (rd)
+

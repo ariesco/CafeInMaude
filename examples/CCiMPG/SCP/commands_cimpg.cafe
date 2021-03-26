@@ -1,0 +1,18 @@
+load ../examples/CCiMPG/SCP/scp.cafe .
+load ../examples/CCiMPG/SCP/all_proofs.cafe .
+
+set-cores 4 .
+
+set-output ../examples/CCiMPG/SCP/scp-proof.cafe .
+
+eof
+
+:infer-proof proofSCP .
+
+:save-proof .
+
+load ../examples/CCiMPG/SCP/scp-proof.cafe .
+
+eof
+
+load ../examples/CCiMPG/SCP/commands_cimpg.cafe .

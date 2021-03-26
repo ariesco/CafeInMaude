@@ -1,0 +1,182 @@
+mod! BIT principal-sort Bit {
+  [Bit]
+  ops 0 1 : -> Bit {constr}
+  op compl : Bit -> Bit
+  eq compl(0) = 1 .
+  eq compl(1) = 0 .
+  eq (0 = 1) = false .
+--
+-- Lemmas
+--
+  vars B1 B2 : Bit
+  ceq (compl(B1) = B2) = true if not (B1 = B2) .
+  eq (compl(B1) = B1) = false .
+}
+
+mod! PACKET principal-sort Packet {
+  [Packet]
+  op p0 : -> Packet {constr}
+  op p : Packet -> Packet {constr}
+  vars P P2 : Packet
+  eq (p0 = p(P)) = false .
+  eq (p(P) = p(P2)) = (P = P2) .
+}
+
+mod! PAIR(FE :: TRIV,SE :: TRIV) {
+  [Pair]
+  op <_,_> : Elt.FE Elt.SE -> Pair {constr}
+  op 1st : Pair -> Elt.FE
+  op 2nd : Pair -> Elt.SE
+  vars FE1 FE2 : Elt.FE
+  vars SE1 SE2 : Elt.SE
+  eq (< FE1,SE1 > = < FE2,SE2 >)
+    = (FE1 = FE2 and SE1 = SE2) .
+  eq 1st(< FE1,SE1 >) = FE1 .
+  eq 2nd(< FE1,SE1 >) = SE1 .
+}
+
+mod! PBPAIR principal-sort PBPair {
+  pr(PAIR(PACKET,BIT) * {sort Pair -> PBPair})
+}
+
+mod! CELL(E :: TRIV) {
+  [Elt.E < Cell]
+  op e : -> Cell {constr}
+  op isEmp : Cell -> Bool
+  op hd : Cell -> Elt.E
+  op tl : Cell -> Cell
+  var E : Elt.E
+  eq (e = E) = false .
+  eq isEmp(e) = true .
+  eq isEmp(E) = false .
+  eq hd(E) = E .
+  eq tl(E) = e .
+}
+
+mod! PBPCELL {
+  pr(CELL(PBPAIR) * {sort Cell -> PBPCell})
+}
+
+mod! BCELL {
+  pr(CELL(BIT) * {sort Cell -> BCell})
+}
+
+mod! SEQ(E :: TRIV) {
+  [Elt.E < Seq]
+  op e : -> Seq {constr}
+  op _,_ : Seq Seq -> Seq {constr assoc id: e}
+  vars E1 E2 E3 E4 : Elt.E
+  vars S1 S2 : Seq
+  eq (e = E1,S1) = false .
+  eq (E1 = E3,E4,S2) = false .
+  eq (E1,E2,S1 = E3,E4,S2) = (E1 = E3 and E2 = E4 and S1 = S2) .
+--
+-- LEMMAS
+--
+}
+
+mod! PSEQ {
+  pr(SEQ(PACKET) * {sort Seq -> PSeq})
+  op mksq : Packet -> PSeq
+  var P : Packet .
+  eq mksq(p0) = p0 .
+  eq mksq(p(P)) = mksq(P),p(P) .
+}
+
+mod! SCP {
+  pr(PBPCELL)
+  pr(BCELL)
+  pr(PSEQ)
+  [Sys]
+  op init : -> Sys {constr}
+  op snd1 : Sys -> Sys {constr}
+  op rec1 : Sys -> Sys {constr}
+  op snd2 : Sys -> Sys {constr}
+  op rec2 : Sys -> Sys {constr}
+  op drp1 : Sys -> Sys {constr}
+  op drp2 : Sys -> Sys {constr}
+  op sb : Sys -> Bit
+  op p2s : Sys -> Packet
+  op rb : Sys -> Bit
+  op psr :  Sys -> PSeq
+  op dc : Sys -> PBPCell
+  op ac : Sys -> BCell
+  --
+  var S : Sys
+  -- init
+  eq sb(init) = 0 .
+  eq p2s(init) = p0 .
+  eq rb(init) = 0 .
+  eq psr(init) = e .
+  eq dc(init) = e .
+  eq ac(init) = e .
+  -- snd1
+  eq sb(snd1(S)) = sb(S) .
+  eq p2s(snd1(S)) = p2s(S) .
+  eq rb(snd1(S)) = rb(S) .
+  eq psr(snd1(S)) = psr(S) .
+  eq dc(snd1(S)) = < p2s(S),sb(S) > .
+  eq ac(snd1(S)) = ac(S) .
+  -- rec1
+  ceq sb(rec1(S))
+    = (if sb(S) = hd(ac(S)) then sb(S) else compl(sb(S)) fi)
+    if not isEmp(ac(S)) .
+  ceq p2s(rec1(S))
+    = (if sb(S) = hd(ac(S)) then p2s(S) else p(p2s(S)) fi)
+    if not isEmp(ac(S)) .
+  ceq rb(rec1(S)) = rb(S) if not isEmp(ac(S)) .
+  ceq psr(rec1(S)) = psr(S) if not isEmp(ac(S)) .
+  ceq dc(rec1(S)) = dc(S) if not isEmp(ac(S)) .
+  ceq ac(rec1(S)) = tl(ac(S)) if not isEmp(ac(S)) .
+  ceq rec1(S) = S if isEmp(ac(S)) .
+  -- snd2
+  eq sb(snd2(S)) = sb(S) .
+  eq p2s(snd2(S)) = p2s(S) .
+  eq rb(snd2(S)) = rb(S) .
+  eq psr(snd2(S)) = psr(S) .
+  eq dc(snd2(S)) = dc(S) .
+  eq ac(snd2(S)) = rb(S) .
+  -- rec2
+  ceq sb(rec2(S)) = sb(S) if not isEmp(dc(S)) .
+  ceq p2s(rec2(S)) = p2s(S) if not isEmp(dc(S)) .
+  ceq rb(rec2(S))
+    = (if rb(S) = 2nd(hd(dc(S))) then compl(rb(S)) else rb(S) fi)
+    if not isEmp(dc(S)) .
+  ceq psr(rec2(S))
+    = (if rb(S) = 2nd(hd(dc(S))) then psr(S),1st(hd(dc(S))) else psr(S) fi)
+    if not isEmp(dc(S)) .
+  ceq dc(rec2(S)) = tl(dc(S)) if not isEmp(dc(S)) .
+  ceq ac(rec2(S)) = ac(S) if not isEmp(dc(S)) .
+  ceq rec2(S) = S if isEmp(dc(S)) .
+  -- drp1
+  ceq sb(drp1(S)) = sb(S) if not isEmp(dc(S)) .
+  ceq p2s(drp1(S)) = p2s(S) if not isEmp(dc(S)) .
+  ceq rb(drp1(S)) = rb(S) if not isEmp(dc(S)) .
+  ceq psr(drp1(S)) = psr(S) if not isEmp(dc(S)) .
+  ceq dc(drp1(S)) = tl(dc(S)) if not isEmp(dc(S)) .
+  ceq ac(drp1(S)) = ac(S) if not isEmp(dc(S)) .
+  ceq drp1(S) = S if isEmp(dc(S)) .
+  -- drp2
+  ceq sb(drp2(S)) = sb(S) if not isEmp(ac(S)) .
+  ceq p2s(drp2(S)) = p2s(S) if not isEmp(ac(S)) .
+  ceq rb(drp2(S)) = rb(S) if not isEmp(ac(S)) .
+  ceq psr(drp2(S)) = psr(S) if not isEmp(ac(S)) .
+  ceq dc(drp2(S)) = dc(S) if not isEmp(ac(S)) .
+  ceq ac(drp2(S)) = tl(ac(S)) if not isEmp(ac(S)) .
+  ceq drp2(S) = S if isEmp(ac(S)) .
+--
+-- Properties
+--
+  op inv1 : Sys -> Bool
+  op inv2 : Sys -> Bool
+  op inv3 : Sys -> Bool
+  eq inv1(S)
+    = (sb(S) = rb(S) implies psr(S),p2s(S) = mksq(p2s(S))) and
+      ((not (sb(S) = rb(S))) implies psr(S) = mksq(p2s(S))) .
+  eq inv2(S)
+    = ((not (ac(S) = e)) and (not (sb(S) = hd(ac(S)))))
+      implies (rb(S) = hd(ac(S))) .
+  eq inv3(S)
+    = ((not (dc(S) = e)) and rb(S) = 2nd(hd(dc(S))))
+      implies (p2s(S) = 1st(hd(dc(S))) and sb(S) = 2nd(hd(dc(S)))) .
+}

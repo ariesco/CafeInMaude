@@ -14,6 +14,10 @@ view ParameterDeclList from TRIV to META-LEVEL is
  sort Elt to ParameterDeclList .
 endv
 
+view Variable from TRIV to META-TERM is
+ sort Elt to Variable .
+endv
+
 fmod MAYBE{X :: TRIV} is
  sort Maybe{X} .
  subsort X$Elt < Maybe{X} .
@@ -543,21 +547,39 @@ fmod OPEN-CLOSE-AUX is
  eq parseRedTerm(M, T, VS) = empty [owise] .
 endfm
 
-fmod COMMAND-PARSING is
+mod TASKS is
+ inc STD-STREAM .
  pr META-LEVEL .
 
- var  TL : TermList .
- vars T T' : Term .
+ var MIOP : MIOccupationPair .
+ var MIOS : MIOccupationSet .
+ var O : Oid .
+ var T : TId .
 
- op extractTerms : Term -> TermList .
- eq extractTerms('__[TL]) = extractTerms*(TL) .
- eq extractTerms(T) = T [owise] .
+ sort TId Task TaskQueue MIOccupationPair MIOccupationSet .
+ subsort MIOccupationPair < MIOccupationSet .
+ subsort Task < TaskQueue .
+ subsort NatList < TId .
 
- op extractTerms* : TermList -> TermList .
- eq extractTerms*(empty) = empty .
- eq extractTerms*((T, TL)) = extractTerms(T), extractTerms*(TL) .
+ op noTask : -> TId [ctor] .
 
- op generateLoadList : Term -> TermList .
- eq generateLoadList('__[T, T']) = generateLoadList(T), generateLoadList(T') .
- eq generateLoadList(T) = 'load_.['token[T]] [owise] .
-endfm
+ op [_,_,_] : TId Qid Term -> Task [ctor] .
+
+ op mtTQueue : -> TaskQueue [ctor] .
+ op __ : TaskQueue TaskQueue -> TaskQueue [ctor assoc id: mtTQueue] .
+
+ op [_,_] : Oid TId -> MIOccupationPair [ctor] .
+
+ op noOccupation : -> MIOccupationSet [ctor] .
+ op __ : MIOccupationSet MIOccupationSet -> MIOccupationSet [ctor assoc comm id: noOccupation] .
+
+ op numCoresStarted : MIOccupationSet -> Nat .
+ eq numCoresStarted(noOccupation) = 0 .
+ eq numCoresStarted(MIOP MIOS) = s(numCoresStarted(MIOS)) .
+
+ op allIdle : MIOccupationSet -> Bool .
+ ceq allIdle([O, T] MIOS) = false
+  if T =/= noTask .
+ eq allIdle(MIOS) = true [owise] .
+endm
+

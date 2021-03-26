@@ -1,0 +1,18 @@
+load ../examples/CCiMPG/TAS/tas.cafe .
+load ../examples/CCiMPG/TAS/all_proofs.cafe .
+
+set-cores 4 .
+
+set-output ../examples/CCiMPG/TAS/tas-proof.cafe .
+
+eof
+
+:infer-proof tas .
+
+:save-proof .
+
+load ../examples/CCiMPG/TAS/tas-proof.cafe .
+
+eof
+
+load ../examples/CCiMPG/TAS/commands_cimpg.cafe .

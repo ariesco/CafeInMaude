@@ -1,0 +1,940 @@
+
+:goal{
+eq [proofSCP :nonexec] : inv1(S:Sys)  = true .
+ eq [proofSCP1 :nonexec] : inv2(S:Sys)  = true .
+ eq [proofSCP2 :nonexec] : inv3(S:Sys)  = true .
+}
+:ind on (S:Sys)
+:apply(si)
+:sel(3)
+	:apply(tc)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+
+:sel(1)
+	:apply(tc)
+
+	-- Goal`1-1  -  inv1(drp1(S#Sys))  - Success
+	:def csb1#1 = :ctf {eq mksq(p2s(drp1(S#Sys)))  = psr(drp1(S#Sys)) .}
+
+	:apply(csb1#1)
+
+		-- Goal`1-1-1  -  inv1(drp1(S#Sys))  - Success
+		:def csb2#1 = :ctf [dc(S#Sys)  .]
+
+		:apply(csb2#1)
+
+			-- Goal`1-1-1-1 Success by implication and reduction.
+			:imp [proofSCP]  .
+
+			:apply (rd)
+
+			-- Goal`1-1-1-2 Success by implication and reduction.
+			:imp [proofSCP]  .
+
+			:apply (rd)
+
+		-- Goal`1-1-2  -  inv1(drp1(S#Sys))  - Success
+		:def csb3#1 = :ctf [dc(S#Sys)  .]
+
+		:apply(csb3#1)
+
+			-- Goal`1-1-2-1 Success by implication and reduction.
+			:imp [proofSCP]  .
+
+			:apply (rd)
+
+			-- Goal`1-1-2-2 Success by implication and reduction.
+			:imp [proofSCP]  .
+
+			:apply (rd)
+
+	-- Goal`1-2  -  inv2(drp1(S#Sys))  - Success
+	:def csb4#1 = :ctf [dc(S#Sys)  .]
+
+	:apply(csb4#1)
+
+		-- Goal`1-2-1 Success by implication and reduction.
+		:imp [proofSCP1]  .
+
+		:apply (rd)
+
+		-- Goal`1-2-2 Success by implication and reduction.
+		:imp [proofSCP1]  .
+
+		:apply (rd)
+
+	-- Goal`1-3  -  inv3(drp1(S#Sys))  - Success
+	:def csb5#1 = :ctf [dc(S#Sys)  .]
+
+	:apply(csb5#1)
+
+		-- Goal`1-3-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`1-3-2 Success by reduction
+		:apply (rd)
+
+
+:sel(2)
+	:apply(tc)
+
+	-- Goal`2-1  -  inv1(drp2(S#Sys))  - Success
+	:def csb1#2 = :ctf {eq mksq(p2s(drp2(S#Sys)))  = psr(drp2(S#Sys)) .}
+
+	:apply(csb1#2)
+
+		-- Goal`2-1-1  -  inv1(drp2(S#Sys))  - Success
+		:def csb2#2 = :ctf [ac(S#Sys)  .]
+
+		:apply(csb2#2)
+
+			-- Goal`2-1-1-1 Success by implication and reduction.
+			:imp [proofSCP]  .
+
+			:apply (rd)
+
+			-- Goal`2-1-1-2 Success by implication and reduction.
+			:imp [proofSCP]  .
+
+			:apply (rd)
+
+			-- Goal`2-1-1-3 Success by implication and reduction.
+			:imp [proofSCP]  .
+
+			:apply (rd)
+
+		-- Goal`2-1-2  -  inv1(drp2(S#Sys))  - Success
+		:def csb3#2 = :ctf [ac(S#Sys)  .]
+
+		:apply(csb3#2)
+
+			-- Goal`2-1-2-1 Success by implication and reduction.
+			:imp [proofSCP]  .
+
+			:apply (rd)
+
+			-- Goal`2-1-2-2 Success by implication and reduction.
+			:imp [proofSCP]  .
+
+			:apply (rd)
+
+			-- Goal`2-1-2-3 Success by implication and reduction.
+			:imp [proofSCP]  .
+
+			:apply (rd)
+
+	-- Goal`2-2  -  inv2(drp2(S#Sys))  - Success
+	:def csb4#2 = :ctf [ac(S#Sys)  .]
+
+	:apply(csb4#2)
+
+		-- Goal`2-2-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`2-2-2 Success by reduction
+		:apply (rd)
+
+		-- Goal`2-2-3 Success by reduction
+		:apply (rd)
+
+	-- Goal`2-3  -  inv3(drp2(S#Sys))  - Success
+	:def csb5#2 = :ctf [ac(S#Sys)  .]
+
+	:apply(csb5#2)
+
+		-- Goal`2-3-1 Success by implication and reduction.
+		:imp [proofSCP2]  .
+
+		:apply (rd)
+
+		-- Goal`2-3-2 Success by implication and reduction.
+		:imp [proofSCP2]  .
+
+		:apply (rd)
+
+		-- Goal`2-3-3 Success by implication and reduction.
+		:imp [proofSCP2]  .
+
+		:apply (rd)
+
+
+:sel(6)
+	:apply(tc)
+
+	-- The corresponding proof score was not present.
+	:imp [proofSCP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofSCP1]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+
+:sel(7)
+	:apply(tc)
+
+	-- The corresponding proof score was not present.
+	:imp [proofSCP]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+	-- The corresponding proof score was not present.
+	:imp [proofSCP2]  .
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+
+:sel(5)
+	:apply(tc)
+
+	-- Goal`5-1  -  inv1(rec2(S#Sys))  - Success
+	:def csb1#5 = :ctf {eq mksq(p2s(rec2(S#Sys)))  = psr(rec2(S#Sys)) .}
+
+	:apply(csb1#5)
+
+		-- Goal`5-1-1  -  inv1(rec2(S#Sys))  - Success
+		:def csb2#5 = :ctf [dc(S#Sys)  .]
+
+		:apply(csb2#5)
+
+			-- Goal`5-1-1-1  -  inv1(rec2(S#Sys))  - Success
+			:def csb3#5 = :ctf {eq rb(S#Sys)  = B#CS5-1-1.Bit .}
+
+			:apply(csb3#5)
+
+				-- Goal`5-1-1-1-1  -  inv1(rec2(S#Sys))  - Success
+				:def csb4#5 = :ctf {eq p2s(S#Sys)  = P#CS5-1-1.Packet .}
+
+				:apply(csb4#5)
+
+					-- Goal`5-1-1-1-1-1  -  inv1(rec2(S#Sys))  - Success
+					:def csb5#5 = :ctf {eq sb(S#Sys)  = B#CS5-1-1.Bit .}
+
+					:apply(csb5#5)
+
+						-- Goal`5-1-1-1-1-1-1 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:apply (rd)
+
+						-- Goal`5-1-1-1-1-1-2 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:imp [proofSCP2]  .
+
+						:apply (rd)
+
+					-- Goal`5-1-1-1-1-2 Success by implication and reduction.
+					:imp [proofSCP]  .
+
+					:imp [proofSCP2]  .
+
+					:apply (rd)
+
+				-- Goal`5-1-1-1-2 Success by implication and reduction.
+				:imp [proofSCP]  .
+
+				:apply (rd)
+
+			-- Goal`5-1-1-2 Success by implication and reduction.
+			:imp [proofSCP]  .
+
+			:apply (rd)
+
+		-- Goal`5-1-2  -  inv1(rec2(S#Sys))  - Success
+		:def csb6#5 = :ctf [dc(S#Sys)  .]
+
+		:apply(csb6#5)
+
+			-- Goal`5-1-2-1  -  inv1(rec2(S#Sys))  - Success
+			:def csb7#5 = :ctf {eq rb(S#Sys)  = B#CS5-1-2.Bit .}
+
+			:apply(csb7#5)
+
+				-- Goal`5-1-2-1-1  -  inv1(rec2(S#Sys))  - Success
+				:def csb8#5 = :ctf {eq p2s(S#Sys)  = P#CS5-1-2.Packet .}
+
+				:apply(csb8#5)
+
+					-- Goal`5-1-2-1-1-1  -  inv1(rec2(S#Sys))  - Success
+					:def csb9#5 = :ctf {eq sb(S#Sys)  = B#CS5-1-2.Bit .}
+
+					:apply(csb9#5)
+
+						-- Goal`5-1-2-1-1-1-1 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:apply (rd)
+
+						-- Goal`5-1-2-1-1-1-2 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:imp [proofSCP2]  .
+
+						:apply (rd)
+
+					-- Goal`5-1-2-1-1-2 Success by implication and reduction.
+					:imp [proofSCP]  .
+
+					:imp [proofSCP2]  .
+
+					:apply (rd)
+
+				-- Goal`5-1-2-1-2 Success by implication and reduction.
+				:imp [proofSCP]  .
+
+				:apply (rd)
+
+			-- Goal`5-1-2-2 Success by implication and reduction.
+			:imp [proofSCP]  .
+
+			:apply (rd)
+
+	-- Goal`5-2  -  inv2(rec2(S#Sys))  - Success
+	:def csb10#5 = :ctf [dc(S#Sys)  .]
+
+	:apply(csb10#5)
+
+		-- Goal`5-2-1  -  inv2(rec2(S#Sys))  - Success
+		:def csb11#5 = :ctf {eq hd(ac(S#Sys))  = sb(S#Sys) .}
+
+		:apply(csb11#5)
+
+			-- Goal`5-2-1-1 Success by reduction
+			:apply (rd)
+
+			-- Goal`5-2-1-2  -  inv2(rec2(S#Sys))  - Success
+			:def csb12#5 = :ctf {eq rb(S#Sys)  = B#CS5-2.Bit .}
+
+			:apply(csb12#5)
+
+				-- Goal`5-2-1-2-1  -  inv2(rec2(S#Sys))  - Success
+				:def csb13#5 = :ctf {eq compl(B#CS5-2.Bit)  = hd(ac(S#Sys)) .}
+
+				:apply(csb13#5)
+
+					-- Goal`5-2-1-2-1-1 Success by reduction
+					:apply (rd)
+
+					-- Goal`5-2-1-2-1-2  -  inv2(rec2(S#Sys))  - Success
+					:def csb14#5 = :ctf {eq hd(ac(S#Sys))  = B#CS5-2.Bit .}
+
+					:apply(csb14#5)
+
+						-- Goal`5-2-1-2-1-2-1 Success by implication and reduction.
+						:imp [proofSCP1]  .
+
+						:imp [proofSCP2]  .
+
+						:apply (rd)
+
+						-- Goal`5-2-1-2-1-2-2 Success by implication and reduction.
+						:imp [proofSCP1]  .
+
+						:apply (rd)
+
+				-- Goal`5-2-1-2-2 Success by implication and reduction.
+				:imp [proofSCP1]  .
+
+				:apply (rd)
+
+		-- Goal`5-2-2 Success by implication and reduction.
+		:imp [proofSCP1]  .
+
+		:apply (rd)
+
+	-- Goal`5-3  -  inv3(rec2(S#Sys))  - Success
+	:def csb15#5 = :ctf [dc(S#Sys)  .]
+
+	:apply(csb15#5)
+
+		-- Goal`5-3-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`5-3-2 Success by reduction
+		:apply (rd)
+
+
+:sel(4)
+	:apply(tc)
+
+	-- Goal`4-1  -  inv1(rec1(S#Sys))  - Success
+	:def csb1#4 = :ctf {eq mksq(p2s(rec1(S#Sys)))  = psr(rec1(S#Sys)) .}
+
+	:apply(csb1#4)
+
+		-- Goal`4-1-1  -  inv1(rec1(S#Sys))  - Success
+		:def csb2#4 = :ctf [ac(S#Sys)  .]
+
+		:apply(csb2#4)
+
+			-- Goal`4-1-1-1  -  inv1(rec1(S#Sys))  - Success
+			:def csb3#4 = :ctf [rb(S#Sys)  .]
+
+			:apply(csb3#4)
+
+				-- Goal`4-1-1-1-1  -  inv1(rec1(S#Sys))  - Success
+				:def csb4#4 = :ctf [sb(S#Sys)  .]
+
+				:apply(csb4#4)
+
+					-- Goal`4-1-1-1-1-1 Success by implication and reduction.
+					:imp [proofSCP]  .
+
+					:apply (rd)
+
+					-- Goal`4-1-1-1-1-2  -  inv1(rec1(S#Sys))  - Success
+					:def csb5#4 = :ctf {eq mksq(p2s(S#Sys))  = psr(S#Sys) .}
+
+					:apply(csb5#4)
+
+						-- Goal`4-1-1-1-1-2-1 Success by reduction
+						:apply (rd)
+
+						-- Goal`4-1-1-1-1-2-2 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:apply (rd)
+
+				-- Goal`4-1-1-1-2  -  inv1(rec1(S#Sys))  - Success
+	:def csb6#4 = :cvs [psr(S#Sys)  .]
+
+	:apply(csb6#4)
+
+					-- Goal`4-1-1-1-2-1  -  inv1(rec1(S#Sys))  - Success
+					:def csb7#4 = :ctf [sb(S#Sys)  .]
+
+					:apply(csb7#4)
+
+						-- Goal`4-1-1-1-2-1-1 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:apply (rd)
+
+						-- Goal`4-1-1-1-2-1-2 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:imp [proofSCP1]  .
+
+						:apply (rd)
+
+					-- Goal`4-1-1-1-2-2  -  inv1(rec1(S#Sys))  - Success
+					:def csb8#4 = :ctf [sb(S#Sys)  .]
+
+					:apply(csb8#4)
+
+						-- Goal`4-1-1-1-2-2-1 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:apply (rd)
+
+						-- Goal`4-1-1-1-2-2-2 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:imp [proofSCP1]  .
+
+						:apply (rd)
+
+					-- Goal`4-1-1-1-2-3  -  inv1(rec1(S#Sys))  - Success
+					:def csb9#4 = :ctf [sb(S#Sys)  .]
+
+					:apply(csb9#4)
+
+						-- Goal`4-1-1-1-2-3-1 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:apply (rd)
+
+						-- Goal`4-1-1-1-2-3-2 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:imp [proofSCP1]  .
+
+						:apply (rd)
+
+			-- Goal`4-1-1-2  -  inv1(rec1(S#Sys))  - Success
+			:def csb10#4 = :ctf [rb(S#Sys)  .]
+
+			:apply(csb10#4)
+
+				-- Goal`4-1-1-2-1  -  inv1(rec1(S#Sys))  - Success
+	:def csb11#4 = :cvs [psr(S#Sys)  .]
+
+	:apply(csb11#4)
+
+					-- Goal`4-1-1-2-1-1  -  inv1(rec1(S#Sys))  - Success
+					:def csb12#4 = :ctf [sb(S#Sys)  .]
+
+					:apply(csb12#4)
+
+						-- Goal`4-1-1-2-1-1-1 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:imp [proofSCP1]  .
+
+						:apply (rd)
+
+						-- Goal`4-1-1-2-1-1-2 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:apply (rd)
+
+					-- Goal`4-1-1-2-1-2  -  inv1(rec1(S#Sys))  - Success
+					:def csb13#4 = :ctf [sb(S#Sys)  .]
+
+					:apply(csb13#4)
+
+						-- Goal`4-1-1-2-1-2-1 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:imp [proofSCP1]  .
+
+						:apply (rd)
+
+						-- Goal`4-1-1-2-1-2-2 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:apply (rd)
+
+					-- Goal`4-1-1-2-1-3  -  inv1(rec1(S#Sys))  - Success
+					:def csb14#4 = :ctf [sb(S#Sys)  .]
+
+					:apply(csb14#4)
+
+						-- Goal`4-1-1-2-1-3-1 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:imp [proofSCP1]  .
+
+						:apply (rd)
+
+						-- Goal`4-1-1-2-1-3-2 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:apply (rd)
+
+				-- Goal`4-1-1-2-2  -  inv1(rec1(S#Sys))  - Success
+				:def csb15#4 = :ctf [sb(S#Sys)  .]
+
+				:apply(csb15#4)
+
+					-- Goal`4-1-1-2-2-1  -  inv1(rec1(S#Sys))  - Success
+					:def csb16#4 = :ctf {eq mksq(p2s(S#Sys))  = psr(S#Sys) .}
+
+					:apply(csb16#4)
+
+						-- Goal`4-1-1-2-2-1-1 Success by reduction
+						:apply (rd)
+
+						-- Goal`4-1-1-2-2-1-2 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:apply (rd)
+
+					-- Goal`4-1-1-2-2-2 Success by implication and reduction.
+					:imp [proofSCP]  .
+
+					:apply (rd)
+
+			-- Goal`4-1-1-3 Success by implication and reduction.
+			:imp [proofSCP]  .
+
+			:apply (rd)
+
+		-- Goal`4-1-2  -  inv1(rec1(S#Sys))  - Success
+		:def csb17#4 = :ctf [ac(S#Sys)  .]
+
+		:apply(csb17#4)
+
+			-- Goal`4-1-2-1  -  inv1(rec1(S#Sys))  - Success
+			:def csb18#4 = :ctf [rb(S#Sys)  .]
+
+			:apply(csb18#4)
+
+				-- Goal`4-1-2-1-1  -  inv1(rec1(S#Sys))  - Success
+				:def csb19#4 = :ctf [sb(S#Sys)  .]
+
+				:apply(csb19#4)
+
+					-- Goal`4-1-2-1-1-1 Success by implication and reduction.
+					:imp [proofSCP]  .
+
+					:apply (rd)
+
+					-- Goal`4-1-2-1-1-2  -  inv1(rec1(S#Sys))  - Success
+					:def csb20#4 = :ctf {eq mksq(p2s(S#Sys))  = psr(S#Sys) .}
+
+					:apply(csb20#4)
+
+						-- Goal`4-1-2-1-1-2-1 Success by reduction
+						:apply (rd)
+
+						-- Goal`4-1-2-1-1-2-2 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:apply (rd)
+
+				-- Goal`4-1-2-1-2  -  inv1(rec1(S#Sys))  - Success
+	:def csb21#4 = :cvs [psr(S#Sys)  .]
+
+	:apply(csb21#4)
+
+					-- Goal`4-1-2-1-2-1  -  inv1(rec1(S#Sys))  - Success
+					:def csb22#4 = :ctf [sb(S#Sys)  .]
+
+					:apply(csb22#4)
+
+						-- Goal`4-1-2-1-2-1-1 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:apply (rd)
+
+						-- Goal`4-1-2-1-2-1-2 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:imp [proofSCP1]  .
+
+						:apply (rd)
+
+					-- Goal`4-1-2-1-2-2  -  inv1(rec1(S#Sys))  - Success
+					:def csb23#4 = :ctf [sb(S#Sys)  .]
+
+					:apply(csb23#4)
+
+						-- Goal`4-1-2-1-2-2-1 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:apply (rd)
+
+						-- Goal`4-1-2-1-2-2-2 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:imp [proofSCP1]  .
+
+						:apply (rd)
+
+					-- Goal`4-1-2-1-2-3  -  inv1(rec1(S#Sys))  - Success
+					:def csb24#4 = :ctf [sb(S#Sys)  .]
+
+					:apply(csb24#4)
+
+						-- Goal`4-1-2-1-2-3-1 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:apply (rd)
+
+						-- Goal`4-1-2-1-2-3-2 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:imp [proofSCP1]  .
+
+						:apply (rd)
+
+			-- Goal`4-1-2-2  -  inv1(rec1(S#Sys))  - Success
+			:def csb25#4 = :ctf [rb(S#Sys)  .]
+
+			:apply(csb25#4)
+
+				-- Goal`4-1-2-2-1  -  inv1(rec1(S#Sys))  - Success
+	:def csb26#4 = :cvs [psr(S#Sys)  .]
+
+	:apply(csb26#4)
+
+					-- Goal`4-1-2-2-1-1  -  inv1(rec1(S#Sys))  - Success
+					:def csb27#4 = :ctf [sb(S#Sys)  .]
+
+					:apply(csb27#4)
+
+						-- Goal`4-1-2-2-1-1-1 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:imp [proofSCP1]  .
+
+						:apply (rd)
+
+						-- Goal`4-1-2-2-1-1-2 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:apply (rd)
+
+					-- Goal`4-1-2-2-1-2  -  inv1(rec1(S#Sys))  - Success
+					:def csb28#4 = :ctf [sb(S#Sys)  .]
+
+					:apply(csb28#4)
+
+						-- Goal`4-1-2-2-1-2-1 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:imp [proofSCP1]  .
+
+						:apply (rd)
+
+						-- Goal`4-1-2-2-1-2-2 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:apply (rd)
+
+					-- Goal`4-1-2-2-1-3  -  inv1(rec1(S#Sys))  - Success
+					:def csb29#4 = :ctf [sb(S#Sys)  .]
+
+					:apply(csb29#4)
+
+						-- Goal`4-1-2-2-1-3-1 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:imp [proofSCP1]  .
+
+						:apply (rd)
+
+						-- Goal`4-1-2-2-1-3-2 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:apply (rd)
+
+				-- Goal`4-1-2-2-2  -  inv1(rec1(S#Sys))  - Success
+				:def csb30#4 = :ctf [sb(S#Sys)  .]
+
+				:apply(csb30#4)
+
+					-- Goal`4-1-2-2-2-1  -  inv1(rec1(S#Sys))  - Success
+					:def csb31#4 = :ctf {eq mksq(p2s(S#Sys))  = psr(S#Sys) .}
+
+					:apply(csb31#4)
+
+						-- Goal`4-1-2-2-2-1-1 Success by reduction
+						:apply (rd)
+
+						-- Goal`4-1-2-2-2-1-2 Success by implication and reduction.
+						:imp [proofSCP]  .
+
+						:apply (rd)
+
+					-- Goal`4-1-2-2-2-2 Success by implication and reduction.
+					:imp [proofSCP]  .
+
+					:apply (rd)
+
+			-- Goal`4-1-2-3 Success by implication and reduction.
+			:imp [proofSCP]  .
+
+			:apply (rd)
+
+	-- Goal`4-2  -  inv2(rec1(S#Sys))  - Success
+	:def csb32#4 = :ctf [ac(S#Sys)  .]
+
+	:apply(csb32#4)
+
+		-- Goal`4-2-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`4-2-2 Success by reduction
+		:apply (rd)
+
+		-- Goal`4-2-3 Success by reduction
+		:apply (rd)
+
+	-- Goal`4-3  -  inv3(rec1(S#Sys))  - Success
+	:def csb33#4 = :ctf [ac(S#Sys)  .]
+
+	:apply(csb33#4)
+
+		-- Goal`4-3-1  -  inv3(rec1(S#Sys))  - Success
+		:def csb34#4 = :ctf {eq 2nd(hd(dc(S#Sys)))  = rb(S#Sys) .}
+
+		:apply(csb34#4)
+
+			-- Goal`4-3-1-1  -  inv3(rec1(S#Sys))  - Success
+			:def csb35#4 = :ctf [1st(hd(dc(S#Sys)))  .]
+
+			:apply(csb35#4)
+
+				-- Goal`4-3-1-1-1  -  inv3(rec1(S#Sys))  - Success
+				:def csb36#4 = :ctf [rb(S#Sys)  .]
+
+				:apply(csb36#4)
+
+					-- Goal`4-3-1-1-1-1  -  inv3(rec1(S#Sys))  - Success
+					:def csb37#4 = :ctf [sb(S#Sys)  .]
+
+					:apply(csb37#4)
+
+						-- Goal`4-3-1-1-1-1-1 Success by implication and reduction.
+						:imp [proofSCP2]  .
+
+						:apply (rd)
+
+						-- Goal`4-3-1-1-1-1-2 Success by implication and reduction.
+						:imp [proofSCP2]  .
+
+						:apply (rd)
+
+					-- Goal`4-3-1-1-1-2  -  inv3(rec1(S#Sys))  - Success
+					:def csb38#4 = :ctf [sb(S#Sys)  .]
+
+					:apply(csb38#4)
+
+						-- Goal`4-3-1-1-1-2-1 Success by implication and reduction.
+						:imp [proofSCP2]  .
+
+						:apply (rd)
+
+						-- Goal`4-3-1-1-1-2-2 Success by implication and reduction.
+						:imp [proofSCP2]  .
+
+						:imp [proofSCP1]  .
+
+						:apply (rd)
+
+				-- Goal`4-3-1-1-2  -  inv3(rec1(S#Sys))  - Success
+				:def csb39#4 = :ctf [rb(S#Sys)  .]
+
+				:apply(csb39#4)
+
+					-- Goal`4-3-1-1-2-1  -  inv3(rec1(S#Sys))  - Success
+					:def csb40#4 = :ctf [sb(S#Sys)  .]
+
+					:apply(csb40#4)
+
+						-- Goal`4-3-1-1-2-1-1 Success by implication and reduction.
+						:imp [proofSCP2]  .
+
+						:apply (rd)
+
+						-- Goal`4-3-1-1-2-1-2 Success by implication and reduction.
+						:imp [proofSCP2]  .
+
+						:apply (rd)
+
+					-- Goal`4-3-1-1-2-2  -  inv3(rec1(S#Sys))  - Success
+					:def csb41#4 = :ctf [sb(S#Sys)  .]
+
+					:apply(csb41#4)
+
+						-- Goal`4-3-1-1-2-2-1 Success by implication and reduction.
+						:imp [proofSCP2]  .
+
+						:apply (rd)
+
+						-- Goal`4-3-1-1-2-2-2 Success by implication and reduction.
+						:imp [proofSCP2]  .
+
+						:imp [proofSCP1]  .
+
+						:apply (rd)
+
+			-- Goal`4-3-1-2 Success by reduction
+			:apply (rd)
+
+		-- Goal`4-3-2  -  inv3(rec1(S#Sys))  - Success
+		:def csb42#4 = :ctf {eq 2nd(hd(dc(S#Sys)))  = rb(S#Sys) .}
+
+		:apply(csb42#4)
+
+			-- Goal`4-3-2-1  -  inv3(rec1(S#Sys))  - Success
+			:def csb43#4 = :ctf [1st(hd(dc(S#Sys)))  .]
+
+			:apply(csb43#4)
+
+				-- Goal`4-3-2-1-1  -  inv3(rec1(S#Sys))  - Success
+				:def csb44#4 = :ctf [rb(S#Sys)  .]
+
+				:apply(csb44#4)
+
+					-- Goal`4-3-2-1-1-1  -  inv3(rec1(S#Sys))  - Success
+					:def csb45#4 = :ctf [sb(S#Sys)  .]
+
+					:apply(csb45#4)
+
+						-- Goal`4-3-2-1-1-1-1 Success by implication and reduction.
+						:imp [proofSCP2]  .
+
+						:imp [proofSCP1]  .
+
+						:apply (rd)
+
+						-- Goal`4-3-2-1-1-1-2 Success by implication and reduction.
+						:imp [proofSCP2]  .
+
+						:apply (rd)
+
+					-- Goal`4-3-2-1-1-2  -  inv3(rec1(S#Sys))  - Success
+					:def csb46#4 = :ctf [sb(S#Sys)  .]
+
+					:apply(csb46#4)
+
+						-- Goal`4-3-2-1-1-2-1 Success by implication and reduction.
+						:imp [proofSCP2]  .
+
+						:apply (rd)
+
+						-- Goal`4-3-2-1-1-2-2 Success by implication and reduction.
+						:imp [proofSCP2]  .
+
+						:apply (rd)
+
+				-- Goal`4-3-2-1-2  -  inv3(rec1(S#Sys))  - Success
+				:def csb47#4 = :ctf [rb(S#Sys)  .]
+
+				:apply(csb47#4)
+
+					-- Goal`4-3-2-1-2-1  -  inv3(rec1(S#Sys))  - Success
+					:def csb48#4 = :ctf [sb(S#Sys)  .]
+
+					:apply(csb48#4)
+
+						-- Goal`4-3-2-1-2-1-1 Success by implication and reduction.
+						:imp [proofSCP2]  .
+
+						:imp [proofSCP1]  .
+
+						:apply (rd)
+
+						-- Goal`4-3-2-1-2-1-2 Success by implication and reduction.
+						:imp [proofSCP2]  .
+
+						:apply (rd)
+
+					-- Goal`4-3-2-1-2-2  -  inv3(rec1(S#Sys))  - Success
+					:def csb49#4 = :ctf [sb(S#Sys)  .]
+
+					:apply(csb49#4)
+
+						-- Goal`4-3-2-1-2-2-1 Success by implication and reduction.
+						:imp [proofSCP2]  .
+
+						:apply (rd)
+
+						-- Goal`4-3-2-1-2-2-2 Success by implication and reduction.
+						:imp [proofSCP2]  .
+
+						:apply (rd)
+
+			-- Goal`4-3-2-2 Success by reduction
+			:apply (rd)
+
+		-- Goal`4-3-3 Success by implication and reduction.
+		:imp [proofSCP2]  .
+
+		:apply (rd)
+

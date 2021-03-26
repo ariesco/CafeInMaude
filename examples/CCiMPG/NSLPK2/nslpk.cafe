@@ -1,0 +1,568 @@
+--
+-- Needham-Schroeder-Lowe Public-Key Authentication Protocol
+-- (NSLPK Protocol)
+--
+-- Msg1 p --> q : E_q(n_p, p)
+-- Msg2 q --> p : E_p(n_p, n_q, q)
+-- Msg3 p --> q : E_q(n_q)
+--
+
+--
+-- One of the principals is the intruder denoted by constant intruder.
+--
+mod! PRINCIPAL {
+  [Prin]
+  op intruder : -> Prin
+}
+
+--
+-- Unguessable random numbers for nonces
+--
+mod! RANDOM {
+  [Rand]
+}
+
+--
+-- Given principals p,q and random value r, term n(p,q,r) denotes a
+-- nonce created by principal p for authenticating p to principal q,
+-- where r makes the nonce globally unique and unguessable.
+--
+mod! NONCE {
+  pr(PRINCIPAL + RANDOM)
+  [Nonce]
+  op n : Prin Prin Rand -> Nonce
+  op creator : Nonce -> Prin
+  op forwhom : Nonce -> Prin
+  op random : Nonce -> Rand
+  vars N1 N2 : Nonce
+  vars C C' : Prin
+  vars W W' : Prin
+  vars R R' : Rand
+  eq creator(n(C,W,R)) = C .
+  eq forwhom(n(C,W,R)) = W .
+  eq random(n(C,W,R)) = R .
+  eq (n(C,W,R) = n(C',W',R')) = (C = C' and W = W' and R = R') .
+}
+
+--
+-- Given principals p,q and nonce n_p, term enc1(q,n_p,p) denotes
+-- cipher E_q(n_p, p), nonce n_p and principal p encrypted with
+-- principal q's public key.
+--
+mod! CIPHER1 {
+  pr(PRINCIPAL + NONCE)
+  [Cipher1]
+  op enc1 : Prin Nonce Prin -> Cipher1
+  op key : Cipher1 -> Prin
+  op nonce : Cipher1 -> Nonce
+  op principal : Cipher1 -> Prin
+  vars E11 E12 : Cipher1
+  vars K K' : Prin
+  vars N N' : Nonce
+  vars P P' : Prin
+  eq key(enc1(K,N,P)) = K .
+  eq nonce(enc1(K,N,P)) = N .
+  eq principal(enc1(K,N,P)) = P .
+  eq (enc1(K,N,P) = enc1(K',N',P')) = (K = K' and N = N' and P = P') .
+}
+
+--
+-- Given principals p,q and nonces n_p,n_q term enc2(p,n_p,n_q,p)
+-- denotes cipher E_p(n_p, n_q, q), nonces n_p,n_q and principal q
+-- encrypted with principal p's public key.
+--
+mod! CIPHER2 {
+  pr(PRINCIPAL + NONCE)
+  [Cipher2]
+  op enc2 : Prin Nonce Nonce Prin -> Cipher2
+  op key : Cipher2 -> Prin
+  op nonce1 : Cipher2 -> Nonce
+  op nonce2 : Cipher2 -> Nonce
+  op principal : Cipher2 -> Prin
+  vars E21 E22 : Cipher2
+  vars K K' : Prin
+  vars N1 N1' : Nonce
+  vars N2 N2' : Nonce
+  vars P P' : Prin
+  eq key(enc2(K,N1,N2,P)) = K .
+  eq nonce1(enc2(K,N1,N2,P)) = N1 .
+  eq nonce2(enc2(K,N1,N2,P)) = N2 .
+  eq principal(enc2(K,N1,N2,P)) = P .
+  eq (enc2(K,N1,N2,P) = enc2(K',N1',N2',P')) 
+    = (K = K' and N1 = N1' and N2 = N2' and P = P') .
+}
+
+--
+-- Given principals p,q and nonce n_p, term enc1(q,n_p,p) denotes
+-- cipher E_q(n_p, p), nonce n_p and principal p encrypted with
+-- principal q's public key.
+--
+mod! CIPHER3 {
+  pr(PRINCIPAL + NONCE)
+  [Cipher3]
+  op enc3 : Prin Nonce -> Cipher3
+  op key : Cipher3 -> Prin
+  op nonce : Cipher3 -> Nonce
+  vars E31 E32 : Cipher3
+  vars K K' : Prin
+  vars N N' : Nonce
+  eq key(enc3(K,N)) = K .
+  eq nonce(enc3(K,N)) = N .
+  eq (enc3(K,N) = enc3(K',N')) = (K = K' and N = N') .
+}
+
+--
+-- Given principals c,s,r and cipheri ei (i = 1,2,3),
+-- mi(c,s,r,ei) denotes a message created by principal c,
+-- but it seems to be sent by principal s to principal r.
+--
+-- c may be the intruder, and c may be different from s.
+-- If so, the message is faked by the intruder.
+--
+mod! MESSAGE {
+  pr(PRINCIPAL + CIPHER1 + CIPHER2 + CIPHER3)
+  [Msg]
+  --      creator   sender    receiver
+  --    --------------------------------------------------
+  op m1 : Prin Prin Prin Cipher1 -> Msg
+  op m2 : Prin Prin Prin Cipher2 -> Msg
+  op m3 : Prin Prin Prin Cipher3 -> Msg
+  --
+  op m1? : Msg -> Bool
+  op m2? : Msg -> Bool
+  op m3? : Msg -> Bool
+  --
+  op creator : Msg -> Prin
+  op sender : Msg -> Prin
+  op receiver : Msg -> Prin
+  op cipher1 : Msg -> Cipher1
+  op cipher2 : Msg -> Cipher2
+  op cipher3 : Msg -> Cipher3
+  --
+  vars M M1 M2 : Msg
+  vars C S R C' S' R' : Prin
+  vars E1 E1' : Cipher1
+  vars E2 E2' : Cipher2
+  vars E3 E3' : Cipher3
+  --
+  eq m1?(m1(C,S,R,E1)) = true .
+  eq m1?(m2(C,S,R,E2)) = false .
+  eq m1?(m3(C,S,R,E3)) = false .
+  eq m2?(m1(C,S,R,E1)) = false .
+  eq m2?(m2(C,S,R,E2)) = true .
+  eq m2?(m3(C,S,R,E3)) = false .
+  eq m3?(m1(C,S,R,E1)) = false .
+  eq m3?(m2(C,S,R,E2)) = false .
+  eq m3?(m3(C,S,R,E3)) = true .
+  --
+  eq creator(m1(C,S,R,E1)) = C .
+  eq creator(m2(C,S,R,E2)) = C .
+  eq creator(m3(C,S,R,E3)) = C .
+  eq sender(m1(C,S,R,E1)) = S .
+  eq sender(m2(C,S,R,E2)) = S .
+  eq sender(m3(C,S,R,E3)) = S .
+  eq receiver(m1(C,S,R,E1)) = R .
+  eq receiver(m2(C,S,R,E2)) = R .
+  eq receiver(m3(C,S,R,E3)) = R .
+  eq cipher1(m1(C,S,R,E1)) = E1 .
+  eq cipher2(m2(C,S,R,E2)) = E2 .
+  eq cipher3(m3(C,S,R,E3)) = E3 .
+  --
+  ceq (M1 = M2)
+      = (m1?(M2) and creator(M1) = creator(M2) and sender(M1) = sender(M2) and
+         receiver(M1) = receiver(M2) and cipher1(M1) = cipher1(M2))
+      if m1?(M1) .
+  ceq (M1 = M2)
+      = (m2?(M2) and creator(M1) = creator(M2) and sender(M1) = sender(M2) and
+         receiver(M1) = receiver(M2) and cipher2(M1) = cipher2(M2))
+      if m2?(M1) .
+  ceq (M1 = M2)
+      = (m3?(M2) and creator(M1) = creator(M2) and sender(M1) = sender(M2) and
+         receiver(M1) = receiver(M2) and cipher3(M1) = cipher3(M2))
+      if m3?(M1) .
+
+  eq (m1(C,S,R,E1) = m1(C',S',R',E1')) = (C = C' and S = S' and R = R' and E1 = E1') .
+  eq (m2(C,S,R,E2) = m2(C',S',R',E2')) = (C = C' and S = S' and R = R' and E2 = E2') .
+  eq (m3(C,S,R,E3) = m3(C',S',R',E3')) = (C = C' and S = S' and R = R' and E3 = E3') .
+}
+
+mod! BAG (D :: TRIV) {
+  [Elt.D < Bag]
+  op void : -> Bag
+  op _,_ : Bag Bag -> Bag {assoc comm id: void}
+  op _\in_ : Elt.D Bag -> Bool
+  var B : Bag
+  vars E1 E2 : Elt.D
+  eq E1 \in void = false .
+  eq E1 \in E2 = (E1 = E2) .
+  eq E1 \in (E2,B) = (E1 = E2) or (E1 \in B) .
+}
+
+mod! SET (D :: TRIV) {
+  [Elt.D < Set]
+  op empty : -> Set
+  op __ : Set Set -> Set {assoc comm idem id: empty}
+  op _\in_ : Elt.D Set -> Bool
+  var S : Set
+  vars E1 E2 : Elt.D
+  eq E1 \in empty = false .
+  eq E1 \in E2 = (E1 = E2) .
+  eq E1 \in (E2 S) = (E1 = E2) or (E1 \in S) .
+}
+
+mod! COLLECTION(D :: TRIV) {
+  [Elt.D < Collection]
+  op _\in_ : Elt.D Collection -> Bool
+}
+
+view TRIV2MSG from TRIV to MESSAGE {
+  sort Elt -> Msg
+}
+view TRIV2NONCE from TRIV to NONCE {
+  sort Elt -> Nonce
+}
+view TRIV2CIPHER1 from TRIV to CIPHER1 {
+  sort Elt -> Cipher1
+}
+view TRIV2CIPHER2 from TRIV to CIPHER2 {
+  sort Elt -> Cipher2
+}
+view TRIV2CIPHER3 from TRIV to CIPHER3 {
+  sort Elt -> Cipher3
+}
+view TRIV2RAND from TRIV to RANDOM {
+  sort Elt -> Rand
+}
+
+--
+-- The network is the bag of messages, which can be regarded as part of
+-- the intruder.
+--
+mod! NETWORK {
+  pr(PRINCIPAL + NONCE)
+  pr(CIPHER1 + CIPHER2 + CIPHER3)
+  pr(BAG(D <= TRIV2MSG)*{sort Bag -> Network})
+  pr(COLLECTION(D <= TRIV2NONCE)*{sort Collection -> ColNonce})
+  pr(COLLECTION(D <= TRIV2CIPHER1)*{sort Collection -> ColCipher1})
+  pr(COLLECTION(D <= TRIV2CIPHER2)*{sort Collection -> ColCipher2})
+  pr(COLLECTION(D <= TRIV2CIPHER3)*{sort Collection -> ColCipher3})
+  --
+  op cnonce : Network -> ColNonce
+  op cenc1 : Network -> ColCipher1
+  op cenc2 : Network -> ColCipher2
+  op cenc3 : Network -> ColCipher3
+  --
+  var NW : Network
+  var M : Msg
+  vars N N' : Nonce
+  var E1 : Cipher1
+  var E2 : Cipher2
+  var E3 : Cipher3
+  vars K P Q Q1 : Prin
+  --
+  -- cnonce : the collection of nonces gleaned by the intruder.
+  -- If a nonce is created by the intruder, the nonce is available to the intruder.
+  -- If there exists a message in the network and the cipher in the message is
+  -- encrypted with the intruder's public key, the nonces in the cipher are
+  -- available to the intruder. Those are the only nonces available to the intruder.
+  --
+  eq N \in cnonce(void) = (creator(N) = intruder) .
+  ceq N \in cnonce(M,NW) = true
+      if m1?(M) and key(cipher1(M)) = intruder and nonce(cipher1(M)) = N .
+  ceq N \in cnonce(M,NW) = true
+      if m2?(M) and key(cipher2(M)) = intruder and nonce1(cipher2(M)) = N .
+  ceq N \in cnonce(M,NW) = true
+      if m2?(M) and key(cipher2(M)) = intruder and nonce2(cipher2(M)) = N .
+  ceq N \in cnonce(M,NW) = true
+      if m3?(M) and key(cipher3(M)) = intruder and nonce(cipher3(M)) = N .
+  ceq N \in cnonce(M,NW) = N \in cnonce(NW)
+      if not(m1?(M) and key(cipher1(M)) = intruder and nonce(cipher1(M)) = N) and
+         not(m2?(M) and key(cipher2(M)) = intruder and nonce1(cipher2(M)) = N) and
+         not(m2?(M) and key(cipher2(M)) = intruder and nonce2(cipher2(M)) = N) and
+         not(m3?(M) and key(cipher3(M)) = intruder and nonce(cipher3(M)) = N) .
+  
+  ceq nonce2(cipher2(M)) \in cnonce(NW) = true
+      if m2?(M) and key(cipher2(M)) = intruder and M \in NW .
+  ceq nonce(cipher1(M)) \in cnonce(NW) = true
+      if m1?(M) and key(cipher1(M)) = intruder and M \in NW .
+  ceq n(sender(M),P,R:Rand) \in cnonce(NW) = true
+      if m2?(M) and key(cipher2(M)) = intruder and M \in NW and n(sender(M),P,R:Rand) = nonce2(cipher2(M)) .
+  
+  --
+  -- cenc1 : the collection of cipher1's gleaned by the intruder.
+  -- If the cipher is encrypted by the intruder's public key, it is not necessary
+  -- to collect because the cipher can be rebuilt by the intruder.
+  --
+  eq E1 \in cenc1(void) = false .
+  ceq E1 \in cenc1(M,NW) = true
+      if m1?(M) and not(key(cipher1(M)) = intruder) and E1 = cipher1(M) .
+  ceq E1 \in cenc1(M,NW) = E1 \in cenc1(NW)
+      if not(m1?(M) and not(key(cipher1(M)) = intruder) and E1 = cipher1(M)) .
+
+  ceq cipher1(M) \in cenc1(NW) = true
+      if m1?(M) and not(key(cipher1(M)) = intruder) and M \in NW .
+  ceq enc1(K,nonce(E1),P) \in cenc1(NW) = E1 \in cenc1(NW)
+      if K = key(E1) and P = principal(E1)  . 
+
+  --
+  -- cenc2 : the collection of cipher2's gleaned by the intruder.
+  -- If the cipher is encrypted by the intruder's public key, it is not necessary
+  -- to collect because the cipher can be rebuilt by the intruder.
+  --
+  eq E2 \in cenc2(void) = false .
+  ceq E2 \in cenc2(M,NW) = true
+      if m2?(M) and not(key(cipher2(M)) = intruder) and E2 = cipher2(M) .
+  ceq E2 \in cenc2(M,NW) = E2 \in cenc2(NW)
+      if not(m2?(M) and not(key(cipher2(M)) = intruder) and E2 = cipher2(M)) .
+  
+  ceq cipher2(M) \in cenc2(NW) = true
+      if m2?(M) and not(key(cipher2(M)) = intruder) and M \in NW .
+  ceq m2(Q1,Q,P,E2) \in NW = false 
+      if E2 \in cenc2(NW) = false and not(key(E2) = intruder) .
+
+  --
+  -- cenc3 : the collection of cipher3's gleaned by the intruder.
+  -- If the cipher is encrypted by the intruder's public key, it is not necessary
+  -- to collect because the cipher can be rebuilt by the intruder.
+  --
+  eq E3 \in cenc3(void) = false .
+  ceq E3 \in cenc3(M,NW) = true
+      if m3?(M) and not(key(cipher3(M)) = intruder) and E3 = cipher3(M) .
+  ceq E3 \in cenc3(M,NW) = E3 \in cenc3(NW)
+      if not(m3?(M) and not(key(cipher3(M)) = intruder) and E3 = cipher3(M)) .
+    
+  ceq cipher3(M) \in cenc3(NW) = true
+      if m3?(M) and not(key(cipher3(M)) = intruder) and M \in NW .
+  
+  ceq m3(Q1,P,Q,E3) \in NW = false 
+      if E3 \in cenc3(NW) = false and not(key(E3) = intruder) .
+
+  ceq m1(creator(M), creator(M), P, enc1(P,N:Nonce,creator(M))) \in NW = true
+      if M \in NW and m1?(M) and receiver(M) = P and
+      N:Nonce = nonce(cipher1(M)) .
+  ceq m2(creator(M), P, Q, enc2(Q,N1:Nonce,N2:Nonce,P)) \in NW = true
+      if M \in NW and m2?(M) and sender(M) = P and receiver(M) = Q and
+      N1:Nonce = nonce1(cipher2(M)) and N2:Nonce = nonce2(cipher2(M)) .
+
+  ceq enc2(P,N1:Nonce,nonce2(cipher2(M)),Q) \in cenc2(NW) = true
+      if m2?(M) and sender(M) = Q and receiver(M) = P and
+    N1:Nonce = nonce1(cipher2(M)) and cipher2(M) \in cenc2(NW) .
+
+}
+
+mod* NSLPK {
+  pr(NETWORK)
+  pr(SET(D <= TRIV2RAND)*{sort Set -> URand})
+  [Sys]
+-- any initial state
+  op init : -> Sys {constr}
+-- observations
+  op ur : Sys -> URand -- the set of used random numbers
+  op nw : Sys -> Network
+-- actions
+  -- sending messages according to the protocol
+  op sdm1 : Sys Prin Prin Rand        -> Sys {constr}
+  op sdm2 : Sys Prin Rand Msg          -> Sys {constr}
+  op sdm3 : Sys Prin Rand Msg Msg  -> Sys {constr}
+  -- faking messages based on the gleaned info
+  op fkm11 : Sys Prin Prin Cipher1     -> Sys {constr}
+  op fkm12 : Sys Prin Prin Nonce       -> Sys {constr}
+  op fkm21 : Sys Prin Prin Cipher2     -> Sys {constr}
+  op fkm22 : Sys Prin Prin Nonce Nonce -> Sys {constr}
+  op fkm31 : Sys Prin Prin Cipher3     -> Sys {constr}
+  op fkm32 : Sys Prin Prin Nonce       -> Sys {constr}
+-- CafeOBJ variables
+  var S : Sys
+  vars M M1 M2 : Msg
+  vars P Q : Prin
+  var R : Rand
+  vars N N1 N2 : Nonce
+  var E1 : Cipher1
+  var E2 : Cipher2
+  var E3 : Cipher3
+-- for any initial state
+  eq ur(init) = empty .
+  eq nw(init) = void .
+-- for sdm1
+  op c-sdm1 : Sys Prin Prin Rand -> Bool
+  eq c-sdm1(S,P,Q,R) = not (R \in ur(S)) .
+  -- 
+  ceq ur(sdm1(S,P,Q,R)) = R ur(S) if c-sdm1(S,P,Q,R) .
+  ceq nw(sdm1(S,P,Q,R)) = (m1(P,P,Q,enc1(Q,n(P,Q,R),P)) , nw(S)) if c-sdm1(S,P,Q,R) .
+  ceq sdm1(S,P,Q,R)     = S if not c-sdm1(S,P,Q,R) .
+
+-- for sdm2
+  op c-sdm2 : Sys Prin Rand Msg -> Bool
+  --
+  -- The effective condition means that there exists message1 M that seems to be
+  -- sent bt P denoted by sender(M) and random number R is really fresh.
+  --
+  eq c-sdm2(S,Q,R,M)
+     = (M \in nw(S) and m1?(M) and receiver(M) = Q and key(cipher1(M)) = Q and
+        principal(cipher1(M)) = sender(M) and not(R \in ur(S))) .
+  --
+  ceq ur(sdm2(S,Q,R,M)) = R ur(S) if c-sdm2(S,Q,R,M) .
+  ceq nw(sdm2(S,Q,R,M))
+      = m2(Q,Q,sender(M),enc2(sender(M),nonce(cipher1(M)),n(Q,sender(M),R),Q)) , nw(S)
+      if c-sdm2(S,Q,R,M) .
+  ceq sdm2(S,Q,R,M)     = S if not c-sdm2(S,Q,R,M) .
+
+-- for sdm3
+  op c-sdm3 : Sys Prin Rand Msg Msg -> Bool -- {strat: (0 1 2 3 4 5)}
+  --
+  -- The effective condition means that principal P has sent message1 M1 to Q denoted
+  -- by receiver(M1) and there exits message1 M2 that seems to be sent by Q to P in
+  -- response to M1.
+  --
+  eq c-sdm3(S,P,R,M1,M2)
+     = (M1 \in nw(S) and M2 \in nw(S) and m1?(M1) and m2?(M2) and
+        creator(M1) = P and sender(M1) = P and receiver(M1) = sender(M2) and
+        key(cipher1(M1)) = sender(M2) and nonce(cipher1(M1)) = n(P,sender(M2),R) and
+        principal(cipher1(M1)) = P and
+        receiver(M2) = P and key(cipher2(M2)) = P and
+        nonce1(cipher2(M2)) = n(P,sender(M2),R) and principal(cipher2(M2)) = sender(M2)) .
+  --
+  eq  ur(sdm3(S,P,R,M1,M2)) = ur(S) .
+  ceq nw(sdm3(S,P,R,M1,M2))
+      = m3(P,P,sender(M2),enc3(sender(M2),nonce2(cipher2(M2)))) , nw(S)
+      if c-sdm3(S,P,R,M1,M2) .
+  ceq sdm3(S,P,R,M1,M2)     = S if not c-sdm3(S,P,R,M1,M2) .
+-- for fkm11
+  op c-fkm11 : Sys Prin Prin Cipher1 -> Bool -- {strat: (0 1 2 3 4)}
+  eq c-fkm11(S,P,Q,E1) = E1 \in cenc1(nw(S)) .
+  --
+  eq  ur(fkm11(S,P,Q,E1)) = ur(S) .
+  ceq nw(fkm11(S,P,Q,E1)) = m1(intruder,P,Q,E1) , nw(S) if c-fkm11(S,P,Q,E1) .
+  ceq fkm11(S,P,Q,E1)     = S if not c-fkm11(S,P,Q,E1) .
+-- for fkm12
+  op c-fkm12 : Sys Prin Prin Nonce -> Bool -- {strat: (0 1 2 3 4)}
+  eq c-fkm12(S,P,Q,N) = N \in cnonce(nw(S)) .
+  --
+  eq  ur(fkm12(S,P,Q,N)) = ur(S) .
+  ceq nw(fkm12(S,P,Q,N)) = m1(intruder,P,Q,enc1(Q,N,P)) , nw(S) if c-fkm12(S,P,Q,N) .
+  ceq fkm12(S,P,Q,N)     = S if not c-fkm12(S,P,Q,N) .
+-- for fkm21
+  op c-fkm21 : Sys Prin Prin Cipher2 -> Bool -- {strat: (0 1 2 3 4)}
+  eq c-fkm21(S,P,Q,E2) = E2 \in cenc2(nw(S)) .
+  --
+  eq  ur(fkm21(S,P,Q,E2)) = ur(S) .
+  ceq nw(fkm21(S,P,Q,E2)) = m2(intruder,P,Q,E2) , nw(S) if c-fkm21(S,P,Q,E2) .
+  ceq fkm21(S,P,Q,E2)     = S if not c-fkm21(S,P,Q,E2) .
+-- for fkm22
+  op c-fkm22 : Sys Prin Prin Nonce Nonce -> Bool -- {strat: (0 1 2 3 4 5)}
+  eq c-fkm22(S,P,Q,N1,N2) = N1 \in cnonce(nw(S)) and N2 \in cnonce(nw(S)) .
+  --
+  eq  ur(fkm22(S,P,Q,N1,N2)) = ur(S) .
+  ceq nw(fkm22(S,P,Q,N1,N2)) = m2(intruder,P,Q,enc2(Q,N1,N2,P)) , nw(S)
+      if c-fkm22(S,P,Q,N1,N2) .
+  ceq fkm22(S,P,Q,N1,N2)     = S if not c-fkm22(S,P,Q,N1,N2) .
+-- for fkm31
+  op c-fkm31 : Sys Prin Prin Cipher3 -> Bool -- {strat: (0 1 2 3 4)}
+  eq c-fkm31(S,P,Q,E3) = E3 \in cenc3(nw(S)) .
+  --
+  eq  ur(fkm31(S,P,Q,E3)) = ur(S) .
+  ceq nw(fkm31(S,P,Q,E3)) = m3(intruder,P,Q,E3) , nw(S) if c-fkm31(S,P,Q,E3) .
+  ceq fkm31(S,P,Q,E3)     = S if not c-fkm31(S,P,Q,E3) .
+-- for fkm32
+  op c-fkm32 : Sys Prin Prin Nonce -> Bool -- {strat: (0 1 2 3 4)}
+  eq c-fkm32(S,P,Q,N) = N \in cnonce(nw(S)) .
+  --
+  eq  ur(fkm32(S,P,Q,N)) = ur(S) .
+  ceq nw(fkm32(S,P,Q,N)) = m3(intruder,P,Q,enc3(Q,N)) , nw(S) if c-fkm32(S,P,Q,N) .
+  ceq fkm32(S,P,Q,N)     = S if not c-fkm32(S,P,Q,N) .
+}
+
+mod INV {
+  pr(NSLPK) 
+-- declare invariants to prove
+  op inv100 : Sys Cipher1 -> Bool
+  op inv110 : Sys Cipher2 -> Bool
+  op inv120 : Sys Cipher3 -> Bool
+  op inv130 : Sys Nonce -> Bool
+  op inv140 : Sys Cipher1 -> Bool
+  op inv150 : Sys Cipher2 -> Bool
+  op inv160 : Sys Nonce -> Bool
+  op inv170 : Sys Prin Prin Prin Rand Nonce -> Bool
+  op inv180 : Sys Prin Prin Prin Rand Nonce -> Bool
+  op inv190 : Sys Prin Prin Rand Nonce -> Bool
+  op inv200 : Sys Prin Prin Rand -> Bool
+  op inv210 : Sys Prin Prin Rand -> Bool
+  op inv220 : Sys Prin Prin Rand Nonce -> Bool
+  op inv230 : Sys Prin Prin Rand -> Bool
+  op inv240 : Sys Prin Prin Rand -> Bool
+  op inv250 : Sys Prin Prin Prin Rand Nonce -> Bool
+  op inv260 : Sys Prin Prin Nonce Nonce -> Bool
+-- CafeOBJ variables
+  var S : Sys
+  var E1 : Cipher1
+  var E2 : Cipher2
+  var E3 : Cipher3
+  var R : Rand
+  vars N N1 N2 : Nonce
+  vars P Q P1 Q1 : Prin
+-- define invariants to prove
+  eq inv100(S,E1) = (E1 \in cenc1(nw(S)) implies not(key(E1) = intruder)) .
+  eq inv110(S,E2) = (E2 \in cenc2(nw(S)) implies not(key(E2) = intruder)) .
+  eq inv120(S,E3) = (E3 \in cenc3(nw(S)) implies not(key(E3) = intruder)) .
+  eq inv130(S,N) 
+     = (N \in cnonce(nw(S)) implies (creator(N) = intruder or forwhom(N) = intruder)) .
+  eq inv140(S,E1)
+     = (E1 \in cenc1(nw(S)) and principal(E1) = intruder
+        implies
+        nonce(E1) \in cnonce(nw(S))) .
+  eq inv150(S,E2)
+     = (E2 \in cenc2(nw(S)) and principal(E2) = intruder
+        implies
+        nonce2(E2) \in cnonce(nw(S))) .
+  eq inv160(S,N) = (creator(N) = intruder implies N \in cnonce(nw(S))) .
+  eq inv170(S,P,Q,Q1,R,N)
+     = (not(P = intruder) and
+        m1(P,P,Q,enc1(Q,n(P,Q,R),P)) \in nw(S) and
+        m2(Q1,Q,P,enc2(P,n(P,Q,R),N,Q)) \in nw(S)
+        implies
+        m2(Q,Q,P,enc2(P,n(P,Q,R),N,Q)) \in nw(S)) .
+  eq inv180(S,P,Q,P1,R,N)
+     = (not(Q = intruder) and
+        m2(Q,Q,P,enc2(P,N,n(Q,P,R),Q)) \in nw(S) and
+        m3(P1,P,Q,enc3(Q,n(Q,P,R))) \in nw(S)
+        implies
+        m3(P,P,Q,enc3(Q,n(Q,P,R))) \in nw(S)) .
+  eq inv190(S,P,Q,R,N)
+     = (not(P = intruder) and enc2(P,n(P,Q,R),N,Q) \in cenc2(nw(S))
+        implies 
+        R \in ur(S)) .
+  eq inv200(S,P,Q,R)
+     = (not(P = intruder) and not(Q = intruder) and 
+        enc1(Q,n(P,Q,R),P) \in cenc1(nw(S))
+        implies 
+        R \in ur(S)) .
+  eq inv210(S,P,Q,R)
+     = (not(P = intruder) and n(P,Q,R) \in cnonce(nw(S))
+        implies 
+        R \in ur(S)) .
+  eq inv220(S,P,Q,R,N)
+     = (not(P = intruder) and
+        m1(P,P,Q,enc1(Q,n(P,Q,R),P)) \in nw(S) and
+        enc2(P,n(P,Q,R),N,Q) \in cenc2(nw(S))
+        implies
+        m2(Q,Q,P,enc2(P,n(P,Q,R),N,Q)) \in nw(S)) .
+  eq inv230(S,P,Q,R)
+     = (not(Q = intruder) and not(P = intruder) and
+        enc3(Q,n(Q,P,R)) \in cenc3(nw(S))
+        implies
+        m3(P,P,Q,enc3(Q,n(Q,P,R))) \in nw(S)) .
+  eq inv240(S,P,Q,R)
+     = (not(Q = intruder) and enc3(Q,n(Q,P,R)) \in cenc3(nw(S))
+        implies 
+        R \in ur(S)) .
+  eq inv250(S,P1,P,Q,R,N)
+     = (not(Q = intruder) and not(P1 = intruder) and
+        enc2(P1,N,n(Q,P,R),Q) \in cenc2(nw(S))
+        implies 
+        R \in ur(S)) .
+  eq inv260(S,P,Q,N1,N2) 
+     = (not(P = intruder) and
+        m2(P,P,Q,enc2(Q,N1,N2,P)) \in nw(S)
+        implies
+        forwhom(N2) = Q) .
+}

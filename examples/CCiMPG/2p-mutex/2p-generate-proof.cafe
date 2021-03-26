@@ -1,0 +1,66 @@
+
+:goal{
+eq [pm :nonexec] : inv1(S:Sys)  = true .
+}
+:ind on (S:Sys)
+:apply(si)
+:sel(3)
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+
+:sel(1)
+	-- Goal`1  -  inv1(enter1(S#Sys))  - Success
+	:def csb1#1 = :ctf [pc2(S#Sys)  .]
+
+	:apply(csb1#1)
+
+		-- Goal`1-1 Success by implication and reduction.
+		:imp [pm]  .
+
+		:apply (rd)
+
+		-- Goal`1-2 Success by reduction
+		:apply (rd)
+
+
+:sel(2)
+	-- Goal`2  -  inv1(enter2(S#Sys))  - Success
+	:def csb1#2 = :ctf [pc1(S#Sys)  .]
+
+	:apply(csb1#2)
+
+		-- Goal`2-1 Success by implication and reduction.
+		:imp [pm]  .
+
+		:apply (rd)
+
+		-- Goal`2-2 Success by reduction
+		:apply (rd)
+
+
+:sel(4)
+	-- Goal`4  -  inv1(leave1(S#Sys))  - Success
+	:def csb1#4 = :ctf [pc1(S#Sys)  .]
+
+	:apply(csb1#4)
+
+		-- Goal`4-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`4-2 Success by reduction
+		:apply (rd)
+
+
+:sel(5)
+	-- Goal`5  -  inv1(leave2(S#Sys))  - Success
+	:def csb1#5 = :ctf [pc2(S#Sys)  .]
+
+	:apply(csb1#5)
+
+		-- Goal`5-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`5-2 Success by reduction
+		:apply (rd)
+

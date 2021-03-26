@@ -1,0 +1,26 @@
+load ../examples/CCiMPG/TAS/tas.cafe .
+
+set-cores 4 .
+
+set-output ../examples/CCiMPG/TAS/tas-generate-proof.cafe .
+
+open TAS .
+ :id(tas)
+-- fresh constants
+  ops i j : -> Pid .
+-- |-
+  red inv1(S:Sys,i,j) .
+  red inv2(S:Sys,i) .
+close
+
+:infer-proof tas .
+
+:save-proof .
+
+eof
+
+load ../examples/CCiMPG/TAS/tas-generate-proof.cafe .
+
+eof
+
+load ../examples/CCiMPG/TAS/commands_generate.cafe .

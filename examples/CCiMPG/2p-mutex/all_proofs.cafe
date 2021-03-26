@@ -1,0 +1,74 @@
+open 2P-MUTEX .
+  :id(inv1)
+
+  red inv1(init) .
+close
+
+open 2P-MUTEX .
+  :id(inv1)
+
+  op s : -> Sys .
+  eq [:nonexec] : inv1(s) = true .
+  eq pc2(s) = rs .
+  red inv1(s) implies inv1(enter1(s)) .
+close
+open 2P-MUTEX .
+  :id(inv1)
+
+  op s : -> Sys .
+  eq [:nonexec] : inv1(s) = true .
+  eq (pc2(s) = rs) = false .
+  red inv1(s) implies inv1(enter1(s)) .
+close
+
+open 2P-MUTEX .
+  :id(inv1)
+
+  op s : -> Sys .
+  eq [:nonexec] : inv1(s) = true .
+  eq pc1(s) = cs .
+  red inv1(s) implies inv1(leave1(s)) .
+close
+open 2P-MUTEX .
+  :id(inv1)
+
+  op s : -> Sys .
+  eq [:nonexec] : inv1(s) = true .
+  eq (pc1(s) = cs) = false .
+  red inv1(s) implies inv1(leave1(s)) .
+close
+
+open 2P-MUTEX .
+  :id(inv1)
+
+  op s : -> Sys .
+  eq [:nonexec] : inv1(s) = true .
+  eq pc1(s) = rs .
+  red inv1(s) implies inv1(enter2(s)) .
+close
+open 2P-MUTEX .
+  :id(inv1)
+
+  op s : -> Sys .
+  eq [:nonexec] : inv1(s) = true .
+  eq (pc1(s) = rs) = false .
+  red inv1(s) implies inv1(enter2(s)) .
+close
+
+open 2P-MUTEX .
+  :id(inv1)
+
+  op s : -> Sys .
+  eq [:nonexec] : inv1(s) = true .
+  eq pc2(s) = cs .
+  red inv1(s) implies inv1(leave2(s)) .
+close
+open 2P-MUTEX .
+  :id(inv1)
+
+  op s : -> Sys .
+  eq [:nonexec] : inv1(s) = true .
+  eq (pc2(s) = cs) = false .
+  red inv1(s) implies inv1(leave2(s)) .
+close
+

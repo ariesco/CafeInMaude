@@ -139,6 +139,7 @@ fmod CITP-AUX is
   var  PRVN : Bool .
   vars N N' : Nat .
   var  H : Header .
+  var  Ty : Type .
   var  G : Goal .
 
   ************************************************************************************
@@ -198,8 +199,8 @@ fmod CITP-AUX is
 
   op parseEqMacro : Module Qid Term -> Macros .
   ceq parseEqMacro(M, Q, 'eq_=_.['CafeBubble[T],'CafeBubble[T']]) = # M, Q - Eq #
-   if T1 := getTerm(metaParse(M, downQidList(T), anyType)) /\
-      T2 := getTerm(metaParse(M, downQidList(T'), anyType)) /\
+   if {T1, Ty} := metaParse(M, downQidList(T), anyType) /\
+      T2 := getTerm(metaParse(M, downQidList(T'), Ty)) /\
       Eq := eq T1 = T2 [none] . .
   eq parseEqMacro(M, Q, T) = mtMacros [owise] .
 

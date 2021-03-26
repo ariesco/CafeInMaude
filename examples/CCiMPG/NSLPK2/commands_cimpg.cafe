@@ -1,0 +1,52 @@
+load ../examples/CCiMPG/NSLPK2/nslpk.cafe .
+load ../examples/CCiMPG/NSLPK2/proof_score/prsc160.cafe .
+
+set-cores 4 .
+
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs/proof16.cafe .
+
+
+:proven(inv100(S:Sys, C:Cipher1))
+:proven(inv110(S:Sys, C:Cipher2))
+:proven(inv120(S:Sys, C:Cipher3))
+
+:infer-proof inv16 .
+
+:save-proof .
+
+eof
+
+load ../examples/CCiMPG/NSLPK2/commands_cimpg.cafe .
+
+- Proof score 100 -> Standalone (4 m 55 s)
+
+load ../examples/CCiMPG/NSLPK2/proof_score/prsc100.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs/proof10.cafe .
+:infer-proof inv10 .
+
+- Proof score 110 -> Standalone (4m 8 s)
+
+load ../examples/CCiMPG/NSLPK2/proof_score/prsc110.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs/proof11.cafe .
+:infer-proof inv11 .
+
+- Proof score 120 -> Standalone (6 m 48 s)
+
+load ../examples/CCiMPG/NSLPK2/proof_score/prsc120.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs/proof12.cafe .
+:infer-proof inv12 .
+
+- Proof score 130 ->
+
+:proven(inv100(S:Sys, r:Cipher1))
+
+- Proof score 160 ->
+
+:proven(inv100(S:Sys, r:Cipher1))
+:proven(inv110(S:Sys, r:Cipher2))
+
+- Proof score 260 -> Standalone (XXX)
+
+load ../examples/CCiMPG/NSLPK2/proof_score/prsc260.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs/proof26.cafe .
+:infer-proof inv26 .

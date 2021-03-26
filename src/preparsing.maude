@@ -138,17 +138,36 @@ fmod PREPARSING is
  eq $prepareModule(QIL) = QIL [owise] .
 
  op prepareModule : QidList -> QidList .
- eq prepareModule(QIL) = prepareModule(QIL, nil, nil) .
+ ceq prepareModule('open QIL) = QIL'
+  if QIL' := prepareOC(QIL, 'open, nil) .
+ ceq prepareModule(QIL) = QIL'
+  if QIL' := prepareModule(QIL, nil, nil) [owise] .
 
  op prepareModule : QidList QidList QidList -> QidList .
  eq prepareModule(nil, ACC, ACC') = ACC' $prepareModule(ACC) .
  ceq prepareModule(Q QIL', ACC, ACC') = prepareModule(QIL', Q, ACC' prepareModule(ACC))
-  if (Q == 'mod!) or (Q == 'module!) or (Q == 'mod*) or (Q == 'mod) or (Q == 'module*) or
-     (Q == 'module) or (Q == 'view) or (Q == 'make) .
- eq prepareModule('`} 'open Q '. QIL', ACC, ACC') = prepareModule(QIL', 'open Q '. , ACC' prepareModule(ACC '`})) .
- eq prepareModule('close 'open Q '. QIL', ACC, ACC') = prepareModule(QIL', 'open Q '. , ACC' prepareModule(ACC 'close)) .
- eq prepareModule(QIL '. 'open Q '. QIL', ACC, ACC') = prepareModule(QIL', 'open Q '. , ACC' prepareModule(ACC '.)) .
+  if (Q == 'mod!) or-else (Q == 'module!) or-else (Q == 'mod*) or-else (Q == 'mod) or-else (Q == 'module*) or-else
+     (Q == 'module) or-else (Q == 'view) or-else (Q == 'make) or-else (Q == ':goal) or-else (Q == 'load) or-else
+     (Q == 'set-cores) or-else (Q == ':ind) or-else (Q == ':apply) or-else (Q == ':imp) or-else (Q == ':def) or-else
+     (Q == ':id) or-else (Q == ':infer) or-else (Q == ':proof) or-else (Q == ':show) or-else (Q == ':desc) or-else
+     (Q == ':infer-proof) or-else (Q == ':generate-proof) .
+ eq prepareModule('`} 'open Q '. QIL', ACC, ACC') = prepareOC(QIL', 'open Q '. , ACC' prepareModule(ACC '`})) .
+ eq prepareModule('`) 'open Q '. QIL', ACC, ACC') = prepareOC(QIL', 'open Q '. , ACC' prepareModule(ACC '`))) .
+ eq prepareModule('`] 'open Q '. QIL', ACC, ACC') = prepareOC(QIL', 'open Q '. , ACC' prepareModule(ACC '`])) .
+ eq prepareModule('close 'open Q '. QIL', ACC, ACC') = prepareOC(QIL', 'open Q '. , ACC' prepareModule(ACC 'close)) .
+ eq prepareModule(QIL '. 'open Q '. QIL', ACC, ACC') = prepareOC(QIL', 'open Q '. , ACC' prepareModule(ACC QIL '.)) .
  eq prepareModule(Q QIL, ACC, ACC') = prepareModule(QIL, ACC Q, ACC') [owise] .
+
+ op prepareOC : QidList QidList QidList -> QidList .
+ eq prepareOC(nil, ACC, ACC') = ACC' $prepareModule(ACC) .
+ eq prepareOC('close 'open QIL', ACC, ACC') = prepareOC(QIL', 'open, ACC' prepareModule(ACC 'close)) .
+ ceq prepareOC('close Q QIL', ACC, ACC') = prepareModule(QIL', Q, ACC' prepareModule(ACC 'close))
+  if (Q == 'mod!) or-else (Q == 'module!) or-else (Q == 'mod*) or-else (Q == 'mod) or-else (Q == 'module*) or-else
+     (Q == 'module) or-else (Q == 'view) or-else (Q == 'make) or-else (Q == ':goal) or-else (Q == 'load) or-else
+     (Q == 'set-cores) or-else (Q == ':ind) or-else (Q == ':apply) or-else (Q == ':imp) or-else (Q == ':def) or-else
+     (Q == ':id) or-else (Q == ':infer) or-else (Q == ':proof) or-else (Q == ':show) or-else (Q == ':desc) or-else
+     (Q == ':infer-proof) or-else (Q == ':generate-proof) .
+ eq prepareOC(Q QIL, ACC, ACC') = prepareOC(QIL, ACC Q, ACC') [owise] .
 
 
  op transformText : String -> String .

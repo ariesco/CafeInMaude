@@ -1,0 +1,18 @@
+load ../examples/CCiMPG/NSLPK/nslpk.cafe .
+load ../examples/CCiMPG/NSLPK/all_proofs.cafe .
+
+set-cores 4 .
+
+set-output ../examples/CCiMPG/NSLPK/nslpk-proof.cafe .
+
+eof
+
+:infer-proof nslpk .
+
+:save-proof .
+
+load ../examples/CCiMPG/NSLPK/nslpk-proof.cafe .
+
+eof
+
+load ../examples/CCiMPG/NSLPK/commands_cimpg.cafe .

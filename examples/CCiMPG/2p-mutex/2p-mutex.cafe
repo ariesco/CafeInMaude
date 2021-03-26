@@ -1,0 +1,58 @@
+mod! LABEL {
+  [Label]
+  ops rs cs : -> Label {constr}
+  eq (rs = cs) = false .
+}
+
+mod* 2P-MUTEX {
+  pr(LABEL)
+  [Sys]
+-- any initial state
+  op init : -> Sys {constr}
+-- transitions
+  op enter1 : Sys -> Sys {constr}
+  op leave1 : Sys -> Sys {constr}
+  op enter2 : Sys -> Sys {constr}
+  op leave2 : Sys -> Sys {constr}
+-- observations
+  op pc1 : Sys -> Label
+  op pc2 : Sys -> Label
+-- CafeOBJ variables
+  var S : Sys
+-- for any initial state
+  eq pc1(init) = rs .
+  eq pc2(init) = rs .
+-- for enter1
+  op c-enter1 : Sys -> Bool
+  eq c-enter1(S) = (pc2(S) = rs) .
+  --
+  ceq pc1(enter1(S)) = cs     if c-enter1(S) .
+  ceq pc2(enter1(S)) = pc2(S) if c-enter1(S) .
+  ceq enter1(S)      = S      if not c-enter1(S) .
+-- for leave1
+  op c-leave1 : Sys -> Bool
+  eq c-leave1(S) = (pc1(S) = cs) .
+  --
+  ceq pc1(leave1(S)) = rs     if c-leave1(S) .
+  ceq pc2(leave1(S)) = pc2(S) if c-leave1(S) .
+  ceq leave1(S)       = S     if not c-leave1(S) .
+-- for enter2
+  op c-enter2 : Sys -> Bool
+  eq c-enter2(S) = (pc1(S) = rs) .
+  --
+  ceq pc1(enter2(S)) = pc1(S) if c-enter2(S) .
+  ceq pc2(enter2(S)) = cs     if c-enter2(S) .
+  ceq enter2(S)      = S      if not c-enter2(S) .
+-- for leave2
+  op c-leave2 : Sys -> Bool
+  eq c-leave2(S) = (pc2(S) = cs) .
+  --
+  ceq pc1(leave2(S)) = pc1(S) if c-leave2(S) .
+  ceq pc2(leave2(S)) = rs     if c-leave2(S) .
+  ceq leave2(S)       = S     if not c-leave2(S) .
+--
+-- properties to prove
+--
+  op inv1 : Sys -> Bool
+  eq inv1(S) = not ((pc1(S) = cs) and (pc2(S) = cs)) .
+}

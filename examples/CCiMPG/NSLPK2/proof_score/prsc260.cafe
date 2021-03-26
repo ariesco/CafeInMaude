@@ -1,0 +1,811 @@
+--> I) Base case
+--> init
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+	op n1 : -> Nonce .
+    op n2 : -> Nonce .
+  red inv260(init,p,q,n1,n2) .
+close
+
+--> II) Induction cases
+--> 1. fkm11(s,r1,r2,r3)
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+	op n1 : -> Nonce .
+    op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Cipher1 .
+	op s : -> Sys .
+	eq (r3 \in cenc1(nw(s))) = true .
+	red inv260(s,p,q,n1,n2) implies inv260(fkm11(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+	op n1 : -> Nonce .
+    op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Cipher1 .
+	op s : -> Sys .
+	eq (r3 \in cenc1(nw(s))) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(fkm11(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+--> 2. fkm12(s,r1,r2,r3)
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+	op n1 : -> Nonce .
+    op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = true .
+	red inv260(s,p,q,n1,n2) implies inv260(fkm12(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+	op n1 : -> Nonce .
+    op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(fkm12(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+--> 3. fkm21(s,r1,r2,r3)
+open INV .
+  :id(inv26)
+	op p : -> Prin .
+    op q : -> Prin .
+	op n1 : -> Nonce .
+    op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Cipher2 .
+	op s : -> Sys .
+	eq (r3 \in cenc2(nw(s))) = true .
+    eq p = intruder .
+	red inv260(s,p,q,n1,n2) implies inv260(fkm21(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+	op p : -> Prin .
+    op q : -> Prin .
+	op n1 : -> Nonce .
+    op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Cipher2 .
+	op s : -> Sys .
+	eq (r3 \in cenc2(nw(s))) = true .
+    eq (p = intruder) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(fkm21(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+	op p : -> Prin .
+    op q : -> Prin .
+	op n1 : -> Nonce .
+    op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Cipher2 .
+	op s : -> Sys .
+	eq (r3 \in cenc2(nw(s))) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(fkm21(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+--> 4. fkm22(s,r1,r2,r3,r4)
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op r4 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = true .
+	eq (r4 \in cnonce(nw(s))) = true .
+    eq p = intruder .
+  	red inv260(s,p,q,n1,n2) implies inv260(fkm22(s,r1,r2,r3,r4),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op r4 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = true .
+	eq (r4 \in cnonce(nw(s))) = true .
+    eq (p = intruder) = false .
+  	red inv260(s,p,q,n1,n2) implies inv260(fkm22(s,r1,r2,r3,r4),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op r4 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = true .
+	eq (r4 \in cnonce(nw(s))) = false .
+  	red inv260(s,p,q,n1,n2) implies inv260(fkm22(s,r1,r2,r3,r4),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op r4 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = false .
+  	red inv260(s,p,q,n1,n2) implies inv260(fkm22(s,r1,r2,r3,r4),p,q,n1,n2) .
+close
+
+--> 5. fkm31(s,r1,r2,r3)
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Cipher3 .
+	op s : -> Sys .
+	eq r3 \in cenc3(nw(s)) = true .
+	red inv260(s,p,q,n1,n2) implies inv260(fkm31(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Cipher3 .
+	op s : -> Sys .
+	eq r3 \in cenc3(nw(s)) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(fkm31(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+--> 6. fkm32(s,r1,r2,r3)
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = true .
+	red inv260(s,p,q,n1,n2) implies inv260(fkm32(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(fkm32(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+--> 7. sdm1(s,r1,r2,r3)
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Rand .
+	op s : -> Sys .
+	eq (r3 \in ur(s)) = true .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm1(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Rand .
+	op s : -> Sys .
+	eq (r3 \in ur(s)) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm1(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+--> 8. sdm2(s,r1,r2,r3)
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = true .
+  	eq m1?(r3) = true .
+  	eq receiver(r3) = r1 .
+  	eq key(cipher1(r3)) = r1 .
+  	eq principal(cipher1(r3)) = sender(r3) .
+  	eq r2 \in ur(s) = true .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm2(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = true .
+  	eq m1?(r3) = true .
+  	eq receiver(r3) = r1 .
+  	eq key(cipher1(r3)) = r1 .
+  	eq principal(cipher1(r3)) = sender(r3) .
+  	eq r2 \in ur(s) = false .
+
+  	eq p = r1 .
+  	eq q = sender(r3) .
+  	eq n1 = nonce(cipher1(r3)) .
+  	eq n2 = n(r1,sender(r3),r2) .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm2(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = true .
+  	eq m1?(r3) = true .
+  	eq receiver(r3) = r1 .
+  	eq key(cipher1(r3)) = r1 .
+  	eq principal(cipher1(r3)) = sender(r3) .
+  	eq r2 \in ur(s) = false .
+
+  	eq p = r1 .
+  	eq q = sender(r3) .
+  	eq n1 = nonce(cipher1(r3)) .
+  	eq (n2 = n(r1,sender(r3),r2)) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm2(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = true .
+  	eq m1?(r3) = true .
+  	eq receiver(r3) = r1 .
+  	eq key(cipher1(r3)) = r1 .
+  	eq principal(cipher1(r3)) = sender(r3) .
+  	eq r2 \in ur(s) = false .
+
+  	eq p = r1 .
+  	eq q = sender(r3) .
+  	eq (n1 = nonce(cipher1(r3))) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm2(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = true .
+  	eq m1?(r3) = true .
+  	eq receiver(r3) = r1 .
+  	eq key(cipher1(r3)) = r1 .
+  	eq principal(cipher1(r3)) = sender(r3) .
+  	eq r2 \in ur(s) = false .
+
+  	eq p = r1 .
+  	eq (q = sender(r3)) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm2(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = true .
+  	eq m1?(r3) = true .
+  	eq receiver(r3) = r1 .
+  	eq key(cipher1(r3)) = r1 .
+  	eq principal(cipher1(r3)) = sender(r3) .
+  	eq r2 \in ur(s) = false .
+
+  	eq (p = r1) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm2(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = true .
+  	eq m1?(r3) = true .
+  	eq receiver(r3) = r1 .
+  	eq key(cipher1(r3)) = r1 .
+  	eq (principal(cipher1(r3)) = sender(r3)) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm2(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = true .
+  	eq m1?(r3) = true .
+  	eq receiver(r3) = r1 .
+  	eq (key(cipher1(r3)) = r1) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm2(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = true .
+  	eq m1?(r3) = true .
+  	eq (receiver(r3) = r1) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm2(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = true .
+  	eq m1?(r3) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm2(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm2(s,r1,r2,r3),p,q,n1,n2) .
+close
+
+--> 9. sdm3(s,r1,r2,r3,r4)
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+    eq sender(r3) = r1 .
+    eq receiver(r3) = sender(r4) .
+    eq key(cipher1(r3)) = sender(r4) .
+	eq nonce(cipher1(r3)) = n(r1,sender(r4),r2) .
+	eq principal(cipher1(r3)) = r1 .
+    eq receiver(r4) = r1 .
+	eq key(cipher2(r4)) = r1 .
+    eq nonce1(cipher2(r4)) = n(r1,sender(r4),r2) .
+	eq principal(cipher2(r4)) = sender(r4) .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm3(s,r1,r2,r3,r4),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+    eq sender(r3) = r1 .
+    eq receiver(r3) = sender(r4) .
+    eq key(cipher1(r3)) = sender(r4) .
+	eq nonce(cipher1(r3)) = n(r1,sender(r4),r2) .
+	eq principal(cipher1(r3)) = r1 .
+    eq receiver(r4) = r1 .
+	eq key(cipher2(r4)) = r1 .
+    eq nonce1(cipher2(r4)) = n(r1,sender(r4),r2) .
+	eq (principal(cipher2(r4)) = sender(r4)) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm3(s,r1,r2,r3,r4),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+    eq sender(r3) = r1 .
+    eq receiver(r3) = sender(r4) .
+    eq key(cipher1(r3)) = sender(r4) .
+	eq nonce(cipher1(r3)) = n(r1,sender(r4),r2) .
+	eq principal(cipher1(r3)) = r1 .
+    eq receiver(r4) = r1 .
+	eq key(cipher2(r4)) = r1 .
+    eq (nonce1(cipher2(r4)) = n(r1,sender(r4),r2)) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm3(s,r1,r2,r3,r4),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+    eq sender(r3) = r1 .
+    eq receiver(r3) = sender(r4) .
+    eq key(cipher1(r3)) = sender(r4) .
+	eq nonce(cipher1(r3)) = n(r1,sender(r4),r2) .
+	eq principal(cipher1(r3)) = r1 .
+    eq receiver(r4) = r1 .
+	eq (key(cipher2(r4)) = r1) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm3(s,r1,r2,r3,r4),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+    eq sender(r3) = r1 .
+    eq receiver(r3) = sender(r4) .
+    eq key(cipher1(r3)) = sender(r4) .
+	eq nonce(cipher1(r3)) = n(r1,sender(r4),r2) .
+	eq principal(cipher1(r3)) = r1 .
+    eq (receiver(r4) = r1) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm3(s,r1,r2,r3,r4),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+    eq sender(r3) = r1 .
+    eq receiver(r3) = sender(r4) .
+    eq key(cipher1(r3)) = sender(r4) .
+	eq nonce(cipher1(r3)) = n(r1,sender(r4),r2) .
+	eq (principal(cipher1(r3)) = r1) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm3(s,r1,r2,r3,r4),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+    eq sender(r3) = r1 .
+    eq receiver(r3) = sender(r4) .
+    eq key(cipher1(r3)) = sender(r4) .
+	eq (nonce(cipher1(r3)) = n(r1,sender(r4),r2)) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm3(s,r1,r2,r3,r4),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+    eq sender(r3) = r1 .
+    eq receiver(r3) = sender(r4) .
+    eq (key(cipher1(r3)) = sender(r4)) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm3(s,r1,r2,r3,r4),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+    eq sender(r3) = r1 .
+    eq (receiver(r3) = sender(r4)) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm3(s,r1,r2,r3,r4),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+    eq (sender(r3) = r1) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm3(s,r1,r2,r3,r4),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq (creator(r3) = r1) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm3(s,r1,r2,r3,r4),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm3(s,r1,r2,r3,r4),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm3(s,r1,r2,r3,r4),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm3(s,r1,r2,r3,r4),p,q,n1,n2) .
+close
+
+open INV .
+  :id(inv26)
+    op p : -> Prin .
+    op q : -> Prin .
+    op n1 : -> Nonce .
+	op n2 : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = false .
+	red inv260(s,p,q,n1,n2) implies inv260(sdm3(s,r1,r2,r3,r4),p,q,n1,n2) .
+close

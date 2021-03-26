@@ -1,0 +1,20 @@
+load ../examples/CCiMPG/MCS/mcs.cafe .
+
+load ../examples/CCiMPG/MCS/all_proofs.cafe .
+
+set-cores 4 .
+
+set-output ../examples/CCiMPG/MCS/mcs-proof.cafe .
+
+eof
+
+:infer-proof mcs .
+
+:save-proof .
+
+load ../examples/CCiMPG/MCS/mcs-proof.cafe .
+
+eof
+
+load ../examples/CCiMPG/MCS/commands_cimpg.cafe .
+

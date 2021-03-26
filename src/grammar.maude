@@ -5,6 +5,13 @@ fmod COMMANDS is
 
  op q : -> @Command@ [ctor] .
  op load_. : @NeTokenList@ -> @Command@ [ctor] .
+ op set-cores_. : @Token@ -> @Command@ [ctor] .
+ op set-output_. : @Token@ -> @Command@ [ctor] .
+ op :save-proof`. : -> @Command@ [ctor] .
+ op :infer-proof_. : @Token@ -> @Command@ [ctor] .
+ op :generate-proof_. : @Token@ -> @Command@ [ctor] .
+ op :generate-proof`. : -> @Command@ [ctor] .
+ op :proven`(_`) : @Bubble@ -> @Command@ [ctor] .
 endfm
 
 
@@ -35,7 +42,11 @@ fmod CafeBUBBLES is
   op CafeBubble : QidList -> @CafeBubble@ [special (id-hook Bubble (1 -1 ( ))
                             op-hook qidListSymbol (__ : QidList QidList ~> QidList)
                             op-hook qidSymbol (<Qids> : ~> Qid)
-                            id-hook Exclude(eq ceq trans ctrans red assoc comm ctor cmod! cmod* var vars op ops copen cview))] .
+                            id-hook Exclude(eq ceq trans ctrans red assoc comm ctor cmod! cmod*
+                                            var vars op ops copen cview :goal :ind set-cores
+                                            :apply :imp :def :id :proof :infer :show :desc
+                                            set-output :save-proof :infer-proof :generate-proof
+                                            :sel :proven))] .
 
   op CafeToken : Qid -> @CafeToken@ [special (id-hook Bubble (1 1)
                             op-hook qidSymbol (<Qids> : ~> Qid)
@@ -44,7 +55,10 @@ fmod CafeBUBBLES is
   op neCafeTokenList : QidList -> @NeCafeTokenList@ [special (id-hook Bubble (1 -1)
                             op-hook qidListSymbol (__ : QidList QidList ~> QidList)
                             op-hook qidSymbol (<Qids> : ~> Qid)
-                            id-hook Exclude(. : { } ))] .
+                            id-hook Exclude(. : { } :apply :ind :imp :def :id
+                                            :proof :infer :show :desc set-cores
+                                            set-output :save-proof :infer-proof
+                                            :sel :generate-proof :proven copen))] .
 endfm
 
 ***(%
@@ -224,7 +238,7 @@ It first defines all the required sorts, and the subsort relations between them:
   subsort @CafeType@ < @CafeTypeList@ .
   subsorts @CafeImportDecl@ @CafeVarDecl@ @CafeEqDecl@ @VisibleSortDecl@ @CafeOpDecl@
            @CafeTransDecl@ @ExecutionDecl@ @CafeInductiveComm@
-           < @CafeLDeclList@ < @OpenCloseDeclList@  .
+           < @CafeLDeclList@ < @OpenCloseDeclList@ .
   subsorts @HiddenSortDecl@ @BehaviorEquationDecl@ @CafeLDeclList@
            < @CafeDeclList@ .
   subsort @ModExp@ < @CafeModExp@ . *** !!!!
@@ -546,8 +560,8 @@ declared or not:
   op :imp[_]by{_} : @CafeToken@ @NeCafeTokenList@ -> @CafeInductiveComm@ [ctor] .
   op :sel(_) : @CafeToken@ -> @CafeInductiveComm@ [ctor] .
   op :postpone`. : -> @CafeInductiveComm@ [ctor] .
-  op :show`proof : -> @CafeInductiveComm@ [ctor] .
-  op :desc`proof : -> @CafeInductiveComm@ [ctor] .
+  op :show`proof`. : -> @CafeInductiveComm@ [ctor] .
+  op :desc`proof`. : -> @CafeInductiveComm@ [ctor] .
   op :desc`. : -> @CafeInductiveComm@ [ctor] .
 
   op :id(_) : @CafeToken@ -> @CafeInductiveComm@ [ctor] .
@@ -600,7 +614,7 @@ fmod INPUT is
 
 
  sort @Input@ .
- subsort @Command@ @CafeMODULE@ @OpenCloseEnv@ @ReqProvDecl@ @OpenCloseDeclList@ < @Input@ .
+ subsort @Command@ @CafeMODULE@ @OpenCloseEnv@ @ReqProvDecl@ @CafeDeclList@ < @Input@ .
 
  op __ : @Input@ @Input@ -> @Input@ [ctor assoc prec 10] .
 

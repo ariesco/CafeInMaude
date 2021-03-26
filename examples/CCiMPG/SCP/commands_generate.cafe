@@ -1,0 +1,32 @@
+load ../examples/CCiMPG/SCP/scp.cafe .
+
+set-cores 4 .
+
+set-output ../examples/CCiMPG/SCP/scp-proof-generate.cafe .
+
+open SCP .
+  :id(proofSCP)
+
+  red inv1(S:Sys) .
+  red inv2(S:Sys) .
+  red inv3(S:Sys) .
+close
+
+:infer-proof proofSCP .
+
+eof
+
+:save-proof .
+
+load ../examples/CCiMPG/SCP/scp-proof-generate.cafe .
+
+eof
+
+load ../examples/CCiMPG/SCP/commands_generate.cafe .
+
+Recommended configuration
+  eq backtrackLevels = 5 .
+  eq numInstVars = 2 .
+  eq extraImpLevels = 1 .
+
+

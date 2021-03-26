@@ -1,17 +1,29 @@
 mod IO is
+ pr ATTRIBUTE-UPDATING .
  pr COMMAND-PARSING .
  inc STD-STREAM .
  inc FILE .
 
- var AtS : AttributeSet .
- var TL : TermList .
+ var  AtS : AttributeSet .
+ var  TL : TermList .
+ var  S S' : String .
+ var  T : Term .
 
  sort State .
 
+ ***        ***
+ *** States ***
+ ***        ***
  *** Initial state, meta-interpreter for parsing is created.
  op init : -> State [ctor] .
+ *** Waiting for commands.
+ op idle : -> State [ctor] .
  *** Executing commands.
  op executeComm : -> State [ctor] .
+ *** For printing and executing the next command.
+ op print&executeComm : -> State [ctor] .
+ *** Final state before leaving
+ op exiting : -> State [ctor] .
 
  ***            ***
  *** Attributes ***
@@ -23,6 +35,8 @@ mod IO is
  op state:_ : State -> Attribute [ctor] .
  *** Current module
  op current:_ : Module -> Attribute [ctor] .
+ *** Output file path
+ op output-file:_ : String -> Attribute [ctor] .
 
  ***           ***
  *** CID & OID ***
@@ -36,20 +50,54 @@ mod IO is
  *** Initial value for attributes ***
  ***                              ***
  op initAtS : -> AttributeSet .
- eq initAtS = state: init, input: empty, current: upModule('NAT, true) .
+ eq initAtS = state: init, input: empty, current: upModule('NAT, true),
+              output-file: "" .
+
+ ***                          ***
+ ***          OUTPUT          ***
+ ***                          ***
+ crl [quit] :
+     < cafeInMaude : CIM | state: executeComm, input: ('set-output_.['token[T]], TL), output-file: S, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, output-file: S', AtS >
+     write(stdout, cafeInMaude, "\nOutput file defined as " + S' + "\n\n")
+  if S' := string(downQid(T)) .
+
+ ***                          ***
+ ***     Print & execute      ***
+ ***                          ***
+ rl [print&executeComm] :
+    wrote(cafeInMaude, stdout)
+    < cafeInMaude : CIM | state: print&executeComm, AtS >
+ => < cafeInMaude : CIM | state: executeComm, AtS > .
 
  ***                        ***
  ***          QUIT          ***
  ***                        ***
  rl [quit] :
     < cafeInMaude : CIM | state: executeComm, input: ('q.@Command@, TL), AtS >
- => write(stdout, cafeInMaude, "Thanks for using CafeInMaude!\n") .
+ => < cafeInMaude : CIM | state: exiting, input: TL, AtS >
+    write(stdout, cafeInMaude, "Thanks for using CafeInMaude!\n") .
+
+ ***                        ***
+ ***          EXIT          ***
+ ***                        ***
+ rl [quit] :
+    wrote(cafeInMaude, stdout)
+    < cafeInMaude : CIM | state: exiting, AtS >
+ => none .
 endm
 
 mod PARSER-IO is
- pr ATTRIBUTE-UPDATING .
+ inc META-INTERPRETER .
  pr PRELOAD-LIST .
  pr IO .
+
+ var  LP : List{Preload} .
+ var  AtS : AttributeSet .
+ var  MS : TheorySortMap .
+ vars MI MI' : Oid .
+ var  M : Module .
+ var  Q : Qid .
 
  ***            ***
  *** Attributes ***
@@ -67,6 +115,18 @@ mod PARSER-IO is
  op msorts:_ : TheorySortMap -> Attribute [ctor gather (&)] .
  *** Set of views
  op views:_ : SortSet -> Attribute [ctor gather (&)] .
+ *** Predefined modules for the user
+ op uload:_ : List{Preload} -> Attribute [ctor gather (&)] .
+ *** Meta-interpreter with user information.
+ op mi:_ : Oid -> Attribute [ctor] .
+
+ ***            ***
+ ***   States   ***
+ ***            ***
+ *** Loading modules required by the meta-interpreter for parsing.
+ op loading-UMI : -> State [ctor] .
+ *** Initial state, meta-interpreter for parsing is created.
+ op updateCores : -> State [ctor] .
 
  ***                                  ***
  *** List of initial principal sorts. ***
@@ -96,17 +156,117 @@ mod PARSER-IO is
  op initParsing-AtS : -> AttributeSet .
  eq initParsing-AtS = psorts: initialPrincipalSorts, tsm: ('TRIV -> 'Elt), hsm: empty,
                       msorts: empty, params: initialParameterMap, views: 'Qid .
+
+ ***                           ***
+ *** meta-interpreters created ***
+ ***                           ***
+ crl [mis-created] :
+     createdInterpreter(cafeInMaude, interpreterManager, MI)
+     < cafeInMaude : CIM | state: init, uload: module(Q) LP, msorts: MS, AtS >
+  => < cafeInMaude : CIM | state: loading-UMI, mi: MI, uload: LP,
+                           msorts: (MS, getName(M) -> getSorts(M)), AtS >
+     insertModule(MI, cafeInMaude, M)
+  if M := upModule(Q, false) .
+
+ ***                          ***
+ *** Inserted module for user ***
+ ***                          ***
+ crl [uload-mod-mod] :
+     insertedModule(cafeInMaude, MI')
+     < cafeInMaude : CIM | state: loading-UMI, uload: module(Q) LP, mi: MI,
+                           msorts: MS, AtS >
+ =>  < cafeInMaude : CIM | state: loading-UMI, uload: LP, mi: MI,
+                           msorts: (MS, getName(M) -> getSorts(M)), AtS >
+     insertModule(MI, cafeInMaude, M)
+ if M := upModule(Q, false) .
+
+ rl [uload-mod-view] :
+    insertedModule(cafeInMaude, MI')
+    < cafeInMaude : CIM | state: loading-UMI, uload: view(Q) LP, mi: MI, AtS >
+ => < cafeInMaude : CIM | state: loading-UMI, uload: LP, mi: MI, AtS >
+    insertView(MI, cafeInMaude, upView(Q)) .
+
+ crl [uload-view-mod] :
+     insertedView(cafeInMaude, MI')
+     < cafeInMaude : CIM | state: loading-UMI, uload: module(Q) LP, mi: MI,
+                           msorts: MS, AtS >
+  => < cafeInMaude : CIM | state: loading-UMI, uload: LP, mi: MI,
+                           msorts: (MS, getName(M) -> getSorts(M)), AtS >
+     insertModule(MI, cafeInMaude, M)
+  if M := upModule(Q, false) .
+
+ rl [uload-view-view] :
+    insertedView(cafeInMaude, MI')
+    < cafeInMaude : CIM | state: loading-UMI, uload: view(Q) LP, mi: MI, AtS >
+ => < cafeInMaude : CIM | state: loading-UMI, uload: LP, mi: MI, AtS >
+    insertView(MI, cafeInMaude, upView(Q)) .
+
+ rl [uload-mod-finish] :
+    insertedModule(cafeInMaude, MI)
+    < cafeInMaude : CIM | state: loading-UMI, uload: nil, mi: MI, AtS >
+ => < cafeInMaude : CIM | state: updateCores, mi: MI, AtS > .
+
+ rl [uload-view-finish] :
+    insertedView(cafeInMaude, MI)
+    < cafeInMaude : CIM | state: loading-UMI, uload: nil, mi: MI, AtS >
+ => < cafeInMaude : CIM | state: updateCores, mi: MI, AtS > .
 endm
 
 mod CIMPA-IO is
- pr OPEN-CLOSE-PARSER .
- pr IO .
+ pr (MAYBE * (op maybe to noVar)){Variable} .
+ pr CIMPA-COMMANDS-PROCESSING .
+ pr PARSER-IO .
 
+ vars T T' T'' T1 MPT MNL MSIS MMACS : Term .
+ vars TL TL' TL1 TL2 : TermList .
+ vars EqS PROVEN : EquationSet .
+ vars QIL QIL' QIL'' : QidList .
+ vars SIS SIS' : ScoreInfoSet .
+ vars PT PT' PT'' : ProofTree .
+ var  MIOS : MIOccupationSet .
+ var  MV : Maybe{Variable} .
  vars PO PO' : ProofOrder .
+ vars S S' OF SP : String .
+ vars M M' M1 M2 : Module .
  var  AtS : AttributeSet .
- vars PT PT' : ProofTree .
- var  TL : TermList .
- vars T T' : Term .
+ vars TQ TQ' : TaskQueue .
+ var  SIM : ScoreInfoMap .
+ var  SB : Substitution .
+ vars MI FHOut : Oid .
+ var  AttS : AttrSet .
+ var  MACS : Macros .
+ var  Eq : Equation .
+ var  V : Variable .
+ var  C : Constant .
+ var  NL : NatList .
+ var  ST : State .
+ vars N N' : Nat .
+ vars Q Q' : Qid .
+ var  Ty : Type .
+ var  B : Bool .
+
+
+ var ODS : OpDeclSet .
+ var EqS' : EquationSet .
+
+ vars PTL PTL' : ProofTreeList .
+ var  G : Goal .
+
+ ***        ***
+ *** States ***
+ ***        ***
+ *** Initial state, meta-interpreter for parsing is created.
+ op addingCore : -> State [ctor] .
+ *** Removing extra meta-interpreter.
+ op removingCore : -> State [ctor] .
+ *** For printing and waiting for more input.
+ op print&updateCores : -> State [ctor] .
+ *** Inserting meta-module into the interpreter.
+ op insertModuleCore : -> State [ctor] .
+ *** Saving the proof in the output file.
+ op saving : -> State [ctor] .
+ *** Sending tasks to cores.
+ op computing : -> State [ctor] .
 
  ***            ***
  *** Attributes ***
@@ -116,19 +276,586 @@ mod CIMPA-IO is
  *** Proof tree
  op ptree:_ : ProofTree -> Attribute [ctor] .
  *** Proof order.
- op po:_ : ProofOrder -> Attribute [ctor] .
+ op po:_ : ProofOrder -> Attribute [ctor gather (&)] .
+ *** Meta-interpreter occupation
+ op mios:_ : MIOccupationSet -> Attribute [ctor gather (&)] .
+ *** Queue of tasks
+ op tasks:_ : TaskQueue -> Attribute [ctor gather (&)] .
+ *** Number of cores available.
+ op cores:_ : Nat -> Attribute [ctor] .
+ *** Number of cores available.
+ op indVar:_ : Maybe{Variable} -> Attribute [ctor] .
+ *** Macros with definitions
+ op macros:_ : Macros -> Attribute [ctor gather (&)] .
+ *** Current proof
+ op proof:_ : String -> Attribute [ctor] .
+ *** Goals previously proven
+ op provenGoals:_ : EquationSet -> Attribute [ctor gather (&)] .
 
  ***                               ***
  *** Initial value for attributes. ***
  ***                               ***
  op initCiMPA-AtS : -> AttributeSet .
- eq initCiMPA-AtS = scoreinfo: mtSIM, ptree: mtPT, po: finished .
+ eq initCiMPA-AtS = scoreinfo: mtSIM, ptree: mtPT, po: finished, tasks: mtTQueue,
+                    mios: noOccupation, cores: 1, indVar: noVar,
+                    macros: mtMacros, proof: "", provenGoals: none .
+
+ ***                        ***
+ ***       SET CORES        ***
+ ***                        ***
+ crl [set-cores] :
+     < cafeInMaude : CIM | state: executeComm, input: ('set-cores_.['token[T]], TL), cores: N, AtS >
+  => < cafeInMaude : CIM | state: print&updateCores, input: TL, cores: N', AtS >
+     write(stdout, cafeInMaude, "\nNumber of cores set to " + S + ".\n\n")
+  if S := string(downQid(T)) /\
+     N' := rat(S, 10) /\
+     N' > 0 .
+
+ crl [set-cores-no-nat] :
+     < cafeInMaude : CIM | state: executeComm, input: ('set-cores_.['token[T]], TL), AtS >
+  => < cafeInMaude : CIM | state: print&updateCores, input: TL, AtS >
+     write(stdout, cafeInMaude, "\nError: the argument must be a natural number.\n")
+  if not (rat(string(downQid(T)), 10) :: Nat ) .
+
+ crl [set-cores-0] :
+     < cafeInMaude : CIM | state: executeComm, input: ('set-cores_.['token[T]], TL), AtS >
+  => < cafeInMaude : CIM | state: print&updateCores, input: TL, AtS >
+     write(stdout, cafeInMaude, "\nError: the argument must be greater than 0.\n")
+  if rat(string(downQid(T)), 10) == 0 .
+
+ ***                        ***
+ ***      UPDATE CORES      ***
+ ***                        ***
+ crl [update-cores-finished] :
+     < cafeInMaude : CIM | state: updateCores, cores: N, mios: MIOS, AtS >
+  => < cafeInMaude : CIM | state: executeComm, cores: N, mios: MIOS, AtS >
+  if N == numCoresStarted(MIOS) .
+
+ crl [update-cores-more-required] :
+     < cafeInMaude : CIM | state: updateCores, cores: N, mios: MIOS, AtS >
+  => < cafeInMaude : CIM | state: addingCore, cores: N, mios: MIOS, AtS >
+     createInterpreter(interpreterManager, cafeInMaude, newProcess)
+  if N > numCoresStarted(MIOS) .
+
+ rl [adding-core] :
+    createdInterpreter(cafeInMaude, interpreterManager, MI)
+    < cafeInMaude : CIM | state: addingCore, mios: MIOS, AtS >
+ => < cafeInMaude : CIM | state: insertModuleCore, mios: [MI, noTask] MIOS, AtS >
+    insertModule(MI, cafeInMaude, upModule('OPEN-CLOSE-PARSER, true)) .
+
+ rl [added-core] :
+    insertedModule(cafeInMaude, MI)
+    < cafeInMaude : CIM | state: insertModuleCore, AtS >
+ => < cafeInMaude : CIM | state: updateCores, AtS > .
+
+ crl [update-cores-less-required] :
+     < cafeInMaude : CIM | state: updateCores, cores: N, mios: [MI, noTask] MIOS, AtS >
+  => < cafeInMaude : CIM | state: removingCore, cores: N, mios: [MI, noTask] MIOS, AtS >
+     quit(MI, cafeInMaude)
+  if N <= numCoresStarted(MIOS) .
+
+ rl [update-cores-bye] :
+    bye(cafeInMaude, MI)
+    < cafeInMaude : CIM | state: removingCore, cores: N, mios: [MI, noTask] MIOS, AtS >
+ => < cafeInMaude : CIM | state: updateCores, cores: N, mios: MIOS, AtS > .
 
  ***                        ***
  ***          GOAL          ***
  ***                        ***
  crl [goal] :
-     < cafeInMaude : CIM | state: executeComm, input: ('goal[T,T'], TL), AtS >
-  => < cafeInMaude : CIM | state: executeComm, input: TL, AtS >
-  if true .
+     < cafeInMaude : CIM | state: executeComm, input: (':goal`{_`}[T], TL), ptree: PT,
+                           po: PO, current: M, proof: S, macros: MACS, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT', po: PO',
+                           current: M, proof: S', macros: mtMacros, AtS >
+     write(stdout, cafeInMaude, printTokens(QIL))
+  if [PT', PO', QIL] := evalGoalCommand(M, T, none) /\
+     S' := ":goal{" + printGoal(T) + "}" [print "goal " PO' "\n Goal - Antes: " PO " Después: " PO'] .
+
+ ***                           ***
+ ***       INDUCTION VAR       ***
+ ***                           ***
+ crl [ind-var] :
+     < cafeInMaude : CIM | state: executeComm, input: (':ind`on`(_`)['CafeToken[T]], TL),
+                           current: M, indVar: MV, proof: SP, provenGoals: PROVEN, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, current: M, indVar: V,
+                           proof: (SP + S'), provenGoals: PROVEN, AtS >
+     write(stdout, cafeInMaude, S)
+  if V := downQid(T) /\
+     S := "\nInduction set on " + printTokens(metaPrettyPrint(M, V, po)) + "\n\n" /\
+     S' := "\n:ind on (" + printTokens(metaPrettyPrint(M, V, po)) + ")" .
+
+
+ ***                    ***
+ ***       APPLY        ***
+ ***                    ***
+ crl [apply] :
+     < cafeInMaude : CIM | state: executeComm, input: (':apply`(_`)['neCafeTokenList[T]], TL), AtS >
+  => < cafeInMaude : CIM | state: executeComm, input: (TL', TL), AtS >
+  if TL' := createApplyComms(T) .
+
+ crl [applyParsed] :
+     < cafeInMaude : CIM | state: executeComm, input: (':applyComm[T], TL), ptree: PT,
+                           po: PO, current: M, indVar: V, macros: MACS, proof: SP,
+                           provenGoals: PROVEN, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT'', po: PO', current: M,
+                           indVar: V, macros: MACS, proof: (SP + S'), provenGoals: PROVEN, AtS >
+     write(stdout, cafeInMaude, printTokens(QIL) + "\n")
+  if Q := downQid(T) /\
+     [PT', PO', QIL] := evalApply(M, Q, PT, V, MACS, PO) /\
+     PT'' := if Q == 'si
+             then addProvenGoals(PT', PROVEN, V)
+             else PT'
+             fi /\
+     S' := "\n:apply(" + string(Q) + ")" [print "Apply - Antes " PO " Despues " PO'] .
+
+ ***                         ***
+ ***       IMPLICATION       ***
+ ***                         ***
+ crl [implication] :
+     < cafeInMaude : CIM | state: executeComm, input: (':imp`[_`].['CafeToken[T]], TL), ptree: PT,
+                           proof: SP, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT', proof: (SP + S), AtS >
+     write(stdout, cafeInMaude, printTokens(QIL))
+  if Q := downQid(T) /\
+     [PT', B] := applyImp(PT, Q) /\
+     QIL := if B
+            then '\n 'New 'goal 'generated: printCurrent(PT')
+            else '\n 'Command 'failed. '\n
+            fi /\
+     S := if B
+          then "\n:imp[" + string(Q) + "] ."
+          else ""
+          fi .
+
+ crl [implication-subs] :
+     < cafeInMaude : CIM | state: executeComm, input: (':imp`[_`]by`{_`}['CafeToken[T], 'neCafeTokenList[T']], TL),
+                           ptree: PT, po: PO, proof: SP, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT', po: PO, proof: (SP + S), AtS >
+     write(stdout, cafeInMaude, printTokens(QIL))
+  if Q := downQid(T) /\
+     SB := procImpSub(getMod(PT, fst(PO)), T') /\
+     [PT', B] := applyImp(PT, Q, SB) /\
+     QIL := if B
+            then '\n 'New 'goal 'generated: printCurrent(PT')
+            else '\n 'Command 'failed. '\n
+            fi /\
+     S := if B
+          then "\n:imp[" + string(Q) + "] by {" + printTokenDown(T') + "}"
+          else ""
+          fi [print "Imp - Antes: " PO] .
+ ***                ***
+ ***       ID       ***
+ ***                ***
+
+ rl [id] :
+    < cafeInMaude : CIM | state: executeComm, input: (':id`(_`)[T], TL), AtS >
+ => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
+    write(stdout, cafeInMaude, "\nError: Command not supported in interactive mode.\n\n") .
+ ***                   ***
+ ***       PROOF       ***
+ ***                   ***
+
+ rl [proof] :
+    < cafeInMaude : CIM | state: executeComm, input: (':proof`(_`)[T], TL), AtS >
+ => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
+    write(stdout, cafeInMaude, "\nError: Command not supported in interactive mode.\n\n") .
+
+ ***                   ***
+ ***       INFER       ***
+ ***                   ***
+
+ rl [infer] :
+    < cafeInMaude : CIM | state: executeComm, input: (':infer`(_`)[T], TL), AtS >
+ => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
+    write(stdout, cafeInMaude, "\nError: Command not supported in interactive mode.\n\n") .
+
+ ***                      ***
+ ***       Postpone       ***
+ ***                      ***
+
+ crl [postpone] :
+     < cafeInMaude : CIM | state: executeComm, input: (':postpone`..@CafeInductiveComm@, TL),
+                           ptree: PT, po: NL y PO, proof: SP, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT', po: PO', proof: (SP + S), AtS >
+     write(stdout, cafeInMaude, printTokens(QIL))
+  if PO' := PO y NL /\
+     PT' := selectGoal(PT, fst(PO')) /\
+     QIL := '\n 'Sentence printIndex(NL) 'postponed. '\n '\n /\
+     S := "\n:postpone ." .
+
+ ***                        ***
+ ***       Show proof       ***
+ ***                        ***
+
+ crl [show-proof] :
+     < cafeInMaude : CIM | state: executeComm, input: (':show`proof`..@CafeInductiveComm@, TL),
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, printTokens(QIL))
+  if QIL := '\n 'Current 'goals: printGoals(PT) .
+
+ ***                        ***
+ ***       Desc proof       ***
+ ***                        ***
+
+ crl [desc-proof] :
+     < cafeInMaude : CIM | state: executeComm, input: (':desc`proof`..@CafeInductiveComm@, TL),
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, printTokens(QIL?:[QidList]))
+  if QIL?:[QidList] := '\n 'Current 'proof: printProofTree(PT) .
+
+ ***                   ***
+ ***       Desc        ***
+ ***                   ***
+
+ crl [desc] :
+     < cafeInMaude : CIM | state: executeComm, input: (':desc`..@CafeInductiveComm@, TL),
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, printTokens(QIL))
+  if QIL := '\n 'Current 'goal: printCurrent(PT) .
+
+ ***                     ***
+ ***       Select        ***
+ ***                     ***
+
+ crl [sel] :
+     < cafeInMaude : CIM | state: executeComm, input: (':sel`(_`)['CafeToken[T]], TL),
+                           proof: SP, po: PO, ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, proof: (SP + S), po: PO',
+                           ptree: PT', AtS >
+     write(stdout, cafeInMaude, printTokens(QIL))
+  if Q := downQid(T) /\
+     NL := qid2natlist(Q) /\
+     PT' := selectGoal(PT, NL) /\
+     PO' := selectGoal(PO, NL) /\
+     S := "\n:sel(" + string(Q) + ")" /\
+     QIL := '\n 'Sentence Q 'selected. '\n [print "SEL - Antes: " PO " Después: " PO'] .
+
+ ***                        ***
+ ***       DEFINITION       ***
+ ***                        ***
+ crl [def-ctf1] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:ctf`{_`}['CafeToken[T], T'], TL),
+                           macros: MACS, ptree: PT, proof: SP, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, macros: (MACS # M', Q - Eq #),
+                           ptree: PT, proof: (SP + S), AtS >
+     write(stdout, cafeInMaude, printTokens(QIL))
+  if Q := downQid(T) /\
+     # M', Q - Eq # := parseEqMacro(PT, Q, T') /\
+     QIL := '\n Q 'defined 'as ':ctf ' '`{ ' printEq(M', Eq) ' '`} '\n /\
+     S := "\n:def " + string(Q) + " = :ctf {" + printEqMacro(T') + "}" .
+
+ crl [def-ctfXX] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:ctf`{_`}['CafeToken[T], T'], TL),
+                           macros: MACS, ptree: PT, proof: SP, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, *** macros: (MACS # M', Q - Eq #),
+                           ptree: PT, proof: (SP + S), AtS >
+     write(stdout, cafeInMaude, printTokens(QIL))
+  if Q := downQid(T) /\
+     *** # M', Q - Eq # := parseEqMacro(PT, Q, T') /\
+     QIL := nil /\ *** '\n Q 'defined 'as ':ctf ' '`{ ' printEq(M', Eq) ' '`} '\n /\
+     S := "" [print "Fallo " PT] . *** "\n:def " + string(Q) + " = :ctf {" + printEqMacro(T') + "}" .
+     *** eq_=_.['CafeBubble['__[''rb.Qid,''`(.Qid,''S#Sys.Qid,''`).Qid]],'CafeBubble[''B#CS5-1-1-2.Bit.Qid]]
+
+ crl [def-ctf2] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:ctf`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           macros: MACS, ptree: PT, proof: SP, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, macros: (MACS # M', Q - T'' #),
+                           ptree: PT, proof: (SP + S), AtS >
+     write(stdout, cafeInMaude, printTokens(QIL))
+  if Q := downQid(T) /\
+     # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+     QIL := '\n Q 'defined 'as ':ctf ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+     S := "\n:def " + string(Q) + " = :ctf [ " + printTokenDown(T') + " ]" .
+
+ crl [def-cvss] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvss`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           macros: MACS, ptree: PT, proof: SP, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, macros: (MACS # M', Q - T'' . cvss #),
+                           ptree: PT, proof: (SP + S), AtS >
+     write(stdout, cafeInMaude, printTokens(QIL))
+  if Q := downQid(T) /\
+      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+      subsortSingleBinaryOpConstraints(M', T'') /\
+      QIL := '\n Q 'defined 'as ':cvss ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+      S := "\n:def " + string(Q) + " = :cvss [ " + printTokenDown(T') + " ]" .
+
+ crl [def-cvvs] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvvs`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           macros: MACS, ptree: PT, proof: SP, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, macros: (MACS # M', Q - T'' . cvvs #),
+                           ptree: PT, proof: (SP + S), AtS >
+     write(stdout, cafeInMaude, printTokens(QIL))
+  if Q := downQid(T) /\
+      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+      QIL := '\n Q 'defined 'as ':cvvs ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+      S := "\n:def " + string(Q) + " = :cvvs [ " + printTokenDown(T') + " ]" .
+
+ crl [def-cvsv] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvsv`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           macros: MACS, ptree: PT, proof: SP, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, macros: (MACS # M', Q - T'' . cvsv #),
+                           ptree: PT, proof: (SP + S), AtS >
+     write(stdout, cafeInMaude, printTokens(QIL))
+  if Q := downQid(T) /\
+      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+      QIL := '\n Q 'defined 'as ':cvsv ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+      S := "\n:def " + string(Q) + " = :cvsv [ " + printTokenDown(T') + " ]" .
+
+ crl [def-cevss] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cevss`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           macros: MACS, ptree: PT, proof: SP, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, macros: (MACS # M', Q - T'' . cevss #),
+                           ptree: PT, proof: (SP + S), AtS >
+     write(stdout, cafeInMaude, printTokens(QIL))
+  if Q := downQid(T) /\
+      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+      QIL := '\n Q 'defined 'as ':cevss ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+      S := "\n:def " + string(Q) + " = :cevss [ " + printTokenDown(T') + " ]" .
+
+ crl [def-cvs] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvs`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           macros: MACS, ptree: PT, proof: SP, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, macros: (MACS # M', Q - T'' . cvs #),
+                           ptree: PT, proof: (SP + S), AtS >
+     write(stdout, cafeInMaude, printTokens(QIL))
+  if Q := downQid(T) /\
+      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+      subsortUnaryBinaryOpConstraints(M', T'') /\
+      QIL := '\n Q 'defined 'as ':cvs ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+      S := "\n:def " + string(Q) + " = :cvs [ " + printTokenDown(T') + " ]" .
+
+ crl [def-csv] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:csv`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           macros: MACS, ptree: PT, proof: SP, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, macros: (MACS # M', Q - T'' . csv #),
+                           ptree: PT, proof: (SP + S), AtS >
+     write(stdout, cafeInMaude, printTokens(QIL))
+  if Q := downQid(T) /\
+      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+      subsortUnaryBinaryOpConstraints(M', T'') /\
+      QIL := '\n Q 'defined 'as ':csv ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+      S := "\n:def " + string(Q) + " = :csv [ " + printTokenDown(T') + " ]" .
+
+ crl [def-csvs] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:csvs`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           macros: MACS, ptree: PT, proof: SP, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, macros: (MACS # M', Q - T'' . csvs #),
+                           ptree: PT, proof: (SP + S), AtS >
+     write(stdout, cafeInMaude, printTokens(QIL))
+  if Q := downQid(T) /\
+      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+      subsortUnaryBinaryOpConstraints(M', T'') /\
+      QIL := '\n Q 'defined 'as ':csvs ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+      S := "\n:def " + string(Q) + " = :csvs [ " + printTokenDown(T') + " ]" .
+
+ ***                          ***
+ ***          PROVEN          ***
+ ***                          ***
+ crl [proven] :
+     < cafeInMaude : CIM | state: executeComm, input: (':proven`(_`)['bubble[T]], TL),
+                           current: M, provenGoals: PROVEN, proof: SP, AtS >
+  => < cafeInMaude : CIM | state: executeComm, input: TL, current: M,
+                           provenGoals: (PROVEN eq T' = 'true.Bool [none] .),
+                           proof: (SP + S), AtS >
+  if QIL := downQidList(T) /\
+     T' := getTerm(metaParse(M, varsFromQidList(QIL), QIL, 'Bool)) /\
+     S := "\n:proven(" + printTokens(QIL) + ")" .
+
+ ***                            ***
+ ***          GENERATE          ***
+ ***                            ***
+ crl [generate-proof] :
+     < cafeInMaude : CIM | state: executeComm, input: (':infer-proof_.['token[T]], TL),
+                           po: finished, ptree: PT, scoreinfo: SIM, tasks: TQ,
+                           proof: SP, current: M, indVar: MV, provenGoals: PROVEN, AtS >
+  => < cafeInMaude : CIM | state: computing, input: TL, po: nil, ptree: PT', scoreinfo: SIM,
+                           tasks: TQ', proof: (SP + S), current: M, indVar: V, provenGoals: PROVEN, AtS >
+  if Q := downQid(T) /\
+     SIS $ M1, M2, (TL1, T1, TL2)$ := SIM[Q] /\
+     hasVars(T1) /\
+     (V, TL') := getGoal($ M1, M2, (TL1, T1, TL2)$) /\
+     EqS := goalEqS(TL', Q, 0) /\
+     [PT', PO] := applyInduction(| M, [nil, 'root, EqS, true, false], mtPT, 1 |, V, nil) /\
+     S := "\n:goal{\n" + printTokens(printEqS(M, EqS, ')) + "}" +
+          "\n:ind on (" + string(metaPrettyPrint(M, V, po)) + ")" +
+          "\n:apply(si)" /\
+     TQ' := taskQueueForInductiveCases(PT', PO, SIS, mtMacros) /\
+     M' := addProvenGoals(M, PROVEN, V) .
+
+     var TT TT' TT'' : Term .
+     var Q'' : Qid .
+     vars TK1 TK2 TK3 : Task .
+
+ op hasGoal : ScoreInfoSet -> Bool .
+ ceq hasGoal(SIS $ M1, M2, (TL1, T1, TL2)$) = true
+  if hasVars(T1) .
+ eq hasGoal(SIS) = false [owise] .
+
+ ***                         ***
+ ***          INFER          ***
+ ***                         ***
+ crl [infer-proof-no-goal] :
+     < cafeInMaude : CIM | state: executeComm, input: (':infer-proof_.['token[T]], TL),
+                           po: finished, ptree: PT, scoreinfo: SIM,
+                           proof: SP, current: M, AtS >
+  => < cafeInMaude : CIM | state: executeComm, input: (':infer-proof_.['token[T]], TL),
+                           po: nil, ptree: PT', scoreinfo: SIM,
+                           proof: (SP + S), current: M, AtS >
+  if Q := downQid(T) /\
+     SIS := SIM[Q] /\
+     not hasGoal(SIS) /\
+     SIS =/= noScoreInfo /\
+     TL' := inferGoal(SIS) /\
+     EqS := goalEqS(TL', Q, 0) /\
+     PT' := | M, [nil, 'root, EqS, true, false], mtPT, 1 | /\
+     S := "\n:goal{\n" + printTokens(printEqS(M, EqS, ')) + "}" .
+
+ crl [infer-proof-with-goal] :
+     < cafeInMaude : CIM | state: executeComm, input: (':infer-proof_.['token[T]], TL),
+                           po: nil, ptree: PT, scoreinfo: SIM, macros: MACS, tasks: TQ,
+                           indVar: MV, proof: SP, provenGoals: PROVEN, AtS >
+  => < cafeInMaude : CIM | state: computing, input: TL, po: finished, ptree: mtPT, scoreinfo: SIM,
+                           macros: MACS, tasks: TQ', indVar: V, proof: (SP + S),
+                           provenGoals: PROVEN, AtS >
+  if Q := downQid(T) /\
+     SIS := SIM[Q] /\
+     eq T' = 'true.Bool [AttS] . EqS := getGoal(PT, nil) /\
+     M := getMod(PT, nil) /\
+     V := indRequired(SIS, M, T') /\
+     [PT', PO] := applyInduction(PT, V, nil) /\
+     S := "\n:ind on (" + string(metaPrettyPrint(M, V, po)) + ")" +
+          "\n:apply(si)" /\
+     PT'' := addProvenGoals(PT', PROVEN, V) /\
+     TQ' := taskQueueForInductiveCases(PT'', PO, SIS, MACS) .
+
+ op addProvenGoals : ProofTree EquationSet Variable -> ProofTree .
+ ceq addProvenGoals(| M, G, PTL, N |, EqS, V) = | M, G, PTL', N |
+  if PTL' := addProvenGoals*(PTL, EqS, V) .
+ eq addProvenGoals(PT, EqS, V) = PT [owise] .
+
+ op addProvenGoals* : ProofTreeList EquationSet Variable -> ProofTreeList .
+ eq addProvenGoals*(mtPT, EqS, V) = mtPT .
+ ceq addProvenGoals*(| M, G, PTL, N | PTL', EqS, V) = | M', G, PTL, N | addProvenGoals*(PTL', EqS, V)
+  if M' := addProvenGoals(M, EqS, V) .
+
+ op addProvenGoals : Module EquationSet Variable -> Module .
+ ceq addProvenGoals(M, EqS, V) = M'
+  if Ty := getType(V) /\
+     C := qid(string(getName(V)) + "#" + string(getType(V)) + "." + string(Ty)) /\
+     Q := getName(C) /\
+     ODS op Q : nil -> Ty [AttS] . := getOps(M) /\
+     EqS' := subsituteIndVar(EqS, V, C, 0) /\
+     M' := addHyp(M, EqS') [print "Terms " EqS'] .
+ eq addProvenGoals(M, EqS, V) = M [owise] .
+
+ op subsituteIndVar : EquationSet Variable Constant Nat -> EquationSet .
+ eq subsituteIndVar(none, V, C, N) = none .
+ ceq subsituteIndVar(eq T = T' [AttS] . EqS, V, C, N) = eq substitute(T, V <- C) = T' [metadata("HI") label(Q) nonexec AttS] .
+                                                        subsituteIndVar(EqS, V, C, s(N))
+  if Q := qid("proven-goal" + string(N, 10)) .
+
+ *** Currently not fully supported by Maude due to blocking I/O
+ crl [infer-proof] :
+     < cafeInMaude : CIM | state: executeComm, input: (':infer-proof_.['token[T]], TL), proof: SP,
+                           po: NL y PO, ptree: PT, scoreinfo: SIM, macros: MACS, tasks: TQ, AtS >
+  => < cafeInMaude : CIM | state: computing, input: TL, proof: (SP + S), po: PO, ptree: PT,
+                           scoreinfo: SIM, macros: MACS, tasks: TQ [NL, 'OPEN-CLOSE-PARSER, T'], AtS >
+  if NL =/= nil /\
+     Q := downQid(T) /\
+     SIS := SIM[Q] /\
+     SIS' := getSIS(PT, NL, SIS) /\
+     MPT := upTerm(PT) /\
+     MNL := upTerm(NL) /\
+     MSIS := upTerm(SIS') /\
+     MMACS := upTerm(MACS) /\
+     T' := 'developProof[MPT, MNL, MSIS, MMACS] /\
+     S := "\npostpone ." [print "Hecho " TL] .
+
+ ***                        ***
+ ***       START TASK       ***
+ ***                        ***
+ rl [start-task] :
+    < cafeInMaude : CIM | state: computing, tasks: [NL, Q, T] TQ, mios: [MI, noTask] MIOS, AtS >
+ => < cafeInMaude : CIM | state: computing, tasks: TQ, mios: [MI, NL] MIOS, AtS >
+    reduceTerm(MI, cafeInMaude, Q, T) [print "Launching: " NL] .
+
+ ***                           ***
+ ***       TASK FINISHED       ***
+ ***                           ***
+ crl [task-finished] :
+     reducedTerm(cafeInMaude, MI, N, T, 'NeQidList)
+     < cafeInMaude : CIM | state: computing, mios: [MI, NL] MIOS, proof: SP, AtS >
+  => < cafeInMaude : CIM | state: computing, mios: [MI, noTask] MIOS, proof: (SP + S'), AtS >
+  if S := string(printIndexNoDot(NL)) /\
+     QIL := renameCTF(downQidList(T), "#" + S) /\
+     S' := "\n:sel(" + S + ")\n" +
+           printTokens(QIL) [print "Task finished: " NL] .
+
+ crl [task-finished-error] :
+     reducedTerm(cafeInMaude, MI, N, T, Ty)
+     < cafeInMaude : CIM | state: computing, mios: [MI, NL] MIOS, AtS >
+  => < cafeInMaude : CIM | state: computing, mios: [MI, noTask] MIOS, AtS >
+  if Ty =/= 'NeQidList [print "Task finished: " T " con tipo " Ty] .
+
+ ***                                ***
+ ***       ALL TASKS FINISHED       ***
+ ***                                ***
+ crl [all-tasks-finished] :
+     < cafeInMaude : CIM | state: computing, mios: MIOS, tasks: mtTQueue, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, mios: MIOS, tasks: mtTQueue, AtS >
+     write(stdout, cafeInMaude, "\nExecution finished.\n")
+  if allIdle(MIOS) [print "\nFinished.\n"] .
+
+
+ ***                        ***
+ ***          SAVE          ***
+ ***                        ***
+ crl [save-proof] :
+     < cafeInMaude : CIM | state: executeComm, input: (':save-proof`..@Command@, TL), proof: S,
+                           output-file: OF, AtS >
+  => < cafeInMaude : CIM | state: saving, input: TL, proof: S, output-file: OF, AtS >
+     openFile(fileManager, cafeInMaude, OF, "w")
+  if OF =/= "" /\
+     S =/= "" .
+
+ rl [save-proof-no-proof] :
+    < cafeInMaude : CIM | state: executeComm, input: (':save-proof`..@Command@, TL),
+                          proof: "", AtS >
+ => < cafeInMaude : CIM | state: print&executeComm, input: TL, proof: "", AtS >
+    write(stdout, cafeInMaude, "\nError: No proof for saving.\n") .
+
+ rl [save-proof-no-file] :
+    < cafeInMaude : CIM | state: executeComm, input: (':save-proof`..@Command@, TL),
+                          output-file: "", AtS >
+ => < cafeInMaude : CIM | state: print&executeComm, input: TL, output-file: "", AtS >
+    write(stdout, cafeInMaude, "\nError: No output file defined.\n") .
+
+ rl [save-opened-file] :
+    openedFile(cafeInMaude, fileManager, FHOut)
+    < cafeInMaude : CIM | state: saving, proof: S, AtS >
+ => < cafeInMaude : CIM | state: saving, proof: S, AtS >
+    write(FHOut, cafeInMaude, S) .
+
+ rl [save-wrote] :
+    wrote(cafeInMaude, FHOut)
+    < cafeInMaude : CIM | state: saving, AtS >
+ => < cafeInMaude : CIM | state: saving, AtS >
+    closeFile(FHOut, cafeInMaude) .
+
+ rl [save-wrote] :
+    closedFile(cafeInMaude, FHOut)
+    < cafeInMaude : CIM | state: saving, AtS >
+ => < cafeInMaude : CIM | state: print&executeComm, AtS >
+    write(stdout, cafeInMaude, "\nProof saved.\n") .
+
+ ***                               ***
+ ***      Print & do something     ***
+ ***                                ***
+ rl [print&updateCores] :
+    wrote(cafeInMaude, stdout)
+    < cafeInMaude : CIM | state: print&updateCores, AtS >
+ => < cafeInMaude : CIM | state: updateCores, AtS > .
 endm

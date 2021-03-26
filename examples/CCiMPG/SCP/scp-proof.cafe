@@ -1,0 +1,419 @@
+
+:goal{
+eq [proofSCP :nonexec] : inv1(S:Sys)  = true .
+ eq [proofSCP1 :nonexec] : inv2(S:Sys)  = true .
+ eq [proofSCP2 :nonexec] : inv3(S:Sys)  = true .
+}
+:ind on (S:Sys)
+:apply(si)
+:sel(3)
+	:apply(tc)
+
+	:apply (rd)
+
+	:apply (rd)
+
+	:apply (rd)
+
+
+:sel(2)
+	:apply(tc)
+
+	:def csb1#2 = :ctf [ac(S#Sys)  .]
+
+	:apply(csb1#2)
+
+	:imp [proofSCP]  .
+
+	:apply (rd)
+
+	:imp [proofSCP]  .
+
+	:apply (rd)
+
+	:imp [proofSCP]  .
+
+	:apply (rd)
+
+	:def csb2#2 = :ctf [ac(S#Sys)  .]
+
+	:apply(csb2#2)
+
+	:imp [proofSCP1]  .
+
+	:apply (rd)
+
+	:imp [proofSCP1]  .
+
+	:apply (rd)
+
+	:imp [proofSCP1]  .
+
+	:apply (rd)
+
+	:def csb3#2 = :ctf [ac(S#Sys)  .]
+
+	:apply(csb3#2)
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+
+:sel(1)
+	:apply(tc)
+
+	:def csb1#1 = :ctf [dc(S#Sys)  .]
+
+	:apply(csb1#1)
+
+	:imp [proofSCP]  .
+
+	:apply (rd)
+
+	:imp [proofSCP]  .
+
+	:apply (rd)
+
+	:def csb2#1 = :ctf [dc(S#Sys)  .]
+
+	:apply(csb2#1)
+
+	:imp [proofSCP1]  .
+
+	:apply (rd)
+
+	:imp [proofSCP1]  .
+
+	:apply (rd)
+
+	:def csb3#1 = :ctf [dc(S#Sys)  .]
+
+	:apply(csb3#1)
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+
+:sel(6)
+	:apply(tc)
+
+	:imp [proofSCP]  .
+
+	:apply (rd)
+
+	:imp [proofSCP1]  .
+
+	:apply (rd)
+
+	:def csb1#6 = :ctf [dc(S#Sys)  .]
+
+	:apply(csb1#6)
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+
+:sel(7)
+	:apply(tc)
+
+	:imp [proofSCP]  .
+
+	:apply (rd)
+
+	:def csb1#7 = :ctf [ac(S#Sys)  .]
+
+	:apply(csb1#7)
+
+	:imp [proofSCP1]  .
+
+	:apply (rd)
+
+	:imp [proofSCP1]  .
+
+	:apply (rd)
+
+	:imp [proofSCP1]  .
+
+	:apply (rd)
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+
+:sel(5)
+	:apply(tc)
+
+	:def csb1#5 = :ctf [dc(S#Sys)  .]
+
+	:apply(csb1#5)
+
+	:def csb2#5 = :ctf {eq rb(S#Sys)  = B#CSBit .}
+
+	:apply(csb2#5)
+
+	:def csb3#5 = :ctf {eq p2s(S#Sys)  = P#CSPacket .}
+
+	:apply(csb3#5)
+
+	:def csb4#5 = :ctf {eq sb(S#Sys)  = B#CSBit .}
+
+	:apply(csb4#5)
+
+	:imp [proofSCP]  .
+
+	:apply (rd)
+
+	:imp [proofSCP]  .
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+	:imp [proofSCP]  .
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+	:imp [proofSCP]  .
+
+	:apply (rd)
+
+	:imp [proofSCP]  .
+
+	:apply (rd)
+
+	:def csb5#5 = :ctf [dc(S#Sys)  .]
+
+	:apply(csb5#5)
+
+	:def csb6#5 = :ctf {eq rb(S#Sys)  = B#CSBit .}
+
+	:apply(csb6#5)
+
+	:def csb7#5 = :ctf {eq sb(S#Sys)  = B#CSBit .}
+
+	:apply(csb7#5)
+
+	:imp [proofSCP1]  .
+
+	:apply (rd)
+
+	:imp [proofSCP1]  .
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+	:imp [proofSCP1]  .
+
+	:apply (rd)
+
+	:imp [proofSCP1]  .
+
+	:apply (rd)
+
+	:def csb8#5 = :ctf [dc(S#Sys)  .]
+
+	:apply(csb8#5)
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+
+:sel(4)
+	:apply(tc)
+
+	:def csb1#4 = :ctf [ac(S#Sys)  .]
+
+	:apply(csb1#4)
+
+	:def csb2#4 = :ctf {eq sb(S#Sys)  = 0 .}
+
+	:apply(csb2#4)
+
+	:imp [proofSCP]  .
+
+	:apply (rd)
+
+	:def csb3#4 = :ctf {eq rb(S#Sys)  = 0 .}
+
+	:apply(csb3#4)
+
+	:def csb4#4 = :ctf {eq psr(S#Sys)  = mksq(p2s(S#Sys)) .}
+
+	:apply(csb4#4)
+
+	:imp [proofSCP]  .
+
+	:apply (rd)
+
+	:imp [proofSCP]  .
+
+	:apply (rd)
+
+	:imp [proofSCP]  .
+
+	:imp [proofSCP1]  .
+
+	:apply (rd)
+
+	:def csb5#4 = :ctf {eq sb(S#Sys)  = 1 .}
+
+	:apply(csb5#4)
+
+	:imp [proofSCP]  .
+
+	:apply (rd)
+
+	:def csb6#4 = :ctf {eq rb(S#Sys)  = 1 .}
+
+	:apply(csb6#4)
+
+	:def csb7#4 = :ctf {eq psr(S#Sys)  = mksq(p2s(S#Sys)) .}
+
+	:apply(csb7#4)
+
+	:imp [proofSCP]  .
+
+	:apply (rd)
+
+	:imp [proofSCP]  .
+
+	:apply (rd)
+
+	:imp [proofSCP]  .
+
+	:imp [proofSCP1]  .
+
+	:apply (rd)
+
+	:imp [proofSCP]  .
+
+	:apply (rd)
+
+	:def csb8#4 = :ctf [ac(S#Sys)  .]
+
+	:apply(csb8#4)
+
+	:imp [proofSCP1]  .
+
+	:apply (rd)
+
+	:imp [proofSCP1]  .
+
+	:apply (rd)
+
+	:imp [proofSCP1]  .
+
+	:apply (rd)
+
+	:def csb9#4 = :ctf [ac(S#Sys)  .]
+
+	:apply(csb9#4)
+
+	:def csb10#4 = :ctf {eq sb(S#Sys)  = 0 .}
+
+	:apply(csb10#4)
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+	:def csb11#4 = :ctf {eq rb(S#Sys)  = 0 .}
+
+	:apply(csb11#4)
+
+	:def csb12#4 = :ctf {eq p2s(S#Sys)  = 1st(hd(dc(S#Sys))) .}
+
+	:apply(csb12#4)
+
+	:def csb13#4 = :ctf {eq 2nd(hd(dc(S#Sys)))  = sb(S#Sys) .}
+
+	:apply(csb13#4)
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+	:imp [proofSCP2]  .
+
+	:imp [proofSCP1]  .
+
+	:apply (rd)
+
+	:def csb14#4 = :ctf {eq sb(S#Sys)  = 1 .}
+
+	:apply(csb14#4)
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+	:def csb15#4 = :ctf {eq rb(S#Sys)  = 1 .}
+
+	:apply(csb15#4)
+
+	:def csb16#4 = :ctf {eq p2s(S#Sys)  = 1st(hd(dc(S#Sys))) .}
+
+	:apply(csb16#4)
+
+	:def csb17#4 = :ctf {eq 2nd(hd(dc(S#Sys)))  = sb(S#Sys) .}
+
+	:apply(csb17#4)
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+
+	:imp [proofSCP2]  .
+
+	:imp [proofSCP1]  .
+
+	:apply (rd)
+
+	:imp [proofSCP2]  .
+
+	:apply (rd)
+

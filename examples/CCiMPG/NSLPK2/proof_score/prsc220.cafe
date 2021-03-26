@@ -1,0 +1,1123 @@
+--> I) Base case
+--> init
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+  	red inv220(init,p,q,r,n) .
+close
+
+--> II) Induction cases
+--> 1. fkm11(s,r1,r2,r3)
+open INV .
+  :id(inv22)
+    op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+
+	op r3 : -> Cipher1 .
+	op s : -> Sys .
+	eq (r3 \in cenc1(nw(s))) = true .
+    eq p = intruder .
+	red inv220(s,p,q,r,n) implies inv220(fkm11(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+    op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Cipher1 .
+	op s : -> Sys .
+	eq (r3 \in cenc1(nw(s))) = true .
+    eq (p = intruder) = false .
+	red inv220(s,p,q,r,n) implies inv220(fkm11(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Cipher1 .
+	op s : -> Sys .
+	eq (r3 \in cenc1(nw(s))) = false .
+	red inv220(s,p,q,r,n) implies inv220(fkm11(s,r1,r2,r3),p,q,r,n) .
+close
+
+--> 2. fkm12(s,r1,r2,r3)
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = true .
+    eq p = intruder .
+	red inv220(s,p,q,r,n) implies inv220(fkm12(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = true .
+    eq (p = intruder) = false .
+	red inv220(s,p,q,r,n) implies inv220(fkm12(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = false .
+	red inv220(s,p,q,r,n) implies inv220(fkm12(s,r1,r2,r3),p,q,r,n) .
+close
+
+--> 3. fkm21(s,r1,r2,r3)
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Cipher2 .
+	op s : -> Sys .
+	eq (r3 \in cenc2(nw(s))) = true .
+    eq enc2(p,n(p,q,r),n,q) = r3 .
+    eq p = intruder .
+	red inv220(s,p,q,r,n) implies inv220(fkm21(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Cipher2 .
+	op s : -> Sys .
+	eq (r3 \in cenc2(nw(s))) = true .
+    eq enc2(p,n(p,q,r),n,q) = r3 .
+    eq (p = intruder) = false .
+	red inv220(s,p,q,r,n) implies inv220(fkm21(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Cipher2 .
+	op s : -> Sys .
+	eq (r3 \in cenc2(nw(s))) = true .
+    eq (enc2(p,n(p,q,r),n,q) = r3) = false .
+	red inv220(s,p,q,r,n) implies inv220(fkm21(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Cipher2 .
+	op s : -> Sys .
+	eq (r3 \in cenc2(nw(s))) = false .
+	red inv220(s,p,q,r,n) implies inv220(fkm21(s,r1,r2,r3),p,q,r,n) .
+close
+
+--> 4. fkm22(s,r1,r2,r3,r4)
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op r4 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = true .
+	eq (r4 \in cnonce(nw(s))) = true .
+    eq (p = intruder) = true .
+    eq r \in ur(s) = true .
+  	red inv220(s,p,q,r,n) implies inv220(fkm22(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op r4 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = true .
+	eq (r4 \in cnonce(nw(s))) = true .
+    eq (p = intruder) = true .
+    eq r \in ur(s) = false .
+  	red inv220(s,p,q,r,n) implies inv220(fkm22(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op r4 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = true .
+	eq (r4 \in cnonce(nw(s))) = true .
+    eq (p = intruder) = false .
+	eq r3 = n(p,q,r) .
+	eq n(p,q,r) \in cnonce(nw(s)) = true .
+	eq r1 = q .
+	eq q = intruder .
+	eq n(p,intruder,r) \in cnonce(nw(s)) = true .
+	eq r2 = p .
+	eq n = r4 .
+  	red inv220(s,p,q,r,n) implies inv220(fkm22(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op r4 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = true .
+	eq (r4 \in cnonce(nw(s))) = true .
+    eq (p = intruder) = false .
+	eq r3 = n(p,q,r) .
+	eq n(p,q,r) \in cnonce(nw(s)) = true .
+	eq r1 = q .
+	eq q = intruder .
+	eq n(p,intruder,r) \in cnonce(nw(s)) = true .
+	eq r2 = p .
+	eq (n = r4) = false .
+  	red inv220(s,p,q,r,n) implies inv220(fkm22(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op r4 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = true .
+	eq (r4 \in cnonce(nw(s))) = true .
+    eq (p = intruder) = false .
+	eq r3 = n(p,q,r) .
+	eq n(p,q,r) \in cnonce(nw(s)) = true .
+	eq r1 = q .
+	eq q = intruder .
+	eq n(p,intruder,r) \in cnonce(nw(s)) = true .
+	eq (r2 = p) = false .
+  	red inv220(s,p,q,r,n) implies inv220(fkm22(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op r4 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = true .
+	eq (r4 \in cnonce(nw(s))) = true .
+    eq (p = intruder) = false .
+	eq r3 = n(p,q,r) .
+	eq n(p,q,r) \in cnonce(nw(s)) = true .
+	eq r1 = q .
+	eq q = intruder .
+	eq n(p,intruder,r) \in cnonce(nw(s)) = false .
+  	red inv220(s,p,q,r,n) implies inv220(fkm22(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op r4 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = true .
+	eq (r4 \in cnonce(nw(s))) = true .
+    eq (p = intruder) = false .
+	eq r3 = n(p,q,r) .
+	eq n(p,q,r) \in cnonce(nw(s)) = true .
+	eq r1 = q .
+	eq (q = intruder) = false .
+  	red inv130(s,r3) implies inv220(s,p,q,r,n) implies inv220(fkm22(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op r4 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = true .
+	eq (r4 \in cnonce(nw(s))) = true .
+    eq (p = intruder) = false .
+	eq r3 = n(p,q,r) .
+	eq n(p,q,r) \in cnonce(nw(s)) = true .
+	eq (r1 = q) = false .
+  	red inv220(s,p,q,r,n) implies inv220(fkm22(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op r4 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = true .
+	eq (r4 \in cnonce(nw(s))) = true .
+    eq (p = intruder) = false .
+	eq r3 = n(p,q,r) .
+	eq n(p,q,r) \in cnonce(nw(s)) = false .
+  	red inv220(s,p,q,r,n) implies inv220(fkm22(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op r4 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = true .
+	eq (r4 \in cnonce(nw(s))) = true .
+    eq (p = intruder) = false .
+	eq (r3 = n(p,q,r)) = false .
+  	red inv130(s,r3) implies inv220(s,p,q,r,n) implies inv220(fkm22(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op r4 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = true .
+	eq (r4 \in cnonce(nw(s))) = false .
+	red inv220(s,p,q,r,n) implies inv220(fkm22(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op r4 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = false .
+	red inv220(s,p,q,r,n) implies inv220(fkm22(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+--> 5. fkm31(s,r1,r2,r3)
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Cipher3 .
+	op s : -> Sys .
+	eq (r3 \in cenc3(nw(s))) = true .
+	red inv220(s,p,q,r,n) implies inv220(fkm31(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Cipher3 .
+	op s : -> Sys .
+	eq (r3 \in cenc3(nw(s))) = false .
+	red inv220(s,p,q,r,n) implies inv220(fkm31(s,r1,r2,r3),p,q,r,n) .
+close
+
+--> 6. fkm32(s,r1,r2,r3)
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = true .
+	red inv220(s,p,q,r,n) implies inv220(fkm32(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Nonce .
+	op s : -> Sys .
+	eq (r3 \in cnonce(nw(s))) = false .
+	red inv220(s,p,q,r,n) implies inv220(fkm32(s,r1,r2,r3),p,q,r,n) .
+close
+
+--> 7. sdm1(s,r1,r2,r3)
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Rand .
+	op s : -> Sys .
+	eq (r3 \in ur(s)) = true .
+	red inv220(s,p,q,r,n) implies inv220(sdm1(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Rand .
+	op s : -> Sys .
+	eq (r3 \in ur(s)) = false .
+    eq p = intruder .
+	red inv220(s,p,q,r,n) implies inv220(sdm1(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Rand .
+	op s : -> Sys .
+	eq (r3 \in ur(s)) = false .
+    eq (p = intruder) = false .
+    eq r = r3 .
+    eq r2 = q .
+    eq r1 = p .
+    eq enc2(p,n(p,q,r3),n,q) \in cenc2(nw(s)) = true .
+	red inv190(s,p,q,r,n) implies inv220(s,p,q,r,n) implies inv220(sdm1(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Rand .
+	op s : -> Sys .
+	eq (r3 \in ur(s)) = false .
+    eq (p = intruder) = false .
+    eq r = r3 .
+    eq r2 = q .
+    eq r1 = p .
+    eq enc2(p,n(p,q,r3),n,q) \in cenc2(nw(s)) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm1(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Rand .
+	op s : -> Sys .
+	eq (r3 \in ur(s)) = false .
+    eq (p = intruder) = false .
+    eq r = r3 .
+    eq r2 = q .
+    eq (r1 = p) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm1(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Rand .
+	op s : -> Sys .
+	eq (r3 \in ur(s)) = false .
+    eq (p = intruder) = false .
+    eq r = r3 .
+    eq (r2 = q) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm1(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Prin .
+	op r3 : -> Rand .
+	op s : -> Sys .
+	eq (r3 \in ur(s)) = false .
+    eq (p = intruder) = false .
+    eq (r = r3) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm1(s,r1,r2,r3),p,q,r,n) .
+close
+
+--> 8. sdm2(s,r1,r2,r3)
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = true .
+  	eq m1?(r3) = true .
+  	eq receiver(r3) = r1 .
+  	eq key(cipher1(r3)) = r1 .
+  	eq principal(cipher1(r3)) = sender(r3) .
+  	eq r2 \in ur(s) = true .
+	red inv220(s,p,q,r,n) implies inv220(sdm2(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = true .
+  	eq m1?(r3) = true .
+  	eq receiver(r3) = r1 .
+  	eq key(cipher1(r3)) = r1 .
+  	eq principal(cipher1(r3)) = sender(r3) .
+  	eq r2 \in ur(s) = false .
+  	eq nonce(cipher1(r3)) = n(p,q,r) .
+  	eq p = sender(r3) .
+  	eq n = n(r1,sender(r3),r2) .
+  	eq q = r1 .
+	red inv220(s,p,q,r,n) implies inv220(sdm2(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = true .
+  	eq m1?(r3) = true .
+  	eq receiver(r3) = r1 .
+  	eq key(cipher1(r3)) = r1 .
+  	eq principal(cipher1(r3)) = sender(r3) .
+  	eq r2 \in ur(s) = false .
+  	eq nonce(cipher1(r3)) = n(p,q,r) .
+  	eq p = sender(r3) .
+  	eq n = n(r1,sender(r3),r2) .
+  	eq (q = r1) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm2(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = true .
+  	eq m1?(r3) = true .
+  	eq receiver(r3) = r1 .
+  	eq key(cipher1(r3)) = r1 .
+  	eq principal(cipher1(r3)) = sender(r3) .
+  	eq r2 \in ur(s) = false .
+  	eq nonce(cipher1(r3)) = n(p,q,r) .
+  	eq p = sender(r3) .
+  	eq (n = n(r1,sender(r3),r2)) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm2(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = true .
+  	eq m1?(r3) = true .
+  	eq receiver(r3) = r1 .
+  	eq key(cipher1(r3)) = r1 .
+  	eq principal(cipher1(r3)) = sender(r3) .
+  	eq r2 \in ur(s) = false .
+  	eq nonce(cipher1(r3)) = n(p,q,r) .
+  	eq (p = sender(r3)) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm2(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = true .
+  	eq m1?(r3) = true .
+  	eq receiver(r3) = r1 .
+  	eq key(cipher1(r3)) = r1 .
+  	eq principal(cipher1(r3)) = sender(r3) .
+  	eq r2 \in ur(s) = false .
+  	eq (nonce(cipher1(r3)) = n(p,q,r)) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm2(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = true .
+  	eq m1?(r3) = true .
+  	eq receiver(r3) = r1 .
+  	eq key(cipher1(r3)) = r1 .
+  	eq (principal(cipher1(r3)) = sender(r3)) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm2(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = true .
+  	eq m1?(r3) = true .
+  	eq receiver(r3) = r1 .
+  	eq (key(cipher1(r3)) = r1) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm2(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = true .
+  	eq m1?(r3) = true .
+  	eq (receiver(r3) = r1) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm2(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = true .
+  	eq m1?(r3) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm2(s,r1,r2,r3),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op s : -> Sys .
+  	eq r3 \in nw(s) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm2(s,r1,r2,r3),p,q,r,n) .
+close
+
+--> 9. sdm3(s,r1,r2,r3,r4)
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+    eq sender(r3) = r1 .
+    eq receiver(r3) = sender(r4) .
+    eq key(cipher1(r3)) = sender(r4) .
+	eq nonce(cipher1(r3)) = n(r1,sender(r4),r2) .
+	eq principal(cipher1(r3)) = r1 .
+    eq receiver(r4) = r1 .
+	eq key(cipher2(r4)) = r1 .
+    eq nonce1(cipher2(r4)) = n(r1,sender(r4),r2) .
+	eq principal(cipher2(r4)) = sender(r4) .
+	red inv220(s,p,q,r,n) implies inv220(sdm3(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+    eq sender(r3) = r1 .
+    eq receiver(r3) = sender(r4) .
+    eq key(cipher1(r3)) = sender(r4) .
+	eq nonce(cipher1(r3)) = n(r1,sender(r4),r2) .
+	eq principal(cipher1(r3)) = r1 .
+    eq receiver(r4) = r1 .
+	eq key(cipher2(r4)) = r1 .
+    eq nonce1(cipher2(r4)) = n(r1,sender(r4),r2) .
+	eq (principal(cipher2(r4)) = sender(r4)) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm3(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+    eq sender(r3) = r1 .
+    eq receiver(r3) = sender(r4) .
+    eq key(cipher1(r3)) = sender(r4) .
+	eq nonce(cipher1(r3)) = n(r1,sender(r4),r2) .
+	eq principal(cipher1(r3)) = r1 .
+    eq receiver(r4) = r1 .
+	eq key(cipher2(r4)) = r1 .
+    eq (nonce1(cipher2(r4)) = n(r1,sender(r4),r2)) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm3(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+    eq sender(r3) = r1 .
+    eq receiver(r3) = sender(r4) .
+    eq key(cipher1(r3)) = sender(r4) .
+	eq nonce(cipher1(r3)) = n(r1,sender(r4),r2) .
+	eq principal(cipher1(r3)) = r1 .
+    eq receiver(r4) = r1 .
+	eq (key(cipher2(r4)) = r1) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm3(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+    eq sender(r3) = r1 .
+    eq receiver(r3) = sender(r4) .
+    eq key(cipher1(r3)) = sender(r4) .
+	eq nonce(cipher1(r3)) = n(r1,sender(r4),r2) .
+	eq principal(cipher1(r3)) = r1 .
+    eq (receiver(r4) = r1) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm3(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+    eq sender(r3) = r1 .
+    eq receiver(r3) = sender(r4) .
+    eq key(cipher1(r3)) = sender(r4) .
+	eq nonce(cipher1(r3)) = n(r1,sender(r4),r2) .
+	eq (principal(cipher1(r3)) = r1) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm3(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+    eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+    eq sender(r3) = r1 .
+    eq receiver(r3) = sender(r4) .
+    eq key(cipher1(r3)) = sender(r4) .
+	eq (nonce(cipher1(r3)) = n(r1,sender(r4),r2)) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm3(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+	eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+    eq sender(r3) = r1 .
+    eq receiver(r3) = sender(r4) .
+    eq (key(cipher1(r3)) = sender(r4)) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm3(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+	eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+    eq sender(r3) = r1 .
+    eq (receiver(r3) = sender(r4)) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm3(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+	eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+    eq (sender(r3) = r1) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm3(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+	eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq (creator(r3) = r1) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm3(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+	eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm3(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+	eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm3(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+	eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm3(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :id(inv22)
+	op p : -> Prin .
+    op q : -> Prin .
+    op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+	eq (r3 \in nw(s)) = false .
+	red inv220(s,p,q,r,n) implies inv220(sdm3(s,r1,r2,r3,r4),p,q,r,n) .
+close
+
+open INV .
+  :proof(inv22)
+close

@@ -750,6 +750,7 @@ the list, applying the appropriate function to each element:
 
   ceq parseBubbles(('eq_=_.['CafeBubble[T],'CafeBubble[T']]) | TrS, TOP, FLAT, VS) = parseBubbles(TrS, TOP', FLAT', VS)
    if [ QIL, AtS' ] := improveLabel(downQidList(T)) /\
+      *** TODO: Variables with the same name and different sort should be distinguished
       VS' := varsFromQidList(QIL) /\
       {T1, Srt} := metaParse(FLAT, VS ; VS', QIL, anyType) /\
       < T'', AtS > := cafeEqAtS2maudeEqAts(T') /\

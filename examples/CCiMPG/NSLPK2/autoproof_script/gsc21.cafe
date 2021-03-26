@@ -1,0 +1,429 @@
+open INV .
+	:goal{
+		eq [inv21 :nonexec] : inv210(S:System,P:Principal,P0:Principal,R:Random) = true .
+	}
+
+	:ind on (S:System)
+
+	:apply(si)
+-- fkm11
+	:apply(tc)
+
+	:def csb1 = :ctf [C#Cipher1 \in cenc1(nw(S#System)) .]
+
+	:apply(csb1)
+
+	:def csb2 = :ctf {eq key(C#Cipher1) = intruder .}
+
+	:apply(csb2)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:postpone . -- inv100
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+-- fkm12
+	:apply(tc)
+
+	:def csb3 = :ctf [N#Nonce \in cnonce(nw(S#System)) .]
+
+	:apply(csb3)
+
+	:def csb4 = :ctf {eq n(P@Principal,P0@Principal,R@Random) = N#Nonce .}
+
+	:apply(csb4)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+-- fkm21
+	:apply(tc)
+
+	:def csb5 = :ctf [C#Cipher2 \in cenc2(nw(S#System)) .]
+
+	:apply(csb5)
+
+	:def csb6 = :ctf {eq key(C#Cipher2) = intruder .}
+
+	:apply(csb6)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:postpone . -- inv110
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+-- fkm22
+	:apply(tc)
+
+	:def csb7 = :ctf [N#Nonce \in cnonce(nw(S#System)) .]
+
+	:apply(csb7)
+
+	:def csb8 = :ctf [N0#Nonce \in cnonce(nw(S#System)) .]
+
+	:apply(csb8)
+
+	:def csb9 = :ctf {eq n(P@Principal,P0@Principal,R@Random) = N#Nonce .}
+
+	:apply(csb9)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:def csb10 = :ctf {eq n(P@Principal,P0@Principal,R@Random) = N0#Nonce .}
+
+	:apply(csb10)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+-- fkm31
+	:apply(tc)
+
+	:def csb11 = :ctf [C#Cipher3 \in cenc3(nw(S#System)) .]
+
+	:apply(csb11)
+
+	:def csb12 = :ctf {eq key(C#Cipher3) = intruder .}
+
+	:apply(csb12)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:postpone . -- inv120
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+-- fkm32
+	:apply(tc)
+
+	:def csb13 = :ctf [N#Nonce \in cnonce(nw(S#System)) .]
+
+	:apply(csb13)
+
+	:def csb14 = :ctf {eq n(P@Principal,P0@Principal,R@Random) = N#Nonce .}
+
+	:apply(csb14)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+-- init
+	:apply(tc)
+
+	:apply (rd)
+-- sdm1
+	:apply(tc)
+
+	:def csb15 = :ctf [R#Random \in ur(S#System) .]
+
+	:apply(csb15)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:def csb16 = :ctf {eq R@Random  = R#Random .}
+
+	:apply(csb16)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+-- sdm2
+	:apply(tc)
+
+	:def csb17 = :ctf [M#Message \in nw(S#System) .]
+
+	:apply(csb17)
+
+	:def csb18 = :ctf [m1?(M#Message) .]
+
+	:apply(csb18)
+
+	:def csb19 = :ctf {eq receiver(M#Message) = P#Principal .}
+
+	:apply(csb19)
+
+	:def csb20 = :ctf {eq key(cipher1(M#Message)) = P#Principal .}
+
+	:apply(csb20)
+
+	:def csb21 = :ctf {eq principal(cipher1(M#Message)) = sender(M#Message) .}
+
+	:apply(csb21)
+
+	:def csb22 = :ctf [R#Random \in ur(S#System) .]
+
+	:apply(csb22)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:def csb23 = :ctf {eq R@Random  = R#Random .}
+
+	:apply(csb23)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:def csb24 = :ctf {eq sender(M#Message) = intruder .}
+
+	:apply(csb24)
+
+	:def csb25 = :ctf {eq n(P@Principal,P0@Principal,R@Random) = nonce(cipher1(M#Message)) .}
+
+	:apply(csb25)
+
+	:def csb26 = :ctf {eq P#Principal  = intruder .}
+
+	:apply(csb26)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:def csb27 = :ctf [nonce(cipher1(M#Message))\in cnonce(nw(S#System)) .]
+
+	:apply(csb27)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:postpone . -- inv140
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+-- sdm3
+	:apply(tc)
+
+	:def csb28 = :ctf [M#Message \in nw(S#System) .]
+
+	:apply(csb28)
+
+	:def csb29 = :ctf [M0#Message \in nw(S#System) .]
+
+	:apply(csb29)
+
+	:def csb30 = :ctf [m1?(M#Message) .]
+
+	:apply(csb30)
+
+	:def csb31 = :ctf [m2?(M0#Message) .]
+
+	:apply(csb31)
+
+	:def csb32 = :ctf {eq creator(M#Message) = P#Principal .}
+
+	:apply(csb32)
+
+	:def csb33 = :ctf {eq sender(M#Message) = P#Principal .}
+
+	:apply(csb33)
+
+	:def csb34 = :ctf {eq receiver(M#Message) = sender(M0#Message) .}
+
+	:apply(csb34)
+
+	:def csb35 = :ctf {eq key(cipher1(M#Message)) = sender(M0#Message) .}
+
+	:apply(csb35)
+
+	:def csb36 = :ctf {eq nonce(cipher1(M#Message)) = n(P#Principal,sender(M0#Message),R#Random) .}
+
+	:apply(csb36)
+
+	:def csb37 = :ctf {eq principal(cipher1(M#Message)) = P#Principal .}
+
+	:apply(csb37)
+
+	:def csb38 = :ctf {eq receiver(M0#Message) = P#Principal .}
+
+	:apply(csb38)
+
+	:def csb39 = :ctf {eq key(cipher2(M0#Message)) = P#Principal .}
+
+	:apply(csb39)
+
+	:def csb40 = :ctf {eq nonce1(cipher2(M0#Message)) = n(P#Principal,sender(M0#Message),R#Random) .}
+
+	:apply(csb40)
+
+	:def csb41 = :ctf {eq principal(cipher2(M0#Message)) = sender(M0#Message) .}
+
+	:apply(csb41)
+
+	:def csb42 = :ctf {eq sender(M0#Message) = intruder .}
+
+	:apply(csb42)
+
+	:def csb43 = :ctf {eq n(P@Principal,P0@Principal,R@Random) = nonce2(cipher2(M0#Message)) .}
+
+	:apply(csb43)
+
+	:def csb44 = :ctf {eq P#Principal  = intruder .}
+
+	:apply(csb44)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:def csb45 = :ctf [nonce2(cipher2(M0#Message))\in cnonce(nw(S#System)) .]
+
+	:apply(csb45)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:postpone . -- inv150
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+	:imp [inv21] by {P0:Principal <- P0@Principal ; P:Principal <- P@Principal ; R:Random <- R@Random ;}
+
+	:apply (rd)
+
+
+close
