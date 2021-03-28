@@ -370,7 +370,7 @@ mod CIMPA-IO is
                            current: M, proof: S', macros: mtMacros, AtS >
      write(stdout, cafeInMaude, printTokens(QIL))
   if [PT', PO', QIL] := evalGoalCommand(M, T, none) /\
-     S' := ":goal{" + printGoal(T) + "}" [print "goal " PO' "\n Goal - Antes: " PO " Después: " PO'] .
+     S' := ":goal{" + printGoal(T) + "}" .
 
  ***                           ***
  ***       INDUCTION VAR       ***
@@ -407,7 +407,7 @@ mod CIMPA-IO is
              then addProvenGoals(PT', PROVEN, V)
              else PT'
              fi /\
-     S' := "\n:apply(" + string(Q) + ")" [print "Apply - Antes " PO " Despues " PO'] .
+     S' := "\n:apply(" + string(Q) + ")" .
 
  ***                         ***
  ***       IMPLICATION       ***
@@ -443,7 +443,7 @@ mod CIMPA-IO is
      S := if B
           then "\n:imp[" + string(Q) + "] by {" + printTokenDown(T') + "}"
           else ""
-          fi [print "Imp - Antes: " PO] .
+          fi .
  ***                ***
  ***       ID       ***
  ***                ***
@@ -532,7 +532,7 @@ mod CIMPA-IO is
      PT' := selectGoal(PT, NL) /\
      PO' := selectGoal(PO, NL) /\
      S := "\n:sel(" + string(Q) + ")" /\
-     QIL := '\n 'Sentence Q 'selected. '\n [print "SEL - Antes: " PO " Después: " PO'] .
+     QIL := '\n 'Sentence Q 'selected. '\n .
 
  ***                        ***
  ***       DEFINITION       ***
@@ -829,7 +829,7 @@ mod CIMPA-IO is
      S := if printTPS(M, TPS, TPS') == ""
           then "\nNo recommendations.\n"
           else printTPS(M, TPS, TPS')
-          fi [print "\nTrS " TrS "\nTrS' " TrS' "\nTPS " TPS "\nTPS' " TPS''] .
+          fi . *** [print "\nTrS " TrS "\nTrS' " TrS' "\nTPS " TPS "\nTPS' " TPS''] .
 
  op printTPS : Module TrialPairSet TrialPairSet -> String .
  eq printTPS(M, TPS, TPS') = if TPS == mtTPS

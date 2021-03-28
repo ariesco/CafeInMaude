@@ -1,31 +1,30 @@
 load ../examples/CCiMPG/NSLPK2/nslpk.cafe .
-load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc130.cafe .
+load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc160.cafe .
 
 set-cores 4 .
 
-:proven(inv100(S:Sys, r:Cipher1))
+:proven(inv100(S:Sys, C:Cipher1))
 :proven(inv110(S:Sys, C:Cipher2))
 :proven(inv120(S:Sys, C:Cipher3))
-:proven(inv140(S:Sys, C:Cipher1))
-:proven(inv150(S:Sys, C:Cipher2))
 
 open INV .
-  :id(inv13)
+  :id(inv16)
 
   op  n : -> Nonce .
 
-  red inv130(S:Sys, n) .
+  red inv160(S:Sys, n) .
 close
 
-:infer-proof inv13 .
+:infer-proof inv16 .
 
-set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof13.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof16.cafe .
 
 :save-proof .
 
 eof
 
-
+58:11
+09:49
 
 load ../examples/CCiMPG/NSLPK2/commands_cimpg_generate.cafe .
 
@@ -89,9 +88,9 @@ close
 set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof12.cafe .
 :infer-proof inv12 .
 
-- Proof score 130 -> inv100, inv110, inv120, inv140, inv150 (12 m 19 s / 10 m 7 s)
+- Proof score 130 -> inv100, inv110, inv120, inv140, inv150 (9 m 46 s / 9 m 5 s)
 
-  eq backtrackLevels = 6 .
+  eq backtrackLevels = 10 .
   eq numInstVars = 2 .
   eq extraImpLevels = 1 .
 
@@ -114,7 +113,11 @@ set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof13.cafe .
 
 :infer-proof inv13 .
 
-- Proof score 140 -> Dependencies: inv100, inv110, inv120, inv160 (X m X s / X m X s)
+- Proof score 140 -> Dependencies: inv100, inv110, inv120, inv160 (11 m 8 s / 7 m 10 s)
+
+  eq backtrackLevels = 14 .
+  eq numInstVars = 2 .
+  eq extraImpLevels = 1 .
 
 load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc140.cafe .
 set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof14.cafe .
@@ -124,9 +127,17 @@ set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof14.cafe .
 :proven(inv120(S:Sys, C:Cipher3))
 :proven(inv160(S:Sys, N:Nonce))
 
+open INV .
+  :id(inv14)
+
+  op  c : -> Cipher1 .
+
+  red inv140(S:Sys, c) .
+close
+
 :infer-proof inv14 .
 
-- Proof score 150 -> Dependencies: inv100 (X m X s / X m X s)
+- Proof score 150 -> Dependencies: inv100 (9 m 38 s / 6 m 10 s)
 
 load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc150.cafe .
 set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof15.cafe .
@@ -135,6 +146,14 @@ set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof15.cafe .
 :proven(inv110(S:Sys, C:Cipher2))
 :proven(inv120(S:Sys, C:Cipher3))
 :proven(inv160(S:Sys, N:Nonce))
+
+open INV .
+  :id(inv15)
+
+  op  c : -> Cipher2 .
+
+  red inv150(S:Sys, c) .
+close
 
 :infer-proof inv15 .
 
