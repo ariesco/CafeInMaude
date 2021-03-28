@@ -221,6 +221,7 @@ mod CIMPA-IO is
  vars TL TL' TL1 TL2 : TermList .
  vars EqS PROVEN : EquationSet .
  vars QIL QIL' QIL'' : QidList .
+ vars PTL PTL' : ProofTreeList .
  vars SIS SIS' : ScoreInfoSet .
  vars PT PT' PT'' : ProofTree .
  var  MIOS : MIOccupationSet .
@@ -228,10 +229,13 @@ mod CIMPA-IO is
  vars PO PO' : ProofOrder .
  vars S S' OF SP : String .
  vars M M' M1 M2 : Module .
+ var  TrS TrS' : TermSet .
  var  AtS : AttributeSet .
  vars TQ TQ' : TaskQueue .
  var  SIM : ScoreInfoMap .
+ var  EqS' : EquationSet .
  var  SB : Substitution .
+ var  ODS : OpDeclSet .
  vars MI FHOut : Oid .
  var  AttS : AttrSet .
  var  MACS : Macros .
@@ -244,13 +248,10 @@ mod CIMPA-IO is
  vars Q Q' : Qid .
  var  Ty : Type .
  var  B : Bool .
-
-
- var ODS : OpDeclSet .
- var EqS' : EquationSet .
-
- vars PTL PTL' : ProofTreeList .
  var  G : Goal .
+
+
+ vars TPS TPS' TPS'' : TrialPairSet .
 
  ***        ***
  *** States ***
@@ -671,7 +672,7 @@ mod CIMPA-IO is
      < cafeInMaude : CIM | state: executeComm, input: (':infer-proof_.['token[T]], TL),
                            po: finished, ptree: PT, scoreinfo: SIM, tasks: TQ,
                            proof: SP, current: M, indVar: MV, provenGoals: PROVEN, AtS >
-  => < cafeInMaude : CIM | state: computing, input: TL, po: nil, ptree: PT', scoreinfo: SIM,
+  => < cafeInMaude : CIM | state: computing, input: TL, po: nil, ptree: PT'', scoreinfo: SIM,
                            tasks: TQ', proof: (SP + S), current: M, indVar: V, provenGoals: PROVEN, AtS >
   if Q := downQid(T) /\
      SIS $ M1, M2, (TL1, T1, TL2)$ := SIM[Q] /\
@@ -682,8 +683,8 @@ mod CIMPA-IO is
      S := "\n:goal{\n" + printTokens(printEqS(M, EqS, ')) + "}" +
           "\n:ind on (" + string(metaPrettyPrint(M, V, po)) + ")" +
           "\n:apply(si)" /\
-     TQ' := taskQueueForInductiveCases(PT', PO, SIS, mtMacros) /\
-     M' := addProvenGoals(M, PROVEN, V) .
+     PT'' := addProvenGoals(PT', PROVEN, V) /\
+     TQ' := taskQueueForInductiveCases(PT'', PO, SIS, mtMacros) .
 
      var TT TT' TT'' : Term .
      var Q'' : Qid .
@@ -808,6 +809,52 @@ mod CIMPA-IO is
   => < cafeInMaude : CIM | state: print&executeComm, mios: MIOS, tasks: mtTQueue, AtS >
      write(stdout, cafeInMaude, "\nExecution finished.\n")
   if allIdle(MIOS) [print "\nFinished.\n"] .
+
+ ***                        ***
+ ***          HELP          ***
+ ***                        ***
+ crl [save-proof] :
+     < cafeInMaude : CIM | state: executeComm, input: (':help`..@Command@, TL),
+                           ptree: PT, po: (NL y PO), AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, po: (NL y PO), AtS >
+     write(stdout, cafeInMaude, S)
+  if M := getMod(PT, NL) /\
+     eq T = 'true.Bool [AttS] . := getGoal(PT, NL) /\
+     T' := getTerm(metaReduce(M, T)) /\
+     TrS := getEqualityTerms(M, T) /\
+     TrS' := getEqTermsWithImps(M, T) /\
+     TPS := processEqualityTerm*(M, TrS) /\
+     TPS' := processEqualityTerm*(M, TrS' - TrS) /\
+     TPS'' := (TPS' - TPS) /\
+     S := if printTPS(M, TPS, TPS') == ""
+          then "\nNo recommendations.\n"
+          else printTPS(M, TPS, TPS')
+          fi [print "\nTrS " TrS "\nTrS' " TrS' "\nTPS " TPS "\nTPS' " TPS''] .
+
+ op printTPS : Module TrialPairSet TrialPairSet -> String .
+ eq printTPS(M, TPS, TPS') = if TPS == mtTPS
+                             then ""
+                             else "The following case splittings are recommended:" + $printTPS(M, TPS)
+                             fi +
+                             if TPS' == mtTPS
+                             then ""
+                             else "The following case splittings are recommended when using premises:" + $printTPS(M, TPS')
+                             fi .
+
+ op $printTPS : Module TrialPairSet -> String .
+ eq $printTPS(M, mtTPS) = "\n" .
+ eq $printTPS(M, [T, ctf] TPS) = "\n Case splitting by true-false recommended for "
+                                 + printTokens(metaPrettyPrint(M, T, po)) +
+                                 $printTPS(M, TPS) .
+ eq $printTPS(M, [T, term] TPS) = "\n Case splitting by constructors recommended for "
+                                  + printTokens(metaPrettyPrint(M, T, po)) +
+                                  $printTPS(M, TPS) .
+ eq $printTPS(M, [T, cevs] TPS) = "\n Case splitting for associative sequences (empty + variable sequence) recommended for "
+                                  + printTokens(metaPrettyPrint(M, T, po)) +
+                                  $printTPS(M, TPS) .
+ eq $printTPS(M, [T, cesv] TPS) = "\n Case splitting for associative sequences (empty + sequence variable) recommended for "
+                                  + printTokens(metaPrettyPrint(M, T, po)) +
+                                  $printTPS(M, TPS) .
 
 
  ***                        ***

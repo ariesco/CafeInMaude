@@ -12,6 +12,7 @@ fmod COMMANDS is
  op :generate-proof_. : @Token@ -> @Command@ [ctor] .
  op :generate-proof`. : -> @Command@ [ctor] .
  op :proven`(_`) : @Bubble@ -> @Command@ [ctor] .
+ op :help`. : -> @Command@ [ctor] .
 endfm
 
 
@@ -46,7 +47,7 @@ fmod CafeBUBBLES is
                                             var vars op ops copen cview :goal :ind set-cores
                                             :apply :imp :def :id :proof :infer :show :desc
                                             set-output :save-proof :infer-proof :generate-proof
-                                            :sel :proven))] .
+                                            :sel :proven :help))] .
 
   op CafeToken : Qid -> @CafeToken@ [special (id-hook Bubble (1 1)
                             op-hook qidSymbol (<Qids> : ~> Qid)
@@ -58,7 +59,8 @@ fmod CafeBUBBLES is
                             id-hook Exclude(. : { } :apply :ind :imp :def :id
                                             :proof :infer :show :desc set-cores
                                             set-output :save-proof :infer-proof
-                                            :sel :generate-proof :proven copen))] .
+                                            :sel :generate-proof :proven copen
+                                            :help))] .
 endfm
 
 ***(%

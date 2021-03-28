@@ -13,7 +13,7 @@
 |-------------|------------|-----------------|
 |   NSLPK     |    118 s   |       59 s      |
 |-------------|------------|-----------------|
-|   NSLPK2    |            |                 |
+|   NSLPK2    |  2 h 53 m  |     2 h 1 m     |
 |-------------|------------|-----------------|
 |   Cloud     |    132 s   |       27 s      |
 |-------------|------------|-----------------|
@@ -43,11 +43,11 @@
 |-------------|---------------|-----------------|
 |    MCS      | 3 h 16 m 25 s |     59 m 14 s   |
 |-------------|---------------|-----------------|
-|    ABP      |    2 h 30 m   |     2 h 30 m    |
+|    ABP      |    2 h 30 m   |     2 h 1 m     |
 |-----------------------------------------------|
 
 Parallelization does not work well for ABP because it requires
-adjusting manually the parameters.
+adjusting manually the parameters. New command proven in some cases.
 
 Standard NSLPK: nonce secrecy property
 
