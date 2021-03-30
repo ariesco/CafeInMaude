@@ -548,6 +548,7 @@ mod CIMPA-IO is
      QIL := '\n Q 'defined 'as ':ctf ' '`{ ' printEq(M', Eq) ' '`} '\n /\
      S := "\n:def " + string(Q) + " = :ctf {" + printEqMacro(T') + "}" .
 
+ *** TODO: Error handling
  crl [def-ctfXX] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:ctf`{_`}['CafeToken[T], T'], TL),
                            macros: MACS, ptree: PT, proof: SP, AtS >
@@ -557,7 +558,7 @@ mod CIMPA-IO is
   if Q := downQid(T) /\
      *** # M', Q - Eq # := parseEqMacro(PT, Q, T') /\
      QIL := nil /\ *** '\n Q 'defined 'as ':ctf ' '`{ ' printEq(M', Eq) ' '`} '\n /\
-     S := "" [print "Fallo " PT] . *** "\n:def " + string(Q) + " = :ctf {" + printEqMacro(T') + "}" .
+     S := "" . *** "\n:def " + string(Q) + " = :ctf {" + printEqMacro(T') + "}" .
      *** eq_=_.['CafeBubble['__[''rb.Qid,''`(.Qid,''S#Sys.Qid,''`).Qid]],'CafeBubble[''B#CS5-1-1-2.Bit.Qid]]
 
  crl [def-ctf2] :
@@ -773,7 +774,7 @@ mod CIMPA-IO is
      MSIS := upTerm(SIS') /\
      MMACS := upTerm(MACS) /\
      T' := 'developProof[MPT, MNL, MSIS, MMACS] /\
-     S := "\npostpone ." [print "Hecho " TL] .
+     S := "\npostpone ." .
 
  ***                        ***
  ***       START TASK       ***
@@ -795,11 +796,12 @@ mod CIMPA-IO is
      S' := "\n:sel(" + S + ")\n" +
            printTokens(QIL) [print "Task finished: " NL] .
 
+ *** TODO: Error handling
  crl [task-finished-error] :
      reducedTerm(cafeInMaude, MI, N, T, Ty)
      < cafeInMaude : CIM | state: computing, mios: [MI, NL] MIOS, AtS >
   => < cafeInMaude : CIM | state: computing, mios: [MI, noTask] MIOS, AtS >
-  if Ty =/= 'NeQidList [print "Task finished: " T " con tipo " Ty] .
+  if Ty =/= 'NeQidList .
 
  ***                                ***
  ***       ALL TASKS FINISHED       ***
@@ -813,7 +815,7 @@ mod CIMPA-IO is
  ***                        ***
  ***          HELP          ***
  ***                        ***
- crl [save-proof] :
+ crl [help] :
      < cafeInMaude : CIM | state: executeComm, input: (':help`..@Command@, TL),
                            ptree: PT, po: (NL y PO), AtS >
   => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, po: (NL y PO), AtS >
@@ -829,7 +831,7 @@ mod CIMPA-IO is
      S := if printTPS(M, TPS, TPS') == ""
           then "\nNo recommendations.\n"
           else printTPS(M, TPS, TPS')
-          fi . *** [print "\nTrS " TrS "\nTrS' " TrS' "\nTPS " TPS "\nTPS' " TPS''] .
+          fi .
 
  op printTPS : Module TrialPairSet TrialPairSet -> String .
  eq printTPS(M, TPS, TPS') = if TPS == mtTPS
