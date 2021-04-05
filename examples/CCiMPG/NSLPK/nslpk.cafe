@@ -15,8 +15,8 @@ mod* PRIN {
 
 mod* RAND {
   [Rand]
-  op seed : -> Rand
-  op next : Rand -> Rand
+  op seed : -> Rand {constr}
+  op next : Rand -> Rand {constr}
   vars R1 R2 : Rand
   eq (seed = next(R1)) = false .
   eq (R1 = next(R1)) = false .

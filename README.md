@@ -2,7 +2,7 @@ CafeInMaude: A translation from CafeOBJ into Maude
 ==================================================
 
 CafeInMaude is a tool to introduce CafeOBJ specifications into the Maude system. Please note
-that the current version of CafeInMaude runs in Maude 3, please visit the *previous versions*
+that the current version of CafeInMaude runs in Maude 3.1, please visit the *previous versions*
 folder for Maude 2 versions.
 
 This tool has the following features:
@@ -15,6 +15,7 @@ attributes.
 from proof scores.
 * It provides the CafeInMaude Proof Generator & Fixer-Upper (CiMPG+F) for generating
 proofs.
+* It supports multi-core computation.
 
 The current translation has a number of limitations:
 * Behavioral specifications are not supported.
@@ -49,6 +50,16 @@ Once the tool is started, the **load** command can be used for loading files:
 ```
     $ CafeInMaude> load examples/abp.cafe .
 ```
+
+General commands
+----------------
+
+The following commands can be used for any tool:
+* **load PATH .**. This command executes the input stored in the file located at **PATH**.
+* **set-cores N .**. This command indicates that **N** processes can be used for concurrent computation.
+* **set-output PATH .**. This command sets **PATH** as the default output.
+* **:save-proof .**. This command stores the current proof in the text file previously indicated by means of
+**set-output**.
 
 The CafeInMaude Proof Assistant (CiMPA)
 ---------------------------------------
@@ -102,30 +113,20 @@ the proof tree). A goal is displayed with * if it has already been proved and wi
 A goal is displayed with * if it has already been proved and with
 **>** if it is the current one.
 
-The CafeInMaude Proof Generator (CiMPG)
----------------------------------------
+The CafeInMaude Proof Generator (CiMPG) & the CafeInMaude Proof Generator & Upper-Fixer (CiMPG+F)
+-------------------------------------------------------------------------------------------------
 
 The CafeInMaude Proof Generator provides annotations for inferring proof scripts for
 CiMPA from proof scores. These annotations are:
 * **:id(LAB)**, which indicates that the proof scores is associated to the proof for
 goal **LAB**.
-* **:proof(LAB)**, which asks CiMPG to generate the proof script for goal **LAB** by
+* **:infer-proof LAB .**, which asks CiMPG to generate the proof script for goal **LAB** by
 using the proof scores previously associated to this proof by means of **:id**.
+* If some open-close environments are missing, then CiMPG+F is used.
 
 CiMPG requires that:
-* All open-close environments open the same module, including the one for **:proof**.
+* All open-close environments open the same module.
 * All the reductions on these environments are related to the proof.
-
-The CafeInMaude Proof Generator & Upper-Fixer (CiMPG+F)
--------------------------------------------------------
-
-The CafeInMaude Proof Generator & Upper-Fixer (CiMPG+F) allows users to fix proofs
-when some proof scores were omitted and even generate proofs from scratch in some
-cases. The user is still required to create a proof score identified with **:id(LAB)**
-and including the properties he/she wants to prove. These properties must use variables
-for those arguments were induction should be applied and constants for the rest of
-arguments. Then, an extra open-close environment with the annotation **:infer(LAB)**
-must be used.
 
 Using the MFE (discontinued)
 ----------------------------
