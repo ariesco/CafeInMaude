@@ -48,8 +48,11 @@ Using the tool
 Once the tool is started, the **load** command can be used for loading files:
 
 ```
-    $ CafeInMaude> load examples/abp.cafe .
+    $ CafeInMaude> load examples/CCIMPG/ABP/abp.cafe .
 ```
+
+In general, the examples in the **CCIMPG** folder provide a **commands_XXX.cafe** file with the
+commands required to run the example.
 
 General commands
 ----------------
