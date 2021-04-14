@@ -10,7 +10,7 @@
 
 mod* PRIN {
   [Prin]
-  op intr : -> Prin
+  op intr : -> Prin {constr}
 }
 
 mod* RAND {
