@@ -830,7 +830,7 @@ mod CIMPA-IO is
      TPS'' := (TPS' - TPS) /\
      S := if printTPS(M, TPS, TPS') == ""
           then "\nNo recommendations.\n"
-          else printTPS(M, TPS, TPS')
+          else printTPS(M, TPS, TPS'')
           fi .
 
  op printTPS : Module TrialPairSet TrialPairSet -> String .
