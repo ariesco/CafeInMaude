@@ -71,8 +71,8 @@ mod! CIPHER {
 
 mod! BAG (M :: TRIV) {
   [Elt.M < Bag]
-  op empty : -> Bag
-  op __ : Bag Bag -> Bag {assoc comm}
+  op empty : -> Bag {constr}
+  op __ : Bag Bag -> Bag {constr assoc comm}
   op _\in_ : Elt.M Bag -> Bool
   vars X Y : Elt.M
   var S : Bag
