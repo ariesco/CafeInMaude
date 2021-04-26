@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2021-04-26T07:50:15.373Z" agent="5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36" etag="8x3LXRjt2oPcQE4jKoPC" version="14.6.6" type="github">
+<mxfile host="app.diagrams.net" modified="2021-04-26T07:57:31.991Z" agent="5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36" etag="m15ln9Oj_kBIixzS95Hi" version="14.6.6" type="github">
   <diagram id="bXwVD6ywDrlLAVm8X_Z4" name="Page-1">
-    <mxGraphModel dx="946" dy="515" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="946" dy="458" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -181,10 +181,10 @@
         <mxCell id="bIrODpHyJd9pbExji8rB-54" value="CiMPG: generateProof" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;glass=0;" vertex="1" parent="1">
           <mxGeometry x="630" y="80" width="130" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="bIrODpHyJd9pbExji8rB-55" value=":sel(1)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;glass=0;" vertex="1" parent="1">
-          <mxGeometry x="374" y="230" width="40" height="20" as="geometry" />
+        <mxCell id="bIrODpHyJd9pbExji8rB-55" value="restrict(1)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="365" y="230" width="40" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="bIrODpHyJd9pbExji8rB-56" value=":sel(n)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;glass=0;" vertex="1" parent="1">
+        <mxCell id="bIrODpHyJd9pbExji8rB-56" value="restrict(n)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;glass=0;" vertex="1" parent="1">
           <mxGeometry x="550" y="240" width="40" height="20" as="geometry" />
         </mxCell>
         <mxCell id="bIrODpHyJd9pbExji8rB-58" value="" style="endArrow=classic;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0;entryDx=10;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="bIrODpHyJd9pbExji8rB-39" target="bIrODpHyJd9pbExji8rB-37">
