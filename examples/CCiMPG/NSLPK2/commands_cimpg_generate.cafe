@@ -80,7 +80,7 @@ open INV .
 
   op  c1 : -> Cipher3 .
 
-  red inv110(S:Sys, c1) .
+  red inv120(S:Sys, c1) .
 close
 
 set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof12.cafe .
