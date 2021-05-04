@@ -215,9 +215,11 @@ endm
 mod CIMPA-IO is
  pr (MAYBE * (op maybe to noVar)){Variable} .
  pr CIMPA-COMMANDS-PROCESSING .
+ pr PRINT-TPS .
  pr PARSER-IO .
 
  vars T T' T'' T1 MPT MNL MSIS MMACS : Term .
+ vars TPS TPS' TPS'' : TrialPairSet .
  vars TL TL' TL1 TL2 : TermList .
  vars EqS PROVEN : EquationSet .
  vars QIL QIL' QIL'' : QidList .
@@ -249,9 +251,6 @@ mod CIMPA-IO is
  var  Ty : Type .
  var  B : Bool .
  var  G : Goal .
-
-
- vars TPS TPS' TPS'' : TrialPairSet .
 
  ***        ***
  *** States ***
@@ -384,6 +383,12 @@ mod CIMPA-IO is
   if V := downQid(T) /\
      S := "\nInduction set on " + printTokens(metaPrettyPrint(M, V, po)) + "\n\n" /\
      S' := "\n:ind on (" + printTokens(metaPrettyPrint(M, V, po)) + ")" .
+
+ crl [ind-var-no-var] :
+     < cafeInMaude : CIM | state: executeComm, input: (':ind`on`(_`)['CafeToken[T]], TL), AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
+     write(stdout, cafeInMaude, "\nError: Invalid variable.\n")
+  if not (downQid(T) :: Variable) .
 
 
  ***                    ***
@@ -832,33 +837,6 @@ mod CIMPA-IO is
           then "\nNo recommendations.\n"
           else printTPS(M, TPS, TPS'')
           fi .
-
- op printTPS : Module TrialPairSet TrialPairSet -> String .
- eq printTPS(M, TPS, TPS') = if TPS == mtTPS
-                             then ""
-                             else "The following case splittings are recommended:" + $printTPS(M, TPS)
-                             fi +
-                             if TPS' == mtTPS
-                             then ""
-                             else "The following case splittings are recommended when using premises:" + $printTPS(M, TPS')
-                             fi .
-
- op $printTPS : Module TrialPairSet -> String .
- eq $printTPS(M, mtTPS) = "\n" .
- eq $printTPS(M, [T, ctf] TPS) = "\n Case splitting by true-false recommended for "
-                                 + printTokens(metaPrettyPrint(M, T, po)) +
-                                 $printTPS(M, TPS) .
- eq $printTPS(M, [T, term] TPS) = "\n Case splitting by constructors recommended for "
-                                  + printTokens(metaPrettyPrint(M, T, po)) +
-                                  $printTPS(M, TPS) .
- eq $printTPS(M, [T, cevs] TPS) = "\n Case splitting for associative sequences (empty + variable sequence) recommended for "
-                                  + printTokens(metaPrettyPrint(M, T, po)) +
-                                  $printTPS(M, TPS) .
- eq $printTPS(M, [T, cesv] TPS) = "\n Case splitting for associative sequences (empty + sequence variable) recommended for "
-                                  + printTokens(metaPrettyPrint(M, T, po)) +
-                                  $printTPS(M, TPS) .
-
-
  ***                        ***
  ***          SAVE          ***
  ***                        ***

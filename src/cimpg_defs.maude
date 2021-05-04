@@ -10,6 +10,26 @@ sets of 3-tuples.
 \begin{comment}
 %)
 
+fmod TRIAL-PAIR is
+  pr META-TERM .
+
+  sorts TrialType TrialPair TrialPairSet .
+  subsort TrialPair < TrialPairSet .
+
+  ops ctf term cevs cesv : -> TrialType [ctor] .
+
+  op [_,_] : Term TrialType -> TrialPair [ctor] .
+
+  op mtTPS : -> TrialPairSet [ctor] .
+  op __ : TrialPairSet TrialPairSet -> TrialPairSet [ctor comm assoc id: mtTPS] .
+
+  var  TPS : TrialPairSet .
+  var  TPair : TrialPair .
+
+  eq TPair TPair TPS = TPair TPS [metadata "idempotency"] .
+  *** eq TPair TPair = TPair .
+endfm
+
 fmod SCORE-INFO-MAP is
  pr META-LEVEL .
 

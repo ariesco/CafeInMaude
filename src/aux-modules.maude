@@ -583,3 +583,41 @@ mod TASKS is
  eq allIdle(MIOS) = true [owise] .
 endm
 
+fmod PRINT-TPS is
+ pr META-LEVEL .
+ pr TRIAL-PAIR .
+ pr LEXICAL .
+
+ vars TPS TPS' TPS'' : TrialPairSet .
+ var  M : Module .
+ var  T : Term .
+
+ op po : -> PrintOptionSet .
+ eq po = mixfix number rat format .
+
+ op printTPS : Module TrialPairSet TrialPairSet -> String .
+ eq printTPS(M, TPS, TPS') = if TPS == mtTPS
+                             then ""
+                             else "The following case splittings are recommended:" + $printTPS(M, TPS)
+                             fi +
+                             if TPS' == mtTPS
+                             then ""
+                             else "The following case splittings are recommended when using premises:" + $printTPS(M, TPS')
+                             fi .
+
+ op $printTPS : Module TrialPairSet -> String .
+ eq $printTPS(M, mtTPS) = "\n" .
+ eq $printTPS(M, [T, ctf] TPS) = "\n Case splitting by true-false recommended for "
+                                 + printTokens(metaPrettyPrint(M, T, po)) +
+                                 $printTPS(M, TPS) .
+ eq $printTPS(M, [T, term] TPS) = "\n Case splitting by constructors recommended for "
+                                  + printTokens(metaPrettyPrint(M, T, po)) +
+                                  $printTPS(M, TPS) .
+ eq $printTPS(M, [T, cevs] TPS) = "\n Case splitting for associative sequences (empty + variable sequence) recommended for "
+                                  + printTokens(metaPrettyPrint(M, T, po)) +
+                                  $printTPS(M, TPS) .
+ eq $printTPS(M, [T, cesv] TPS) = "\n Case splitting for associative sequences (empty + sequence variable) recommended for "
+                                  + printTokens(metaPrettyPrint(M, T, po)) +
+                                  $printTPS(M, TPS) .
+endfm
+

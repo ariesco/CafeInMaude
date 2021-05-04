@@ -2,6 +2,7 @@ fmod OPEN-CLOSE-PARSER is
  pr PROOF-DATA-STRUCTURES .
  pr OPEN-CLOSE-AUX .
  pr CafePARSER .
+ pr TRIAL-PAIR .
 
  vars M M' M'' M''' M1 M2 M3 TOP TOP' FLAT FLAT' : Module .
  vars PSM SM VM : SortMap . **** PSM: Principal Sort Map
@@ -1561,8 +1562,6 @@ fmod OPEN-CLOSE-PARSER is
   var  CTXT : Context .
   var  IR : IR .
 
-  eq TPair TPair = TPair .
-
   op _-_ : TermSet TermSet -> TermSet .
   eq (T | TrS) - (T | TrS') = TrS - TrS' .
   eq TrS - TrS' = TrS [owise] .
@@ -1769,17 +1768,6 @@ fmod OPEN-CLOSE-PARSER is
    if [QIL, MACS', B] := tryCaseSplitting(IT, MACS, nil, S + "-" + string(N, 10), INDENT, NL N) /\
       [QIL', MACS'', B'] := tryCaseSplitting*(ITL, MACS', S, INDENT, s(N), NL) .
   eq tryCaseSplitting*(nilITL, MACS, S, INDENT, N, NL) = [nil, MACS, true] .
-
-  sorts TrialType TrialPair TrialPairSet .
-  subsort TrialPair < TrialPairSet .
-
-  ops ctf term cevs cesv : -> TrialType [ctor] .
-
-  op [_,_] : Term TrialType -> TrialPair [ctor] .
-
-  op mtTPS : -> TrialPairSet [ctor] .
-  op __ : TrialPairSet TrialPairSet -> TrialPairSet [ctor comm assoc id: mtTPS] .
-  eq TPair TPair TPS = TPair TPS [metadata "idempotency"] .
 
   op processEqualityTerm : Module Term -> TrialPairSet .
   ceq processEqualityTerm(M, T) = mtTPS
