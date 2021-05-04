@@ -427,7 +427,7 @@ print conceal ptree:_ .
 print conceal macros:_ .
 print conceal scoreinfo:_ .
 
-set print attribute off .
+set print attribute on .
 set show advisories off .
 
 erew run .

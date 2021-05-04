@@ -291,14 +291,16 @@ mod CIMPA-IO is
  op proof:_ : String -> Attribute [ctor] .
  *** Goals previously proven
  op provenGoals:_ : EquationSet -> Attribute [ctor gather (&)] .
+ *** Bound in the number of levels for backtracking
+ op backtrackLevels:_ : Nat -> Attribute [ctor] .
 
  ***                               ***
  *** Initial value for attributes. ***
  ***                               ***
  op initCiMPA-AtS : -> AttributeSet .
  eq initCiMPA-AtS = scoreinfo: mtSIM, ptree: mtPT, po: finished, tasks: mtTQueue,
-                    mios: noOccupation, cores: 1, indVar: noVar,
-                    macros: mtMacros, proof: "", provenGoals: none .
+                    mios: noOccupation, cores: 1, indVar: noVar, macros: mtMacros,
+                    proof: "", provenGoals: none, backtrackLevels: 6 .
 
  ***                        ***
  ***       SET CORES        ***
@@ -371,6 +373,13 @@ mod CIMPA-IO is
   if [PT', PO', QIL] := evalGoalCommand(M, T, none) /\
      S' := ":goal{" + printGoal(T) + "}" .
 
+ crl [goal-error] :
+     < cafeInMaude : CIM | state: executeComm, input: (':goal`{_`}[T], TL),
+                           current: M, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, current: M, AtS >
+     write(stdout, cafeInMaude, "\nError: No parse for goal.\n")
+  if not (evalGoalCommand(M, T, none) :: GoalRes) .
+
  ***                           ***
  ***       INDUCTION VAR       ***
  ***                           ***
@@ -413,6 +422,15 @@ mod CIMPA-IO is
              else PT'
              fi /\
      S' := "\n:apply(" + string(Q) + ")" .
+
+ crl [applyParsed-error] :
+     < cafeInMaude : CIM | state: executeComm, input: (':applyComm[T], TL), ptree: PT,
+                           po: PO, current: M, indVar: V, macros: MACS, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, po: PO, current: M,
+                           indVar: V, macros: MACS, AtS >
+     write(stdout, cafeInMaude, "\nError: Invalid macro " + string(Q) + ".\n")
+  if Q := downQid(T) /\
+     not (evalApply(M, Q, PT, V, MACS, PO) :: GoalRes) .
 
  ***                         ***
  ***       IMPLICATION       ***
