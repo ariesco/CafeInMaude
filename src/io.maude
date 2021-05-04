@@ -306,22 +306,31 @@ mod CIMPA-IO is
  ***       SET CORES        ***
  ***                        ***
  crl [set-cores] :
-     < cafeInMaude : CIM | state: executeComm, input: ('set-cores_.['token[T]], TL), cores: N, AtS >
-  => < cafeInMaude : CIM | state: print&updateCores, input: TL, cores: N', AtS >
+     < cafeInMaude : CIM | state: executeComm, input: ('set-cores_.['token[T]], TL), cores: N,
+                           mios: MIOS, AtS >
+  => < cafeInMaude : CIM | state: print&updateCores, input: TL, cores: N', mios: MIOS, AtS >
      write(stdout, cafeInMaude, "\nNumber of cores set to " + S + ".\n\n")
-  if S := string(downQid(T)) /\
+  if allIdle(MIOS) /\
+     S := string(downQid(T)) /\
      N' := rat(S, 10) /\
      N' > 0 .
 
+ crl [set-cores-no-idle] :
+     < cafeInMaude : CIM | state: executeComm, input: ('set-cores_.['token[T]], TL),
+                           mios: MIOS, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, mios: MIOS, AtS >
+     write(stdout, cafeInMaude, "\nError: Some processes are not idle.\n")
+  if not allIdle(MIOS) .
+
  crl [set-cores-no-nat] :
      < cafeInMaude : CIM | state: executeComm, input: ('set-cores_.['token[T]], TL), AtS >
-  => < cafeInMaude : CIM | state: print&updateCores, input: TL, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
      write(stdout, cafeInMaude, "\nError: the argument must be a natural number.\n")
   if not (rat(string(downQid(T)), 10) :: Nat ) .
 
  crl [set-cores-0] :
      < cafeInMaude : CIM | state: executeComm, input: ('set-cores_.['token[T]], TL), AtS >
-  => < cafeInMaude : CIM | state: print&updateCores, input: TL, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
      write(stdout, cafeInMaude, "\nError: the argument must be greater than 0.\n")
   if rat(string(downQid(T)), 10) == 0 .
 
