@@ -672,6 +672,14 @@ mod CIMPA-IO is
      QIL := '\n Q 'defined 'as ':cvvs ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
      S := "\n:def " + string(Q) + " = :cvvs [ " + printTokenDown(T') + " ]" .
 
+ crl [def-cvvs-error] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvvs`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, "\nError: Macro could not be parsed.\n\n")
+  if Q := downQid(T) /\
+     not (parseTermMacro(PT, Q, T') :: Macro) .
+
  crl [def-cvsv] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvsv`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
                            macros: MACS, ptree: PT, proof: SP, AtS >
@@ -682,6 +690,14 @@ mod CIMPA-IO is
      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
      QIL := '\n Q 'defined 'as ':cvsv ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
      S := "\n:def " + string(Q) + " = :cvsv [ " + printTokenDown(T') + " ]" .
+
+ crl [def-cvsv-error] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvsv`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, "\nError: Macro could not be parsed.\n\n")
+  if Q := downQid(T) /\
+     not (parseTermMacro(PT, Q, T') :: Macro) .
 
  crl [def-cevss] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cevss`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
