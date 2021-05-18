@@ -639,10 +639,27 @@ mod CIMPA-IO is
                            ptree: PT, proof: (SP + S), AtS >
      write(stdout, cafeInMaude, printTokens(QIL))
   if Q := downQid(T) /\
-      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
-      subsortSingleBinaryOpConstraints(M', T'') /\
-      QIL := '\n Q 'defined 'as ':cvss ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
-      S := "\n:def " + string(Q) + " = :cvss [ " + printTokenDown(T') + " ]" .
+     # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+     subsortSingleBinaryOpConstraints(M', T'') /\
+     QIL := '\n Q 'defined 'as ':cvss ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+     S := "\n:def " + string(Q) + " = :cvss [ " + printTokenDown(T') + " ]" .
+
+ crl [def-cvss-error-macro] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvss`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, "\nError: Macro could not be parsed.\n\n")
+  if Q := downQid(T) /\
+     not (parseTermMacro(PT, Q, T') :: Macro) .
+
+ crl [def-cvss-error-subsort] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvss`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, "\nError: The term is not a sequence.\n\n")
+  if Q := downQid(T) /\
+     # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+     not subsortSingleBinaryOpConstraints(M', T'') .
 
  crl [def-cvvs] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvvs`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
@@ -651,9 +668,9 @@ mod CIMPA-IO is
                            ptree: PT, proof: (SP + S), AtS >
      write(stdout, cafeInMaude, printTokens(QIL))
   if Q := downQid(T) /\
-      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
-      QIL := '\n Q 'defined 'as ':cvvs ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
-      S := "\n:def " + string(Q) + " = :cvvs [ " + printTokenDown(T') + " ]" .
+     # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+     QIL := '\n Q 'defined 'as ':cvvs ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+     S := "\n:def " + string(Q) + " = :cvvs [ " + printTokenDown(T') + " ]" .
 
  crl [def-cvsv] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvsv`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
@@ -662,9 +679,9 @@ mod CIMPA-IO is
                            ptree: PT, proof: (SP + S), AtS >
      write(stdout, cafeInMaude, printTokens(QIL))
   if Q := downQid(T) /\
-      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
-      QIL := '\n Q 'defined 'as ':cvsv ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
-      S := "\n:def " + string(Q) + " = :cvsv [ " + printTokenDown(T') + " ]" .
+     # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+     QIL := '\n Q 'defined 'as ':cvsv ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+     S := "\n:def " + string(Q) + " = :cvsv [ " + printTokenDown(T') + " ]" .
 
  crl [def-cevss] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cevss`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
@@ -673,9 +690,9 @@ mod CIMPA-IO is
                            ptree: PT, proof: (SP + S), AtS >
      write(stdout, cafeInMaude, printTokens(QIL))
   if Q := downQid(T) /\
-      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
-      QIL := '\n Q 'defined 'as ':cevss ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
-      S := "\n:def " + string(Q) + " = :cevss [ " + printTokenDown(T') + " ]" .
+     # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+     QIL := '\n Q 'defined 'as ':cevss ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+     S := "\n:def " + string(Q) + " = :cevss [ " + printTokenDown(T') + " ]" .
 
  crl [def-cvs] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvs`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
@@ -684,10 +701,10 @@ mod CIMPA-IO is
                            ptree: PT, proof: (SP + S), AtS >
      write(stdout, cafeInMaude, printTokens(QIL))
   if Q := downQid(T) /\
-      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
-      subsortUnaryBinaryOpConstraints(M', T'') /\
-      QIL := '\n Q 'defined 'as ':cvs ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
-      S := "\n:def " + string(Q) + " = :cvs [ " + printTokenDown(T') + " ]" .
+     # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+     subsortUnaryBinaryOpConstraints(M', T'') /\
+     QIL := '\n Q 'defined 'as ':cvs ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+     S := "\n:def " + string(Q) + " = :cvs [ " + printTokenDown(T') + " ]" .
 
  crl [def-csv] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:csv`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
@@ -696,10 +713,10 @@ mod CIMPA-IO is
                            ptree: PT, proof: (SP + S), AtS >
      write(stdout, cafeInMaude, printTokens(QIL))
   if Q := downQid(T) /\
-      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
-      subsortUnaryBinaryOpConstraints(M', T'') /\
-      QIL := '\n Q 'defined 'as ':csv ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
-      S := "\n:def " + string(Q) + " = :csv [ " + printTokenDown(T') + " ]" .
+     # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+     subsortUnaryBinaryOpConstraints(M', T'') /\
+     QIL := '\n Q 'defined 'as ':csv ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+     S := "\n:def " + string(Q) + " = :csv [ " + printTokenDown(T') + " ]" .
 
  crl [def-csvs] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:csvs`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
@@ -708,10 +725,10 @@ mod CIMPA-IO is
                            ptree: PT, proof: (SP + S), AtS >
      write(stdout, cafeInMaude, printTokens(QIL))
   if Q := downQid(T) /\
-      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
-      subsortUnaryBinaryOpConstraints(M', T'') /\
-      QIL := '\n Q 'defined 'as ':csvs ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
-      S := "\n:def " + string(Q) + " = :csvs [ " + printTokenDown(T') + " ]" .
+     # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+     subsortUnaryBinaryOpConstraints(M', T'') /\
+     QIL := '\n Q 'defined 'as ':csvs ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+     S := "\n:def " + string(Q) + " = :csvs [ " + printTokenDown(T') + " ]" .
 
  ***                          ***
  ***          PROVEN          ***
@@ -725,6 +742,14 @@ mod CIMPA-IO is
   if QIL := downQidList(T) /\
      T' := getTerm(metaParse(M, varsFromQidList(QIL), QIL, 'Bool)) /\
      S := "\n:proven(" + printTokens(QIL) + ")" .
+
+ crl [proven-error] :
+     < cafeInMaude : CIM | state: executeComm, input: (':proven`(_`)['bubble[T]], TL),
+                           current: M, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, current: M, AtS >
+     write(stdout, cafeInMaude, "\nError: the term cannot be parsed.\n\n")
+  if QIL := downQidList(T) /\
+     not (getTerm(metaParse(M, varsFromQidList(QIL), QIL, 'Bool)) :: Term) .
 
  ***                            ***
  ***          GENERATE          ***
