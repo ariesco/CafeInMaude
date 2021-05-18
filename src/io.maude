@@ -605,18 +605,13 @@ mod CIMPA-IO is
      QIL := '\n Q 'defined 'as ':ctf ' '`{ ' printEq(M', Eq) ' '`} '\n /\
      S := "\n:def " + string(Q) + " = :ctf {" + printEqMacro(T') + "}" .
 
- *** TODO: Error handling
- crl [def-ctfXX] :
+ crl [def-ctf1-error] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:ctf`{_`}['CafeToken[T], T'], TL),
-                           macros: MACS, ptree: PT, proof: SP, AtS >
-  => < cafeInMaude : CIM | state: print&executeComm, input: TL, *** macros: (MACS # M', Q - Eq #),
-                           ptree: PT, proof: (SP + S), AtS >
-     write(stdout, cafeInMaude, printTokens(QIL))
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, "\nError: Macro could not be parsed.\n\n")
   if Q := downQid(T) /\
-     *** # M', Q - Eq # := parseEqMacro(PT, Q, T') /\
-     QIL := nil /\ *** '\n Q 'defined 'as ':ctf ' '`{ ' printEq(M', Eq) ' '`} '\n /\
-     S := "" . *** "\n:def " + string(Q) + " = :ctf {" + printEqMacro(T') + "}" .
-     *** eq_=_.['CafeBubble['__[''rb.Qid,''`(.Qid,''S#Sys.Qid,''`).Qid]],'CafeBubble[''B#CS5-1-1-2.Bit.Qid]]
+     not (parseEqMacro(PT, Q, T') :: Macro) .
 
  crl [def-ctf2] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:ctf`[_`]['CafeToken[T], 'CafeBubble[T']], TL),

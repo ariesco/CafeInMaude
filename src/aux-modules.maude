@@ -644,7 +644,6 @@ endfm
 
 fmod ADD-PROVEN is
  pr CITP-AUX .
- *** pr GOAL .
  pr SUBS .
 
  vars EqS EqS' : EquationSet .
