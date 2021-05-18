@@ -624,6 +624,14 @@ mod CIMPA-IO is
      QIL := '\n Q 'defined 'as ':ctf ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
      S := "\n:def " + string(Q) + " = :ctf [ " + printTokenDown(T') + " ]" .
 
+ crl [def-ctf2-error] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:ctf`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, "\nError: Macro could not be parsed.\n\n")
+  if Q := downQid(T) /\
+     not (parseTermMacro(PT, Q, T') :: Macro) .
+
  crl [def-cvss] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvss`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
                            macros: MACS, ptree: PT, proof: SP, AtS >
