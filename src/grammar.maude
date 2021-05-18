@@ -7,6 +7,7 @@ fmod COMMANDS is
  op load_. : @NeTokenList@ -> @Command@ [ctor] .
  op set-cores_. : @Token@ -> @Command@ [ctor] .
  op set-output_. : @Token@ -> @Command@ [ctor] .
+ op set-backtrack-bound_. : @Token@ -> @Command@ [ctor] .
  op :save-proof`. : -> @Command@ [ctor] .
  op :infer-proof_. : @Token@ -> @Command@ [ctor] .
  op :generate-proof_. : @Token@ -> @Command@ [ctor] .
@@ -47,7 +48,7 @@ fmod CafeBUBBLES is
                                             var vars op ops copen cview :goal :ind set-cores
                                             :apply :imp :def :id :proof :infer :show :desc
                                             set-output :save-proof :infer-proof :generate-proof
-                                            :sel :proven :help))] .
+                                            :sel :proven :help set-backtrack-bound))] .
 
   op CafeToken : Qid -> @CafeToken@ [special (id-hook Bubble (1 1)
                             op-hook qidSymbol (<Qids> : ~> Qid)
@@ -60,7 +61,7 @@ fmod CafeBUBBLES is
                                             :proof :infer :show :desc set-cores
                                             set-output :save-proof :infer-proof
                                             :sel :generate-proof :proven copen
-                                            :help))] .
+                                            :help set-backtrack-bound))] .
 endfm
 
 ***(%

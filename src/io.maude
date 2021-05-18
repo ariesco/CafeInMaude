@@ -215,6 +215,7 @@ endm
 mod CIMPA-IO is
  pr (MAYBE * (op maybe to noVar)){Variable} .
  pr CIMPA-COMMANDS-PROCESSING .
+ pr ADD-PROVEN .
  pr PRINT-TPS .
  pr PARSER-IO .
 
@@ -330,6 +331,30 @@ mod CIMPA-IO is
 
  crl [set-cores-0] :
      < cafeInMaude : CIM | state: executeComm, input: ('set-cores_.['token[T]], TL), AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
+     write(stdout, cafeInMaude, "\nError: the argument must be greater than 0.\n")
+  if rat(string(downQid(T)), 10) == 0 .
+
+ ***                                  ***
+ ***       SET BACKTRACK BOUND        ***
+ ***                                  ***
+ crl [set-backtrack-bound] :
+     < cafeInMaude : CIM | state: executeComm, input: ('set-backtrack-bound_.['token[T]], TL),
+                           backtrackLevels: N, AtS >
+  => < cafeInMaude : CIM | state: print&updateCores, input: TL, backtrackLevels: N', AtS >
+     write(stdout, cafeInMaude, "\nBound for backtracking set to " + S + ".\n\n")
+  if S := string(downQid(T)) /\
+     N' := rat(S, 10) /\
+     N' > 0 .
+
+ crl [set-backtrack-no-nat] :
+     < cafeInMaude : CIM | state: executeComm, input: ('set-backtrack-bound_.['token[T]], TL), AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
+     write(stdout, cafeInMaude, "\nError: the argument must be a natural number.\n")
+  if not (rat(string(downQid(T)), 10) :: Nat ) .
+
+ crl [set-backtrack-0] :
+     < cafeInMaude : CIM | state: executeComm, input: ('set-backtrack-bound_.['token[T]], TL), AtS >
   => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
      write(stdout, cafeInMaude, "\nError: the argument must be greater than 0.\n")
   if rat(string(downQid(T)), 10) == 0 .
@@ -764,32 +789,6 @@ mod CIMPA-IO is
           "\n:apply(si)" /\
      PT'' := addProvenGoals(PT', PROVEN, V) /\
      TQ' := taskQueueForInductiveCases(PT'', PO, SIS, MACS) .
-
- op addProvenGoals : ProofTree EquationSet Variable -> ProofTree .
- ceq addProvenGoals(| M, G, PTL, N |, EqS, V) = | M, G, PTL', N |
-  if PTL' := addProvenGoals*(PTL, EqS, V) .
- eq addProvenGoals(PT, EqS, V) = PT [owise] .
-
- op addProvenGoals* : ProofTreeList EquationSet Variable -> ProofTreeList .
- eq addProvenGoals*(mtPT, EqS, V) = mtPT .
- ceq addProvenGoals*(| M, G, PTL, N | PTL', EqS, V) = | M', G, PTL, N | addProvenGoals*(PTL', EqS, V)
-  if M' := addProvenGoals(M, EqS, V) .
-
- op addProvenGoals : Module EquationSet Variable -> Module .
- ceq addProvenGoals(M, EqS, V) = M'
-  if Ty := getType(V) /\
-     C := qid(string(getName(V)) + "#" + string(getType(V)) + "." + string(Ty)) /\
-     Q := getName(C) /\
-     ODS op Q : nil -> Ty [AttS] . := getOps(M) /\
-     EqS' := subsituteIndVar(EqS, V, C, 0) /\
-     M' := addHyp(M, EqS') .
- eq addProvenGoals(M, EqS, V) = M [owise] .
-
- op subsituteIndVar : EquationSet Variable Constant Nat -> EquationSet .
- eq subsituteIndVar(none, V, C, N) = none .
- ceq subsituteIndVar(eq T = T' [AttS] . EqS, V, C, N) = eq substitute(T, V <- C) = T' [metadata("HI") label(Q) nonexec AttS] .
-                                                        subsituteIndVar(EqS, V, C, s(N))
-  if Q := qid("proven-goal" + string(N, 10)) .
 
  *** Currently not fully supported by Maude due to blocking I/O
  crl [infer-proof] :

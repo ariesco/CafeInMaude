@@ -3,6 +3,7 @@ fmod OPEN-CLOSE-PARSER is
  pr OPEN-CLOSE-AUX .
  pr CafePARSER .
  pr TRIAL-PAIR .
+ pr SUBS .
 
  vars M M' M'' M''' M1 M2 M3 TOP TOP' FLAT FLAT' : Module .
  vars PSM SM VM : SortMap . **** PSM: Principal Sort Map
@@ -825,16 +826,6 @@ fmod OPEN-CLOSE-PARSER is
       ODS := getOps(M) /\
       Eq' := impEq(M, Eq, substitute(T, SB)) .
   eq applyImp(M, Eq, Q, N, SB) = [mtPT, false] [owise] .
-
-  op substitute : Term Substitution -> Term .
-  eq substitute(Q[TL], SB) = Q[substitute*(TL, SB)] .
-  eq substitute(C, SB) = C .
-  eq substitute(V, V <- T ; SB) = T .
-  eq substitute(T, SB) = T [owise] .
-
-  op substitute* : TermList Substitution -> TermList .
-  eq substitute*(empty, SB) = empty .
-  eq substitute*((T, TL), SB) = substitute(T, SB), substitute*(TL, SB) .
 
   ***********************************************************************************
   ********************************** APPLY IMPLIES **********************************

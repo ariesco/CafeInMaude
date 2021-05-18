@@ -621,3 +621,73 @@ fmod PRINT-TPS is
                                   $printTPS(M, TPS) .
 endfm
 
+fmod SUBS is
+ pr META-TERM .
+
+ var SB : Substitution .
+ var TL : TermList .
+ var V : Variable .
+ var C : Constant .
+ var T : Term .
+ var Q : Qid .
+
+ op substitute : Term Substitution -> Term .
+ eq substitute(Q[TL], SB) = Q[substitute*(TL, SB)] .
+ eq substitute(C, SB) = C .
+ eq substitute(V, V <- T ; SB) = T .
+ eq substitute(T, SB) = T [owise] .
+
+ op substitute* : TermList Substitution -> TermList .
+ eq substitute*(empty, SB) = empty .
+ eq substitute*((T, TL), SB) = substitute(T, SB), substitute*(TL, SB) .
+endfm
+
+fmod ADD-PROVEN is
+ pr CITP-AUX .
+ *** pr GOAL .
+ pr SUBS .
+
+ vars EqS EqS' : EquationSet .
+ vars PTL PTL' : ProofTreeList .
+ var  ODS : OpDeclSet .
+ var  AttS : AttrSet .
+ vars PT : ProofTree .
+ vars M M' : Module .
+ var  V : Variable .
+ var  C : Constant .
+ vars T T' : Term .
+ var  Ty : Type .
+ var  G : Goal .
+ var  Q : Qid .
+ var  N : Nat .
+
+ op addProvenGoals : ProofTree EquationSet Variable -> ProofTree .
+ ceq addProvenGoals(| M, G, PTL, N |, EqS, V) = | M, G, PTL', N |
+  if PTL' := addProvenGoals*(PTL, EqS, V) .
+ eq addProvenGoals(PT, EqS, V) = PT [owise] .
+
+ op addProvenGoals* : ProofTreeList EquationSet Variable -> ProofTreeList .
+ eq addProvenGoals*(mtPT, EqS, V) = mtPT .
+ ceq addProvenGoals*(| M, G, PTL, N | PTL', EqS, V) = | M', G, PTL, N | addProvenGoals*(PTL', EqS, V)
+  if M' := addProvenGoals(M, EqS, V) .
+
+ op addProvenGoals : Module EquationSet Variable -> Module .
+ ceq addProvenGoals(M, EqS, V) = M'
+  if Ty := getType(V) /\
+     C := qid(string(getName(V)) + "#" + string(getType(V)) + "." + string(Ty)) /\
+     Q := getName(C) /\
+     ODS op Q : nil -> Ty [AttS] . := getOps(M) /\
+     EqS' := subsituteIndVar(EqS, V, C, 0) /\
+     M' := addHyp(M, EqS') .
+ eq addProvenGoals(M, EqS, V) = M [owise] .
+
+ op subsituteIndVar : EquationSet Variable Constant Nat -> EquationSet .
+ eq subsituteIndVar(none, V, C, N) = none .
+ ceq subsituteIndVar(eq T = T' [AttS] . EqS, V, C, N) = eq substitute(T, V <- C) = T' [metadata("HI") label(Q) nonexec AttS] .
+                                                        subsituteIndVar(EqS, V, C, s(N))
+  if Q := qid("proven-goal" + string(N, 10)) .
+endfm
+
+fmod DISPLAY-ERRORS is
+ pr QID-LIST .
+endfm

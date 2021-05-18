@@ -2,6 +2,7 @@ load full-maude_lite.maude
 load file.maude
 load cimpg_defs.maude
 load metaInterpreter.maude
+load citp_aux.maude
 load aux-modules.maude
 load search_predicate.maude
 load predefined.maude
@@ -9,7 +10,6 @@ load predefined_core.maude
 load preparsing.maude
 load grammar.maude
 load parameter_config.maude
-load citp_aux.maude
 load cimpg_defs.maude
 load module_parser.maude
 load open_close_parsing.maude
@@ -382,7 +382,8 @@ mod MTP is
   if QIL := tokenize(Read) /\
      noParse(N) := metaParse(GRAMMAR, QIL, '@Input@) .
 
- crl [parseTextFile] :
+ *** TODO
+ crl [parseTextFileAmbiguous] :
      < cafeInMaude : CIM | out: Read, state: parseTextFileContents, AtS >
   => < cafeInMaude : CIM | out: "", AtS >
   if QIL := tokenize(Read) /\
