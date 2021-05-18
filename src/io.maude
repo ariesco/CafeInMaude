@@ -710,6 +710,14 @@ mod CIMPA-IO is
      QIL := '\n Q 'defined 'as ':cevss ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
      S := "\n:def " + string(Q) + " = :cevss [ " + printTokenDown(T') + " ]" .
 
+ crl [def-cevss-error] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cevss`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, "\nError: Macro could not be parsed.\n\n")
+  if Q := downQid(T) /\
+     not (parseTermMacro(PT, Q, T') :: Macro) .
+
  crl [def-cvs] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvs`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
                            macros: MACS, ptree: PT, proof: SP, AtS >
@@ -721,6 +729,23 @@ mod CIMPA-IO is
      subsortUnaryBinaryOpConstraints(M', T'') /\
      QIL := '\n Q 'defined 'as ':cvs ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
      S := "\n:def " + string(Q) + " = :cvs [ " + printTokenDown(T') + " ]" .
+
+ crl [def-cvs-error-parse] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvs`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, "\nError: Macro could not be parsed.\n\n")
+  if Q := downQid(T) /\
+     not (parseTermMacro(PT, Q, T') :: Macro) .
+
+ crl [def-cvs-error-subsort] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvs`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, "\nError: The term is not a sequence.\n\n")
+  if Q := downQid(T) /\
+     # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+     not subsortUnaryBinaryOpConstraints(M', T'') .
 
  crl [def-csv] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:csv`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
