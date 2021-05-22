@@ -85,6 +85,9 @@ mod IO is
     wrote(cafeInMaude, stdout)
     < cafeInMaude : CIM | state: exiting, AtS >
  => none .
+
+ op errorStr : -> String .
+ eq errorStr = printTokens('\n '\r 'Error: ' '\o) .
 endm
 
 mod PARSER-IO is
@@ -238,12 +241,13 @@ mod CIMPA-IO is
  var  SIM : ScoreInfoMap .
  var  EqS' : EquationSet .
  var  SB : Substitution .
+ var  VS : VariableSet .
+ vars V V' : Variable .
  var  ODS : OpDeclSet .
  vars MI FHOut : Oid .
  var  AttS : AttrSet .
  var  MACS : Macros .
  var  Eq : Equation .
- var  V : Variable .
  var  C : Constant .
  var  NL : NatList .
  var  ST : State .
@@ -320,19 +324,19 @@ mod CIMPA-IO is
      < cafeInMaude : CIM | state: executeComm, input: ('set-cores_.['token[T]], TL),
                            mios: MIOS, AtS >
   => < cafeInMaude : CIM | state: print&executeComm, input: TL, mios: MIOS, AtS >
-     write(stdout, cafeInMaude, "\nError: Some processes are not idle.\n")
+     write(stdout, cafeInMaude, errorStr + "Some processes are not idle.\n")
   if not allIdle(MIOS) .
 
  crl [set-cores-no-nat] :
      < cafeInMaude : CIM | state: executeComm, input: ('set-cores_.['token[T]], TL), AtS >
   => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
-     write(stdout, cafeInMaude, "\nError: the argument must be a natural number.\n")
+     write(stdout, cafeInMaude, errorStr + "the argument must be a natural number.\n")
   if not (rat(string(downQid(T)), 10) :: Nat ) .
 
  crl [set-cores-0] :
      < cafeInMaude : CIM | state: executeComm, input: ('set-cores_.['token[T]], TL), AtS >
   => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
-     write(stdout, cafeInMaude, "\nError: the argument must be greater than 0.\n")
+     write(stdout, cafeInMaude, errorStr + "the argument must be greater than 0.\n")
   if rat(string(downQid(T)), 10) == 0 .
 
  ***                                  ***
@@ -350,13 +354,13 @@ mod CIMPA-IO is
  crl [set-backtrack-no-nat] :
      < cafeInMaude : CIM | state: executeComm, input: ('set-backtrack-bound_.['token[T]], TL), AtS >
   => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
-     write(stdout, cafeInMaude, "\nError: the argument must be a natural number.\n")
+     write(stdout, cafeInMaude, errorStr + "the argument must be a natural number.\n")
   if not (rat(string(downQid(T)), 10) :: Nat ) .
 
  crl [set-backtrack-0] :
      < cafeInMaude : CIM | state: executeComm, input: ('set-backtrack-bound_.['token[T]], TL), AtS >
   => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
-     write(stdout, cafeInMaude, "\nError: the argument must be greater than 0.\n")
+     write(stdout, cafeInMaude, errorStr + "the argument must be greater than 0.\n")
   if rat(string(downQid(T)), 10) == 0 .
 
  ***                        ***
@@ -411,7 +415,7 @@ mod CIMPA-IO is
      < cafeInMaude : CIM | state: executeComm, input: (':goal`{_`}[T], TL),
                            current: M, AtS >
   => < cafeInMaude : CIM | state: print&executeComm, input: TL, current: M, AtS >
-     write(stdout, cafeInMaude, "\nError: No parse for goal.\n")
+     write(stdout, cafeInMaude, errorStr + "No parse for goal.\n")
   if not (evalGoalCommand(M, T, none) :: GoalRes) .
 
  ***                           ***
@@ -430,7 +434,7 @@ mod CIMPA-IO is
  crl [ind-var-no-var] :
      < cafeInMaude : CIM | state: executeComm, input: (':ind`on`(_`)['CafeToken[T]], TL), AtS >
   => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
-     write(stdout, cafeInMaude, "\nError: Invalid variable.\n")
+     write(stdout, cafeInMaude, errorStr + "Invalid variable.\n")
   if not (downQid(T) :: Variable) .
 
 
@@ -462,7 +466,7 @@ mod CIMPA-IO is
                            po: PO, current: M, indVar: V, macros: MACS, AtS >
   => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, po: PO, current: M,
                            indVar: V, macros: MACS, AtS >
-     write(stdout, cafeInMaude, "\nError: Invalid macro " + string(Q) + ".\n")
+     write(stdout, cafeInMaude, errorStr + "Invalid macro " + string(Q) + ".\n")
   if Q := downQid(T) /\
      not (evalApply(M, Q, PT, V, MACS, PO) :: GoalRes) .
 
@@ -508,7 +512,7 @@ mod CIMPA-IO is
  rl [id] :
     < cafeInMaude : CIM | state: executeComm, input: (':id`(_`)[T], TL), AtS >
  => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
-    write(stdout, cafeInMaude, "\nError: Command not supported in interactive mode.\n\n") .
+    write(stdout, cafeInMaude, errorStr + "Command not supported in interactive mode.\n\n") .
  ***                   ***
  ***       PROOF       ***
  ***                   ***
@@ -516,7 +520,7 @@ mod CIMPA-IO is
  rl [proof] :
     < cafeInMaude : CIM | state: executeComm, input: (':proof`(_`)[T], TL), AtS >
  => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
-    write(stdout, cafeInMaude, "\nError: Command not supported in interactive mode.\n\n") .
+    write(stdout, cafeInMaude, errorStr + "Command not supported in interactive mode.\n\n") .
 
  ***                   ***
  ***       INFER       ***
@@ -525,7 +529,7 @@ mod CIMPA-IO is
  rl [infer] :
     < cafeInMaude : CIM | state: executeComm, input: (':infer`(_`)[T], TL), AtS >
  => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
-    write(stdout, cafeInMaude, "\nError: Command not supported in interactive mode.\n\n") .
+    write(stdout, cafeInMaude, errorStr + "Command not supported in interactive mode.\n\n") .
 
  ***                      ***
  ***       Postpone       ***
@@ -609,7 +613,7 @@ mod CIMPA-IO is
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:ctf`{_`}['CafeToken[T], T'], TL),
                            ptree: PT, AtS >
   => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
-     write(stdout, cafeInMaude, "\nError: Macro could not be parsed.\n\n")
+     write(stdout, cafeInMaude, errorStr + "Macro could not be parsed.\n\n")
   if Q := downQid(T) /\
      not (parseEqMacro(PT, Q, T') :: Macro) .
 
@@ -628,7 +632,7 @@ mod CIMPA-IO is
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:ctf`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
                            ptree: PT, AtS >
   => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
-     write(stdout, cafeInMaude, "\nError: Macro could not be parsed.\n\n")
+     write(stdout, cafeInMaude, errorStr + "Macro could not be parsed.\n\n")
   if Q := downQid(T) /\
      not (parseTermMacro(PT, Q, T') :: Macro) .
 
@@ -648,7 +652,7 @@ mod CIMPA-IO is
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvss`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
                            ptree: PT, AtS >
   => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
-     write(stdout, cafeInMaude, "\nError: Macro could not be parsed.\n\n")
+     write(stdout, cafeInMaude, errorStr + "Macro could not be parsed.\n\n")
   if Q := downQid(T) /\
      not (parseTermMacro(PT, Q, T') :: Macro) .
 
@@ -656,7 +660,7 @@ mod CIMPA-IO is
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvss`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
                            ptree: PT, AtS >
   => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
-     write(stdout, cafeInMaude, "\nError: The term is not a sequence.\n\n")
+     write(stdout, cafeInMaude, errorStr + "The term is not a sequence.\n\n")
   if Q := downQid(T) /\
      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
      not subsortSingleBinaryOpConstraints(M', T'') .
@@ -676,7 +680,7 @@ mod CIMPA-IO is
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvvs`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
                            ptree: PT, AtS >
   => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
-     write(stdout, cafeInMaude, "\nError: Macro could not be parsed.\n\n")
+     write(stdout, cafeInMaude, errorStr + "Macro could not be parsed.\n\n")
   if Q := downQid(T) /\
      not (parseTermMacro(PT, Q, T') :: Macro) .
 
@@ -695,7 +699,7 @@ mod CIMPA-IO is
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvsv`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
                            ptree: PT, AtS >
   => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
-     write(stdout, cafeInMaude, "\nError: Macro could not be parsed.\n\n")
+     write(stdout, cafeInMaude, errorStr + "Macro could not be parsed.\n\n")
   if Q := downQid(T) /\
      not (parseTermMacro(PT, Q, T') :: Macro) .
 
@@ -714,7 +718,7 @@ mod CIMPA-IO is
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cevss`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
                            ptree: PT, AtS >
   => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
-     write(stdout, cafeInMaude, "\nError: Macro could not be parsed.\n\n")
+     write(stdout, cafeInMaude, errorStr + "Macro could not be parsed.\n\n")
   if Q := downQid(T) /\
      not (parseTermMacro(PT, Q, T') :: Macro) .
 
@@ -734,7 +738,7 @@ mod CIMPA-IO is
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvs`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
                            ptree: PT, AtS >
   => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
-     write(stdout, cafeInMaude, "\nError: Macro could not be parsed.\n\n")
+     write(stdout, cafeInMaude, errorStr + "Macro could not be parsed.\n\n")
   if Q := downQid(T) /\
      not (parseTermMacro(PT, Q, T') :: Macro) .
 
@@ -742,7 +746,7 @@ mod CIMPA-IO is
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvs`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
                            ptree: PT, AtS >
   => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
-     write(stdout, cafeInMaude, "\nError: The term is not a sequence.\n\n")
+     write(stdout, cafeInMaude, errorStr + "The term is not a sequence.\n\n")
   if Q := downQid(T) /\
      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
      not subsortUnaryBinaryOpConstraints(M', T'') .
@@ -788,9 +792,25 @@ mod CIMPA-IO is
      < cafeInMaude : CIM | state: executeComm, input: (':proven`(_`)['bubble[T]], TL),
                            current: M, AtS >
   => < cafeInMaude : CIM | state: print&executeComm, input: TL, current: M, AtS >
-     write(stdout, cafeInMaude, "\nError: the term cannot be parsed.\n\n")
+     write(stdout, cafeInMaude, errorStr + "the term cannot be parsed.\n\n")
   if QIL := downQidList(T) /\
-     not (getTerm(metaParse(M, varsFromQidList(QIL), QIL, 'Bool)) :: Term) .
+     VS := varsFromQidList(QIL) /\
+     not repeatedVarName(VS) /\
+     not (getTerm(metaParse(M, VS, QIL, 'Bool)) :: Term) .
+
+ crl [proven-repeated-var] :
+     < cafeInMaude : CIM | state: executeComm, input: (':proven`(_`)['bubble[T]], TL),
+                           current: M, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, current: M, AtS >
+     write(stdout, cafeInMaude, errorStr + "repeated var name in term.\n\n")
+  if QIL := downQidList(T) /\
+     VS := varsFromQidList(QIL) /\
+     repeatedVarName(VS) .
+
+ op repeatedVarName : VariableSet -> Bool .
+ ceq repeatedVarName(V ; V' ; VS) = true
+  if getName(V) == getName(V') .
+ eq repeatedVarName(VS) = false [owise] .
 
  ***                            ***
  ***          GENERATE          ***
@@ -947,13 +967,13 @@ mod CIMPA-IO is
     < cafeInMaude : CIM | state: executeComm, input: (':save-proof`..@Command@, TL),
                           proof: "", AtS >
  => < cafeInMaude : CIM | state: print&executeComm, input: TL, proof: "", AtS >
-    write(stdout, cafeInMaude, "\nError: No proof for saving.\n") .
+    write(stdout, cafeInMaude, errorStr + "No proof for saving.\n") .
 
  rl [save-proof-no-file] :
     < cafeInMaude : CIM | state: executeComm, input: (':save-proof`..@Command@, TL),
                           output-file: "", AtS >
  => < cafeInMaude : CIM | state: print&executeComm, input: TL, output-file: "", AtS >
-    write(stdout, cafeInMaude, "\nError: No output file defined.\n") .
+    write(stdout, cafeInMaude, errorStr + "No output file defined.\n") .
 
  rl [save-opened-file] :
     openedFile(cafeInMaude, fileManager, FHOut)
