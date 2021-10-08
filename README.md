@@ -42,13 +42,13 @@ Using the tool
 1. The tool is started by just loading the **CafeInMaude.maude** file into the Maude system:
 
 ```
-    $ maude src/CafeInMaude.maude
+    $ maude src/cafeInMaude.maude
 ```
 
 Once the tool is started, the **load** command can be used for loading files:
 
 ```
-    $ CafeInMaude> load examples/CCIMPG/ABP/abp.cafe .
+    $ CafeInMaude> load ../examples/CCiMPG/ABP/abp.cafe .
 ```
 
 In general, the examples in the **CCIMPG** folder provide a **commands_XXX.cafe** file with the
