@@ -48,11 +48,18 @@ Using the tool
 Once the tool is started, the **load** command can be used for loading files:
 
 ```
-    $ CafeInMaude> load ../examples/CCiMPG/ABP/abp.cafe .
+    $ CafeInMaude> load ../examples/CCiMPG/2p-mutex/2p-mutex.cafe .
 ```
 
 In general, the examples in the **CCIMPG** folder provide a **commands_XXX.cafe** file with the
-commands required to run the example.
+commands required to run the example. For example, the **2p-mutex** folder contains a
+**commands_cimpg.cafe** file that can be loaded as follows:
+
+```
+    $ CafeInMaude> load load ../examples/CCiMPG/2p-mutex/commands_cimpg.cafe .
+```
+
+This file contains the commands for loading the modules, generating the proof, saving, and loading it.
 
 General commands
 ----------------
