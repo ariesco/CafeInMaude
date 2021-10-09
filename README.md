@@ -2,8 +2,8 @@ CafeInMaude: A translation from CafeOBJ into Maude
 ==================================================
 
 CafeInMaude is a tool to introduce CafeOBJ specifications into the Maude system. Please note
-that the current version of CafeInMaude runs in Maude 3.1, please visit the *previous versions*
-folder for Maude 2 versions.
+that the current version of CafeInMaude runs in Maude alpha132 (December 2020), please visit
+the *previous versions* folder for Maude 2 versions.
 
 This tool has the following features:
 * Supports operators, predicates, equations, and transitions, and all their related
