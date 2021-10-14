@@ -657,7 +657,7 @@ fmod OPEN-CLOSE-PARSER is
   ceq applyInduction(| M, [NL, CMD, EqS, true, PRVN], mtPT, N' |, V, PO) =
                           [| M, [NL, CMD, EqS, false, PRVN], PrL', s(size*(PrL')) |, PO']
    if ODS := getCtors(M, getType(V)) /\
-      TL := buildTermsCtors(ODS, "") /\
+      TL := buildTermsCtors2(ODS, "", V) /\
       Ty := getType(V) /\
       PO' := indProofOrder(fst(PO), size(TL)) y pop(PO) /\
       PrL' := subGoal*(M, [NL, CMD, EqS, true, PRVN], V, Ty, TL, NL, 1) .
@@ -790,6 +790,43 @@ fmod OPEN-CLOSE-PARSER is
   ceq $buildArg(Ty, TL, St, N) = C
    if STR := string(Ty) /\
       C := qid(substr(STR, 0, 1) + string(N, 10) + "#" + St + STR + "." + STR) [owise] .
+
+***(
+ * to make the consistency of variable names
+ * author: duongtd
+ * date: 21/10/09
+ *)
+  op buildTermsCtors2 : OpDeclSet String Variable -> TermList .
+  eq buildTermsCtors2(none, STR, V) = empty .
+  ceq buildTermsCtors2(OD ODS, STR, V) = (T, TL)
+   if T := buildTermCtor2(OD, STR, V) /\
+      TL := buildTermsCtors2(ODS, STR, V) .
+
+  op buildTermCtor2 : OpDecl String Variable -> Term .
+  ceq buildTermCtor2(op Q : nil -> Srt [AtS] ., STR, V) = C
+   if C := buildTermCtor(op Q : nil -> Srt [AtS] ., STR) .
+  ceq buildTermCtor2(op Q : TyL -> Srt [AtS] ., STR, V) = Q[TL]
+   if TL := buildArgs2(TyL, empty, STR, V) [owise] .
+
+  op buildArgs2 : TypeList TermList String Variable -> TermList .
+  eq buildArgs2(nil, TL, STR, V) = empty .
+  ceq buildArgs2(Ty TyL, TL, STR, V) = (C, TL')
+   if C := buildArg2(Ty, TL, STR, V) /\
+      TL' := buildArgs2(TyL, (C, TL), STR, V) .
+
+  op buildArg2 : Type TermList String Variable -> TermList .
+  ceq buildArg2(Ty, (TL, C, TL'), St, V) = TL2
+   if TL2 := buildArg(Ty, (TL, C, TL'), St) .
+  ceq buildArg2(Ty, TL, St, V) = 
+    (if Ty == getType(V) then 
+      qid(string(getName(V)) + "#" + St + STR + "." + STR)
+    else
+      qid(substr(STR, 0, 1) + "#" + St + STR + "." + STR)
+    fi)
+   if STR := string(Ty) [owise] .
+***(
+ * end fix
+ *)
 
   op indProofOrder : NatList Nat -> ProofOrder .
   eq indProofOrder(NL, s(N)) = indProofOrder(NL, N) y NL s(N) .
