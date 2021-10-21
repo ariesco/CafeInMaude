@@ -1,0 +1,289 @@
+
+:goal{
+eq [proofNSLPK :nonexec] : inv3(S:Sys, n1:Nonce, n2:Nonce, q:Prin)  = true .
+}
+:ind on (S:Sys)
+:apply(si)
+:sel(4)
+	:apply(tc)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+
+:sel(5)
+	:apply(tc)
+
+	-- Goal`5-1  -  inv3(send1(S#Sys, P#Prin, P0#Prin), n1@Nonce, n2@Nonce, q@Prin)  - Success
+	:def csb1#5 = :ctf {eq intr  = P0#Prin .}
+
+	:apply(csb1#5)
+
+		-- Goal`5-1-1 Success by implication and reduction.
+		:imp [proofNSLPK]  by {n1:Nonce <- n1@Nonce ; n2:Nonce <- n2@Nonce ; q:Prin <- q@Prin ;}
+
+		:apply (rd)
+
+		-- Goal`5-1-2 Success by implication and reduction.
+		:imp [proofNSLPK]  by {n1:Nonce <- n1@Nonce ; n2:Nonce <- n2@Nonce ; q:Prin <- q@Prin ;}
+
+		:apply (rd)
+
+
+:sel(1)
+	:apply(tc)
+
+	-- Goal`1-1  -  inv3(fake1(S#Sys, P#Prin, P0#Prin, N#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+	:def csb1#1 = :ctf {eq intr  = p1(n2@Nonce) .}
+
+	:apply(csb1#1)
+
+		-- Goal`1-1-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`1-1-2  -  inv3(fake1(S#Sys, P#Prin, P0#Prin, N#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+		:def csb2#1 = :ctf {eq intr  = p2(n2@Nonce) .}
+
+		:apply(csb2#1)
+
+			-- Goal`1-1-2-1 Success by reduction
+			:apply (rd)
+
+			-- Goal`1-1-2-2  -  inv3(fake1(S#Sys, P#Prin, P0#Prin, N#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+			:def csb3#1 = :ctf [N#Nonce \in nonces(S#Sys)  .]
+
+			:apply(csb3#1)
+
+				-- Goal`1-1-2-2-1 Success by implication and reduction.
+				:imp [proofNSLPK]  by {n1:Nonce <- n1@Nonce ; n2:Nonce <- n2@Nonce ; q:Prin <- q@Prin ;}
+
+				:apply (rd)
+
+				-- Goal`1-1-2-2-2 Success by implication and reduction.
+				:imp [proofNSLPK]  by {n1:Nonce <- n1@Nonce ; n2:Nonce <- n2@Nonce ; q:Prin <- q@Prin ;}
+
+				:apply (rd)
+
+
+:sel(3)
+	:apply(tc)
+
+	-- Goal`3-1  -  inv3(fake3(S#Sys, P#Prin, N#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+	:def csb1#3 = :ctf {eq intr  = p1(n2@Nonce) .}
+
+	:apply(csb1#3)
+
+		-- Goal`3-1-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`3-1-2  -  inv3(fake3(S#Sys, P#Prin, N#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+		:def csb2#3 = :ctf {eq intr  = p2(n2@Nonce) .}
+
+		:apply(csb2#3)
+
+			-- Goal`3-1-2-1 Success by reduction
+			:apply (rd)
+
+			-- Goal`3-1-2-2  -  inv3(fake3(S#Sys, P#Prin, N#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+			:def csb3#3 = :ctf [N#Nonce \in nonces(S#Sys)  .]
+
+			:apply(csb3#3)
+
+				-- Goal`3-1-2-2-1 Success by implication and reduction.
+				:imp [proofNSLPK]  by {n1:Nonce <- n1@Nonce ; n2:Nonce <- n2@Nonce ; q:Prin <- q@Prin ;}
+
+				:apply (rd)
+
+				-- Goal`3-1-2-2-2 Success by implication and reduction.
+				:imp [proofNSLPK]  by {n1:Nonce <- n1@Nonce ; n2:Nonce <- n2@Nonce ; q:Prin <- q@Prin ;}
+
+				:apply (rd)
+
+
+:sel(2)
+	:apply(tc)
+
+	-- Goal`2-1  -  inv3(fake2(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+	:def csb1#2 = :ctf {eq intr  = p1(n2@Nonce) .}
+
+	:apply(csb1#2)
+
+		-- Goal`2-1-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`2-1-2  -  inv3(fake2(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+		:def csb2#2 = :ctf {eq intr  = p2(n2@Nonce) .}
+
+		:apply(csb2#2)
+
+			-- Goal`2-1-2-1 Success by reduction
+			:apply (rd)
+
+			-- Goal`2-1-2-2  -  inv3(fake2(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+			:def csb3#2 = :ctf [N#Nonce \in nonces(S#Sys)  .]
+
+			:apply(csb3#2)
+
+				-- Goal`2-1-2-2-1  -  inv3(fake2(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+				:def csb4#2 = :ctf [N0#Nonce \in nonces(S#Sys)  .]
+
+				:apply(csb4#2)
+
+					-- Goal`2-1-2-2-1-1  -  inv3(fake2(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+					:def csb5#2 = :ctf {eq N0#Nonce  = n2@Nonce .}
+
+					:apply(csb5#2)
+
+						-- Goal`2-1-2-2-1-1-1  -  inv3(fake2(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+						:def csb6#2 = :ctf [n2@Nonce \in nonces(S#Sys)  .]
+
+						:apply(csb6#2)
+
+							-- Goal`2-1-2-2-1-1-1-1 Success by reduction
+							:apply (rd)
+
+							-- Goal`2-1-2-2-1-1-1-2 Success by implication and reduction.
+							:imp [proofNSLPK]  by {n1:Nonce <- n1@Nonce ; n2:Nonce <- n2@Nonce ; q:Prin <- q@Prin ;}
+
+							:apply (rd)
+
+						-- Goal`2-1-2-2-1-1-2 Success by implication and reduction.
+						:imp [proofNSLPK]  by {n1:Nonce <- n1@Nonce ; n2:Nonce <- n2@Nonce ; q:Prin <- q@Prin ;}
+
+						:apply (rd)
+
+					-- Goal`2-1-2-2-1-2 Success by implication and reduction.
+					:imp [proofNSLPK]  by {n1:Nonce <- n1@Nonce ; n2:Nonce <- n2@Nonce ; q:Prin <- q@Prin ;}
+
+					:apply (rd)
+
+				-- Goal`2-1-2-2-2 Success by implication and reduction.
+				:imp [proofNSLPK]  by {n1:Nonce <- n1@Nonce ; n2:Nonce <- n2@Nonce ; q:Prin <- q@Prin ;}
+
+				:apply (rd)
+
+
+:sel(7)
+	:apply(tc)
+
+	-- Goal`7-1  -  inv3(send3(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+	:def csb1#7 = :ctf {eq intr  = p1(n2@Nonce) .}
+
+	:apply(csb1#7)
+
+		-- Goal`7-1-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`7-1-2  -  inv3(send3(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+		:def csb2#7 = :ctf {eq intr  = p2(n2@Nonce) .}
+
+		:apply(csb2#7)
+
+			-- Goal`7-1-2-1 Success by reduction
+			:apply (rd)
+
+			-- Goal`7-1-2-2  -  inv3(send3(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+			:def csb3#7 = :ctf [enc1(P0#Prin, N#Nonce, P#Prin) \in nw(S#Sys)  .]
+
+			:apply(csb3#7)
+
+				-- Goal`7-1-2-2-1  -  inv3(send3(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+				:def csb4#7 = :ctf [enc2(P#Prin, N#Nonce, N0#Nonce, P0#Prin) \in nw(S#Sys)  .]
+
+				:apply(csb4#7)
+
+					-- Goal`7-1-2-2-1-1  -  inv3(send3(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+					:def csb5#7 = :ctf {eq intr  = P0#Prin .}
+
+					:apply(csb5#7)
+
+						-- Goal`7-1-2-2-1-1-1 Success by implication and reduction.
+						:imp [proofNSLPK]  by {n1:Nonce <- n1@Nonce ; n2:Nonce <- n2@Nonce ; q:Prin <- q@Prin ;}
+
+						:apply (rd)
+
+						-- Goal`7-1-2-2-1-1-2 Success by implication and reduction.
+						:imp [proofNSLPK]  by {n1:Nonce <- n1@Nonce ; n2:Nonce <- n2@Nonce ; q:Prin <- q@Prin ;}
+
+						:apply (rd)
+
+					-- Goal`7-1-2-2-1-2 Success by implication and reduction.
+					:imp [proofNSLPK]  by {n1:Nonce <- n1@Nonce ; n2:Nonce <- n2@Nonce ; q:Prin <- q@Prin ;}
+
+					:apply (rd)
+
+				-- Goal`7-1-2-2-2 Success by implication and reduction.
+				:imp [proofNSLPK]  by {n1:Nonce <- n1@Nonce ; n2:Nonce <- n2@Nonce ; q:Prin <- q@Prin ;}
+
+				:apply (rd)
+
+
+:sel(6)
+	:apply(tc)
+
+	-- Goal`6-1  -  inv3(send2(S#Sys, P#Prin, P0#Prin, N#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+	:def csb1#6 = :ctf {eq intr  = p1(n2@Nonce) .}
+
+	:apply(csb1#6)
+
+		-- Goal`6-1-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`6-1-2  -  inv3(send2(S#Sys, P#Prin, P0#Prin, N#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+		:def csb2#6 = :ctf {eq intr  = p2(n2@Nonce) .}
+
+		:apply(csb2#6)
+
+			-- Goal`6-1-2-1 Success by reduction
+			:apply (rd)
+
+			-- Goal`6-1-2-2  -  inv3(send2(S#Sys, P#Prin, P0#Prin, N#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+			:def csb3#6 = :ctf [enc1(P#Prin, N#Nonce, P0#Prin) \in nw(S#Sys)  .]
+
+			:apply(csb3#6)
+
+				-- Goal`6-1-2-2-1  -  inv3(send2(S#Sys, P#Prin, P0#Prin, N#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+				:def csb4#6 = :ctf [n2@Nonce  .]
+
+				:apply(csb4#6)
+
+					-- Goal`6-1-2-2-1-1  -  inv3(send2(S#Sys, P#Prin, P0#Prin, N#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+					:def csb5#6 = :ctf {eq P#CS6-1-2-2-1.Prin  = P#Prin .}
+
+					:apply(csb5#6)
+
+						-- Goal`6-1-2-2-1-1-1  -  inv3(send2(S#Sys, P#Prin, P0#Prin, N#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+						:def csb6#6 = :ctf {eq intr  = P0#Prin .}
+
+						:apply(csb6#6)
+
+							-- Goal`6-1-2-2-1-1-1-1 Success by implication and reduction.
+							:imp [proofNSLPK]  by {n1:Nonce <- n1@Nonce ; n2:Nonce <- n2@Nonce ; q:Prin <- q@Prin ;}
+
+							:apply (rd)
+
+							-- Goal`6-1-2-2-1-1-1-2 Success by implication and reduction.
+							:imp [proofNSLPK]  by {n1:Nonce <- n1@Nonce ; n2:Nonce <- n2@Nonce ; q:Prin <- q@Prin ;}
+
+							:apply (rd)
+
+						-- Goal`6-1-2-2-1-1-2  -  inv3(send2(S#Sys, P#Prin, P0#Prin, N#Nonce), n1@Nonce, n2@Nonce, q@Prin)  - Success
+						:def csb7#6 = :ctf {eq intr  = P0#Prin .}
+
+						:apply(csb7#6)
+
+							-- Goal`6-1-2-2-1-1-2-1 Success by implication and reduction.
+							:imp [proofNSLPK]  by {n1:Nonce <- n1@Nonce ; n2:Nonce <- n2@Nonce ; q:Prin <- q@Prin ;}
+
+							:apply (rd)
+
+							-- Goal`6-1-2-2-1-1-2-2 Success by implication and reduction.
+							:imp [proofNSLPK]  by {n1:Nonce <- n1@Nonce ; n2:Nonce <- n2@Nonce ; q:Prin <- q@Prin ;}
+
+							:apply (rd)
+
+				-- Goal`6-1-2-2-2 Success by implication and reduction.
+				:imp [proofNSLPK]  by {n1:Nonce <- n1@Nonce ; n2:Nonce <- n2@Nonce ; q:Prin <- q@Prin ;}
+
+				:apply (rd)
+

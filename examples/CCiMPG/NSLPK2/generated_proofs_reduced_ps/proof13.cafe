@@ -1,0 +1,3340 @@
+
+:proven(inv100(S:Sys, r:Cipher1))
+:proven(inv110(S:Sys, C:Cipher2))
+:proven(inv120(S:Sys, C:Cipher3))
+:proven(inv140(S:Sys, C:Cipher1))
+:proven(inv150(S:Sys, C:Cipher2))
+:goal{
+eq [inv13 :nonexec] : inv130(S:Sys, n:Nonce)  = true .
+}
+:ind on (S:Sys)
+:apply(si)
+:sel(1)
+	:apply(tc)
+
+	-- Goal`1-1  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+	:def csb1#1 = :cvs [nw(S#Sys)  .]
+
+	:apply(csb1#1)
+
+		-- Goal`1-1-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`1-1-2  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+		:def csb2#1 = :ctf {eq C#Cipher1  = C#EVS1-1.SubCipher1 .}
+
+		:apply(csb2#1)
+
+			-- Goal`1-1-2-1  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+			:def csb3#1 = :ctf [creator(n@Nonce)  .]
+
+			:apply(csb3#1)
+
+				-- Goal`1-1-2-1-1 Success by reduction
+				:apply (rd)
+
+			-- Goal`1-1-2-2  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+			:def csb4#1 = :ctf [C#Cipher1 \in cenc1(N0#EVS1-1.Network)  .]
+
+			:apply(csb4#1)
+
+				-- Goal`1-1-2-2-1  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+				:def csb5#1 = :ctf {eq nonce(C#Cipher1)  = n@Nonce .}
+
+				:apply(csb5#1)
+
+					-- Goal`1-1-2-2-1-1  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+					:def csb6#1 = :ctf {eq nonce(C#EVS1-1.SubCipher1)  = n@Nonce .}
+
+					:apply(csb6#1)
+
+						-- Goal`1-1-2-2-1-1-1  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+						:def csb7#1 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb7#1)
+
+							-- Goal`1-1-2-2-1-1-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`1-1-2-2-1-1-2  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+						:def csb8#1 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb8#1)
+
+							-- Goal`1-1-2-2-1-1-2-1 Success by reduction
+							:apply (rd)
+
+					-- Goal`1-1-2-2-1-2 Success by implication and reduction.
+					:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+					:apply (rd)
+
+				-- Goal`1-1-2-2-2 Success by implication and reduction.
+				:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+				:apply (rd)
+
+		-- Goal`1-1-3  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+		:def csb9#1 = :ctf [C#Cipher1 \in cenc1(N0#EVS1-1.Network)  .]
+
+		:apply(csb9#1)
+
+			-- Goal`1-1-3-1  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+			:def csb10#1 = :ctf {eq nonce(C#Cipher1)  = n@Nonce .}
+
+			:apply(csb10#1)
+
+				-- Goal`1-1-3-1-1  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+				:def csb11#1 = :ctf {eq nonce1(C#EVS1-1.SubCipher2)  = n@Nonce .}
+
+				:apply(csb11#1)
+
+					-- Goal`1-1-3-1-1-1  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+					:def csb12#1 = :ctf {eq nonce2(C#EVS1-1.SubCipher2)  = n@Nonce .}
+
+					:apply(csb12#1)
+
+						-- Goal`1-1-3-1-1-1-1  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+						:def csb13#1 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb13#1)
+
+							-- Goal`1-1-3-1-1-1-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`1-1-3-1-1-1-2  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+						:def csb14#1 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb14#1)
+
+							-- Goal`1-1-3-1-1-1-2-1 Success by reduction
+							:apply (rd)
+
+					-- Goal`1-1-3-1-1-2  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+					:def csb15#1 = :ctf {eq nonce2(C#EVS1-1.SubCipher2)  = n@Nonce .}
+
+					:apply(csb15#1)
+
+						-- Goal`1-1-3-1-1-2-1  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+						:def csb16#1 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb16#1)
+
+							-- Goal`1-1-3-1-1-2-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`1-1-3-1-1-2-2  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+						:def csb17#1 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb17#1)
+
+							-- Goal`1-1-3-1-1-2-2-1 Success by reduction
+							:apply (rd)
+
+				-- Goal`1-1-3-1-2 Success by implication and reduction.
+				:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+				:apply (rd)
+
+			-- Goal`1-1-3-2 Success by implication and reduction.
+			:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+			:apply (rd)
+
+		-- Goal`1-1-4  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+		:def csb18#1 = :ctf [C#Cipher1 \in cenc1(N0#EVS1-1.Network)  .]
+
+		:apply(csb18#1)
+
+			-- Goal`1-1-4-1  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+			:def csb19#1 = :ctf {eq nonce(C#Cipher1)  = n@Nonce .}
+
+			:apply(csb19#1)
+
+				-- Goal`1-1-4-1-1  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+				:def csb20#1 = :ctf {eq nonce(C#EVS1-1.SubCipher3)  = n@Nonce .}
+
+				:apply(csb20#1)
+
+					-- Goal`1-1-4-1-1-1  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+					:def csb21#1 = :ctf [creator(n@Nonce)  .]
+
+					:apply(csb21#1)
+
+						-- Goal`1-1-4-1-1-1-1 Success by reduction
+						:apply (rd)
+
+					-- Goal`1-1-4-1-1-2  -  inv130(fkm11(S#Sys, P#Prin, P0#Prin, C#Cipher1), n@Nonce)  - Success
+					:def csb22#1 = :ctf [creator(n@Nonce)  .]
+
+					:apply(csb22#1)
+
+						-- Goal`1-1-4-1-1-2-1 Success by reduction
+						:apply (rd)
+
+				-- Goal`1-1-4-1-2 Success by implication and reduction.
+				:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+				:apply (rd)
+
+			-- Goal`1-1-4-2 Success by implication and reduction.
+			:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+			:apply (rd)
+
+
+:sel(2)
+	:apply(tc)
+
+	-- Goal`2-1  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+	:def csb1#2 = :cvs [nw(S#Sys)  .]
+
+	:apply(csb1#2)
+
+		-- Goal`2-1-1  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+		:def csb2#2 = :ctf [creator(N#Nonce)  .]
+
+		:apply(csb2#2)
+
+			-- Goal`2-1-1-1  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+			:def csb3#2 = :ctf {eq N#Nonce  = n@Nonce .}
+
+			:apply(csb3#2)
+
+				-- Goal`2-1-1-1-1  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+				:def csb4#2 = :ctf [creator(n@Nonce)  .]
+
+				:apply(csb4#2)
+
+					-- Goal`2-1-1-1-1-1 Success by reduction
+					:apply (rd)
+
+				-- Goal`2-1-1-1-2 Success by reduction
+				:apply (rd)
+
+		-- Goal`2-1-2  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+		:def csb5#2 = :ctf {eq nonce(C#EVS2-1.SubCipher1)  = N#Nonce .}
+
+		:apply(csb5#2)
+
+			-- Goal`2-1-2-1  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+			:def csb6#2 = :ctf [creator(n@Nonce)  .]
+
+			:apply(csb6#2)
+
+				-- Goal`2-1-2-1-1 Success by reduction
+				:apply (rd)
+
+			-- Goal`2-1-2-2  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+			:def csb7#2 = :ctf [N#Nonce \in cnonce(N0#EVS2-1.Network)  .]
+
+			:apply(csb7#2)
+
+				-- Goal`2-1-2-2-1  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+				:def csb8#2 = :ctf {eq N#Nonce  = n@Nonce .}
+
+				:apply(csb8#2)
+
+					-- Goal`2-1-2-2-1-1  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+					:def csb9#2 = :ctf {eq nonce(C#EVS2-1.SubCipher1)  = n@Nonce .}
+
+					:apply(csb9#2)
+
+						-- Goal`2-1-2-2-1-1-1  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+						:def csb10#2 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb10#2)
+
+							-- Goal`2-1-2-2-1-1-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`2-1-2-2-1-1-2  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+						:def csb11#2 = :ctf [n@Nonce \in cnonce(N0#EVS2-1.Network)  .]
+
+						:apply(csb11#2)
+
+							-- Goal`2-1-2-2-1-1-2-1 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+							-- Goal`2-1-2-2-1-1-2-2 Success by reduction
+							:apply (rd)
+
+					-- Goal`2-1-2-2-1-2 Success by implication and reduction.
+					:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+					:apply (rd)
+
+				-- Goal`2-1-2-2-2 Success by implication and reduction.
+				:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+				:apply (rd)
+
+		-- Goal`2-1-3  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+		:def csb12#2 = :ctf {eq nonce1(C#EVS2-1.SubCipher2)  = N#Nonce .}
+
+		:apply(csb12#2)
+
+			-- Goal`2-1-3-1  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+			:def csb13#2 = :ctf {eq nonce2(C#EVS2-1.SubCipher2)  = N#Nonce .}
+
+			:apply(csb13#2)
+
+				-- Goal`2-1-3-1-1  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+				:def csb14#2 = :ctf [creator(n@Nonce)  .]
+
+				:apply(csb14#2)
+
+					-- Goal`2-1-3-1-1-1 Success by reduction
+					:apply (rd)
+
+				-- Goal`2-1-3-1-2  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+				:def csb15#2 = :ctf [creator(n@Nonce)  .]
+
+				:apply(csb15#2)
+
+					-- Goal`2-1-3-1-2-1 Success by reduction
+					:apply (rd)
+
+			-- Goal`2-1-3-2  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+			:def csb16#2 = :ctf {eq nonce2(C#EVS2-1.SubCipher2)  = N#Nonce .}
+
+			:apply(csb16#2)
+
+				-- Goal`2-1-3-2-1  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+				:def csb17#2 = :ctf [creator(n@Nonce)  .]
+
+				:apply(csb17#2)
+
+					-- Goal`2-1-3-2-1-1 Success by reduction
+					:apply (rd)
+
+				-- Goal`2-1-3-2-2  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+				:def csb18#2 = :ctf [N#Nonce \in cnonce(N0#EVS2-1.Network)  .]
+
+				:apply(csb18#2)
+
+					-- Goal`2-1-3-2-2-1  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+					:def csb19#2 = :ctf {eq N#Nonce  = n@Nonce .}
+
+					:apply(csb19#2)
+
+						-- Goal`2-1-3-2-2-1-1  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+						:def csb20#2 = :ctf {eq nonce1(C#EVS2-1.SubCipher2)  = n@Nonce .}
+
+						:apply(csb20#2)
+
+							-- Goal`2-1-3-2-2-1-1-1  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+							:def csb21#2 = :ctf {eq nonce2(C#EVS2-1.SubCipher2)  = n@Nonce .}
+
+							:apply(csb21#2)
+
+								-- Goal`2-1-3-2-2-1-1-1-1  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+								:def csb22#2 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb22#2)
+
+									-- Goal`2-1-3-2-2-1-1-1-1-1 Success by reduction
+									:apply (rd)
+
+								-- Goal`2-1-3-2-2-1-1-1-2  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+								:def csb23#2 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb23#2)
+
+									-- Goal`2-1-3-2-2-1-1-1-2-1 Success by reduction
+									:apply (rd)
+
+							-- Goal`2-1-3-2-2-1-1-2  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+							:def csb24#2 = :ctf {eq nonce2(C#EVS2-1.SubCipher2)  = n@Nonce .}
+
+							:apply(csb24#2)
+
+								-- Goal`2-1-3-2-2-1-1-2-1  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+								:def csb25#2 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb25#2)
+
+									-- Goal`2-1-3-2-2-1-1-2-1-1 Success by reduction
+									:apply (rd)
+
+								-- Goal`2-1-3-2-2-1-1-2-2  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+								:def csb26#2 = :ctf [n@Nonce \in cnonce(N0#EVS2-1.Network)  .]
+
+								:apply(csb26#2)
+
+									-- Goal`2-1-3-2-2-1-1-2-2-1 Success by implication and reduction.
+									:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+									:apply (rd)
+
+									-- Goal`2-1-3-2-2-1-1-2-2-2 Success by reduction
+									:apply (rd)
+
+						-- Goal`2-1-3-2-2-1-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+					-- Goal`2-1-3-2-2-2 Success by implication and reduction.
+					:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+					:apply (rd)
+
+		-- Goal`2-1-4  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+		:def csb27#2 = :ctf {eq nonce(C#EVS2-1.SubCipher3)  = N#Nonce .}
+
+		:apply(csb27#2)
+
+			-- Goal`2-1-4-1  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+			:def csb28#2 = :ctf [creator(n@Nonce)  .]
+
+			:apply(csb28#2)
+
+				-- Goal`2-1-4-1-1 Success by reduction
+				:apply (rd)
+
+			-- Goal`2-1-4-2  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+			:def csb29#2 = :ctf [N#Nonce \in cnonce(N0#EVS2-1.Network)  .]
+
+			:apply(csb29#2)
+
+				-- Goal`2-1-4-2-1  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+				:def csb30#2 = :ctf {eq N#Nonce  = n@Nonce .}
+
+				:apply(csb30#2)
+
+					-- Goal`2-1-4-2-1-1  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+					:def csb31#2 = :ctf {eq nonce(C#EVS2-1.SubCipher3)  = n@Nonce .}
+
+					:apply(csb31#2)
+
+						-- Goal`2-1-4-2-1-1-1  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+						:def csb32#2 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb32#2)
+
+							-- Goal`2-1-4-2-1-1-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`2-1-4-2-1-1-2  -  inv130(fkm12(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+						:def csb33#2 = :ctf [n@Nonce \in cnonce(N0#EVS2-1.Network)  .]
+
+						:apply(csb33#2)
+
+							-- Goal`2-1-4-2-1-1-2-1 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+							-- Goal`2-1-4-2-1-1-2-2 Success by reduction
+							:apply (rd)
+
+					-- Goal`2-1-4-2-1-2 Success by implication and reduction.
+					:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+					:apply (rd)
+
+				-- Goal`2-1-4-2-2 Success by implication and reduction.
+				:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+				:apply (rd)
+
+
+:sel(3)
+	:apply(tc)
+
+	-- Goal`3-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+	:def csb1#3 = :cvs [nw(S#Sys)  .]
+
+	:apply(csb1#3)
+
+		-- Goal`3-1-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`3-1-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+		:def csb2#3 = :ctf [C#Cipher2 \in cenc2(N0#EVS3-1.Network)  .]
+
+		:apply(csb2#3)
+
+			-- Goal`3-1-2-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+			:def csb3#3 = :ctf {eq nonce(C#EVS3-1.SubCipher1)  = n@Nonce .}
+
+			:apply(csb3#3)
+
+				-- Goal`3-1-2-1-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+				:def csb4#3 = :ctf {eq nonce1(C#Cipher2)  = n@Nonce .}
+
+				:apply(csb4#3)
+
+					-- Goal`3-1-2-1-1-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+					:def csb5#3 = :ctf {eq nonce2(C#Cipher2)  = n@Nonce .}
+
+					:apply(csb5#3)
+
+						-- Goal`3-1-2-1-1-1-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+						:def csb6#3 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb6#3)
+
+							-- Goal`3-1-2-1-1-1-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`3-1-2-1-1-1-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+						:def csb7#3 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb7#3)
+
+							-- Goal`3-1-2-1-1-1-2-1 Success by reduction
+							:apply (rd)
+
+					-- Goal`3-1-2-1-1-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+					:def csb8#3 = :ctf {eq nonce2(C#Cipher2)  = n@Nonce .}
+
+					:apply(csb8#3)
+
+						-- Goal`3-1-2-1-1-2-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+						:def csb9#3 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb9#3)
+
+							-- Goal`3-1-2-1-1-2-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`3-1-2-1-1-2-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+				-- Goal`3-1-2-1-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+				:def csb10#3 = :ctf {eq nonce1(C#Cipher2)  = n@Nonce .}
+
+				:apply(csb10#3)
+
+					-- Goal`3-1-2-1-2-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+					:def csb11#3 = :ctf {eq nonce2(C#Cipher2)  = n@Nonce .}
+
+					:apply(csb11#3)
+
+						-- Goal`3-1-2-1-2-1-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+						:def csb12#3 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb12#3)
+
+							-- Goal`3-1-2-1-2-1-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`3-1-2-1-2-1-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+						:def csb13#3 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb13#3)
+
+							-- Goal`3-1-2-1-2-1-2-1 Success by reduction
+							:apply (rd)
+
+					-- Goal`3-1-2-1-2-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+					:def csb14#3 = :ctf {eq nonce2(C#Cipher2)  = n@Nonce .}
+
+					:apply(csb14#3)
+
+						-- Goal`3-1-2-1-2-2-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+						:def csb15#3 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb15#3)
+
+							-- Goal`3-1-2-1-2-2-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`3-1-2-1-2-2-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+			-- Goal`3-1-2-2 Success by implication and reduction.
+			:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+			:apply (rd)
+
+		-- Goal`3-1-3  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+		:def csb16#3 = :ctf {eq C#Cipher2  = C#EVS3-1.SubCipher2 .}
+
+		:apply(csb16#3)
+
+			-- Goal`3-1-3-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+			:def csb17#3 = :ctf [creator(n@Nonce)  .]
+
+			:apply(csb17#3)
+
+				-- Goal`3-1-3-1-1 Success by reduction
+				:apply (rd)
+
+			-- Goal`3-1-3-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+			:def csb18#3 = :ctf [C#Cipher2 \in cenc2(N0#EVS3-1.Network)  .]
+
+			:apply(csb18#3)
+
+				-- Goal`3-1-3-2-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+				:def csb19#3 = :ctf {eq nonce1(C#Cipher2)  = n@Nonce .}
+
+				:apply(csb19#3)
+
+					-- Goal`3-1-3-2-1-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+					:def csb20#3 = :ctf {eq nonce1(C#EVS3-1.SubCipher2)  = n@Nonce .}
+
+					:apply(csb20#3)
+
+						-- Goal`3-1-3-2-1-1-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+						:def csb21#3 = :ctf {eq nonce2(C#Cipher2)  = n@Nonce .}
+
+						:apply(csb21#3)
+
+							-- Goal`3-1-3-2-1-1-1-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+							:def csb22#3 = :ctf {eq nonce2(C#EVS3-1.SubCipher2)  = n@Nonce .}
+
+							:apply(csb22#3)
+
+								-- Goal`3-1-3-2-1-1-1-1-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+								:def csb23#3 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb23#3)
+
+									-- Goal`3-1-3-2-1-1-1-1-1-1 Success by reduction
+									:apply (rd)
+
+								-- Goal`3-1-3-2-1-1-1-1-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+								:def csb24#3 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb24#3)
+
+									-- Goal`3-1-3-2-1-1-1-1-2-1 Success by reduction
+									:apply (rd)
+
+							-- Goal`3-1-3-2-1-1-1-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+							:def csb25#3 = :ctf {eq nonce2(C#EVS3-1.SubCipher2)  = n@Nonce .}
+
+							:apply(csb25#3)
+
+								-- Goal`3-1-3-2-1-1-1-2-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+								:def csb26#3 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb26#3)
+
+									-- Goal`3-1-3-2-1-1-1-2-1-1 Success by reduction
+									:apply (rd)
+
+								-- Goal`3-1-3-2-1-1-1-2-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+								:def csb27#3 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb27#3)
+
+									-- Goal`3-1-3-2-1-1-1-2-2-1 Success by reduction
+									:apply (rd)
+
+						-- Goal`3-1-3-2-1-1-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+						:def csb28#3 = :ctf {eq nonce2(C#Cipher2)  = n@Nonce .}
+
+						:apply(csb28#3)
+
+							-- Goal`3-1-3-2-1-1-2-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+							:def csb29#3 = :ctf {eq nonce2(C#EVS3-1.SubCipher2)  = n@Nonce .}
+
+							:apply(csb29#3)
+
+								-- Goal`3-1-3-2-1-1-2-1-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+								:def csb30#3 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb30#3)
+
+									-- Goal`3-1-3-2-1-1-2-1-1-1 Success by reduction
+									:apply (rd)
+
+								-- Goal`3-1-3-2-1-1-2-1-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+								:def csb31#3 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb31#3)
+
+									-- Goal`3-1-3-2-1-1-2-1-2-1 Success by reduction
+									:apply (rd)
+
+							-- Goal`3-1-3-2-1-1-2-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+							:def csb32#3 = :ctf {eq nonce2(C#EVS3-1.SubCipher2)  = n@Nonce .}
+
+							:apply(csb32#3)
+
+								-- Goal`3-1-3-2-1-1-2-2-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+								:def csb33#3 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb33#3)
+
+									-- Goal`3-1-3-2-1-1-2-2-1-1 Success by reduction
+									:apply (rd)
+
+								-- Goal`3-1-3-2-1-1-2-2-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+								:def csb34#3 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb34#3)
+
+									-- Goal`3-1-3-2-1-1-2-2-2-1 Success by reduction
+									:apply (rd)
+
+					-- Goal`3-1-3-2-1-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+					:def csb35#3 = :ctf {eq nonce1(C#EVS3-1.SubCipher2)  = n@Nonce .}
+
+					:apply(csb35#3)
+
+						-- Goal`3-1-3-2-1-2-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+						:def csb36#3 = :ctf {eq nonce2(C#Cipher2)  = n@Nonce .}
+
+						:apply(csb36#3)
+
+							-- Goal`3-1-3-2-1-2-1-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+							:def csb37#3 = :ctf {eq nonce2(C#EVS3-1.SubCipher2)  = n@Nonce .}
+
+							:apply(csb37#3)
+
+								-- Goal`3-1-3-2-1-2-1-1-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+								:def csb38#3 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb38#3)
+
+									-- Goal`3-1-3-2-1-2-1-1-1-1 Success by reduction
+									:apply (rd)
+
+								-- Goal`3-1-3-2-1-2-1-1-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+								:def csb39#3 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb39#3)
+
+									-- Goal`3-1-3-2-1-2-1-1-2-1 Success by reduction
+									:apply (rd)
+
+							-- Goal`3-1-3-2-1-2-1-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+						-- Goal`3-1-3-2-1-2-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+						:def csb40#3 = :ctf {eq nonce2(C#Cipher2)  = n@Nonce .}
+
+						:apply(csb40#3)
+
+							-- Goal`3-1-3-2-1-2-2-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+							:def csb41#3 = :ctf {eq nonce2(C#EVS3-1.SubCipher2)  = n@Nonce .}
+
+							:apply(csb41#3)
+
+								-- Goal`3-1-3-2-1-2-2-1-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+								:def csb42#3 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb42#3)
+
+									-- Goal`3-1-3-2-1-2-2-1-1-1 Success by reduction
+									:apply (rd)
+
+								-- Goal`3-1-3-2-1-2-2-1-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+								:def csb43#3 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb43#3)
+
+									-- Goal`3-1-3-2-1-2-2-1-2-1 Success by reduction
+									:apply (rd)
+
+							-- Goal`3-1-3-2-1-2-2-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+				-- Goal`3-1-3-2-2 Success by implication and reduction.
+				:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+				:apply (rd)
+
+		-- Goal`3-1-4  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+		:def csb44#3 = :ctf [C#Cipher2 \in cenc2(N0#EVS3-1.Network)  .]
+
+		:apply(csb44#3)
+
+			-- Goal`3-1-4-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+			:def csb45#3 = :ctf {eq nonce(C#EVS3-1.SubCipher3)  = n@Nonce .}
+
+			:apply(csb45#3)
+
+				-- Goal`3-1-4-1-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+				:def csb46#3 = :ctf {eq nonce1(C#Cipher2)  = n@Nonce .}
+
+				:apply(csb46#3)
+
+					-- Goal`3-1-4-1-1-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+					:def csb47#3 = :ctf {eq nonce2(C#Cipher2)  = n@Nonce .}
+
+					:apply(csb47#3)
+
+						-- Goal`3-1-4-1-1-1-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+						:def csb48#3 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb48#3)
+
+							-- Goal`3-1-4-1-1-1-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`3-1-4-1-1-1-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+						:def csb49#3 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb49#3)
+
+							-- Goal`3-1-4-1-1-1-2-1 Success by reduction
+							:apply (rd)
+
+					-- Goal`3-1-4-1-1-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+					:def csb50#3 = :ctf {eq nonce2(C#Cipher2)  = n@Nonce .}
+
+					:apply(csb50#3)
+
+						-- Goal`3-1-4-1-1-2-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+						:def csb51#3 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb51#3)
+
+							-- Goal`3-1-4-1-1-2-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`3-1-4-1-1-2-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+				-- Goal`3-1-4-1-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+				:def csb52#3 = :ctf {eq nonce1(C#Cipher2)  = n@Nonce .}
+
+				:apply(csb52#3)
+
+					-- Goal`3-1-4-1-2-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+					:def csb53#3 = :ctf {eq nonce2(C#Cipher2)  = n@Nonce .}
+
+					:apply(csb53#3)
+
+						-- Goal`3-1-4-1-2-1-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+						:def csb54#3 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb54#3)
+
+							-- Goal`3-1-4-1-2-1-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`3-1-4-1-2-1-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+						:def csb55#3 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb55#3)
+
+							-- Goal`3-1-4-1-2-1-2-1 Success by reduction
+							:apply (rd)
+
+					-- Goal`3-1-4-1-2-2  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+					:def csb56#3 = :ctf {eq nonce2(C#Cipher2)  = n@Nonce .}
+
+					:apply(csb56#3)
+
+						-- Goal`3-1-4-1-2-2-1  -  inv130(fkm21(S#Sys, P#Prin, P0#Prin, C#Cipher2), n@Nonce)  - Success
+						:def csb57#3 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb57#3)
+
+							-- Goal`3-1-4-1-2-2-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`3-1-4-1-2-2-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+			-- Goal`3-1-4-2 Success by implication and reduction.
+			:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+			:apply (rd)
+
+
+:sel(4)
+	:apply(tc)
+
+	-- Goal`4-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+	:def csb1#4 = :cvs [nw(S#Sys)  .]
+
+	:apply(csb1#4)
+
+		-- Goal`4-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+		:def csb2#4 = :ctf [creator(N#Nonce)  .]
+
+		:apply(csb2#4)
+
+			-- Goal`4-1-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+			:def csb3#4 = :ctf [creator(N0#Nonce)  .]
+
+			:apply(csb3#4)
+
+				-- Goal`4-1-1-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+				:def csb4#4 = :ctf {eq N#Nonce  = n@Nonce .}
+
+				:apply(csb4#4)
+
+					-- Goal`4-1-1-1-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+					:def csb5#4 = :ctf [creator(n@Nonce)  .]
+
+					:apply(csb5#4)
+
+						-- Goal`4-1-1-1-1-1-1 Success by reduction
+						:apply (rd)
+
+					-- Goal`4-1-1-1-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+					:def csb6#4 = :ctf {eq N0#Nonce  = n@Nonce .}
+
+					:apply(csb6#4)
+
+						-- Goal`4-1-1-1-1-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+						:def csb7#4 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb7#4)
+
+							-- Goal`4-1-1-1-1-2-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`4-1-1-1-1-2-2 Success by reduction
+						:apply (rd)
+
+		-- Goal`4-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+		:def csb8#4 = :ctf {eq nonce(C#EVS4-1.SubCipher1)  = N#Nonce .}
+
+		:apply(csb8#4)
+
+			-- Goal`4-1-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+			:def csb9#4 = :ctf {eq N#Nonce  = N0#Nonce .}
+
+			:apply(csb9#4)
+
+				-- Goal`4-1-2-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+				:def csb10#4 = :ctf [creator(n@Nonce)  .]
+
+				:apply(csb10#4)
+
+					-- Goal`4-1-2-1-1-1 Success by reduction
+					:apply (rd)
+
+				-- Goal`4-1-2-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+				:def csb11#4 = :ctf [N0#Nonce \in cnonce(N0#EVS4-1.Network)  .]
+
+				:apply(csb11#4)
+
+					-- Goal`4-1-2-1-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+					:def csb12#4 = :ctf [creator(n@Nonce)  .]
+
+					:apply(csb12#4)
+
+						-- Goal`4-1-2-1-2-1-1 Success by reduction
+						:apply (rd)
+
+					-- Goal`4-1-2-1-2-2 Success by implication and reduction.
+					:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+					:apply (rd)
+
+			-- Goal`4-1-2-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+			:def csb13#4 = :ctf {eq nonce(C#EVS4-1.SubCipher1)  = N0#Nonce .}
+
+			:apply(csb13#4)
+
+				-- Goal`4-1-2-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+				:def csb14#4 = :ctf {eq N#Nonce  = N0#Nonce .}
+
+				:apply(csb14#4)
+
+					-- Goal`4-1-2-2-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+					:def csb15#4 = :ctf [creator(n@Nonce)  .]
+
+					:apply(csb15#4)
+
+						-- Goal`4-1-2-2-1-1-1 Success by reduction
+						:apply (rd)
+
+					-- Goal`4-1-2-2-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+					:def csb16#4 = :ctf [N#Nonce \in cnonce(N0#EVS4-1.Network)  .]
+
+					:apply(csb16#4)
+
+						-- Goal`4-1-2-2-1-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+						:def csb17#4 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb17#4)
+
+							-- Goal`4-1-2-2-1-2-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`4-1-2-2-1-2-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+				-- Goal`4-1-2-2-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+				:def csb18#4 = :ctf [N#Nonce \in cnonce(N0#EVS4-1.Network)  .]
+
+				:apply(csb18#4)
+
+					-- Goal`4-1-2-2-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+					:def csb19#4 = :ctf [N0#Nonce \in cnonce(N0#EVS4-1.Network)  .]
+
+					:apply(csb19#4)
+
+						-- Goal`4-1-2-2-2-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+						:def csb20#4 = :ctf {eq N#Nonce  = n@Nonce .}
+
+						:apply(csb20#4)
+
+							-- Goal`4-1-2-2-2-1-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+							:def csb21#4 = :ctf {eq nonce(C#EVS4-1.SubCipher1)  = n@Nonce .}
+
+							:apply(csb21#4)
+
+								-- Goal`4-1-2-2-2-1-1-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+								:def csb22#4 = :ctf {eq N0#Nonce  = n@Nonce .}
+
+								:apply(csb22#4)
+
+									-- Goal`4-1-2-2-2-1-1-1-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+									:def csb23#4 = :ctf [creator(n@Nonce)  .]
+
+									:apply(csb23#4)
+
+										-- Goal`4-1-2-2-2-1-1-1-1-1-1 Success by reduction
+										:apply (rd)
+
+									-- Goal`4-1-2-2-2-1-1-1-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+									:def csb24#4 = :ctf [creator(n@Nonce)  .]
+
+									:apply(csb24#4)
+
+										-- Goal`4-1-2-2-2-1-1-1-1-2-1 Success by reduction
+										:apply (rd)
+
+								-- Goal`4-1-2-2-2-1-1-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+								:def csb25#4 = :ctf [n@Nonce \in cnonce(N0#EVS4-1.Network)  .]
+
+								:apply(csb25#4)
+
+									-- Goal`4-1-2-2-2-1-1-1-2-1 Success by implication and reduction.
+									:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+									:apply (rd)
+
+									-- Goal`4-1-2-2-2-1-1-1-2-2 Success by reduction
+									:apply (rd)
+
+							-- Goal`4-1-2-2-2-1-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+							:def csb26#4 = :ctf {eq N0#Nonce  = n@Nonce .}
+
+							:apply(csb26#4)
+
+								-- Goal`4-1-2-2-2-1-1-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+								:def csb27#4 = :ctf {eq nonce(C#EVS4-1.SubCipher1)  = n@Nonce .}
+
+								:apply(csb27#4)
+
+									-- Goal`4-1-2-2-2-1-1-2-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+									:def csb28#4 = :ctf [creator(n@Nonce)  .]
+
+									:apply(csb28#4)
+
+										-- Goal`4-1-2-2-2-1-1-2-1-1-1 Success by reduction
+										:apply (rd)
+
+									-- Goal`4-1-2-2-2-1-1-2-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+									:def csb29#4 = :ctf [n@Nonce \in cnonce(N0#EVS4-1.Network)  .]
+
+									:apply(csb29#4)
+
+										-- Goal`4-1-2-2-2-1-1-2-1-2-1 Success by implication and reduction.
+										:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+										:apply (rd)
+
+										-- Goal`4-1-2-2-2-1-1-2-1-2-2 Success by reduction
+										:apply (rd)
+
+								-- Goal`4-1-2-2-2-1-1-2-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+						-- Goal`4-1-2-2-2-1-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+					-- Goal`4-1-2-2-2-2 Success by implication and reduction.
+					:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+					:apply (rd)
+
+		-- Goal`4-1-3  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+		:def csb30#4 = :ctf {eq nonce1(C#EVS4-1.SubCipher2)  = N#Nonce .}
+
+		:apply(csb30#4)
+
+			-- Goal`4-1-3-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+			:def csb31#4 = :ctf {eq N#Nonce  = N0#Nonce .}
+
+			:apply(csb31#4)
+
+				-- Goal`4-1-3-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+				:def csb32#4 = :ctf {eq nonce2(C#EVS4-1.SubCipher2)  = N0#Nonce .}
+
+				:apply(csb32#4)
+
+					-- Goal`4-1-3-1-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+					:def csb33#4 = :ctf [creator(n@Nonce)  .]
+
+					:apply(csb33#4)
+
+						-- Goal`4-1-3-1-1-1-1 Success by reduction
+						:apply (rd)
+
+					-- Goal`4-1-3-1-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+					:def csb34#4 = :ctf [creator(n@Nonce)  .]
+
+					:apply(csb34#4)
+
+						-- Goal`4-1-3-1-1-2-1 Success by reduction
+						:apply (rd)
+
+				-- Goal`4-1-3-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+				:def csb35#4 = :ctf {eq nonce2(C#EVS4-1.SubCipher2)  = N#Nonce .}
+
+				:apply(csb35#4)
+
+					-- Goal`4-1-3-1-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+					:def csb36#4 = :ctf [N0#Nonce \in cnonce(N0#EVS4-1.Network)  .]
+
+					:apply(csb36#4)
+
+						-- Goal`4-1-3-1-2-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+						:def csb37#4 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb37#4)
+
+							-- Goal`4-1-3-1-2-1-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`4-1-3-1-2-1-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+					-- Goal`4-1-3-1-2-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+					:def csb38#4 = :ctf {eq nonce2(C#EVS4-1.SubCipher2)  = N0#Nonce .}
+
+					:apply(csb38#4)
+
+						-- Goal`4-1-3-1-2-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+						:def csb39#4 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb39#4)
+
+							-- Goal`4-1-3-1-2-2-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`4-1-3-1-2-2-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+						:def csb40#4 = :ctf [N0#Nonce \in cnonce(N0#EVS4-1.Network)  .]
+
+						:apply(csb40#4)
+
+							-- Goal`4-1-3-1-2-2-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+							:def csb41#4 = :ctf [creator(n@Nonce)  .]
+
+							:apply(csb41#4)
+
+								-- Goal`4-1-3-1-2-2-2-1-1 Success by reduction
+								:apply (rd)
+
+							-- Goal`4-1-3-1-2-2-2-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+			-- Goal`4-1-3-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+			:def csb42#4 = :ctf {eq nonce1(C#EVS4-1.SubCipher2)  = N0#Nonce .}
+
+			:apply(csb42#4)
+
+				-- Goal`4-1-3-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+				:def csb43#4 = :ctf {eq N#Nonce  = N0#Nonce .}
+
+				:apply(csb43#4)
+
+					-- Goal`4-1-3-2-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+					:def csb44#4 = :ctf {eq nonce2(C#EVS4-1.SubCipher2)  = N0#Nonce .}
+
+					:apply(csb44#4)
+
+						-- Goal`4-1-3-2-1-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+						:def csb45#4 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb45#4)
+
+							-- Goal`4-1-3-2-1-1-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`4-1-3-2-1-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+						:def csb46#4 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb46#4)
+
+							-- Goal`4-1-3-2-1-1-2-1 Success by reduction
+							:apply (rd)
+
+					-- Goal`4-1-3-2-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+					:def csb47#4 = :ctf {eq nonce2(C#EVS4-1.SubCipher2)  = N#Nonce .}
+
+					:apply(csb47#4)
+
+						-- Goal`4-1-3-2-1-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+						:def csb48#4 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb48#4)
+
+							-- Goal`4-1-3-2-1-2-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`4-1-3-2-1-2-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+						:def csb49#4 = :ctf {eq nonce2(C#EVS4-1.SubCipher2)  = N0#Nonce .}
+
+						:apply(csb49#4)
+
+							-- Goal`4-1-3-2-1-2-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+							:def csb50#4 = :ctf [N#Nonce \in cnonce(N0#EVS4-1.Network)  .]
+
+							:apply(csb50#4)
+
+								-- Goal`4-1-3-2-1-2-2-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+								:def csb51#4 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb51#4)
+
+									-- Goal`4-1-3-2-1-2-2-1-1-1 Success by reduction
+									:apply (rd)
+
+								-- Goal`4-1-3-2-1-2-2-1-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+							-- Goal`4-1-3-2-1-2-2-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+							:def csb52#4 = :ctf [N#Nonce \in cnonce(N0#EVS4-1.Network)  .]
+
+							:apply(csb52#4)
+
+								-- Goal`4-1-3-2-1-2-2-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+								:def csb53#4 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb53#4)
+
+									-- Goal`4-1-3-2-1-2-2-2-1-1 Success by reduction
+									:apply (rd)
+
+								-- Goal`4-1-3-2-1-2-2-2-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+				-- Goal`4-1-3-2-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+				:def csb54#4 = :ctf {eq nonce2(C#EVS4-1.SubCipher2)  = N#Nonce .}
+
+				:apply(csb54#4)
+
+					-- Goal`4-1-3-2-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+					:def csb55#4 = :ctf {eq N#Nonce  = N0#Nonce .}
+
+					:apply(csb55#4)
+
+						-- Goal`4-1-3-2-2-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+						:def csb56#4 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb56#4)
+
+							-- Goal`4-1-3-2-2-1-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`4-1-3-2-2-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+						:def csb57#4 = :ctf [N0#Nonce \in cnonce(N0#EVS4-1.Network)  .]
+
+						:apply(csb57#4)
+
+							-- Goal`4-1-3-2-2-1-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+							:def csb58#4 = :ctf [creator(n@Nonce)  .]
+
+							:apply(csb58#4)
+
+								-- Goal`4-1-3-2-2-1-2-1-1 Success by reduction
+								:apply (rd)
+
+							-- Goal`4-1-3-2-2-1-2-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+					-- Goal`4-1-3-2-2-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+					:def csb59#4 = :ctf {eq nonce2(C#EVS4-1.SubCipher2)  = N0#Nonce .}
+
+					:apply(csb59#4)
+
+						-- Goal`4-1-3-2-2-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+						:def csb60#4 = :ctf {eq N#Nonce  = N0#Nonce .}
+
+						:apply(csb60#4)
+
+							-- Goal`4-1-3-2-2-2-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+							:def csb61#4 = :ctf [creator(n@Nonce)  .]
+
+							:apply(csb61#4)
+
+								-- Goal`4-1-3-2-2-2-1-1-1 Success by reduction
+								:apply (rd)
+
+							-- Goal`4-1-3-2-2-2-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+							:def csb62#4 = :ctf [N#Nonce \in cnonce(N0#EVS4-1.Network)  .]
+
+							:apply(csb62#4)
+
+								-- Goal`4-1-3-2-2-2-1-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+								:def csb63#4 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb63#4)
+
+									-- Goal`4-1-3-2-2-2-1-2-1-1 Success by reduction
+									:apply (rd)
+
+								-- Goal`4-1-3-2-2-2-1-2-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+						-- Goal`4-1-3-2-2-2-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+						:def csb64#4 = :ctf [N#Nonce \in cnonce(N0#EVS4-1.Network)  .]
+
+						:apply(csb64#4)
+
+							-- Goal`4-1-3-2-2-2-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+							:def csb65#4 = :ctf [N0#Nonce \in cnonce(N0#EVS4-1.Network)  .]
+
+							:apply(csb65#4)
+
+								-- Goal`4-1-3-2-2-2-2-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+								:def csb66#4 = :ctf {eq N#Nonce  = n@Nonce .}
+
+								:apply(csb66#4)
+
+									-- Goal`4-1-3-2-2-2-2-1-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+									:def csb67#4 = :ctf {eq nonce1(C#EVS4-1.SubCipher2)  = n@Nonce .}
+
+									:apply(csb67#4)
+
+										-- Goal`4-1-3-2-2-2-2-1-1-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+										:def csb68#4 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb68#4)
+
+											-- Goal`4-1-3-2-2-2-2-1-1-1-1-1 Success by reduction
+											:apply (rd)
+
+										-- Goal`4-1-3-2-2-2-2-1-1-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+										:def csb69#4 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb69#4)
+
+											-- Goal`4-1-3-2-2-2-2-1-1-1-2-1 Success by reduction
+											:apply (rd)
+
+									-- Goal`4-1-3-2-2-2-2-1-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+									:def csb70#4 = :ctf {eq N0#Nonce  = n@Nonce .}
+
+									:apply(csb70#4)
+
+										-- Goal`4-1-3-2-2-2-2-1-1-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+										:def csb71#4 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb71#4)
+
+											-- Goal`4-1-3-2-2-2-2-1-1-2-1-1 Success by reduction
+											:apply (rd)
+
+										-- Goal`4-1-3-2-2-2-2-1-1-2-2 Success by implication and reduction.
+										:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+										:apply (rd)
+
+								-- Goal`4-1-3-2-2-2-2-1-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+							-- Goal`4-1-3-2-2-2-2-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+		-- Goal`4-1-4  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+		:def csb72#4 = :ctf {eq nonce(C#EVS4-1.SubCipher3)  = N#Nonce .}
+
+		:apply(csb72#4)
+
+			-- Goal`4-1-4-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+			:def csb73#4 = :ctf {eq N#Nonce  = N0#Nonce .}
+
+			:apply(csb73#4)
+
+				-- Goal`4-1-4-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+				:def csb74#4 = :ctf [creator(n@Nonce)  .]
+
+				:apply(csb74#4)
+
+					-- Goal`4-1-4-1-1-1 Success by reduction
+					:apply (rd)
+
+				-- Goal`4-1-4-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+				:def csb75#4 = :ctf [N0#Nonce \in cnonce(N0#EVS4-1.Network)  .]
+
+				:apply(csb75#4)
+
+					-- Goal`4-1-4-1-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+					:def csb76#4 = :ctf [creator(n@Nonce)  .]
+
+					:apply(csb76#4)
+
+						-- Goal`4-1-4-1-2-1-1 Success by reduction
+						:apply (rd)
+
+					-- Goal`4-1-4-1-2-2 Success by implication and reduction.
+					:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+					:apply (rd)
+
+			-- Goal`4-1-4-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+			:def csb77#4 = :ctf {eq nonce(C#EVS4-1.SubCipher3)  = N0#Nonce .}
+
+			:apply(csb77#4)
+
+				-- Goal`4-1-4-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+				:def csb78#4 = :ctf {eq N#Nonce  = N0#Nonce .}
+
+				:apply(csb78#4)
+
+					-- Goal`4-1-4-2-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+					:def csb79#4 = :ctf [creator(n@Nonce)  .]
+
+					:apply(csb79#4)
+
+						-- Goal`4-1-4-2-1-1-1 Success by reduction
+						:apply (rd)
+
+					-- Goal`4-1-4-2-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+					:def csb80#4 = :ctf [N#Nonce \in cnonce(N0#EVS4-1.Network)  .]
+
+					:apply(csb80#4)
+
+						-- Goal`4-1-4-2-1-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+						:def csb81#4 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb81#4)
+
+							-- Goal`4-1-4-2-1-2-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`4-1-4-2-1-2-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+				-- Goal`4-1-4-2-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+				:def csb82#4 = :ctf [N#Nonce \in cnonce(N0#EVS4-1.Network)  .]
+
+				:apply(csb82#4)
+
+					-- Goal`4-1-4-2-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+					:def csb83#4 = :ctf [N0#Nonce \in cnonce(N0#EVS4-1.Network)  .]
+
+					:apply(csb83#4)
+
+						-- Goal`4-1-4-2-2-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+						:def csb84#4 = :ctf {eq N#Nonce  = n@Nonce .}
+
+						:apply(csb84#4)
+
+							-- Goal`4-1-4-2-2-1-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+							:def csb85#4 = :ctf {eq nonce(C#EVS4-1.SubCipher3)  = n@Nonce .}
+
+							:apply(csb85#4)
+
+								-- Goal`4-1-4-2-2-1-1-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+								:def csb86#4 = :ctf {eq N0#Nonce  = n@Nonce .}
+
+								:apply(csb86#4)
+
+									-- Goal`4-1-4-2-2-1-1-1-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+									:def csb87#4 = :ctf [creator(n@Nonce)  .]
+
+									:apply(csb87#4)
+
+										-- Goal`4-1-4-2-2-1-1-1-1-1-1 Success by reduction
+										:apply (rd)
+
+									-- Goal`4-1-4-2-2-1-1-1-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+									:def csb88#4 = :ctf [creator(n@Nonce)  .]
+
+									:apply(csb88#4)
+
+										-- Goal`4-1-4-2-2-1-1-1-1-2-1 Success by reduction
+										:apply (rd)
+
+								-- Goal`4-1-4-2-2-1-1-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+								:def csb89#4 = :ctf [n@Nonce \in cnonce(N0#EVS4-1.Network)  .]
+
+								:apply(csb89#4)
+
+									-- Goal`4-1-4-2-2-1-1-1-2-1 Success by implication and reduction.
+									:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+									:apply (rd)
+
+									-- Goal`4-1-4-2-2-1-1-1-2-2 Success by reduction
+									:apply (rd)
+
+							-- Goal`4-1-4-2-2-1-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+							:def csb90#4 = :ctf {eq N0#Nonce  = n@Nonce .}
+
+							:apply(csb90#4)
+
+								-- Goal`4-1-4-2-2-1-1-2-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+								:def csb91#4 = :ctf {eq nonce(C#EVS4-1.SubCipher3)  = n@Nonce .}
+
+								:apply(csb91#4)
+
+									-- Goal`4-1-4-2-2-1-1-2-1-1  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+									:def csb92#4 = :ctf [creator(n@Nonce)  .]
+
+									:apply(csb92#4)
+
+										-- Goal`4-1-4-2-2-1-1-2-1-1-1 Success by reduction
+										:apply (rd)
+
+									-- Goal`4-1-4-2-2-1-1-2-1-2  -  inv130(fkm22(S#Sys, P#Prin, P0#Prin, N#Nonce, N0#Nonce), n@Nonce)  - Success
+									:def csb93#4 = :ctf [n@Nonce \in cnonce(N0#EVS4-1.Network)  .]
+
+									:apply(csb93#4)
+
+										-- Goal`4-1-4-2-2-1-1-2-1-2-1 Success by implication and reduction.
+										:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+										:apply (rd)
+
+										-- Goal`4-1-4-2-2-1-1-2-1-2-2 Success by reduction
+										:apply (rd)
+
+								-- Goal`4-1-4-2-2-1-1-2-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+						-- Goal`4-1-4-2-2-1-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+					-- Goal`4-1-4-2-2-2 Success by implication and reduction.
+					:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+					:apply (rd)
+
+
+:sel(5)
+	:apply(tc)
+
+	-- Goal`5-1  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+	:def csb1#5 = :cvs [nw(S#Sys)  .]
+
+	:apply(csb1#5)
+
+		-- Goal`5-1-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`5-1-2  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+		:def csb2#5 = :ctf [C#Cipher3 \in cenc3(N0#EVS5-1.Network)  .]
+
+		:apply(csb2#5)
+
+			-- Goal`5-1-2-1  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+			:def csb3#5 = :ctf {eq nonce(C#Cipher3)  = n@Nonce .}
+
+			:apply(csb3#5)
+
+				-- Goal`5-1-2-1-1  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+				:def csb4#5 = :ctf {eq nonce(C#EVS5-1.SubCipher1)  = n@Nonce .}
+
+				:apply(csb4#5)
+
+					-- Goal`5-1-2-1-1-1  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+					:def csb5#5 = :ctf [creator(n@Nonce)  .]
+
+					:apply(csb5#5)
+
+						-- Goal`5-1-2-1-1-1-1 Success by reduction
+						:apply (rd)
+
+					-- Goal`5-1-2-1-1-2  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+					:def csb6#5 = :ctf [creator(n@Nonce)  .]
+
+					:apply(csb6#5)
+
+						-- Goal`5-1-2-1-1-2-1 Success by reduction
+						:apply (rd)
+
+				-- Goal`5-1-2-1-2 Success by implication and reduction.
+				:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+				:apply (rd)
+
+			-- Goal`5-1-2-2 Success by implication and reduction.
+			:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+			:apply (rd)
+
+		-- Goal`5-1-3  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+		:def csb7#5 = :ctf [C#Cipher3 \in cenc3(N0#EVS5-1.Network)  .]
+
+		:apply(csb7#5)
+
+			-- Goal`5-1-3-1  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+			:def csb8#5 = :ctf {eq nonce(C#Cipher3)  = n@Nonce .}
+
+			:apply(csb8#5)
+
+				-- Goal`5-1-3-1-1  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+				:def csb9#5 = :ctf {eq nonce1(C#EVS5-1.SubCipher2)  = n@Nonce .}
+
+				:apply(csb9#5)
+
+					-- Goal`5-1-3-1-1-1  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+					:def csb10#5 = :ctf {eq nonce2(C#EVS5-1.SubCipher2)  = n@Nonce .}
+
+					:apply(csb10#5)
+
+						-- Goal`5-1-3-1-1-1-1  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+						:def csb11#5 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb11#5)
+
+							-- Goal`5-1-3-1-1-1-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`5-1-3-1-1-1-2  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+						:def csb12#5 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb12#5)
+
+							-- Goal`5-1-3-1-1-1-2-1 Success by reduction
+							:apply (rd)
+
+					-- Goal`5-1-3-1-1-2  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+					:def csb13#5 = :ctf {eq nonce2(C#EVS5-1.SubCipher2)  = n@Nonce .}
+
+					:apply(csb13#5)
+
+						-- Goal`5-1-3-1-1-2-1  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+						:def csb14#5 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb14#5)
+
+							-- Goal`5-1-3-1-1-2-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`5-1-3-1-1-2-2  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+						:def csb15#5 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb15#5)
+
+							-- Goal`5-1-3-1-1-2-2-1 Success by reduction
+							:apply (rd)
+
+				-- Goal`5-1-3-1-2 Success by implication and reduction.
+				:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+				:apply (rd)
+
+			-- Goal`5-1-3-2 Success by implication and reduction.
+			:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+			:apply (rd)
+
+		-- Goal`5-1-4  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+		:def csb16#5 = :ctf {eq C#Cipher3  = C#EVS5-1.SubCipher3 .}
+
+		:apply(csb16#5)
+
+			-- Goal`5-1-4-1  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+			:def csb17#5 = :ctf [creator(n@Nonce)  .]
+
+			:apply(csb17#5)
+
+				-- Goal`5-1-4-1-1 Success by reduction
+				:apply (rd)
+
+			-- Goal`5-1-4-2  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+			:def csb18#5 = :ctf [C#Cipher3 \in cenc3(N0#EVS5-1.Network)  .]
+
+			:apply(csb18#5)
+
+				-- Goal`5-1-4-2-1  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+				:def csb19#5 = :ctf {eq nonce(C#Cipher3)  = n@Nonce .}
+
+				:apply(csb19#5)
+
+					-- Goal`5-1-4-2-1-1  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+					:def csb20#5 = :ctf {eq nonce(C#EVS5-1.SubCipher3)  = n@Nonce .}
+
+					:apply(csb20#5)
+
+						-- Goal`5-1-4-2-1-1-1  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+						:def csb21#5 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb21#5)
+
+							-- Goal`5-1-4-2-1-1-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`5-1-4-2-1-1-2  -  inv130(fkm31(S#Sys, P#Prin, P0#Prin, C#Cipher3), n@Nonce)  - Success
+						:def csb22#5 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb22#5)
+
+							-- Goal`5-1-4-2-1-1-2-1 Success by reduction
+							:apply (rd)
+
+					-- Goal`5-1-4-2-1-2 Success by implication and reduction.
+					:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+					:apply (rd)
+
+				-- Goal`5-1-4-2-2 Success by implication and reduction.
+				:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+				:apply (rd)
+
+
+:sel(6)
+	:apply(tc)
+
+	-- Goal`6-1  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+	:def csb1#6 = :cvs [nw(S#Sys)  .]
+
+	:apply(csb1#6)
+
+		-- Goal`6-1-1  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+		:def csb2#6 = :ctf [creator(N#Nonce)  .]
+
+		:apply(csb2#6)
+
+			-- Goal`6-1-1-1  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+			:def csb3#6 = :ctf {eq N#Nonce  = n@Nonce .}
+
+			:apply(csb3#6)
+
+				-- Goal`6-1-1-1-1  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+				:def csb4#6 = :ctf [creator(n@Nonce)  .]
+
+				:apply(csb4#6)
+
+					-- Goal`6-1-1-1-1-1 Success by reduction
+					:apply (rd)
+
+				-- Goal`6-1-1-1-2 Success by reduction
+				:apply (rd)
+
+		-- Goal`6-1-2  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+		:def csb5#6 = :ctf {eq nonce(C#EVS6-1.SubCipher1)  = N#Nonce .}
+
+		:apply(csb5#6)
+
+			-- Goal`6-1-2-1  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+			:def csb6#6 = :ctf [creator(n@Nonce)  .]
+
+			:apply(csb6#6)
+
+				-- Goal`6-1-2-1-1 Success by reduction
+				:apply (rd)
+
+			-- Goal`6-1-2-2  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+			:def csb7#6 = :ctf [N#Nonce \in cnonce(N0#EVS6-1.Network)  .]
+
+			:apply(csb7#6)
+
+				-- Goal`6-1-2-2-1  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+				:def csb8#6 = :ctf {eq N#Nonce  = n@Nonce .}
+
+				:apply(csb8#6)
+
+					-- Goal`6-1-2-2-1-1  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+					:def csb9#6 = :ctf {eq nonce(C#EVS6-1.SubCipher1)  = n@Nonce .}
+
+					:apply(csb9#6)
+
+						-- Goal`6-1-2-2-1-1-1  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+						:def csb10#6 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb10#6)
+
+							-- Goal`6-1-2-2-1-1-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`6-1-2-2-1-1-2  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+						:def csb11#6 = :ctf [n@Nonce \in cnonce(N0#EVS6-1.Network)  .]
+
+						:apply(csb11#6)
+
+							-- Goal`6-1-2-2-1-1-2-1 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+							-- Goal`6-1-2-2-1-1-2-2 Success by reduction
+							:apply (rd)
+
+					-- Goal`6-1-2-2-1-2 Success by implication and reduction.
+					:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+					:apply (rd)
+
+				-- Goal`6-1-2-2-2 Success by implication and reduction.
+				:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+				:apply (rd)
+
+		-- Goal`6-1-3  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+		:def csb12#6 = :ctf {eq nonce1(C#EVS6-1.SubCipher2)  = N#Nonce .}
+
+		:apply(csb12#6)
+
+			-- Goal`6-1-3-1  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+			:def csb13#6 = :ctf {eq nonce2(C#EVS6-1.SubCipher2)  = N#Nonce .}
+
+			:apply(csb13#6)
+
+				-- Goal`6-1-3-1-1  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+				:def csb14#6 = :ctf [creator(n@Nonce)  .]
+
+				:apply(csb14#6)
+
+					-- Goal`6-1-3-1-1-1 Success by reduction
+					:apply (rd)
+
+				-- Goal`6-1-3-1-2  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+				:def csb15#6 = :ctf [creator(n@Nonce)  .]
+
+				:apply(csb15#6)
+
+					-- Goal`6-1-3-1-2-1 Success by reduction
+					:apply (rd)
+
+			-- Goal`6-1-3-2  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+			:def csb16#6 = :ctf {eq nonce2(C#EVS6-1.SubCipher2)  = N#Nonce .}
+
+			:apply(csb16#6)
+
+				-- Goal`6-1-3-2-1  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+				:def csb17#6 = :ctf [creator(n@Nonce)  .]
+
+				:apply(csb17#6)
+
+					-- Goal`6-1-3-2-1-1 Success by reduction
+					:apply (rd)
+
+				-- Goal`6-1-3-2-2  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+				:def csb18#6 = :ctf [N#Nonce \in cnonce(N0#EVS6-1.Network)  .]
+
+				:apply(csb18#6)
+
+					-- Goal`6-1-3-2-2-1  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+					:def csb19#6 = :ctf {eq N#Nonce  = n@Nonce .}
+
+					:apply(csb19#6)
+
+						-- Goal`6-1-3-2-2-1-1  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+						:def csb20#6 = :ctf {eq nonce1(C#EVS6-1.SubCipher2)  = n@Nonce .}
+
+						:apply(csb20#6)
+
+							-- Goal`6-1-3-2-2-1-1-1  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+							:def csb21#6 = :ctf {eq nonce2(C#EVS6-1.SubCipher2)  = n@Nonce .}
+
+							:apply(csb21#6)
+
+								-- Goal`6-1-3-2-2-1-1-1-1  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+								:def csb22#6 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb22#6)
+
+									-- Goal`6-1-3-2-2-1-1-1-1-1 Success by reduction
+									:apply (rd)
+
+								-- Goal`6-1-3-2-2-1-1-1-2  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+								:def csb23#6 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb23#6)
+
+									-- Goal`6-1-3-2-2-1-1-1-2-1 Success by reduction
+									:apply (rd)
+
+							-- Goal`6-1-3-2-2-1-1-2  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+							:def csb24#6 = :ctf {eq nonce2(C#EVS6-1.SubCipher2)  = n@Nonce .}
+
+							:apply(csb24#6)
+
+								-- Goal`6-1-3-2-2-1-1-2-1  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+								:def csb25#6 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb25#6)
+
+									-- Goal`6-1-3-2-2-1-1-2-1-1 Success by reduction
+									:apply (rd)
+
+								-- Goal`6-1-3-2-2-1-1-2-2  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+								:def csb26#6 = :ctf [n@Nonce \in cnonce(N0#EVS6-1.Network)  .]
+
+								:apply(csb26#6)
+
+									-- Goal`6-1-3-2-2-1-1-2-2-1 Success by implication and reduction.
+									:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+									:apply (rd)
+
+									-- Goal`6-1-3-2-2-1-1-2-2-2 Success by reduction
+									:apply (rd)
+
+						-- Goal`6-1-3-2-2-1-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+					-- Goal`6-1-3-2-2-2 Success by implication and reduction.
+					:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+					:apply (rd)
+
+		-- Goal`6-1-4  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+		:def csb27#6 = :ctf {eq nonce(C#EVS6-1.SubCipher3)  = N#Nonce .}
+
+		:apply(csb27#6)
+
+			-- Goal`6-1-4-1  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+			:def csb28#6 = :ctf [creator(n@Nonce)  .]
+
+			:apply(csb28#6)
+
+				-- Goal`6-1-4-1-1 Success by reduction
+				:apply (rd)
+
+			-- Goal`6-1-4-2  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+			:def csb29#6 = :ctf [N#Nonce \in cnonce(N0#EVS6-1.Network)  .]
+
+			:apply(csb29#6)
+
+				-- Goal`6-1-4-2-1  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+				:def csb30#6 = :ctf {eq N#Nonce  = n@Nonce .}
+
+				:apply(csb30#6)
+
+					-- Goal`6-1-4-2-1-1  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+					:def csb31#6 = :ctf {eq nonce(C#EVS6-1.SubCipher3)  = n@Nonce .}
+
+					:apply(csb31#6)
+
+						-- Goal`6-1-4-2-1-1-1  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+						:def csb32#6 = :ctf [creator(n@Nonce)  .]
+
+						:apply(csb32#6)
+
+							-- Goal`6-1-4-2-1-1-1-1 Success by reduction
+							:apply (rd)
+
+						-- Goal`6-1-4-2-1-1-2  -  inv130(fkm32(S#Sys, P#Prin, P0#Prin, N#Nonce), n@Nonce)  - Success
+						:def csb33#6 = :ctf [n@Nonce \in cnonce(N0#EVS6-1.Network)  .]
+
+						:apply(csb33#6)
+
+							-- Goal`6-1-4-2-1-1-2-1 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+							-- Goal`6-1-4-2-1-1-2-2 Success by reduction
+							:apply (rd)
+
+					-- Goal`6-1-4-2-1-2 Success by implication and reduction.
+					:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+					:apply (rd)
+
+				-- Goal`6-1-4-2-2 Success by implication and reduction.
+				:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+				:apply (rd)
+
+
+:sel(7)
+	:apply(tc)
+
+	-- The corresponding proof score was not present.
+	:apply (rd)
+
+
+:sel(8)
+	:apply(tc)
+
+	-- Goal`8-1  -  inv130(sdm1(S#Sys, P#Prin, P0#Prin, R#Rand), n@Nonce)  - Success
+	:def csb1#8 = :cvs [ur(S#Sys)  .]
+
+	:apply(csb1#8)
+
+		-- Goal`8-1-1  -  inv130(sdm1(S#Sys, P#Prin, P0#Prin, R#Rand), n@Nonce)  - Success
+		:def csb2#8 = :ctf {eq n(P#Prin, P0#Prin, R#Rand)  = n@Nonce .}
+
+		:apply(csb2#8)
+
+			-- Goal`8-1-1-1  -  inv130(sdm1(S#Sys, P#Prin, P0#Prin, R#Rand), n@Nonce)  - Success
+			:def csb3#8 = :ctf [P0#Prin  .]
+
+			:apply(csb3#8)
+
+				-- Goal`8-1-1-1-1  -  inv130(sdm1(S#Sys, P#Prin, P0#Prin, R#Rand), n@Nonce)  - Success
+				:def csb4#8 = :ctf {eq n(P#Prin, intruder, R#Rand)  = n@Nonce .}
+
+				:apply(csb4#8)
+
+					-- Goal`8-1-1-1-1-1  -  inv130(sdm1(S#Sys, P#Prin, P0#Prin, R#Rand), n@Nonce)  - Success
+					:def csb5#8 = :ctf [creator(n@Nonce)  .]
+
+					:apply(csb5#8)
+
+						-- Goal`8-1-1-1-1-1-1 Success by reduction
+						:apply (rd)
+
+					-- Goal`8-1-1-1-1-2 Success by implication and reduction.
+					:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+					:apply (rd)
+
+			-- Goal`8-1-1-2 Success by implication and reduction.
+			:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+			:apply (rd)
+
+		-- Goal`8-1-2  -  inv130(sdm1(S#Sys, P#Prin, P0#Prin, R#Rand), n@Nonce)  - Success
+		:def csb6#8 = :ctf {eq EVS8-1.SubRand  = R#Rand .}
+
+		:apply(csb6#8)
+
+			-- Goal`8-1-2-1 Success by implication and reduction.
+			:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+			:apply (rd)
+
+			-- Goal`8-1-2-2  -  inv130(sdm1(S#Sys, P#Prin, P0#Prin, R#Rand), n@Nonce)  - Success
+			:def csb7#8 = :ctf [R#Rand \in U0#EVS8-1.URand  .]
+
+			:apply(csb7#8)
+
+				-- Goal`8-1-2-2-1 Success by implication and reduction.
+				:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+				:apply (rd)
+
+				-- Goal`8-1-2-2-2  -  inv130(sdm1(S#Sys, P#Prin, P0#Prin, R#Rand), n@Nonce)  - Success
+				:def csb8#8 = :ctf {eq n(P#Prin, P0#Prin, R#Rand)  = n@Nonce .}
+
+				:apply(csb8#8)
+
+					-- Goal`8-1-2-2-2-1  -  inv130(sdm1(S#Sys, P#Prin, P0#Prin, R#Rand), n@Nonce)  - Success
+					:def csb9#8 = :ctf [P0#Prin  .]
+
+					:apply(csb9#8)
+
+						-- Goal`8-1-2-2-2-1-1  -  inv130(sdm1(S#Sys, P#Prin, P0#Prin, R#Rand), n@Nonce)  - Success
+						:def csb10#8 = :ctf {eq n(P#Prin, intruder, R#Rand)  = n@Nonce .}
+
+						:apply(csb10#8)
+
+							-- Goal`8-1-2-2-2-1-1-1  -  inv130(sdm1(S#Sys, P#Prin, P0#Prin, R#Rand), n@Nonce)  - Success
+							:def csb11#8 = :ctf [creator(n@Nonce)  .]
+
+							:apply(csb11#8)
+
+								-- Goal`8-1-2-2-2-1-1-1-1 Success by reduction
+								:apply (rd)
+
+							-- Goal`8-1-2-2-2-1-1-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+					-- Goal`8-1-2-2-2-2 Success by implication and reduction.
+					:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+					:apply (rd)
+
+
+:sel(9)
+	:apply(tc)
+
+	-- Goal`9-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+	:def csb1#9 = :cvs [nw(S#Sys)  .]
+
+	:apply(csb1#9)
+
+		-- Goal`9-1-1 Success by reduction
+		:apply (rd)
+
+		-- Goal`9-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+	:def csb2#9 = :cvs [ur(S#Sys)  .]
+
+	:apply(csb2#9)
+
+			-- Goal`9-1-2-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+			:def csb3#9 = :ctf {eq cipher1(M#Msg)  = C#EVS9-1.SubCipher1 .}
+
+			:apply(csb3#9)
+
+				-- Goal`9-1-2-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+				:def csb4#9 = :ctf {eq creator(M#Msg)  = P#EVS9-1.SubPrin .}
+
+				:apply(csb4#9)
+
+					-- Goal`9-1-2-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+					:def csb5#9 = :ctf {eq key(C#EVS9-1.SubCipher1)  = P#Prin .}
+
+					:apply(csb5#9)
+
+						-- Goal`9-1-2-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+						:def csb6#9 = :ctf {eq principal(C#EVS9-1.SubCipher1)  = sender(M#Msg) .}
+
+						:apply(csb6#9)
+
+							-- Goal`9-1-2-1-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+							:def csb7#9 = :ctf {eq receiver(M#Msg)  = P#Prin .}
+
+							:apply(csb7#9)
+
+								-- Goal`9-1-2-1-1-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+								:def csb8#9 = :ctf {eq P#Prin  = P1#EVS9-1.SubPrin .}
+
+								:apply(csb8#9)
+
+									-- Goal`9-1-2-1-1-1-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+									:def csb9#9 = :ctf {eq sender(M#Msg)  = P0#EVS9-1.SubPrin .}
+
+									:apply(csb9#9)
+
+										-- Goal`9-1-2-1-1-1-1-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb10#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb10#9)
+
+											-- Goal`9-1-2-1-1-1-1-1-1-1-1-1 Success by reduction
+											:apply (rd)
+
+										-- Goal`9-1-2-1-1-1-1-1-1-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb11#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb11#9)
+
+											-- Goal`9-1-2-1-1-1-1-1-1-1-2-1 Success by reduction
+											:apply (rd)
+
+									-- Goal`9-1-2-1-1-1-1-1-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+									:def csb12#9 = :ctf [M#Msg \in N0#EVS9-1.Network  .]
+
+									:apply(csb12#9)
+
+										-- Goal`9-1-2-1-1-1-1-1-1-2-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb13#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb13#9)
+
+											-- Goal`9-1-2-1-1-1-1-1-1-2-1-1 Success by reduction
+											:apply (rd)
+
+										-- Goal`9-1-2-1-1-1-1-1-1-2-2 Success by implication and reduction.
+										:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+										:apply (rd)
+
+								-- Goal`9-1-2-1-1-1-1-1-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+							-- Goal`9-1-2-1-1-1-1-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+						-- Goal`9-1-2-1-1-1-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+					-- Goal`9-1-2-1-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+					:def csb14#9 = :ctf {eq key(C#EVS9-1.SubCipher1)  = P#Prin .}
+
+					:apply(csb14#9)
+
+						-- Goal`9-1-2-1-1-2-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+						:def csb15#9 = :ctf {eq principal(C#EVS9-1.SubCipher1)  = sender(M#Msg) .}
+
+						:apply(csb15#9)
+
+							-- Goal`9-1-2-1-1-2-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+							:def csb16#9 = :ctf {eq receiver(M#Msg)  = P#Prin .}
+
+							:apply(csb16#9)
+
+								-- Goal`9-1-2-1-1-2-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+								:def csb17#9 = :ctf [M#Msg \in N0#EVS9-1.Network  .]
+
+								:apply(csb17#9)
+
+									-- Goal`9-1-2-1-1-2-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+									:def csb18#9 = :ctf [creator(n@Nonce)  .]
+
+									:apply(csb18#9)
+
+										-- Goal`9-1-2-1-1-2-1-1-1-1-1 Success by reduction
+										:apply (rd)
+
+									-- Goal`9-1-2-1-1-2-1-1-1-2 Success by implication and reduction.
+									:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+									:apply (rd)
+
+								-- Goal`9-1-2-1-1-2-1-1-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+							-- Goal`9-1-2-1-1-2-1-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+						-- Goal`9-1-2-1-1-2-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+				-- Goal`9-1-2-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+				:def csb19#9 = :ctf {eq key(cipher1(M#Msg))  = P#Prin .}
+
+				:apply(csb19#9)
+
+					-- Goal`9-1-2-1-2-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+					:def csb20#9 = :ctf {eq principal(cipher1(M#Msg))  = sender(M#Msg) .}
+
+					:apply(csb20#9)
+
+						-- Goal`9-1-2-1-2-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+						:def csb21#9 = :ctf {eq receiver(M#Msg)  = P#Prin .}
+
+						:apply(csb21#9)
+
+							-- Goal`9-1-2-1-2-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+							:def csb22#9 = :ctf [M#Msg \in N0#EVS9-1.Network  .]
+
+							:apply(csb22#9)
+
+								-- Goal`9-1-2-1-2-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+								:def csb23#9 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb23#9)
+
+									-- Goal`9-1-2-1-2-1-1-1-1-1 Success by reduction
+									:apply (rd)
+
+								-- Goal`9-1-2-1-2-1-1-1-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+							-- Goal`9-1-2-1-2-1-1-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+						-- Goal`9-1-2-1-2-1-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+					-- Goal`9-1-2-1-2-2 Success by implication and reduction.
+					:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+					:apply (rd)
+
+			-- Goal`9-1-2-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+			:def csb24#9 = :ctf {eq EVS9-1-2.SubRand  = R#Rand .}
+
+			:apply(csb24#9)
+
+				-- Goal`9-1-2-2-1 Success by implication and reduction.
+				:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+				:apply (rd)
+
+				-- Goal`9-1-2-2-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+				:def csb25#9 = :ctf {eq cipher1(M#Msg)  = C#EVS9-1.SubCipher1 .}
+
+				:apply(csb25#9)
+
+					-- Goal`9-1-2-2-2-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+					:def csb26#9 = :ctf {eq creator(M#Msg)  = P#EVS9-1.SubPrin .}
+
+					:apply(csb26#9)
+
+						-- Goal`9-1-2-2-2-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+						:def csb27#9 = :ctf {eq key(C#EVS9-1.SubCipher1)  = P#Prin .}
+
+						:apply(csb27#9)
+
+							-- Goal`9-1-2-2-2-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+							:def csb28#9 = :ctf {eq principal(C#EVS9-1.SubCipher1)  = sender(M#Msg) .}
+
+							:apply(csb28#9)
+
+								-- Goal`9-1-2-2-2-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+								:def csb29#9 = :ctf {eq receiver(M#Msg)  = P#Prin .}
+
+								:apply(csb29#9)
+
+									-- Goal`9-1-2-2-2-1-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+									:def csb30#9 = :ctf {eq P#Prin  = P1#EVS9-1.SubPrin .}
+
+									:apply(csb30#9)
+
+										-- Goal`9-1-2-2-2-1-1-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb31#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb31#9)
+
+											-- Goal`9-1-2-2-2-1-1-1-1-1-1-1 Success by reduction
+											:apply (rd)
+
+										-- Goal`9-1-2-2-2-1-1-1-1-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb32#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb32#9)
+
+											-- Goal`9-1-2-2-2-1-1-1-1-1-2-1 Success by reduction
+											:apply (rd)
+
+									-- Goal`9-1-2-2-2-1-1-1-1-2 Success by implication and reduction.
+									:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+									:apply (rd)
+
+								-- Goal`9-1-2-2-2-1-1-1-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+							-- Goal`9-1-2-2-2-1-1-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+						-- Goal`9-1-2-2-2-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+						:def csb33#9 = :ctf {eq key(C#EVS9-1.SubCipher1)  = P#Prin .}
+
+						:apply(csb33#9)
+
+							-- Goal`9-1-2-2-2-1-2-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+							:def csb34#9 = :ctf {eq principal(C#EVS9-1.SubCipher1)  = sender(M#Msg) .}
+
+							:apply(csb34#9)
+
+								-- Goal`9-1-2-2-2-1-2-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+								:def csb35#9 = :ctf {eq receiver(M#Msg)  = P#Prin .}
+
+								:apply(csb35#9)
+
+									-- Goal`9-1-2-2-2-1-2-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+									:def csb36#9 = :ctf [M#Msg \in N0#EVS9-1.Network  .]
+
+									:apply(csb36#9)
+
+										-- Goal`9-1-2-2-2-1-2-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb37#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb37#9)
+
+											-- Goal`9-1-2-2-2-1-2-1-1-1-1-1 Success by reduction
+											:apply (rd)
+
+										-- Goal`9-1-2-2-2-1-2-1-1-1-2 Success by implication and reduction.
+										:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+										:apply (rd)
+
+									-- Goal`9-1-2-2-2-1-2-1-1-2 Success by implication and reduction.
+									:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+									:apply (rd)
+
+								-- Goal`9-1-2-2-2-1-2-1-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+							-- Goal`9-1-2-2-2-1-2-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+					-- Goal`9-1-2-2-2-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+					:def csb38#9 = :ctf {eq key(cipher1(M#Msg))  = P#Prin .}
+
+					:apply(csb38#9)
+
+						-- Goal`9-1-2-2-2-2-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+						:def csb39#9 = :ctf {eq principal(cipher1(M#Msg))  = sender(M#Msg) .}
+
+						:apply(csb39#9)
+
+							-- Goal`9-1-2-2-2-2-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+							:def csb40#9 = :ctf {eq receiver(M#Msg)  = P#Prin .}
+
+							:apply(csb40#9)
+
+								-- Goal`9-1-2-2-2-2-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+								:def csb41#9 = :ctf [M#Msg \in N0#EVS9-1.Network  .]
+
+								:apply(csb41#9)
+
+									-- Goal`9-1-2-2-2-2-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+									:def csb42#9 = :ctf [R#Rand \in U0#EVS9-1-2.URand  .]
+
+									:apply(csb42#9)
+
+										-- Goal`9-1-2-2-2-2-1-1-1-1-1 Success by implication and reduction.
+										:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+										:apply (rd)
+
+										-- Goal`9-1-2-2-2-2-1-1-1-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb43#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb43#9)
+
+											-- Goal`9-1-2-2-2-2-1-1-1-1-2-1 Success by reduction
+											:apply (rd)
+
+									-- Goal`9-1-2-2-2-2-1-1-1-2 Success by implication and reduction.
+									:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+									:apply (rd)
+
+								-- Goal`9-1-2-2-2-2-1-1-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+							-- Goal`9-1-2-2-2-2-1-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+						-- Goal`9-1-2-2-2-2-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+		-- Goal`9-1-3  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+	:def csb44#9 = :cvs [ur(S#Sys)  .]
+
+	:apply(csb44#9)
+
+			-- Goal`9-1-3-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+			:def csb45#9 = :ctf {eq cipher2(M#Msg)  = C#EVS9-1.SubCipher2 .}
+
+			:apply(csb45#9)
+
+				-- Goal`9-1-3-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+				:def csb46#9 = :ctf {eq creator(M#Msg)  = P#EVS9-1.SubPrin .}
+
+				:apply(csb46#9)
+
+					-- Goal`9-1-3-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+					:def csb47#9 = :ctf {eq key(cipher1(M#Msg))  = P#Prin .}
+
+					:apply(csb47#9)
+
+						-- Goal`9-1-3-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+						:def csb48#9 = :ctf {eq principal(cipher1(M#Msg))  = sender(M#Msg) .}
+
+						:apply(csb48#9)
+
+							-- Goal`9-1-3-1-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+							:def csb49#9 = :ctf {eq receiver(M#Msg)  = P#Prin .}
+
+							:apply(csb49#9)
+
+								-- Goal`9-1-3-1-1-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+								:def csb50#9 = :ctf {eq P#Prin  = P1#EVS9-1.SubPrin .}
+
+								:apply(csb50#9)
+
+									-- Goal`9-1-3-1-1-1-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+									:def csb51#9 = :ctf {eq sender(M#Msg)  = P0#EVS9-1.SubPrin .}
+
+									:apply(csb51#9)
+
+										-- Goal`9-1-3-1-1-1-1-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb52#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb52#9)
+
+											-- Goal`9-1-3-1-1-1-1-1-1-1-1-1 Success by reduction
+											:apply (rd)
+
+										-- Goal`9-1-3-1-1-1-1-1-1-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb53#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb53#9)
+
+											-- Goal`9-1-3-1-1-1-1-1-1-1-2-1 Success by reduction
+											:apply (rd)
+
+									-- Goal`9-1-3-1-1-1-1-1-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+									:def csb54#9 = :ctf [M#Msg \in N0#EVS9-1.Network  .]
+
+									:apply(csb54#9)
+
+										-- Goal`9-1-3-1-1-1-1-1-1-2-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb55#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb55#9)
+
+											-- Goal`9-1-3-1-1-1-1-1-1-2-1-1 Success by reduction
+											:apply (rd)
+
+										-- Goal`9-1-3-1-1-1-1-1-1-2-2 Success by implication and reduction.
+										:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+										:apply (rd)
+
+								-- Goal`9-1-3-1-1-1-1-1-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+							-- Goal`9-1-3-1-1-1-1-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+						-- Goal`9-1-3-1-1-1-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+					-- Goal`9-1-3-1-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+					:def csb56#9 = :ctf {eq key(cipher1(M#Msg))  = P#Prin .}
+
+					:apply(csb56#9)
+
+						-- Goal`9-1-3-1-1-2-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+						:def csb57#9 = :ctf {eq principal(cipher1(M#Msg))  = sender(M#Msg) .}
+
+						:apply(csb57#9)
+
+							-- Goal`9-1-3-1-1-2-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+							:def csb58#9 = :ctf {eq receiver(M#Msg)  = P#Prin .}
+
+							:apply(csb58#9)
+
+								-- Goal`9-1-3-1-1-2-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+								:def csb59#9 = :ctf [M#Msg \in N0#EVS9-1.Network  .]
+
+								:apply(csb59#9)
+
+									-- Goal`9-1-3-1-1-2-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+									:def csb60#9 = :ctf [creator(n@Nonce)  .]
+
+									:apply(csb60#9)
+
+										-- Goal`9-1-3-1-1-2-1-1-1-1-1 Success by reduction
+										:apply (rd)
+
+									-- Goal`9-1-3-1-1-2-1-1-1-2 Success by implication and reduction.
+									:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+									:apply (rd)
+
+								-- Goal`9-1-3-1-1-2-1-1-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+							-- Goal`9-1-3-1-1-2-1-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+						-- Goal`9-1-3-1-1-2-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+				-- Goal`9-1-3-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+				:def csb61#9 = :ctf {eq key(cipher1(M#Msg))  = P#Prin .}
+
+				:apply(csb61#9)
+
+					-- Goal`9-1-3-1-2-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+					:def csb62#9 = :ctf {eq principal(cipher1(M#Msg))  = sender(M#Msg) .}
+
+					:apply(csb62#9)
+
+						-- Goal`9-1-3-1-2-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+						:def csb63#9 = :ctf {eq receiver(M#Msg)  = P#Prin .}
+
+						:apply(csb63#9)
+
+							-- Goal`9-1-3-1-2-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+							:def csb64#9 = :ctf [M#Msg \in N0#EVS9-1.Network  .]
+
+							:apply(csb64#9)
+
+								-- Goal`9-1-3-1-2-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+								:def csb65#9 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb65#9)
+
+									-- Goal`9-1-3-1-2-1-1-1-1-1 Success by reduction
+									:apply (rd)
+
+								-- Goal`9-1-3-1-2-1-1-1-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+							-- Goal`9-1-3-1-2-1-1-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+						-- Goal`9-1-3-1-2-1-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+					-- Goal`9-1-3-1-2-2 Success by implication and reduction.
+					:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+					:apply (rd)
+
+			-- Goal`9-1-3-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+			:def csb66#9 = :ctf {eq EVS9-1-3.SubRand  = R#Rand .}
+
+			:apply(csb66#9)
+
+				-- Goal`9-1-3-2-1 Success by implication and reduction.
+				:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+				:apply (rd)
+
+				-- Goal`9-1-3-2-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+				:def csb67#9 = :ctf {eq cipher2(M#Msg)  = C#EVS9-1.SubCipher2 .}
+
+				:apply(csb67#9)
+
+					-- Goal`9-1-3-2-2-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+					:def csb68#9 = :ctf {eq creator(M#Msg)  = P#EVS9-1.SubPrin .}
+
+					:apply(csb68#9)
+
+						-- Goal`9-1-3-2-2-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+						:def csb69#9 = :ctf {eq key(cipher1(M#Msg))  = P#Prin .}
+
+						:apply(csb69#9)
+
+							-- Goal`9-1-3-2-2-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+							:def csb70#9 = :ctf {eq principal(cipher1(M#Msg))  = sender(M#Msg) .}
+
+							:apply(csb70#9)
+
+								-- Goal`9-1-3-2-2-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+								:def csb71#9 = :ctf {eq receiver(M#Msg)  = P#Prin .}
+
+								:apply(csb71#9)
+
+									-- Goal`9-1-3-2-2-1-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+									:def csb72#9 = :ctf {eq P#Prin  = P1#EVS9-1.SubPrin .}
+
+									:apply(csb72#9)
+
+										-- Goal`9-1-3-2-2-1-1-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb73#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb73#9)
+
+											-- Goal`9-1-3-2-2-1-1-1-1-1-1-1 Success by reduction
+											:apply (rd)
+
+										-- Goal`9-1-3-2-2-1-1-1-1-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb74#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb74#9)
+
+											-- Goal`9-1-3-2-2-1-1-1-1-1-2-1 Success by reduction
+											:apply (rd)
+
+									-- Goal`9-1-3-2-2-1-1-1-1-2 Success by implication and reduction.
+									:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+									:apply (rd)
+
+								-- Goal`9-1-3-2-2-1-1-1-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+							-- Goal`9-1-3-2-2-1-1-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+						-- Goal`9-1-3-2-2-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+						:def csb75#9 = :ctf {eq key(cipher1(M#Msg))  = P#Prin .}
+
+						:apply(csb75#9)
+
+							-- Goal`9-1-3-2-2-1-2-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+							:def csb76#9 = :ctf {eq principal(cipher1(M#Msg))  = sender(M#Msg) .}
+
+							:apply(csb76#9)
+
+								-- Goal`9-1-3-2-2-1-2-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+								:def csb77#9 = :ctf {eq receiver(M#Msg)  = P#Prin .}
+
+								:apply(csb77#9)
+
+									-- Goal`9-1-3-2-2-1-2-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+									:def csb78#9 = :ctf [M#Msg \in N0#EVS9-1.Network  .]
+
+									:apply(csb78#9)
+
+										-- Goal`9-1-3-2-2-1-2-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb79#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb79#9)
+
+											-- Goal`9-1-3-2-2-1-2-1-1-1-1-1 Success by reduction
+											:apply (rd)
+
+										-- Goal`9-1-3-2-2-1-2-1-1-1-2 Success by implication and reduction.
+										:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+										:apply (rd)
+
+									-- Goal`9-1-3-2-2-1-2-1-1-2 Success by implication and reduction.
+									:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+									:apply (rd)
+
+								-- Goal`9-1-3-2-2-1-2-1-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+							-- Goal`9-1-3-2-2-1-2-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+					-- Goal`9-1-3-2-2-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+					:def csb80#9 = :ctf {eq key(cipher1(M#Msg))  = P#Prin .}
+
+					:apply(csb80#9)
+
+						-- Goal`9-1-3-2-2-2-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+						:def csb81#9 = :ctf {eq principal(cipher1(M#Msg))  = sender(M#Msg) .}
+
+						:apply(csb81#9)
+
+							-- Goal`9-1-3-2-2-2-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+							:def csb82#9 = :ctf {eq receiver(M#Msg)  = P#Prin .}
+
+							:apply(csb82#9)
+
+								-- Goal`9-1-3-2-2-2-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+								:def csb83#9 = :ctf [M#Msg \in N0#EVS9-1.Network  .]
+
+								:apply(csb83#9)
+
+									-- Goal`9-1-3-2-2-2-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+									:def csb84#9 = :ctf [R#Rand \in U0#EVS9-1-3.URand  .]
+
+									:apply(csb84#9)
+
+										-- Goal`9-1-3-2-2-2-1-1-1-1-1 Success by implication and reduction.
+										:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+										:apply (rd)
+
+										-- Goal`9-1-3-2-2-2-1-1-1-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb85#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb85#9)
+
+											-- Goal`9-1-3-2-2-2-1-1-1-1-2-1 Success by reduction
+											:apply (rd)
+
+									-- Goal`9-1-3-2-2-2-1-1-1-2 Success by implication and reduction.
+									:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+									:apply (rd)
+
+								-- Goal`9-1-3-2-2-2-1-1-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+							-- Goal`9-1-3-2-2-2-1-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+						-- Goal`9-1-3-2-2-2-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+		-- Goal`9-1-4  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+	:def csb86#9 = :cvs [ur(S#Sys)  .]
+
+	:apply(csb86#9)
+
+			-- Goal`9-1-4-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+			:def csb87#9 = :ctf {eq cipher3(M#Msg)  = C#EVS9-1.SubCipher3 .}
+
+			:apply(csb87#9)
+
+				-- Goal`9-1-4-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+				:def csb88#9 = :ctf {eq creator(M#Msg)  = P#EVS9-1.SubPrin .}
+
+				:apply(csb88#9)
+
+					-- Goal`9-1-4-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+					:def csb89#9 = :ctf {eq key(cipher1(M#Msg))  = P#Prin .}
+
+					:apply(csb89#9)
+
+						-- Goal`9-1-4-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+						:def csb90#9 = :ctf {eq principal(cipher1(M#Msg))  = sender(M#Msg) .}
+
+						:apply(csb90#9)
+
+							-- Goal`9-1-4-1-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+							:def csb91#9 = :ctf {eq receiver(M#Msg)  = P#Prin .}
+
+							:apply(csb91#9)
+
+								-- Goal`9-1-4-1-1-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+								:def csb92#9 = :ctf {eq P#Prin  = P1#EVS9-1.SubPrin .}
+
+								:apply(csb92#9)
+
+									-- Goal`9-1-4-1-1-1-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+									:def csb93#9 = :ctf {eq sender(M#Msg)  = P0#EVS9-1.SubPrin .}
+
+									:apply(csb93#9)
+
+										-- Goal`9-1-4-1-1-1-1-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb94#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb94#9)
+
+											-- Goal`9-1-4-1-1-1-1-1-1-1-1-1 Success by reduction
+											:apply (rd)
+
+										-- Goal`9-1-4-1-1-1-1-1-1-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb95#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb95#9)
+
+											-- Goal`9-1-4-1-1-1-1-1-1-1-2-1 Success by reduction
+											:apply (rd)
+
+									-- Goal`9-1-4-1-1-1-1-1-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+									:def csb96#9 = :ctf [M#Msg \in N0#EVS9-1.Network  .]
+
+									:apply(csb96#9)
+
+										-- Goal`9-1-4-1-1-1-1-1-1-2-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb97#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb97#9)
+
+											-- Goal`9-1-4-1-1-1-1-1-1-2-1-1 Success by reduction
+											:apply (rd)
+
+										-- Goal`9-1-4-1-1-1-1-1-1-2-2 Success by implication and reduction.
+										:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+										:apply (rd)
+
+								-- Goal`9-1-4-1-1-1-1-1-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+							-- Goal`9-1-4-1-1-1-1-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+						-- Goal`9-1-4-1-1-1-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+					-- Goal`9-1-4-1-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+					:def csb98#9 = :ctf {eq key(cipher1(M#Msg))  = P#Prin .}
+
+					:apply(csb98#9)
+
+						-- Goal`9-1-4-1-1-2-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+						:def csb99#9 = :ctf {eq principal(cipher1(M#Msg))  = sender(M#Msg) .}
+
+						:apply(csb99#9)
+
+							-- Goal`9-1-4-1-1-2-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+							:def csb100#9 = :ctf {eq receiver(M#Msg)  = P#Prin .}
+
+							:apply(csb100#9)
+
+								-- Goal`9-1-4-1-1-2-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+								:def csb101#9 = :ctf [M#Msg \in N0#EVS9-1.Network  .]
+
+								:apply(csb101#9)
+
+									-- Goal`9-1-4-1-1-2-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+									:def csb102#9 = :ctf [creator(n@Nonce)  .]
+
+									:apply(csb102#9)
+
+										-- Goal`9-1-4-1-1-2-1-1-1-1-1 Success by reduction
+										:apply (rd)
+
+									-- Goal`9-1-4-1-1-2-1-1-1-2 Success by implication and reduction.
+									:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+									:apply (rd)
+
+								-- Goal`9-1-4-1-1-2-1-1-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+							-- Goal`9-1-4-1-1-2-1-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+						-- Goal`9-1-4-1-1-2-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+				-- Goal`9-1-4-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+				:def csb103#9 = :ctf {eq key(cipher1(M#Msg))  = P#Prin .}
+
+				:apply(csb103#9)
+
+					-- Goal`9-1-4-1-2-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+					:def csb104#9 = :ctf {eq principal(cipher1(M#Msg))  = sender(M#Msg) .}
+
+					:apply(csb104#9)
+
+						-- Goal`9-1-4-1-2-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+						:def csb105#9 = :ctf {eq receiver(M#Msg)  = P#Prin .}
+
+						:apply(csb105#9)
+
+							-- Goal`9-1-4-1-2-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+							:def csb106#9 = :ctf [M#Msg \in N0#EVS9-1.Network  .]
+
+							:apply(csb106#9)
+
+								-- Goal`9-1-4-1-2-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+								:def csb107#9 = :ctf [creator(n@Nonce)  .]
+
+								:apply(csb107#9)
+
+									-- Goal`9-1-4-1-2-1-1-1-1-1 Success by reduction
+									:apply (rd)
+
+								-- Goal`9-1-4-1-2-1-1-1-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+							-- Goal`9-1-4-1-2-1-1-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+						-- Goal`9-1-4-1-2-1-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+					-- Goal`9-1-4-1-2-2 Success by implication and reduction.
+					:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+					:apply (rd)
+
+			-- Goal`9-1-4-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+			:def csb108#9 = :ctf {eq EVS9-1-4.SubRand  = R#Rand .}
+
+			:apply(csb108#9)
+
+				-- Goal`9-1-4-2-1 Success by implication and reduction.
+				:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+				:apply (rd)
+
+				-- Goal`9-1-4-2-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+				:def csb109#9 = :ctf {eq cipher3(M#Msg)  = C#EVS9-1.SubCipher3 .}
+
+				:apply(csb109#9)
+
+					-- Goal`9-1-4-2-2-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+					:def csb110#9 = :ctf {eq creator(M#Msg)  = P#EVS9-1.SubPrin .}
+
+					:apply(csb110#9)
+
+						-- Goal`9-1-4-2-2-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+						:def csb111#9 = :ctf {eq key(cipher1(M#Msg))  = P#Prin .}
+
+						:apply(csb111#9)
+
+							-- Goal`9-1-4-2-2-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+							:def csb112#9 = :ctf {eq principal(cipher1(M#Msg))  = sender(M#Msg) .}
+
+							:apply(csb112#9)
+
+								-- Goal`9-1-4-2-2-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+								:def csb113#9 = :ctf {eq receiver(M#Msg)  = P#Prin .}
+
+								:apply(csb113#9)
+
+									-- Goal`9-1-4-2-2-1-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+									:def csb114#9 = :ctf {eq P#Prin  = P1#EVS9-1.SubPrin .}
+
+									:apply(csb114#9)
+
+										-- Goal`9-1-4-2-2-1-1-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb115#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb115#9)
+
+											-- Goal`9-1-4-2-2-1-1-1-1-1-1-1 Success by reduction
+											:apply (rd)
+
+										-- Goal`9-1-4-2-2-1-1-1-1-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb116#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb116#9)
+
+											-- Goal`9-1-4-2-2-1-1-1-1-1-2-1 Success by reduction
+											:apply (rd)
+
+									-- Goal`9-1-4-2-2-1-1-1-1-2 Success by implication and reduction.
+									:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+									:apply (rd)
+
+								-- Goal`9-1-4-2-2-1-1-1-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+							-- Goal`9-1-4-2-2-1-1-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+						-- Goal`9-1-4-2-2-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+						:def csb117#9 = :ctf {eq key(cipher1(M#Msg))  = P#Prin .}
+
+						:apply(csb117#9)
+
+							-- Goal`9-1-4-2-2-1-2-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+							:def csb118#9 = :ctf {eq principal(cipher1(M#Msg))  = sender(M#Msg) .}
+
+							:apply(csb118#9)
+
+								-- Goal`9-1-4-2-2-1-2-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+								:def csb119#9 = :ctf {eq receiver(M#Msg)  = P#Prin .}
+
+								:apply(csb119#9)
+
+									-- Goal`9-1-4-2-2-1-2-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+									:def csb120#9 = :ctf [M#Msg \in N0#EVS9-1.Network  .]
+
+									:apply(csb120#9)
+
+										-- Goal`9-1-4-2-2-1-2-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb121#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb121#9)
+
+											-- Goal`9-1-4-2-2-1-2-1-1-1-1-1 Success by reduction
+											:apply (rd)
+
+										-- Goal`9-1-4-2-2-1-2-1-1-1-2 Success by implication and reduction.
+										:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+										:apply (rd)
+
+									-- Goal`9-1-4-2-2-1-2-1-1-2 Success by implication and reduction.
+									:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+									:apply (rd)
+
+								-- Goal`9-1-4-2-2-1-2-1-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+							-- Goal`9-1-4-2-2-1-2-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+					-- Goal`9-1-4-2-2-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+					:def csb122#9 = :ctf {eq key(cipher1(M#Msg))  = P#Prin .}
+
+					:apply(csb122#9)
+
+						-- Goal`9-1-4-2-2-2-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+						:def csb123#9 = :ctf {eq principal(cipher1(M#Msg))  = sender(M#Msg) .}
+
+						:apply(csb123#9)
+
+							-- Goal`9-1-4-2-2-2-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+							:def csb124#9 = :ctf {eq receiver(M#Msg)  = P#Prin .}
+
+							:apply(csb124#9)
+
+								-- Goal`9-1-4-2-2-2-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+								:def csb125#9 = :ctf [M#Msg \in N0#EVS9-1.Network  .]
+
+								:apply(csb125#9)
+
+									-- Goal`9-1-4-2-2-2-1-1-1-1  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+									:def csb126#9 = :ctf [R#Rand \in U0#EVS9-1-4.URand  .]
+
+									:apply(csb126#9)
+
+										-- Goal`9-1-4-2-2-2-1-1-1-1-1 Success by implication and reduction.
+										:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+										:apply (rd)
+
+										-- Goal`9-1-4-2-2-2-1-1-1-1-2  -  inv130(sdm2(S#Sys, P#Prin, R#Rand, M#Msg), n@Nonce)  - Success
+										:def csb127#9 = :ctf [creator(n@Nonce)  .]
+
+										:apply(csb127#9)
+
+											-- Goal`9-1-4-2-2-2-1-1-1-1-2-1 Success by reduction
+											:apply (rd)
+
+									-- Goal`9-1-4-2-2-2-1-1-1-2 Success by implication and reduction.
+									:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+									:apply (rd)
+
+								-- Goal`9-1-4-2-2-2-1-1-2 Success by implication and reduction.
+								:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+								:apply (rd)
+
+							-- Goal`9-1-4-2-2-2-1-2 Success by implication and reduction.
+							:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+							:apply (rd)
+
+						-- Goal`9-1-4-2-2-2-2 Success by implication and reduction.
+						:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+						:apply (rd)
+
+
+:sel(10)
+	:apply(tc)
+
+	:def csb1#10 = :ctf [M#Msg \in nw(S#Sys)  .]
+
+	:apply(csb1#10)
+
+	:def csb2#10 = :ctf [M0#Msg \in nw(S#Sys)  .]
+
+	:apply(csb2#10)
+
+	:def csb3#10 = :ctf [m1?(M#Msg)  .]
+
+	:apply(csb3#10)
+
+	:def csb4#10 = :ctf [m2?(M0#Msg)  .]
+
+	:apply(csb4#10)
+
+	:def csb5#10 = :ctf {eq creator(M#Msg)  = P#Prin .}
+
+	:apply(csb5#10)
+
+	:def csb6#10 = :ctf {eq sender(M#Msg)  = P#Prin .}
+
+	:apply(csb6#10)
+
+	:def csb7#10 = :ctf {eq receiver(M#Msg)  = sender(M0#Msg) .}
+
+	:apply(csb7#10)
+
+	:def csb8#10 = :ctf {eq key(cipher1(M#Msg))  = sender(M0#Msg) .}
+
+	:apply(csb8#10)
+
+	:def csb9#10 = :ctf {eq nonce(cipher1(M#Msg))  = n(P#Prin, sender(M0#Msg), R#Rand) .}
+
+	:apply(csb9#10)
+
+	:def csb10#10 = :ctf {eq principal(cipher1(M#Msg))  = P#Prin .}
+
+	:apply(csb10#10)
+
+	:def csb11#10 = :ctf {eq receiver(M0#Msg)  = P#Prin .}
+
+	:apply(csb11#10)
+
+	:def csb12#10 = :ctf {eq key(cipher2(M0#Msg))  = P#Prin .}
+
+	:apply(csb12#10)
+
+	:def csb13#10 = :ctf {eq nonce1(cipher2(M0#Msg))  = n(P#Prin, sender(M0#Msg), R#Rand) .}
+
+	:apply(csb13#10)
+
+	:def csb14#10 = :ctf {eq principal(cipher2(M0#Msg))  = sender(M0#Msg) .}
+
+	:apply(csb14#10)
+
+	:def csb15#10 = :ctf {eq sender(M0#Msg)  = intruder .}
+
+	:apply(csb15#10)
+
+	:def csb16#10 = :ctf {eq n@Nonce  = nonce2(cipher2(M0#Msg)) .}
+
+	:apply(csb16#10)
+
+	:def csb17#10 = :ctf {eq P#Prin  = intruder .}
+
+	:apply(csb17#10)
+
+	:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+	:apply (rd)
+
+	:def csb18#10 = :ctf [nonce2(cipher2(M0#Msg)) \in cnonce(nw(S#Sys))  .]
+
+	:apply(csb18#10)
+
+	:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+	:apply (rd)
+
+	:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+	:imp [proven-goal4]  by {C:Cipher2 <- cipher2(M0#Msg) ;}
+
+	:apply (rd)
+
+	:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+	:apply (rd)
+
+	:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+	:apply (rd)
+
+	:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+	:apply (rd)
+
+	:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+	:apply (rd)
+
+	:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+	:apply (rd)
+
+	:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+	:apply (rd)
+
+	:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+	:apply (rd)
+
+	:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+	:apply (rd)
+
+	:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+	:apply (rd)
+
+	:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+	:apply (rd)
+
+	:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+	:apply (rd)
+
+	:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+	:apply (rd)
+
+	:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+	:apply (rd)
+
+	:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+	:apply (rd)
+
+	:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+	:apply (rd)
+
+	:imp [inv13]  by {n:Nonce <- n@Nonce ;}
+
+	:apply (rd)
+

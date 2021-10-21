@@ -1,0 +1,344 @@
+--> 9. sdm3(s,r1,r2,r3,r4)
+open INV .
+  :id(inv17)
+  op p : -> Prin .
+  op q : -> Prin .
+	op q1 : -> Prin .
+  op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+  eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+  eq sender(r3) = r1 .
+  eq receiver(r3) = sender(r4) .
+  eq key(cipher1(r3)) = sender(r4) .
+	eq nonce(cipher1(r3)) = n(r1,sender(r4),r2) .
+	eq principal(cipher1(r3)) = r1 .
+  eq receiver(r4) = r1 .
+	eq key(cipher2(r4)) = r1 .
+  eq nonce1(cipher2(r4)) = n(r1,sender(r4),r2) .
+	eq principal(cipher2(r4)) = sender(r4) .
+	red inv170(s,p,q,q1,r,n) implies inv170(sdm3(s,r1,r2,r3,r4),p,q,q1,r,n) .
+close
+
+open INV .
+  :id(inv17)
+  op p : -> Prin .
+  op q : -> Prin .
+	op q1 : -> Prin .
+  op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+  eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+  eq sender(r3) = r1 .
+  eq receiver(r3) = sender(r4) .
+  eq key(cipher1(r3)) = sender(r4) .
+	eq nonce(cipher1(r3)) = n(r1,sender(r4),r2) .
+	eq principal(cipher1(r3)) = r1 .
+  eq receiver(r4) = r1 .
+	eq key(cipher2(r4)) = r1 .
+  eq nonce1(cipher2(r4)) = n(r1,sender(r4),r2) .
+	eq (principal(cipher2(r4)) = sender(r4)) = false .
+	red inv170(s,p,q,q1,r,n) implies inv170(sdm3(s,r1,r2,r3,r4),p,q,q1,r,n) .
+close
+
+open INV .
+  :id(inv17)
+  op p : -> Prin .
+  op q : -> Prin .
+	op q1 : -> Prin .
+  op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+  eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+  eq sender(r3) = r1 .
+  eq receiver(r3) = sender(r4) .
+  eq key(cipher1(r3)) = sender(r4) .
+	eq nonce(cipher1(r3)) = n(r1,sender(r4),r2) .
+	eq principal(cipher1(r3)) = r1 .
+  eq receiver(r4) = r1 .
+	eq key(cipher2(r4)) = r1 .
+  eq (nonce1(cipher2(r4)) = n(r1,sender(r4),r2)) = false .
+	red inv170(s,p,q,q1,r,n) implies inv170(sdm3(s,r1,r2,r3,r4),p,q,q1,r,n) .
+close
+
+open INV .
+  :id(inv17)
+  op p : -> Prin .
+  op q : -> Prin .
+	op q1 : -> Prin .
+  op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+  eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+  eq sender(r3) = r1 .
+  eq receiver(r3) = sender(r4) .
+  eq key(cipher1(r3)) = sender(r4) .
+	eq nonce(cipher1(r3)) = n(r1,sender(r4),r2) .
+	eq principal(cipher1(r3)) = r1 .
+  eq receiver(r4) = r1 .
+	eq (key(cipher2(r4)) = r1) = false .
+	red inv170(s,p,q,q1,r,n) implies inv170(sdm3(s,r1,r2,r3,r4),p,q,q1,r,n) .
+close
+
+open INV .
+  :id(inv17)
+  op p : -> Prin .
+  op q : -> Prin .
+	op q1 : -> Prin .
+  op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+  eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+  eq sender(r3) = r1 .
+  eq receiver(r3) = sender(r4) .
+  eq key(cipher1(r3)) = sender(r4) .
+	eq nonce(cipher1(r3)) = n(r1,sender(r4),r2) .
+	eq principal(cipher1(r3)) = r1 .
+  eq (receiver(r4) = r1) = false .
+	red inv170(s,p,q,q1,r,n) implies inv170(sdm3(s,r1,r2,r3,r4),p,q,q1,r,n) .
+close
+
+open INV .
+  :id(inv17)
+  op p : -> Prin .
+  op q : -> Prin .
+	op q1 : -> Prin .
+  op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+  eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+  eq sender(r3) = r1 .
+  eq receiver(r3) = sender(r4) .
+  eq key(cipher1(r3)) = sender(r4) .
+	eq nonce(cipher1(r3)) = n(r1,sender(r4),r2) .
+	eq (principal(cipher1(r3)) = r1) = false .
+	red inv170(s,p,q,q1,r,n) implies inv170(sdm3(s,r1,r2,r3,r4),p,q,q1,r,n) .
+close
+
+open INV .
+  :id(inv17)
+  op p : -> Prin .
+  op q : -> Prin .
+	op q1 : -> Prin .
+  op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+  eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+  eq sender(r3) = r1 .
+  eq receiver(r3) = sender(r4) .
+  eq key(cipher1(r3)) = sender(r4) .
+	eq (nonce(cipher1(r3)) = n(r1,sender(r4),r2)) = false .
+	red inv170(s,p,q,q1,r,n) implies inv170(sdm3(s,r1,r2,r3,r4),p,q,q1,r,n) .
+close
+
+open INV .
+  :id(inv17)
+  op p : -> Prin .
+  op q : -> Prin .
+	op q1 : -> Prin .
+  op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+  eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+  eq sender(r3) = r1 .
+  eq receiver(r3) = sender(r4) .
+  eq (key(cipher1(r3)) = sender(r4)) = false .
+	red inv170(s,p,q,q1,r,n) implies inv170(sdm3(s,r1,r2,r3,r4),p,q,q1,r,n) .
+close
+
+open INV .
+  :id(inv17)
+  op p : -> Prin .
+  op q : -> Prin .
+	op q1 : -> Prin .
+  op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+  eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+  eq sender(r3) = r1 .
+  eq (receiver(r3) = sender(r4)) = false .
+	red inv170(s,p,q,q1,r,n) implies inv170(sdm3(s,r1,r2,r3,r4),p,q,q1,r,n) .
+close
+
+open INV .
+  :id(inv17)
+  op p : -> Prin .
+  op q : -> Prin .
+	op q1 : -> Prin .
+  op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+  eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq creator(r3) = r1 .
+  eq (sender(r3) = r1) = false .
+	red inv170(s,p,q,q1,r,n) implies inv170(sdm3(s,r1,r2,r3,r4),p,q,q1,r,n) .
+close
+
+open INV .
+  :id(inv17)
+  op p : -> Prin .
+  op q : -> Prin .
+	op q1 : -> Prin .
+  op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+  eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = true .
+	eq (creator(r3) = r1) = false .
+	red inv170(s,p,q,q1,r,n) implies inv170(sdm3(s,r1,r2,r3,r4),p,q,q1,r,n) .
+close
+
+open INV .
+  :id(inv17)
+  op p : -> Prin .
+  op q : -> Prin .
+	op q1 : -> Prin .
+  op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+  eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = true .
+	eq m2?(r4) = false .
+	red inv170(s,p,q,q1,r,n) implies inv170(sdm3(s,r1,r2,r3,r4),p,q,q1,r,n) .
+close
+
+open INV .
+  :id(inv17)
+  op p : -> Prin .
+  op q : -> Prin .
+	op q1 : -> Prin .
+  op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+  eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = true .
+	eq m1?(r3) = false .
+	red inv170(s,p,q,q1,r,n) implies inv170(sdm3(s,r1,r2,r3,r4),p,q,q1,r,n) .
+close
+
+open INV .
+  :id(inv17)
+  op p : -> Prin .
+  op q : -> Prin .
+	op q1 : -> Prin .
+  op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+  eq (r3 \in nw(s)) = true .
+	eq (r4 \in nw(s)) = false .
+	red inv170(s,p,q,q1,r,n) implies inv170(sdm3(s,r1,r2,r3,r4),p,q,q1,r,n) .
+close
+
+open INV .
+  :id(inv17)
+  op p : -> Prin .
+  op q : -> Prin .
+	op q1 : -> Prin .
+  op r : -> Rand .
+	op n : -> Nonce .
+	op r1 : -> Prin .
+	op r2 : -> Rand .
+	op r3 : -> Msg .
+	op r4 : -> Msg .
+	op s : -> Sys .
+  eq (r3 \in nw(s)) = false .
+	red inv170(s,p,q,q1,r,n) implies inv170(sdm3(s,r1,r2,r3,r4),p,q,q1,r,n) .
+close

@@ -2,6 +2,8 @@ fmod OPEN-CLOSE-PARSER is
  pr PROOF-DATA-STRUCTURES .
  pr OPEN-CLOSE-AUX .
  pr CafePARSER .
+ pr TRIAL-PAIR .
+ pr SUBS .
 
  vars M M' M'' M''' M1 M2 M3 TOP TOP' FLAT FLAT' : Module .
  vars PSM SM VM : SortMap . **** PSM: Principal Sort Map
@@ -862,16 +864,6 @@ fmod OPEN-CLOSE-PARSER is
       Eq' := impEq(M, Eq, substitute(T, SB)) .
   eq applyImp(M, Eq, Q, N, SB) = [mtPT, false] [owise] .
 
-  op substitute : Term Substitution -> Term .
-  eq substitute(Q[TL], SB) = Q[substitute*(TL, SB)] .
-  eq substitute(C, SB) = C .
-  eq substitute(V, V <- T ; SB) = T .
-  eq substitute(T, SB) = T [owise] .
-
-  op substitute* : TermList Substitution -> TermList .
-  eq substitute*(empty, SB) = empty .
-  eq substitute*((T, TL), SB) = substitute(T, SB), substitute*(TL, SB) .
-
   ***********************************************************************************
   ********************************** APPLY IMPLIES **********************************
   ***********************************************************************************
@@ -1590,50 +1582,6 @@ fmod OPEN-CLOSE-PARSER is
 
   eq prior(TPS) = mtTPS [owise] .
 
-***( For testing purposes, inv8 - rec2
-  op prior : TrialPairSet -> TrialPairSet .
-  eq prior(['dc['S#Sys.Sys],cevs] TPS) = ['dc['S#Sys.Sys],cevs] .
-  eq prior(['_=_['rb['S#Sys.Sys],'B#EVS1-1.SubBit.Bit],ctf] TPS) = ['_=_['rb['S#Sys.Sys],'B#EVS1-1.SubBit.Bit],ctf] .
-  eq prior(['_=_['ac['S#Sys.Sys],'_`,_['bs1@BSeq.BSeq,'b1@Bit.Bit,'b2@Bit.Bit,'bs2@BSeq.BSeq]],ctf] TPS) =  ['_=_['ac['S#Sys.Sys],'_`,_['bs1@BSeq.BSeq,'b1@Bit.Bit,'b2@Bit.Bit,'bs2@BSeq.BSeq]],ctf] .
-
-  eq prior(['_=_['B#EVS1-1.SubBit.Bit,'b1@Bit.Bit],ctf] TPS) = ['_=_['b1@Bit.Bit,'B#EVS1-1.SubBit.Bit],ctf] .
-  eq prior(TPS) = mtTPS [owise] .
-)
-
-***( For testing purposes, inv1 - rec1
-  op prior1 : TrialPairSet TrialPairSet -> TrialPairSet .
-  op prior2 : TrialPairSet -> TrialPairSet .
-  eq prior1(['ac['S#Sys.Sys],cevs] TPS, TPS') = ['ac['S#Sys.Sys],cevs] .
-  eq prior1(['_=_['sb['S#Sys.Sys],'B0EVS1-1.Bit.Bit],ctf] TPS, TPS') =
-                             ['_=_['sb['S#Sys.Sys],'B0EVS1-1.Bit.Bit],ctf] .
-  eq prior2(['_=_['rb['S#Sys.Sys],'B0EVS1-1.Bit.Bit],ctf] TPS) =
-                             ['_=_['rb['S#Sys.Sys],'B0EVS1-1.Bit.Bit],ctf] .
-***  eq prior1(['_=_['mksq['p2s['S#Sys.Sys]],'psr['S#Sys.Sys]],ctf] TPS, TPS') =
-***                             ['_=_['mksq['p2s['S#Sys.Sys]],'psr['S#Sys.Sys]],ctf] .
-  eq prior1(TPS, ['_=_['rb['S#Sys.Sys],'B0EVS1-1.Bit.Bit],ctf] TPS') = mtTPS .
-  eq prior1(TPS, TPS') = TPS [owise] .
-  eq prior2(TPS) = TPS [owise] .
-)
-
-***( For testing purposes, inv9 - rec1
-  op prior : TrialPairSet TrialPairSet -> TrialPairSet .
-  op prior : TrialPairSet -> TrialPairSet .
-  eq prior(['ac['S#Sys.Sys],cevs] TPS, TPS') = ['ac['S#Sys.Sys],cevs] .
-  eq prior(['_=_['sb['S#Sys.Sys],'B0EVS1-1.Bit.Bit],ctf] TPS, TPS') =
-                                         ['_=_['sb['S#Sys.Sys],'B0EVS1-1.Bit.Bit],ctf] .
-  eq prior(['_=_['dc['S#Sys.Sys],'_`,_['pbps1@PBPSeq.PBPSeq,'<_`,_>['p1@Packet.Packet,'b1@Bit.Bit],'<_`,_>['p2@Packet.Packet,
-    'b2@Bit.Bit],'pbps2@PBPSeq.PBPSeq]],ctf] TPS, TPS') =
-                                         ['_=_['dc['S#Sys.Sys],'_`,_['pbps1@PBPSeq.PBPSeq,'<_`,_>['p1@Packet.Packet,'b1@Bit.Bit],'<_`,_>['p2@Packet.Packet,
-    'b2@Bit.Bit],'pbps2@PBPSeq.PBPSeq]],ctf] .
-  eq prior(TPS, ['_=_['sb['S#Sys.Sys],'b1@Bit.Bit],ctf] TPS') = mtTPS .
-  eq prior(['_=_['p2s['S#Sys.Sys],'p1@Packet.Packet],ctf] TPS) = ['_=_['p2s['S#Sys.Sys],'p1@Packet.Packet],ctf] .
-  eq prior(['_=_['sb['S#Sys.Sys],'b1@Bit.Bit],ctf] TPS) = ['_=_['sb['S#Sys.Sys],'b1@Bit.Bit],ctf] .
-
-  eq prior(TPS) = TPS [owise] .
-  eq prior(TPS, TPS') = TPS [owise] .
-)
-
-
   var  MACS'' : Macros .
   var  IT : IT .
   var  ITL : ITL .
@@ -1641,8 +1589,6 @@ fmod OPEN-CLOSE-PARSER is
   var  TPair : TrialPair .
   var  CTXT : Context .
   var  IR : IR .
-
-  eq TPair TPair = TPair .
 
   op _-_ : TermSet TermSet -> TermSet .
   eq (T | TrS) - (T | TrS') = TrS - TrS' .
@@ -1851,24 +1797,14 @@ fmod OPEN-CLOSE-PARSER is
       [QIL', MACS'', B'] := tryCaseSplitting*(ITL, MACS', S, INDENT, s(N), NL) .
   eq tryCaseSplitting*(nilITL, MACS, S, INDENT, N, NL) = [nil, MACS, true] .
 
-  sorts TrialType TrialPair TrialPairSet .
-  subsort TrialPair < TrialPairSet .
-
-  ops ctf term cevs cesv : -> TrialType [ctor] .
-
-  op [_,_] : Term TrialType -> TrialPair [ctor] .
-
-  op mtTPS : -> TrialPairSet [ctor] .
-  op __ : TrialPairSet TrialPairSet -> TrialPairSet [ctor comm assoc id: mtTPS] .
-  eq TPair TPair TPS = TPair TPS [metadata "idempotency"] .
-
   op processEqualityTerm : Module Term -> TrialPairSet .
   ceq processEqualityTerm(M, T) = mtTPS
    if hasVars(T) .
   ceq processEqualityTerm(M, '_=_[T, T']) = mtTPS
    if subterm(T, T') .
   ceq processEqualityTerm(M, Q[TL]) = processEqualityTerm*(M, tl2ts(TL))
-   if containsBoolOps*(TL) [print "Equality Bools " Q "(" TL ")"] .
+   if containsBoolOps*(TL) or (Q == '_or_) or (Q == '_and_) or
+      (Q == '_xor_) or (Q == 'if_then_else_fi) [print "Equality Bools " Q "(" TL ")"] .
   eq processEqualityTerm(M, '_=_[T, T]) = mtTPS .
   *** Built-in strategies for sequences: built sequences with same top constructor
   ceq processEqualityTerm(M, '_=_[T, T']) = seqEqualities(M, T, T')
@@ -1904,6 +1840,7 @@ fmod OPEN-CLOSE-PARSER is
   *** Default
   ceq processEqualityTerm(M, '_=_[T, T']) = ['_=_[T, T'], ctf]
    if T =/= T' /\
+      not containsBoolOps*((T, T')) /\
       not sees&seCheck(M, T, T') /\
       sameSeqCtor(M, T, T') /\
       not sameSize(T, T') /\
@@ -1919,6 +1856,7 @@ fmod OPEN-CLOSE-PARSER is
   *** Default
   ceq processEqualityTerm(M, '_=_[T, T']) = ['_=_[T, T'], ctf]
    if T =/= T' /\
+      not containsBoolOps*((T, T')) /\
       not subterm(T, T') /\
       Q[T1] := T /\
       isFreshCons(M, T1) /\
@@ -1932,7 +1870,7 @@ fmod OPEN-CLOSE-PARSER is
       not es&esCheck(M, T, T') /\
       not seese&seCheck(M, T, T') /\
       not es&esCheck(M, T', T) [print "es&es 2 " T " = " T'] .
-  eq processEqualityTerm(M, T) = $processEqualityTerm(M, T) [owise print "Eq terms owise " T] .
+  eq processEqualityTerm(M, T) = $processEqualityTerm(M, T) . *** [owise print "Eq terms owise " T] .
 
   op subterm : Term Term -> Bool .
   eq subterm(T, Q[TL, T, TL']) = true .
@@ -1968,7 +1906,7 @@ fmod OPEN-CLOSE-PARSER is
       allCtor(M, T2) . *** [print "Equality term 3 " T1 " = " T2] .
   ceq $processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T1, T2], ctf] *** cevs?
    if isFreshCons(M, T1) /\
-      isFreshCons(M, T2) [print "Equality term 4 " T1 " = " T2] .
+      isFreshCons(M, T2) . *** [print "Equality term 4 " T1 " = " T2] .
   ceq $processEqualityTerm(M, '_=_[T1, T2]) =  $processEqualityTerm(M, T1)
    if not (allCtor(M, T1) or isFreshCons(M, T1)) /\
       allCtor(M, T2) . *** [print "Equality term 5 " T1 " = " T2] .
@@ -1987,17 +1925,17 @@ fmod OPEN-CLOSE-PARSER is
                                               $processEqualityTerm(M, T2)
    if isFreshCons(M, T1) /\
       not hasVars(T2) /\
-      not (allCtor(M, T2) or isFreshCons(M, T2)) [print "Equality term 8 " T1 " = " T2] .
+      not (allCtor(M, T2) or isFreshCons(M, T2)) . *** [print "Equality term 8 " T1 " = " T2] .
   ceq $processEqualityTerm(M, '_=_[T1, T2]) = ['_=_[T1, T2], ctf] *** !!! Seq
                                               processEqualityTerm*(M, T1 | T2)
    if not (allCtor(M, T1) or isFreshCons(M, T1)) /\
       not (allCtor(M, T2) or isFreshCons(M, T2)) /\
-      noneCtor(M, T1) /\ noneCtor(M, T2) [print "Equality term 9 " T1 " = " T2] .
+      noneCtor(M, T1) /\ noneCtor(M, T2) . *** [print "Equality term 9 " T1 " = " T2] .
   ceq $processEqualityTerm(M, '_=_[T1, T2]) = processEqualityTerm*(M, T1 | T2)
    if not (allCtor(M, T1) or isFreshCons(M, T1)) /\
       not (allCtor(M, T2) or isFreshCons(M, T2)) /\
       not (noneCtor(M, T1) and noneCtor(M, T2)) . *** [print "Equality term 10 " T1 " = " T2] .
-  ceq $processEqualityTerm(M, Q[T, T']) = processEqualityTerm*(M, T | T')
+  ceq $processEqualityTerm(M, Q[TL]) = processEqualityTerm*(M, tl2ts(TL))
    if (Q == '_or_) or (Q == '_and_) or (Q == '_xor_) .
   eq $processEqualityTerm(M, 'not_[T]) = $processEqualityTerm(M, T) .
   eq $processEqualityTerm(M, 'if_then_else_fi[T, TL]) = $processEqualityTerm(M, T) .
@@ -2013,7 +1951,7 @@ fmod OPEN-CLOSE-PARSER is
                                          then decomposeTerm(M, T)
                                          else TPS
                                          fi
-   if TPS := processEq*(M, T, EqS) .
+   if TPS := processEq*(M, T, EqS) . *** [print "Double $$: " T " returns " TPS] .
 
   op sameSeqCtor : Module Term Term -> Bool .
   eq sameSeqCtor(M, Q[TL], Q[TL']) = seqCtor(getOps(M), Q) .
@@ -2381,7 +2319,7 @@ and \verb"sizeTL" just computes the size of a list of terms:
   ceq getEqualityTerms(M, Q[TL], T) = getEqualityTerms*(M, TL, T)
    if Q =/= 'if_then_else_fi /\
       containsBoolOps(Q[TL]) .
-  eq getEqualityTerms(M, 'not_[T], T') = T .
+  eq getEqualityTerms(M, 'not_[T], T') = getEqualityTerms(M, T, T') .
   eq getEqualityTerms(M, 'if_then_else_fi[T, T', T''], T1) = getEqualityTerms(M, T, T1) .
   eq getEqualityTerms(M, 'true.Bool, T) = emptyTermSet .
   eq getEqualityTerms(M, 'false.Bool, T) = emptyTermSet .

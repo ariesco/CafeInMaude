@@ -763,8 +763,8 @@ the list, applying the appropriate function to each element:
       VS' := varsFromQidList(QIL) /\
       {T1, Srt} := metaParse(FLAT, VS, QIL, anyType) /\
       < T''', AtS > := cafeEqAtS2maudeEqAts(T') /\
-      T2 := getTerm(metaParse(FLAT, VS, downQidList(T'''), Srt)) /\
-      T3 := getTerm(metaParse(FLAT, VS, downQidList(T''), 'Bool)) /\
+      T2 := getTerm(metaParse(FLAT, VS ; VS', downQidList(T'''), Srt)) /\
+      T3 := getTerm(metaParse(FLAT, VS ; VS', downQidList(T''), 'Bool)) /\
       EqS := ceq T1 = T2 if T3 = 'true.Bool [AtS AtS'] . /\
       TOP' := addEqs(TOP, EqS) /\
       FLAT' := addEqs(FLAT, EqS) .

@@ -1,0 +1,416 @@
+load ../examples/CCiMPG/NSLPK2/nslpk.cafe .
+load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prscXX0.cafe .
+
+set-cores 4 .
+
+open INV .
+  :id(invXX)
+
+  ops p1 p2 : -> Prin .
+  ops n1 n2 : -> Nonce .
+
+  red invXX0(S:Sys, XXX) .
+close
+
+:infer-proof invXX .
+
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proofXX.cafe .
+
+:save-proof .
+
+eof
+
+load ../examples/CCiMPG/NSLPK2/commands_cimpg_generate.cafe .
+
+Hasta proof24
+1 core: 4 h 59 m 1 s
+4 cores: 2 h 57 m 2 s
+
+- Proof step by step
+Order: {100, 110, 120, 260} -> 160 -> {140, 150} -> {130, 210} -> {200, 250}
+-> {190,240} -> 220 -> 170 -> 230 -> 180
+
+- Proof score 100 -> Standalone (5 m 13 s / 4 m 36 s)
+
+  eq backtrackLevels = 6 .
+  eq numInstVars = 2 .
+  eq extraImpLevels = 1 .
+
+open INV .
+  :id(inv10)
+
+  op  c1 : -> Cipher1 .
+
+  red inv100(S:Sys, c1) .
+close
+
+load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc100.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof10.cafe .
+:infer-proof inv10 .
+
+- Proof score 110 -> Standalone (4 m 30 s / 4 m 19 s)
+
+  eq backtrackLevels = 8 .
+  eq numInstVars = 2 .
+  eq extraImpLevels = 1 .
+
+load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc110.cafe .
+
+open INV .
+  :id(inv11)
+
+  op  c1 : -> Cipher2 .
+
+  red inv110(S:Sys, c1) .
+close
+
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof11.cafe .
+:infer-proof inv11 .
+
+- Proof score 120 -> Standalone (7 m 29 s / 5 m 50 s)
+
+  eq backtrackLevels = 6 .
+  eq numInstVars = 2 .
+  eq extraImpLevels = 1 .
+
+load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc120.cafe .
+
+open INV .
+  :id(inv12)
+
+  op  c1 : -> Cipher3 .
+
+  red inv120(S:Sys, c1) .
+close
+
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof12.cafe .
+:infer-proof inv12 .
+
+- Proof score 130 -> inv100, inv110, inv120, inv140, inv150 (9 m 46 s / 9 m 5 s)
+
+  eq backtrackLevels = 10 .
+  eq numInstVars = 2 .
+  eq extraImpLevels = 1 .
+
+open INV .
+  :id(inv13)
+
+  op  n : -> Nonce .
+
+  red inv130(S:Sys, n) .
+close
+
+load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc130.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof13.cafe .
+
+:proven(inv100(S:Sys, r:Cipher1))
+:proven(inv110(S:Sys, C:Cipher2))
+:proven(inv120(S:Sys, C:Cipher3))
+:proven(inv140(S:Sys, C:Cipher1))
+:proven(inv150(S:Sys, C:Cipher2))
+
+:infer-proof inv13 .
+
+- Proof score 140 -> Dependencies: inv100, inv110, inv120, inv160 (11 m 8 s / 7 m 10 s)
+
+  eq backtrackLevels = 14 .
+  eq numInstVars = 2 .
+  eq extraImpLevels = 1 .
+
+load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc140.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof14.cafe .
+
+:proven(inv100(S:Sys, C:Cipher1))
+:proven(inv110(S:Sys, C:Cipher2))
+:proven(inv120(S:Sys, C:Cipher3))
+:proven(inv160(S:Sys, N:Nonce))
+
+open INV .
+  :id(inv14)
+
+  op  c : -> Cipher1 .
+
+  red inv140(S:Sys, c) .
+close
+
+:infer-proof inv14 .
+
+- Proof score 150 -> Dependencies: inv100 (23 m 31 s / 14 m 35 s)
+
+ulimit -s 65532
+
+  eq backtrackLevels = 16 .
+  eq numInstVars = 4 .
+  eq extraImpLevels = 1 .
+
+load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc150.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof15.cafe .
+
+:proven(inv100(S:Sys, C:Cipher1))
+:proven(inv110(S:Sys, C:Cipher2))
+:proven(inv120(S:Sys, C:Cipher3))
+:proven(inv160(S:Sys, N:Nonce))
+
+open INV .
+  :id(inv15)
+
+  op  c : -> Cipher2 .
+
+  red inv150(S:Sys, c) .
+close
+
+:infer-proof inv15 .
+
+- Proof score 160 -> Dependencies: inv100, inv110, inv120 (19 m 53 s / 10 m 54 s)
+
+  eq backtrackLevels = 14 .
+  eq numInstVars = 2 .
+  eq extraImpLevels = 1 .
+
+load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc160.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof16.cafe .
+
+:proven(inv100(S:Sys, C:Cipher1))
+:proven(inv110(S:Sys, C:Cipher2))
+:proven(inv120(S:Sys, C:Cipher3))
+
+open INV .
+  :id(inv16)
+
+  op  n : -> Nonce .
+
+  red inv160(S:Sys, n) .
+close
+
+:infer-proof inv16 .
+
+- Proof score 170 -> Dependencies: inv130, inv190, inv220 (38 m 4 s / 15 m 36 s)
+
+  eq backtrackLevels = 14 .
+  eq numInstVars = 4 .
+  eq extraImpLevels = 1 .
+
+load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc170.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof17.cafe .
+
+:proven(inv130(S:Sys, N:Nonce))
+:proven(inv190(S:Sys, P1:Prin, P2:Prin, R:Rand, N:Nonce))
+:proven(inv220(S:Sys, P1:Prin, P2:Prin, R:Rand, N:Nonce))
+
+open INV .
+  :id(inv17)
+
+  ops p1 p2 p3 : -> Prin .
+  op  r : -> Rand .
+  op  n : -> Nonce .
+
+  red inv170(S:Sys, p1, p2, p3, r, n) .
+close
+
+:infer-proof inv17 .
+
+- Proof score 180 -> Dependencies: inv130, inv230, inv240 (24 m 7 s / 14 m 2 s)
+
+  eq backtrackLevels = 16 .
+  eq numInstVars = 4 .
+  eq extraImpLevels = 1 .
+
+load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc180.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof18.cafe .
+
+:proven(inv130(S:Sys, N:Nonce))
+:proven(inv230(S:Sys, P1:Prin, P2:Prin, R:Rand))
+:proven(inv240(S:Sys, P1:Prin, P2:Prin, R:Rand))
+
+open INV .
+  :id(inv18)
+
+  ops p1 p2 p3 : -> Prin .
+  op  r : -> Rand .
+  op  n : -> Nonce .
+
+  red inv180(S:Sys, p1, p2, p3, r, n) .
+close
+
+:infer-proof inv18 .
+
+- Proof score 190 -> Dependencies: inv200, inv210 (24 m 46 s / 10 m 29 s)
+
+load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc190.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof19.cafe .
+
+:proven(inv200(S:Sys, P1:Prin, P2:Prin, R:Rand))
+:proven(inv210(S:Sys, P1:Prin, P2:Prin, R:Rand))
+
+open INV .
+  :id(inv19)
+
+  ops p1 p2 p3 : -> Prin .
+  op  r : -> Rand .
+  op  n : -> Nonce .
+
+  red inv190(S:Sys, p1, p2, r, n) .
+close
+
+:infer-proof inv19 .
+
+- Proof score 200 -> Dependencies: inv210 (17 m 53 s / 7 m 3 s)
+
+  eq backtrackLevels = 16 .
+  eq numInstVars = 4 .
+  eq extraImpLevels = 1 .
+
+load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc200.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof20.cafe .
+
+:proven(inv210(S:Sys, P1:Prin, P2:Prin, R:Rand))
+
+open INV .
+  :id(inv20)
+
+  ops p1 p2 p3 : -> Prin .
+  op  r : -> Rand .
+
+  red inv200(S:Sys, p1, p2, r) .
+close
+
+:infer-proof inv20 .
+
+- Proof score 210 -> Dependencies: inv100, inv110, inv120, inv140, inv150 (11 m 25 s / 9 m 38 s)
+
+  eq backtrackLevels = 16 .
+  eq numInstVars = 4 .
+  eq extraImpLevels = 1 .
+
+load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc210.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof21.cafe .
+
+:proven(inv100(S:Sys, C:Cipher1))
+:proven(inv110(S:Sys, C:Cipher2))
+:proven(inv120(S:Sys, C:Cipher3))
+:proven(inv140(S:Sys, C:Cipher1))
+:proven(inv150(S:Sys, C:Cipher2))
+
+open INV .
+  :id(inv21)
+
+  op  r : -> Rand .
+  ops p1 p2 : -> Prin .
+
+  red inv210(S:Sys, p1, p2, r) .
+close
+
+:infer-proof inv21 .
+
+- Proof score 220 -> Dependencies: inv130, inv190 (14 m 0 s / 5 m 42 s)
+
+  eq backtrackLevels = 16 .
+  eq numInstVars = 4 .
+  eq extraImpLevels = 1 .
+
+load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc220.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof22.cafe .
+
+:proven(inv130(S:Sys, N:Nonce))
+:proven(inv190(S:Sys, P1:Prin, P2:Prin, R:Rand, N:Nonce))
+
+open INV .
+  :id(inv22)
+
+  op  r : -> Rand .
+  ops p1 p2 : -> Prin .
+  op  n : -> Nonce .
+
+  red inv220(S:Sys, p1, p2, r, n) .
+close
+
+:infer-proof inv22 .
+
+- Proof score 230 -> Dependencies: inv130, inv170, inv260 (28 m 23 s / 24 m 2 s)
+
+  eq backtrackLevels = 16 .
+  eq numInstVars = 4 .
+  eq extraImpLevels = 1 .
+
+load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc230.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof23.cafe .
+
+:proven(inv130(S:Sys, N:Nonce))
+:proven(inv170(S:Sys, P1:Prin, P2:Prin, P3:Prin, R:Rand, N:Nonce))
+:proven(inv260(S:Sys, P1:Prin, P2:Prin, N1:Nonce, N2:Nonce))
+
+open INV .
+  :id(inv23)
+
+  op  r : -> Rand .
+  ops p1 p2 : -> Prin .
+
+  red inv230(S:Sys, p1, p2, r) .
+close
+
+:infer-proof inv23 .
+
+- Proof score 240 -> Dependencies: inv210, inv250 (26 m 53 s / 14 m 46 s)
+
+  eq backtrackLevels = 16 .
+  eq numInstVars = 4 .
+  eq extraImpLevels = 1 .
+
+load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc240.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof24.cafe .
+
+:proven(inv210(S:Sys, P1:Prin, P2:Prin, R:Rand))
+:proven(inv250(S:Sys, P1:Prin, P2:Prin, P3:Prin, R:Rand, N:Nonce))
+
+open INV .
+  :id(inv24)
+
+  op  r : -> Rand .
+  ops p1 p2 : -> Prin .
+
+  red inv240(S:Sys, p1, p2, r) .
+close
+
+:infer-proof inv24 .
+
+- Proof score 250 -> Dependencias: inv210 (21 m 17 s / 8 m 47 s)
+
+  eq backtrackLevels = 16 .
+  eq numInstVars = 4 .
+  eq extraImpLevels = 1 .
+
+load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc250.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof25.cafe .
+
+:proven(inv210(S:Sys, P1:Prin, P2:Prin, R:Rand))
+
+open INV .
+  :id(inv25)
+
+  op  r : -> Rand .
+  ops p1 p2 p3 : -> Prin .
+  op  n : -> Nonce .
+
+  red inv250(S:Sys, p1, p2, p3, r, n) .
+close
+
+:infer-proof inv25 .
+
+- Proof score 260 -> Standalone (12 m 43 s / 10 m 28 s)
+
+  eq backtrackLevels = 16 .
+  eq numInstVars = 4 .
+  eq extraImpLevels = 1 .
+
+open INV .
+  :id(inv26)
+
+  ops p1 p2 : -> Prin .
+  ops n1 n2 : -> Nonce .
+
+  red inv260(S:Sys, p1, p2, n1, n2) .
+close
+
+load ../examples/CCiMPG/NSLPK2/reduced_proof_score/prsc260.cafe .
+set-output ../examples/CCiMPG/NSLPK2/generated_proofs_reduced_ps/proof26.cafe .
+:infer-proof inv26 .

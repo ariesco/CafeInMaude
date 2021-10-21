@@ -85,6 +85,9 @@ mod IO is
     wrote(cafeInMaude, stdout)
     < cafeInMaude : CIM | state: exiting, AtS >
  => none .
+
+ op errorStr : -> String .
+ eq errorStr = printTokens('\n '\r 'Error: ' '\o) .
 endm
 
 mod PARSER-IO is
@@ -215,12 +218,16 @@ endm
 mod CIMPA-IO is
  pr (MAYBE * (op maybe to noVar)){Variable} .
  pr CIMPA-COMMANDS-PROCESSING .
+ pr ADD-PROVEN .
+ pr PRINT-TPS .
  pr PARSER-IO .
 
  vars T T' T'' T1 MPT MNL MSIS MMACS : Term .
+ vars TPS TPS' TPS'' : TrialPairSet .
  vars TL TL' TL1 TL2 : TermList .
  vars EqS PROVEN : EquationSet .
  vars QIL QIL' QIL'' : QidList .
+ vars PTL PTL' : ProofTreeList .
  vars SIS SIS' : ScoreInfoSet .
  vars PT PT' PT'' : ProofTree .
  var  MIOS : MIOccupationSet .
@@ -228,15 +235,19 @@ mod CIMPA-IO is
  vars PO PO' : ProofOrder .
  vars S S' OF SP : String .
  vars M M' M1 M2 : Module .
+ var  TrS TrS' : TermSet .
  var  AtS : AttributeSet .
  vars TQ TQ' : TaskQueue .
  var  SIM : ScoreInfoMap .
+ var  EqS' : EquationSet .
  var  SB : Substitution .
+ var  VS : VariableSet .
+ vars V V' : Variable .
+ var  ODS : OpDeclSet .
  vars MI FHOut : Oid .
  var  AttS : AttrSet .
  var  MACS : Macros .
  var  Eq : Equation .
- var  V : Variable .
  var  C : Constant .
  var  NL : NatList .
  var  ST : State .
@@ -244,12 +255,6 @@ mod CIMPA-IO is
  vars Q Q' : Qid .
  var  Ty : Type .
  var  B : Bool .
-
-
- var ODS : OpDeclSet .
- var EqS' : EquationSet .
-
- vars PTL PTL' : ProofTreeList .
  var  G : Goal .
 
  ***        ***
@@ -291,36 +296,71 @@ mod CIMPA-IO is
  op proof:_ : String -> Attribute [ctor] .
  *** Goals previously proven
  op provenGoals:_ : EquationSet -> Attribute [ctor gather (&)] .
+ *** Bound in the number of levels for backtracking
+ op backtrackLevels:_ : Nat -> Attribute [ctor] .
 
  ***                               ***
  *** Initial value for attributes. ***
  ***                               ***
  op initCiMPA-AtS : -> AttributeSet .
  eq initCiMPA-AtS = scoreinfo: mtSIM, ptree: mtPT, po: finished, tasks: mtTQueue,
-                    mios: noOccupation, cores: 1, indVar: noVar,
-                    macros: mtMacros, proof: "", provenGoals: none .
+                    mios: noOccupation, cores: 1, indVar: noVar, macros: mtMacros,
+                    proof: "", provenGoals: none, backtrackLevels: 6 .
 
  ***                        ***
  ***       SET CORES        ***
  ***                        ***
  crl [set-cores] :
-     < cafeInMaude : CIM | state: executeComm, input: ('set-cores_.['token[T]], TL), cores: N, AtS >
-  => < cafeInMaude : CIM | state: print&updateCores, input: TL, cores: N', AtS >
+     < cafeInMaude : CIM | state: executeComm, input: ('set-cores_.['token[T]], TL), cores: N,
+                           mios: MIOS, AtS >
+  => < cafeInMaude : CIM | state: print&updateCores, input: TL, cores: N', mios: MIOS, AtS >
      write(stdout, cafeInMaude, "\nNumber of cores set to " + S + ".\n\n")
-  if S := string(downQid(T)) /\
+  if allIdle(MIOS) /\
+     S := string(downQid(T)) /\
      N' := rat(S, 10) /\
      N' > 0 .
 
+ crl [set-cores-no-idle] :
+     < cafeInMaude : CIM | state: executeComm, input: ('set-cores_.['token[T]], TL),
+                           mios: MIOS, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, mios: MIOS, AtS >
+     write(stdout, cafeInMaude, errorStr + "Some processes are not idle.\n")
+  if not allIdle(MIOS) .
+
  crl [set-cores-no-nat] :
      < cafeInMaude : CIM | state: executeComm, input: ('set-cores_.['token[T]], TL), AtS >
-  => < cafeInMaude : CIM | state: print&updateCores, input: TL, AtS >
-     write(stdout, cafeInMaude, "\nError: the argument must be a natural number.\n")
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
+     write(stdout, cafeInMaude, errorStr + "the argument must be a natural number.\n")
   if not (rat(string(downQid(T)), 10) :: Nat ) .
 
  crl [set-cores-0] :
      < cafeInMaude : CIM | state: executeComm, input: ('set-cores_.['token[T]], TL), AtS >
-  => < cafeInMaude : CIM | state: print&updateCores, input: TL, AtS >
-     write(stdout, cafeInMaude, "\nError: the argument must be greater than 0.\n")
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
+     write(stdout, cafeInMaude, errorStr + "the argument must be greater than 0.\n")
+  if rat(string(downQid(T)), 10) == 0 .
+
+ ***                                  ***
+ ***       SET BACKTRACK BOUND        ***
+ ***                                  ***
+ crl [set-backtrack-bound] :
+     < cafeInMaude : CIM | state: executeComm, input: ('set-backtrack-bound_.['token[T]], TL),
+                           backtrackLevels: N, AtS >
+  => < cafeInMaude : CIM | state: print&updateCores, input: TL, backtrackLevels: N', AtS >
+     write(stdout, cafeInMaude, "\nBound for backtracking set to " + S + ".\n\n")
+  if S := string(downQid(T)) /\
+     N' := rat(S, 10) /\
+     N' > 0 .
+
+ crl [set-backtrack-no-nat] :
+     < cafeInMaude : CIM | state: executeComm, input: ('set-backtrack-bound_.['token[T]], TL), AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
+     write(stdout, cafeInMaude, errorStr + "the argument must be a natural number.\n")
+  if not (rat(string(downQid(T)), 10) :: Nat ) .
+
+ crl [set-backtrack-0] :
+     < cafeInMaude : CIM | state: executeComm, input: ('set-backtrack-bound_.['token[T]], TL), AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
+     write(stdout, cafeInMaude, errorStr + "the argument must be greater than 0.\n")
   if rat(string(downQid(T)), 10) == 0 .
 
  ***                        ***
@@ -369,7 +409,14 @@ mod CIMPA-IO is
                            current: M, proof: S', macros: mtMacros, AtS >
      write(stdout, cafeInMaude, printTokens(QIL))
   if [PT', PO', QIL] := evalGoalCommand(M, T, none) /\
-     S' := ":goal{" + printGoal(T) + "}" [print "goal " PO' "\n Goal - Antes: " PO " Después: " PO'] .
+     S' := ":goal{" + printGoal(T) + "}" .
+
+ crl [goal-error] :
+     < cafeInMaude : CIM | state: executeComm, input: (':goal`{_`}[T], TL),
+                           current: M, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, current: M, AtS >
+     write(stdout, cafeInMaude, errorStr + "No parse for goal.\n")
+  if not (evalGoalCommand(M, T, none) :: GoalRes) .
 
  ***                           ***
  ***       INDUCTION VAR       ***
@@ -383,6 +430,12 @@ mod CIMPA-IO is
   if V := downQid(T) /\
      S := "\nInduction set on " + printTokens(metaPrettyPrint(M, V, po)) + "\n\n" /\
      S' := "\n:ind on (" + printTokens(metaPrettyPrint(M, V, po)) + ")" .
+
+ crl [ind-var-no-var] :
+     < cafeInMaude : CIM | state: executeComm, input: (':ind`on`(_`)['CafeToken[T]], TL), AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
+     write(stdout, cafeInMaude, errorStr + "Invalid variable.\n")
+  if not (downQid(T) :: Variable) .
 
 
  ***                    ***
@@ -406,7 +459,16 @@ mod CIMPA-IO is
              then addProvenGoals(PT', PROVEN, V)
              else PT'
              fi /\
-     S' := "\n:apply(" + string(Q) + ")" [print "Apply - Antes " PO " Despues " PO'] .
+     S' := "\n:apply(" + string(Q) + ")" .
+
+ crl [applyParsed-error] :
+     < cafeInMaude : CIM | state: executeComm, input: (':applyComm[T], TL), ptree: PT,
+                           po: PO, current: M, indVar: V, macros: MACS, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, po: PO, current: M,
+                           indVar: V, macros: MACS, AtS >
+     write(stdout, cafeInMaude, errorStr + "Invalid macro " + string(Q) + ".\n")
+  if Q := downQid(T) /\
+     not (evalApply(M, Q, PT, V, MACS, PO) :: GoalRes) .
 
  ***                         ***
  ***       IMPLICATION       ***
@@ -442,7 +504,7 @@ mod CIMPA-IO is
      S := if B
           then "\n:imp[" + string(Q) + "] by {" + printTokenDown(T') + "}"
           else ""
-          fi [print "Imp - Antes: " PO] .
+          fi .
  ***                ***
  ***       ID       ***
  ***                ***
@@ -450,7 +512,7 @@ mod CIMPA-IO is
  rl [id] :
     < cafeInMaude : CIM | state: executeComm, input: (':id`(_`)[T], TL), AtS >
  => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
-    write(stdout, cafeInMaude, "\nError: Command not supported in interactive mode.\n\n") .
+    write(stdout, cafeInMaude, errorStr + "Command not supported in interactive mode.\n\n") .
  ***                   ***
  ***       PROOF       ***
  ***                   ***
@@ -458,7 +520,7 @@ mod CIMPA-IO is
  rl [proof] :
     < cafeInMaude : CIM | state: executeComm, input: (':proof`(_`)[T], TL), AtS >
  => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
-    write(stdout, cafeInMaude, "\nError: Command not supported in interactive mode.\n\n") .
+    write(stdout, cafeInMaude, errorStr + "Command not supported in interactive mode.\n\n") .
 
  ***                   ***
  ***       INFER       ***
@@ -467,7 +529,7 @@ mod CIMPA-IO is
  rl [infer] :
     < cafeInMaude : CIM | state: executeComm, input: (':infer`(_`)[T], TL), AtS >
  => < cafeInMaude : CIM | state: print&executeComm, input: TL, AtS >
-    write(stdout, cafeInMaude, "\nError: Command not supported in interactive mode.\n\n") .
+    write(stdout, cafeInMaude, errorStr + "Command not supported in interactive mode.\n\n") .
 
  ***                      ***
  ***       Postpone       ***
@@ -531,7 +593,7 @@ mod CIMPA-IO is
      PT' := selectGoal(PT, NL) /\
      PO' := selectGoal(PO, NL) /\
      S := "\n:sel(" + string(Q) + ")" /\
-     QIL := '\n 'Sentence Q 'selected. '\n [print "SEL - Antes: " PO " Después: " PO'] .
+     QIL := '\n 'Sentence Q 'selected. '\n .
 
  ***                        ***
  ***       DEFINITION       ***
@@ -547,17 +609,13 @@ mod CIMPA-IO is
      QIL := '\n Q 'defined 'as ':ctf ' '`{ ' printEq(M', Eq) ' '`} '\n /\
      S := "\n:def " + string(Q) + " = :ctf {" + printEqMacro(T') + "}" .
 
- crl [def-ctfXX] :
+ crl [def-ctf1-error] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:ctf`{_`}['CafeToken[T], T'], TL),
-                           macros: MACS, ptree: PT, proof: SP, AtS >
-  => < cafeInMaude : CIM | state: print&executeComm, input: TL, *** macros: (MACS # M', Q - Eq #),
-                           ptree: PT, proof: (SP + S), AtS >
-     write(stdout, cafeInMaude, printTokens(QIL))
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, errorStr + "Macro could not be parsed.\n\n")
   if Q := downQid(T) /\
-     *** # M', Q - Eq # := parseEqMacro(PT, Q, T') /\
-     QIL := nil /\ *** '\n Q 'defined 'as ':ctf ' '`{ ' printEq(M', Eq) ' '`} '\n /\
-     S := "" [print "Fallo " PT] . *** "\n:def " + string(Q) + " = :ctf {" + printEqMacro(T') + "}" .
-     *** eq_=_.['CafeBubble['__[''rb.Qid,''`(.Qid,''S#Sys.Qid,''`).Qid]],'CafeBubble[''B#CS5-1-1-2.Bit.Qid]]
+     not (parseEqMacro(PT, Q, T') :: Macro) .
 
  crl [def-ctf2] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:ctf`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
@@ -570,6 +628,14 @@ mod CIMPA-IO is
      QIL := '\n Q 'defined 'as ':ctf ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
      S := "\n:def " + string(Q) + " = :ctf [ " + printTokenDown(T') + " ]" .
 
+ crl [def-ctf2-error] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:ctf`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, errorStr + "Macro could not be parsed.\n\n")
+  if Q := downQid(T) /\
+     not (parseTermMacro(PT, Q, T') :: Macro) .
+
  crl [def-cvss] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvss`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
                            macros: MACS, ptree: PT, proof: SP, AtS >
@@ -577,10 +643,27 @@ mod CIMPA-IO is
                            ptree: PT, proof: (SP + S), AtS >
      write(stdout, cafeInMaude, printTokens(QIL))
   if Q := downQid(T) /\
-      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
-      subsortSingleBinaryOpConstraints(M', T'') /\
-      QIL := '\n Q 'defined 'as ':cvss ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
-      S := "\n:def " + string(Q) + " = :cvss [ " + printTokenDown(T') + " ]" .
+     # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+     subsortSingleBinaryOpConstraints(M', T'') /\
+     QIL := '\n Q 'defined 'as ':cvss ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+     S := "\n:def " + string(Q) + " = :cvss [ " + printTokenDown(T') + " ]" .
+
+ crl [def-cvss-error-macro] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvss`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, errorStr + "Macro could not be parsed.\n\n")
+  if Q := downQid(T) /\
+     not (parseTermMacro(PT, Q, T') :: Macro) .
+
+ crl [def-cvss-error-subsort] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvss`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, errorStr + "The term is not a sequence.\n\n")
+  if Q := downQid(T) /\
+     # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+     not subsortSingleBinaryOpConstraints(M', T'') .
 
  crl [def-cvvs] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvvs`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
@@ -589,9 +672,17 @@ mod CIMPA-IO is
                            ptree: PT, proof: (SP + S), AtS >
      write(stdout, cafeInMaude, printTokens(QIL))
   if Q := downQid(T) /\
-      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
-      QIL := '\n Q 'defined 'as ':cvvs ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
-      S := "\n:def " + string(Q) + " = :cvvs [ " + printTokenDown(T') + " ]" .
+     # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+     QIL := '\n Q 'defined 'as ':cvvs ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+     S := "\n:def " + string(Q) + " = :cvvs [ " + printTokenDown(T') + " ]" .
+
+ crl [def-cvvs-error] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvvs`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, errorStr + "Macro could not be parsed.\n\n")
+  if Q := downQid(T) /\
+     not (parseTermMacro(PT, Q, T') :: Macro) .
 
  crl [def-cvsv] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvsv`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
@@ -600,9 +691,17 @@ mod CIMPA-IO is
                            ptree: PT, proof: (SP + S), AtS >
      write(stdout, cafeInMaude, printTokens(QIL))
   if Q := downQid(T) /\
-      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
-      QIL := '\n Q 'defined 'as ':cvsv ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
-      S := "\n:def " + string(Q) + " = :cvsv [ " + printTokenDown(T') + " ]" .
+     # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+     QIL := '\n Q 'defined 'as ':cvsv ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+     S := "\n:def " + string(Q) + " = :cvsv [ " + printTokenDown(T') + " ]" .
+
+ crl [def-cvsv-error] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvsv`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, errorStr + "Macro could not be parsed.\n\n")
+  if Q := downQid(T) /\
+     not (parseTermMacro(PT, Q, T') :: Macro) .
 
  crl [def-cevss] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cevss`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
@@ -611,9 +710,17 @@ mod CIMPA-IO is
                            ptree: PT, proof: (SP + S), AtS >
      write(stdout, cafeInMaude, printTokens(QIL))
   if Q := downQid(T) /\
-      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
-      QIL := '\n Q 'defined 'as ':cevss ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
-      S := "\n:def " + string(Q) + " = :cevss [ " + printTokenDown(T') + " ]" .
+     # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+     QIL := '\n Q 'defined 'as ':cevss ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+     S := "\n:def " + string(Q) + " = :cevss [ " + printTokenDown(T') + " ]" .
+
+ crl [def-cevss-error] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cevss`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, errorStr + "Macro could not be parsed.\n\n")
+  if Q := downQid(T) /\
+     not (parseTermMacro(PT, Q, T') :: Macro) .
 
  crl [def-cvs] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvs`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
@@ -622,10 +729,27 @@ mod CIMPA-IO is
                            ptree: PT, proof: (SP + S), AtS >
      write(stdout, cafeInMaude, printTokens(QIL))
   if Q := downQid(T) /\
-      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
-      subsortUnaryBinaryOpConstraints(M', T'') /\
-      QIL := '\n Q 'defined 'as ':cvs ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
-      S := "\n:def " + string(Q) + " = :cvs [ " + printTokenDown(T') + " ]" .
+     # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+     subsortUnaryBinaryOpConstraints(M', T'') /\
+     QIL := '\n Q 'defined 'as ':cvs ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+     S := "\n:def " + string(Q) + " = :cvs [ " + printTokenDown(T') + " ]" .
+
+ crl [def-cvs-error-parse] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvs`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, errorStr + "Macro could not be parsed.\n\n")
+  if Q := downQid(T) /\
+     not (parseTermMacro(PT, Q, T') :: Macro) .
+
+ crl [def-cvs-error-subsort] :
+     < cafeInMaude : CIM | state: executeComm, input: (':def_=`:cvs`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
+                           ptree: PT, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, AtS >
+     write(stdout, cafeInMaude, errorStr + "The term is not a sequence.\n\n")
+  if Q := downQid(T) /\
+     # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+     not subsortUnaryBinaryOpConstraints(M', T'') .
 
  crl [def-csv] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:csv`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
@@ -634,10 +758,10 @@ mod CIMPA-IO is
                            ptree: PT, proof: (SP + S), AtS >
      write(stdout, cafeInMaude, printTokens(QIL))
   if Q := downQid(T) /\
-      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
-      subsortUnaryBinaryOpConstraints(M', T'') /\
-      QIL := '\n Q 'defined 'as ':csv ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
-      S := "\n:def " + string(Q) + " = :csv [ " + printTokenDown(T') + " ]" .
+     # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+     subsortUnaryBinaryOpConstraints(M', T'') /\
+     QIL := '\n Q 'defined 'as ':csv ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+     S := "\n:def " + string(Q) + " = :csv [ " + printTokenDown(T') + " ]" .
 
  crl [def-csvs] :
      < cafeInMaude : CIM | state: executeComm, input: (':def_=`:csvs`[_`]['CafeToken[T], 'CafeBubble[T']], TL),
@@ -646,10 +770,10 @@ mod CIMPA-IO is
                            ptree: PT, proof: (SP + S), AtS >
      write(stdout, cafeInMaude, printTokens(QIL))
   if Q := downQid(T) /\
-      # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
-      subsortUnaryBinaryOpConstraints(M', T'') /\
-      QIL := '\n Q 'defined 'as ':csvs ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
-      S := "\n:def " + string(Q) + " = :csvs [ " + printTokenDown(T') + " ]" .
+     # M', Q - T'' # := parseTermMacro(PT, Q, T') /\
+     subsortUnaryBinaryOpConstraints(M', T'') /\
+     QIL := '\n Q 'defined 'as ':csvs ' '`[ ' metaPrettyPrint(M', T'', po) ' '`] '\n /\
+     S := "\n:def " + string(Q) + " = :csvs [ " + printTokenDown(T') + " ]" .
 
  ***                          ***
  ***          PROVEN          ***
@@ -664,6 +788,30 @@ mod CIMPA-IO is
      T' := getTerm(metaParse(M, varsFromQidList(QIL), QIL, 'Bool)) /\
      S := "\n:proven(" + printTokens(QIL) + ")" .
 
+ crl [proven-error] :
+     < cafeInMaude : CIM | state: executeComm, input: (':proven`(_`)['bubble[T]], TL),
+                           current: M, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, current: M, AtS >
+     write(stdout, cafeInMaude, errorStr + "the term cannot be parsed.\n\n")
+  if QIL := downQidList(T) /\
+     VS := varsFromQidList(QIL) /\
+     not repeatedVarName(VS) /\
+     not (getTerm(metaParse(M, VS, QIL, 'Bool)) :: Term) .
+
+ crl [proven-repeated-var] :
+     < cafeInMaude : CIM | state: executeComm, input: (':proven`(_`)['bubble[T]], TL),
+                           current: M, AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, current: M, AtS >
+     write(stdout, cafeInMaude, errorStr + "repeated var name in term.\n\n")
+  if QIL := downQidList(T) /\
+     VS := varsFromQidList(QIL) /\
+     repeatedVarName(VS) .
+
+ op repeatedVarName : VariableSet -> Bool .
+ ceq repeatedVarName(V ; V' ; VS) = true
+  if getName(V) == getName(V') .
+ eq repeatedVarName(VS) = false [owise] .
+
  ***                            ***
  ***          GENERATE          ***
  ***                            ***
@@ -671,7 +819,7 @@ mod CIMPA-IO is
      < cafeInMaude : CIM | state: executeComm, input: (':infer-proof_.['token[T]], TL),
                            po: finished, ptree: PT, scoreinfo: SIM, tasks: TQ,
                            proof: SP, current: M, indVar: MV, provenGoals: PROVEN, AtS >
-  => < cafeInMaude : CIM | state: computing, input: TL, po: nil, ptree: PT', scoreinfo: SIM,
+  => < cafeInMaude : CIM | state: computing, input: TL, po: nil, ptree: PT'', scoreinfo: SIM,
                            tasks: TQ', proof: (SP + S), current: M, indVar: V, provenGoals: PROVEN, AtS >
   if Q := downQid(T) /\
      SIS $ M1, M2, (TL1, T1, TL2)$ := SIM[Q] /\
@@ -682,8 +830,8 @@ mod CIMPA-IO is
      S := "\n:goal{\n" + printTokens(printEqS(M, EqS, ')) + "}" +
           "\n:ind on (" + string(metaPrettyPrint(M, V, po)) + ")" +
           "\n:apply(si)" /\
-     TQ' := taskQueueForInductiveCases(PT', PO, SIS, mtMacros) /\
-     M' := addProvenGoals(M, PROVEN, V) .
+     PT'' := addProvenGoals(PT', PROVEN, V) /\
+     TQ' := taskQueueForInductiveCases(PT'', PO, SIS, mtMacros) .
 
      var TT TT' TT'' : Term .
      var Q'' : Qid .
@@ -731,32 +879,6 @@ mod CIMPA-IO is
      PT'' := addProvenGoals(PT', PROVEN, V) /\
      TQ' := taskQueueForInductiveCases(PT'', PO, SIS, MACS) .
 
- op addProvenGoals : ProofTree EquationSet Variable -> ProofTree .
- ceq addProvenGoals(| M, G, PTL, N |, EqS, V) = | M, G, PTL', N |
-  if PTL' := addProvenGoals*(PTL, EqS, V) .
- eq addProvenGoals(PT, EqS, V) = PT [owise] .
-
- op addProvenGoals* : ProofTreeList EquationSet Variable -> ProofTreeList .
- eq addProvenGoals*(mtPT, EqS, V) = mtPT .
- ceq addProvenGoals*(| M, G, PTL, N | PTL', EqS, V) = | M', G, PTL, N | addProvenGoals*(PTL', EqS, V)
-  if M' := addProvenGoals(M, EqS, V) .
-
- op addProvenGoals : Module EquationSet Variable -> Module .
- ceq addProvenGoals(M, EqS, V) = M'
-  if Ty := getType(V) /\
-     C := qid(string(getName(V)) + "#" + string(getType(V)) + "." + string(Ty)) /\
-     Q := getName(C) /\
-     ODS op Q : nil -> Ty [AttS] . := getOps(M) /\
-     EqS' := subsituteIndVar(EqS, V, C, 0) /\
-     M' := addHyp(M, EqS') .
- eq addProvenGoals(M, EqS, V) = M [owise] .
-
- op subsituteIndVar : EquationSet Variable Constant Nat -> EquationSet .
- eq subsituteIndVar(none, V, C, N) = none .
- ceq subsituteIndVar(eq T = T' [AttS] . EqS, V, C, N) = eq substitute(T, V <- C) = T' [metadata("HI") label(Q) nonexec AttS] .
-                                                        subsituteIndVar(EqS, V, C, s(N))
-  if Q := qid("proven-goal" + string(N, 10)) .
-
  *** Currently not fully supported by Maude due to blocking I/O
  crl [infer-proof] :
      < cafeInMaude : CIM | state: executeComm, input: (':infer-proof_.['token[T]], TL), proof: SP,
@@ -772,7 +894,7 @@ mod CIMPA-IO is
      MSIS := upTerm(SIS') /\
      MMACS := upTerm(MACS) /\
      T' := 'developProof[MPT, MNL, MSIS, MMACS] /\
-     S := "\npostpone ." [print "Hecho " TL] .
+     S := "\npostpone ." .
 
  ***                        ***
  ***       START TASK       ***
@@ -794,11 +916,12 @@ mod CIMPA-IO is
      S' := "\n:sel(" + S + ")\n" +
            printTokens(QIL) [print "Task finished: " NL] .
 
+ *** TODO: Error handling
  crl [task-finished-error] :
      reducedTerm(cafeInMaude, MI, N, T, Ty)
      < cafeInMaude : CIM | state: computing, mios: [MI, NL] MIOS, AtS >
   => < cafeInMaude : CIM | state: computing, mios: [MI, noTask] MIOS, AtS >
-  if Ty =/= 'NeQidList [print "Task finished: " T " con tipo " Ty] .
+  if Ty =/= 'NeQidList .
 
  ***                                ***
  ***       ALL TASKS FINISHED       ***
@@ -809,7 +932,26 @@ mod CIMPA-IO is
      write(stdout, cafeInMaude, "\nExecution finished.\n")
   if allIdle(MIOS) [print "\nFinished.\n"] .
 
-
+ ***                        ***
+ ***          HELP          ***
+ ***                        ***
+ crl [help] :
+     < cafeInMaude : CIM | state: executeComm, input: (':help`..@Command@, TL),
+                           ptree: PT, po: (NL y PO), AtS >
+  => < cafeInMaude : CIM | state: print&executeComm, input: TL, ptree: PT, po: (NL y PO), AtS >
+     write(stdout, cafeInMaude, S)
+  if M := getMod(PT, NL) /\
+     eq T = 'true.Bool [AttS] . := getGoal(PT, NL) /\
+     T' := getTerm(metaReduce(M, T)) /\
+     TrS := getEqualityTerms(M, T) /\
+     TrS' := getEqTermsWithImps(M, T) /\
+     TPS := processEqualityTerm*(M, TrS) /\
+     TPS' := processEqualityTerm*(M, TrS' - TrS) /\
+     TPS'' := (TPS' - TPS) /\
+     S := if printTPS(M, TPS, TPS') == ""
+          then "\nNo recommendations.\n"
+          else printTPS(M, TPS, TPS'')
+          fi .
  ***                        ***
  ***          SAVE          ***
  ***                        ***
@@ -825,13 +967,13 @@ mod CIMPA-IO is
     < cafeInMaude : CIM | state: executeComm, input: (':save-proof`..@Command@, TL),
                           proof: "", AtS >
  => < cafeInMaude : CIM | state: print&executeComm, input: TL, proof: "", AtS >
-    write(stdout, cafeInMaude, "\nError: No proof for saving.\n") .
+    write(stdout, cafeInMaude, errorStr + "No proof for saving.\n") .
 
  rl [save-proof-no-file] :
     < cafeInMaude : CIM | state: executeComm, input: (':save-proof`..@Command@, TL),
                           output-file: "", AtS >
  => < cafeInMaude : CIM | state: print&executeComm, input: TL, output-file: "", AtS >
-    write(stdout, cafeInMaude, "\nError: No output file defined.\n") .
+    write(stdout, cafeInMaude, errorStr + "No output file defined.\n") .
 
  rl [save-opened-file] :
     openedFile(cafeInMaude, fileManager, FHOut)

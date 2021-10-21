@@ -166,7 +166,7 @@ fmod PREPARSING is
      (Q == 'module) or-else (Q == 'view) or-else (Q == 'make) or-else (Q == ':goal) or-else (Q == 'load) or-else
      (Q == 'set-cores) or-else (Q == ':ind) or-else (Q == ':apply) or-else (Q == ':imp) or-else (Q == ':def) or-else
      (Q == ':id) or-else (Q == ':infer) or-else (Q == ':proof) or-else (Q == ':show) or-else (Q == ':desc) or-else
-     (Q == ':infer-proof) or-else (Q == ':generate-proof) .
+     (Q == ':infer-proof) or-else (Q == ':generate-proof) or-else (Q == 'set-backtrack-bound) .
  eq prepareOC(Q QIL, ACC, ACC') = prepareOC(QIL, ACC Q, ACC') [owise] .
 
 

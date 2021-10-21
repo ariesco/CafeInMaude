@@ -378,57 +378,47 @@ eq [inv23 :nonexec] : inv230(S:Sys, P:Prin, P0:Prin, R:Rand)  = true .
 
 	:apply(csb21#10)
 
-	:def csb22#10 = :ctf {eq m3(P@Prin, P@Prin, sender(M0#Msg), enc3(sender(M0#Msg), n(sender(M0#Msg), P@Prin, R@Rand))) \in nw(S#Sys)  = true .}
+	:imp [inv23]  by {P0:Prin <- P0@Prin ; P:Prin <- P@Prin ; R:Rand <- R@Rand ;}
+
+	:imp [proven-goal0]  by {N:Nonce <- n(sender(M0#Msg), P@Prin, R@Rand) ;}
+
+	:apply (rd)
+
+	:def csb22#10 = :ctf [m2(sender(M0#Msg), sender(M0#Msg), creator(M#Msg), enc2(creator(M#Msg), n(creator(M#Msg), sender(M0#Msg), R#Rand), n(sender(M0#Msg), P@Prin, R@Rand), sender(M0#Msg))) \in nw(S#Sys)  .]
 
 	:apply(csb22#10)
 
 	:imp [inv23]  by {P0:Prin <- P0@Prin ; P:Prin <- P@Prin ; R:Rand <- R@Rand ;}
 
+	:imp [proven-goal2]  by {P1:Prin <- P0@Prin ; P2:Prin <- P#Prin ; N1:Nonce <- n(P#Prin, P0@Prin, R#Rand) ; N2:Nonce <- n(P0@Prin, P@Prin, R@Rand) ;}
+
 	:apply (rd)
 
-	:postpone .
+	:imp [inv23]  by {P0:Prin <- P0@Prin ; P:Prin <- P@Prin ; R:Rand <- R@Rand ;}
 
-	:def csb23#10 = :ctf [m2(sender(M0#Msg), sender(M0#Msg), creator(M#Msg), enc2(creator(M#Msg), n(creator(M#Msg), sender(M0#Msg), R#Rand), n(sender(M0#Msg), P@Prin, R@Rand), sender(M0#Msg))) \in nw(S#Sys)  .]
+	:imp [proven-goal1]  by {P1:Prin <- P#Prin ; R:Rand <- R#Rand ; N:Nonce <- n(sender(M0#Msg), P@Prin, R@Rand) ; P2:Prin <- sender(M0#Msg) ; P3:Prin <- creator(M0#Msg) ;}
+
+	:apply (rd)
+
+	:imp [inv23]  by {P0:Prin <- P0@Prin ; P:Prin <- P@Prin ; R:Rand <- R@Rand ;}
+
+	:apply (rd)
+
+	:imp [inv23]  by {P0:Prin <- P0@Prin ; P:Prin <- P@Prin ; R:Rand <- R@Rand ;}
+
+	:apply (rd)
+
+	:imp [inv23]  by {P0:Prin <- P0@Prin ; P:Prin <- P@Prin ; R:Rand <- R@Rand ;}
+
+	:apply (rd)
+
+	:def csb23#10 = :ctf {eq nonce(cipher1(M#Msg))  = n(creator(M#Msg), sender(M0#Msg), R#Rand) .}
 
 	:apply(csb23#10)
 
-	:def csb24#10 = :ctf {eq m3(P@Prin, P@Prin, sender(M0#Msg), enc3(sender(M0#Msg), n(sender(M0#Msg), P@Prin, R@Rand))) \in nw(S#Sys)  = true .}
+	:def csb24#10 = :ctf {eq nonce1(cipher2(M0#Msg))  = n(creator(M#Msg), sender(M0#Msg), R#Rand) .}
 
 	:apply(csb24#10)
-
-	-- The corresponding proof score was not present.
-	:apply (rd)
-
-	:postpone .
-
-	:def csb25#10 = :ctf {eq m3(P@Prin, P@Prin, sender(M0#Msg), enc3(sender(M0#Msg), n(sender(M0#Msg), P@Prin, R@Rand))) \in nw(S#Sys)  = true .}
-
-	:apply(csb25#10)
-
-	-- The corresponding proof score was not present.
-	:apply (rd)
-
-	:postpone .
-
-	:imp [inv23]  by {P0:Prin <- P0@Prin ; P:Prin <- P@Prin ; R:Rand <- R@Rand ;}
-
-	:apply (rd)
-
-	:imp [inv23]  by {P0:Prin <- P0@Prin ; P:Prin <- P@Prin ; R:Rand <- R@Rand ;}
-
-	:apply (rd)
-
-	:imp [inv23]  by {P0:Prin <- P0@Prin ; P:Prin <- P@Prin ; R:Rand <- R@Rand ;}
-
-	:apply (rd)
-
-	:def csb26#10 = :ctf {eq nonce(cipher1(M#Msg))  = n(creator(M#Msg), sender(M0#Msg), R#Rand) .}
-
-	:apply(csb26#10)
-
-	:def csb27#10 = :ctf {eq nonce1(cipher2(M0#Msg))  = n(creator(M#Msg), sender(M0#Msg), R#Rand) .}
-
-	:apply(csb27#10)
 
 	:imp [inv23]  by {P0:Prin <- P0@Prin ; P:Prin <- P@Prin ; R:Rand <- R@Rand ;}
 

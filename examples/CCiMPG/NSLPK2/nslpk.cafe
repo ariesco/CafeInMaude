@@ -12,7 +12,7 @@
 --
 mod! PRINCIPAL {
   [Prin]
-  op intruder : -> Prin
+  op intruder : -> Prin {constr}
 }
 
 --
@@ -30,7 +30,7 @@ mod! RANDOM {
 mod! NONCE {
   pr(PRINCIPAL + RANDOM)
   [Nonce]
-  op n : Prin Prin Rand -> Nonce
+  op n : Prin Prin Rand -> Nonce {constr}
   op creator : Nonce -> Prin
   op forwhom : Nonce -> Prin
   op random : Nonce -> Rand
@@ -52,7 +52,7 @@ mod! NONCE {
 mod! CIPHER1 {
   pr(PRINCIPAL + NONCE)
   [Cipher1]
-  op enc1 : Prin Nonce Prin -> Cipher1
+  op enc1 : Prin Nonce Prin -> Cipher1 {constr}
   op key : Cipher1 -> Prin
   op nonce : Cipher1 -> Nonce
   op principal : Cipher1 -> Prin
@@ -74,7 +74,7 @@ mod! CIPHER1 {
 mod! CIPHER2 {
   pr(PRINCIPAL + NONCE)
   [Cipher2]
-  op enc2 : Prin Nonce Nonce Prin -> Cipher2
+  op enc2 : Prin Nonce Nonce Prin -> Cipher2 {constr}
   op key : Cipher2 -> Prin
   op nonce1 : Cipher2 -> Nonce
   op nonce2 : Cipher2 -> Nonce
@@ -88,7 +88,7 @@ mod! CIPHER2 {
   eq nonce1(enc2(K,N1,N2,P)) = N1 .
   eq nonce2(enc2(K,N1,N2,P)) = N2 .
   eq principal(enc2(K,N1,N2,P)) = P .
-  eq (enc2(K,N1,N2,P) = enc2(K',N1',N2',P')) 
+  eq (enc2(K,N1,N2,P) = enc2(K',N1',N2',P'))
     = (K = K' and N1 = N1' and N2 = N2' and P = P') .
 }
 
@@ -100,7 +100,7 @@ mod! CIPHER2 {
 mod! CIPHER3 {
   pr(PRINCIPAL + NONCE)
   [Cipher3]
-  op enc3 : Prin Nonce -> Cipher3
+  op enc3 : Prin Nonce -> Cipher3 {constr}
   op key : Cipher3 -> Prin
   op nonce : Cipher3 -> Nonce
   vars E31 E32 : Cipher3
@@ -124,9 +124,9 @@ mod! MESSAGE {
   [Msg]
   --      creator   sender    receiver
   --    --------------------------------------------------
-  op m1 : Prin Prin Prin Cipher1 -> Msg
-  op m2 : Prin Prin Prin Cipher2 -> Msg
-  op m3 : Prin Prin Prin Cipher3 -> Msg
+  op m1 : Prin Prin Prin Cipher1 -> Msg {constr}
+  op m2 : Prin Prin Prin Cipher2 -> Msg {constr}
+  op m3 : Prin Prin Prin Cipher3 -> Msg {constr}
   --
   op m1? : Msg -> Bool
   op m2? : Msg -> Bool
@@ -188,8 +188,8 @@ mod! MESSAGE {
 
 mod! BAG (D :: TRIV) {
   [Elt.D < Bag]
-  op void : -> Bag
-  op _,_ : Bag Bag -> Bag {assoc comm id: void}
+  op void : -> Bag {constr}
+  op _,_ : Bag Bag -> Bag {constr assoc comm id: void}
   op _\in_ : Elt.D Bag -> Bool
   var B : Bag
   vars E1 E2 : Elt.D
@@ -200,8 +200,8 @@ mod! BAG (D :: TRIV) {
 
 mod! SET (D :: TRIV) {
   [Elt.D < Set]
-  op empty : -> Set
-  op __ : Set Set -> Set {assoc comm idem id: empty}
+  op empty : -> Set {constr}
+  op __ : Set Set -> Set {constr assoc comm idem id: empty}
   op _\in_ : Elt.D Set -> Bool
   var S : Set
   vars E1 E2 : Elt.D
@@ -247,10 +247,10 @@ mod! NETWORK {
   pr(COLLECTION(D <= TRIV2CIPHER2)*{sort Collection -> ColCipher2})
   pr(COLLECTION(D <= TRIV2CIPHER3)*{sort Collection -> ColCipher3})
   --
-  op cnonce : Network -> ColNonce
-  op cenc1 : Network -> ColCipher1
-  op cenc2 : Network -> ColCipher2
-  op cenc3 : Network -> ColCipher3
+  op cnonce : Network -> ColNonce {constr}
+  op cenc1 : Network -> ColCipher1 {constr}
+  op cenc2 : Network -> ColCipher2 {constr}
+  op cenc3 : Network -> ColCipher3 {constr}
   --
   var NW : Network
   var M : Msg
@@ -280,14 +280,14 @@ mod! NETWORK {
          not(m2?(M) and key(cipher2(M)) = intruder and nonce1(cipher2(M)) = N) and
          not(m2?(M) and key(cipher2(M)) = intruder and nonce2(cipher2(M)) = N) and
          not(m3?(M) and key(cipher3(M)) = intruder and nonce(cipher3(M)) = N) .
-  
+
   ceq nonce2(cipher2(M)) \in cnonce(NW) = true
       if m2?(M) and key(cipher2(M)) = intruder and M \in NW .
   ceq nonce(cipher1(M)) \in cnonce(NW) = true
       if m1?(M) and key(cipher1(M)) = intruder and M \in NW .
   ceq n(sender(M),P,R:Rand) \in cnonce(NW) = true
       if m2?(M) and key(cipher2(M)) = intruder and M \in NW and n(sender(M),P,R:Rand) = nonce2(cipher2(M)) .
-  
+
   --
   -- cenc1 : the collection of cipher1's gleaned by the intruder.
   -- If the cipher is encrypted by the intruder's public key, it is not necessary
@@ -302,7 +302,7 @@ mod! NETWORK {
   ceq cipher1(M) \in cenc1(NW) = true
       if m1?(M) and not(key(cipher1(M)) = intruder) and M \in NW .
   ceq enc1(K,nonce(E1),P) \in cenc1(NW) = E1 \in cenc1(NW)
-      if K = key(E1) and P = principal(E1)  . 
+      if K = key(E1) and P = principal(E1)  .
 
   --
   -- cenc2 : the collection of cipher2's gleaned by the intruder.
@@ -314,10 +314,10 @@ mod! NETWORK {
       if m2?(M) and not(key(cipher2(M)) = intruder) and E2 = cipher2(M) .
   ceq E2 \in cenc2(M,NW) = E2 \in cenc2(NW)
       if not(m2?(M) and not(key(cipher2(M)) = intruder) and E2 = cipher2(M)) .
-  
+
   ceq cipher2(M) \in cenc2(NW) = true
       if m2?(M) and not(key(cipher2(M)) = intruder) and M \in NW .
-  ceq m2(Q1,Q,P,E2) \in NW = false 
+  ceq m2(Q1,Q,P,E2) \in NW = false
       if E2 \in cenc2(NW) = false and not(key(E2) = intruder) .
 
   --
@@ -330,11 +330,11 @@ mod! NETWORK {
       if m3?(M) and not(key(cipher3(M)) = intruder) and E3 = cipher3(M) .
   ceq E3 \in cenc3(M,NW) = E3 \in cenc3(NW)
       if not(m3?(M) and not(key(cipher3(M)) = intruder) and E3 = cipher3(M)) .
-    
+
   ceq cipher3(M) \in cenc3(NW) = true
       if m3?(M) and not(key(cipher3(M)) = intruder) and M \in NW .
-  
-  ceq m3(Q1,P,Q,E3) \in NW = false 
+
+  ceq m3(Q1,P,Q,E3) \in NW = false
       if E3 \in cenc3(NW) = false and not(key(E3) = intruder) .
 
   ceq m1(creator(M), creator(M), P, enc1(P,N:Nonce,creator(M))) \in NW = true
@@ -386,7 +386,7 @@ mod* NSLPK {
 -- for sdm1
   op c-sdm1 : Sys Prin Prin Rand -> Bool
   eq c-sdm1(S,P,Q,R) = not (R \in ur(S)) .
-  -- 
+  --
   ceq ur(sdm1(S,P,Q,R)) = R ur(S) if c-sdm1(S,P,Q,R) .
   ceq nw(sdm1(S,P,Q,R)) = (m1(P,P,Q,enc1(Q,n(P,Q,R),P)) , nw(S)) if c-sdm1(S,P,Q,R) .
   ceq sdm1(S,P,Q,R)     = S if not c-sdm1(S,P,Q,R) .
@@ -473,7 +473,7 @@ mod* NSLPK {
 }
 
 mod INV {
-  pr(NSLPK) 
+  pr(NSLPK)
 -- declare invariants to prove
   op inv100 : Sys Cipher1 -> Bool
   op inv110 : Sys Cipher2 -> Bool
@@ -504,7 +504,7 @@ mod INV {
   eq inv100(S,E1) = (E1 \in cenc1(nw(S)) implies not(key(E1) = intruder)) .
   eq inv110(S,E2) = (E2 \in cenc2(nw(S)) implies not(key(E2) = intruder)) .
   eq inv120(S,E3) = (E3 \in cenc3(nw(S)) implies not(key(E3) = intruder)) .
-  eq inv130(S,N) 
+  eq inv130(S,N)
      = (N \in cnonce(nw(S)) implies (creator(N) = intruder or forwhom(N) = intruder)) .
   eq inv140(S,E1)
      = (E1 \in cenc1(nw(S)) and principal(E1) = intruder
@@ -529,16 +529,16 @@ mod INV {
         m3(P,P,Q,enc3(Q,n(Q,P,R))) \in nw(S)) .
   eq inv190(S,P,Q,R,N)
      = (not(P = intruder) and enc2(P,n(P,Q,R),N,Q) \in cenc2(nw(S))
-        implies 
+        implies
         R \in ur(S)) .
   eq inv200(S,P,Q,R)
-     = (not(P = intruder) and not(Q = intruder) and 
+     = (not(P = intruder) and not(Q = intruder) and
         enc1(Q,n(P,Q,R),P) \in cenc1(nw(S))
-        implies 
+        implies
         R \in ur(S)) .
   eq inv210(S,P,Q,R)
      = (not(P = intruder) and n(P,Q,R) \in cnonce(nw(S))
-        implies 
+        implies
         R \in ur(S)) .
   eq inv220(S,P,Q,R,N)
      = (not(P = intruder) and
@@ -553,14 +553,14 @@ mod INV {
         m3(P,P,Q,enc3(Q,n(Q,P,R))) \in nw(S)) .
   eq inv240(S,P,Q,R)
      = (not(Q = intruder) and enc3(Q,n(Q,P,R)) \in cenc3(nw(S))
-        implies 
+        implies
         R \in ur(S)) .
   eq inv250(S,P1,P,Q,R,N)
      = (not(Q = intruder) and not(P1 = intruder) and
         enc2(P1,N,n(Q,P,R),Q) \in cenc2(nw(S))
-        implies 
+        implies
         R \in ur(S)) .
-  eq inv260(S,P,Q,N1,N2) 
+  eq inv260(S,P,Q,N1,N2)
      = (not(P = intruder) and
         m2(P,P,Q,enc2(Q,N1,N2,P)) \in nw(S)
         implies
