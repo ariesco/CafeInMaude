@@ -1,3 +1,8 @@
+***(
+ Before using metaParse to parse the input, we need to transform it so some constructions are in line
+ with Maude syntax, which is required by some Full Maude parsing functions.
+ This module is in charge of implementing this functionality.
+)
 fmod PREPARSING is
  pr QID-LIST .
  pr EXT-BOOL .
@@ -12,6 +17,9 @@ fmod PREPARSING is
  sort NormRes .
  op <<<_,_>>> : QidList QidList -> NormRes [ctor] .
 
+ ***(
+  This function introduces those dots required by Maude but do not required by CafeOBJ.
+ )
  op normalizeCafeOBJ : QidList -> QidList .
  ceq normalizeCafeOBJ(QIL Q Q' QIL') = normalizeCafeOBJ(QIL Q '. Q' QIL')
   if Q =/= '. /\ Q =/= '`, /\ Q =/= '`] /\ Q =/= '* /\ Q =/= '`) /\ Q =/= 'proof /\
@@ -30,6 +38,9 @@ fmod PREPARSING is
                                   fi [owise] .
  eq normalizeCafeOBJ(QIL) = normalizeImports(QIL) [owise] .
 
+ ***(
+  This function adapts the CafeOBJ syntax to Maude when traversing the importation list.
+ )
  op normalizeImports : QidList -> QidList .
  eq normalizeImports(QIL) = normalizeImports(QIL, nil) .
 
@@ -61,7 +72,9 @@ fmod PREPARSING is
   if <<< QIL2, QIL3 >>> := otfView(QIL, 0) .
  eq normalizeImp(Q QIL, QIL', N) = normalizeImp(QIL, QIL' Q, N) [owise] .
 
-
+ ***(
+  This function transforms the syntax for views.
+ )
  op normalizeCafeOBJView : QidList -> QidList .
  ceq normalizeCafeOBJView(QIL '`, Q QIL') = normalizeCafeOBJView(QIL '. Q QIL')
   if Q == 'sort or-else Q == 'hsort or-else Q == 'op or-else
@@ -79,6 +92,10 @@ fmod PREPARSING is
  eq otfView('`{ QIL, QIL', N) = otfView(QIL, QIL' '`{, s(N)) .
  eq otfView(Q QIL, QIL', N) = otfView(QIL, QIL' Q, N) [owise] .
 
+ ***(
+  This function adds dots in open-close environments. These dots are required by
+  Ful Maude parsing functions.
+ )
  op normalizeOpenClose : QidList -> QidList .
  *** We look for the end of the module expression to place the dot
  ceq normalizeOpenClose(Q Q' QIL) = Q '. normOpenCloseAux(Q' QIL)
@@ -94,7 +111,9 @@ fmod PREPARSING is
  eq normalizeOpenClose(Q '. QIL) = Q '. normOpenCloseAux(QIL) .
  eq normalizeOpenClose(Q Q' QIL) = Q normalizeOpenClose(Q' QIL) [owise] .
 
-
+ ***(
+  This function adds dots as for modules.
+ )
  op normOpenCloseAux : QidList -> QidList .
  ceq normOpenCloseAux(QIL Q Q' QIL') = normOpenCloseAux(QIL Q '. Q' QIL')
   if Q =/= '. /\ Q =/= '`, /\ Q =/= '`] /\ Q =/= '* /\ Q =/= '`) /\ Q =/= '`{ /\
@@ -114,6 +133,9 @@ fmod PREPARSING is
                                      else QIL Q 'close
                                      fi [owise] .
 
+ ***(
+  This function modifies the header and the principal sort, so it has a unique representation.
+ )
  op $prepareModule : QidList -> QidList .
  eq $prepareModule('mod! QIL '`}) = $prepareModule(normalizeCafeOBJ('cmod! QIL '`})) .
  eq $prepareModule('module! QIL '`}) = $prepareModule('mod! QIL '`}) .
@@ -137,6 +159,10 @@ fmod PREPARSING is
   if Q' =/= ': .
  eq $prepareModule(QIL) = QIL [owise] .
 
+ ***(
+  This function looks for the end of modules, commands, and environments, so the functions above can be
+  applied to an isolated module.
+ )
  op prepareModule : QidList -> QidList .
  ceq prepareModule('open QIL) = QIL'
   if QIL' := prepareOC(QIL, 'open, nil) .
@@ -158,6 +184,9 @@ fmod PREPARSING is
  eq prepareModule(QIL '. 'open Q '. QIL', ACC, ACC') = prepareOC(QIL', 'open Q '. , ACC' prepareModule(ACC QIL '.)) .
  eq prepareModule(Q QIL, ACC, ACC') = prepareModule(QIL, ACC Q, ACC') [owise] .
 
+ ***(
+  This function is applied to open-close environments, in order to find the end of the environment.
+ )
  op prepareOC : QidList QidList QidList -> QidList .
  eq prepareOC(nil, ACC, ACC') = ACC' $prepareModule(ACC) .
  eq prepareOC('close 'open QIL', ACC, ACC') = prepareOC(QIL', 'open, ACC' prepareModule(ACC 'close)) .
@@ -169,22 +198,36 @@ fmod PREPARSING is
      (Q == ':infer-proof) or-else (Q == ':generate-proof) or-else (Q == 'set-backtrack-bound) .
  eq prepareOC(Q QIL, ACC, ACC') = prepareOC(QIL, ACC Q, ACC') [owise] .
 
-
+ ***(
+  This function receives a String, obtained from a file, removes the elements after the end-of-file, and uses
+  the predefined function tokenize to transform the thus obtained String into a QidList, applies the previous
+  transformations, and transforms it back into a String using printTokens.
+ )
  op transformText : String -> String .
  ceq transformText(S) = S''
   if S' := removeAfterEOF(S) /\
      S'' := printTokens(prepareModule(tokenize(S'))) .
 
+ ***(
+  This function removes all the elements after an end-of-file.
+ )
  op removeAfterEOF : String -> String .
  ceq removeAfterEOF(S) = S'
   if N := find(S, "eof", 0) /\
      S' := substr(S, 0, N) .
  eq removeAfterEOF(S) = S [owise] .
 
+ ***(
+  This function removes the comments from the line.
+ )
  op transformLine : String -> String .
  ceq transformLine(S) = S'
   if S' := removeComments(S) .
 
+ ***(
+  This function distinguishes between the different types
+  of comments, removing them.
+ )
  op removeComments : String -> String .
  ceq removeComments(S) = removeComments(S')
   if N := find(S, "--", 0) /\
