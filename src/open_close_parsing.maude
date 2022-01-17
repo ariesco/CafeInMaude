@@ -2939,6 +2939,8 @@ and \verb"sizeTL" just computes the size of a list of terms:
   eq eqDefinedFor(M, T) = false [owise] .
 
   op eqDefinedFor : Module Term Term -> Bool .
+  ceq eqDefinedFor(M, T, 'true.Bool) = true
+   if eq T = 'false.Bool [AtS] . EqS := getEqs(M) .
   ceq eqDefinedFor(M, T, T') = true
    if eq T = T' [AtS] . EqS := getEqs(M) .
   ceq eqDefinedFor(M, T, T') = true
@@ -3112,8 +3114,8 @@ and \verb"sizeTL" just computes the size of a list of terms:
   eq consistentPremises(M, M', CS) = consistentPremises(getEqs(M), M, M', CS) .
 
   op consistentPremises : EquationSet Module Module ConsSub -> Bool [memo] .
-  ceq consistentPremises(eq T = T' [AtS] . EqS, M, M', CS) = (T3 =/= 'false.Bool) and
-                                                             *** exactEq(M', T1, T2) and
+  ceq consistentPremises(eq T = T' [AtS] . EqS, M, M', CS) = (exactEq(M', T1, T2) or-else
+                                                              T3 =/= 'false.Bool) and
                                                              consistentPremises(EqS, M, M', CS)
    if isExec(AtS) /\
       T1 := instantiateVars(M, M', T, CS) /\
@@ -3137,8 +3139,8 @@ and \verb"sizeTL" just computes the size of a list of terms:
 
   op consistentPremisesEq : EquationSet Module Module Module ConsSub -> Bool .
   ceq consistentPremisesEq(eq T = T' [AtS] . EqS, M, M', M'', CS) =
-                           ((T3 =/= 'false.Bool) or-else definedForOther(M'', T1, T2)) and
-                           *** asd (exactEq(M'', T1, T2) or-else definedForOther(M'', T1, T2)) and
+                           (exactEq(M'', T1, T2) or-else 
+                           T3 =/= 'false.Bool or-else definedForOther(M'', T1, T2)) and
                            consistentPremisesEq(EqS, M, M', M'', CS)
    if isExec(AtS) /\
       T1 := instantiateVars(M, M'', T, CS) /\
