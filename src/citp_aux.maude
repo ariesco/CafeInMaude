@@ -31,15 +31,27 @@ fmod GOAL is
  vars SR SR' : SearchRes .
  var  PO : ProofOrder .
 
+ ***(
+  This function extracts the equation set from the goal.
+ )
  op getEq : Goal -> EquationSet .
  eq getEq([NL, Q, EqS, CURR, PRV]) = EqS .
 
+ ***(
+  This function extracts the id from the goal.
+ )
  op getId : Goal -> NatList .
  eq getId([NL, Q, EqS, CURR, PRV]) = NL .
 
+ ***(
+  This function extracts whether the goal is proven.
+ )
  op isProven : Goal -> Bool .
  eq isProven([NL, Q, EqS, CURR, PRV]) = PRV .
 
+ ***(
+  This function extracts the size of the node.
+ )
  op size : ProofTree -> Nat .
  eq size(mtPT) = 0 .
  eq size(| M, G, PrL, N |) = N .
@@ -53,6 +65,9 @@ fmod GOAL is
 
  op allProven : -> SearchRes [ctor] .
 
+ ***(
+  This function returns the list of natural numbers with the lowest index.
+ )
  op minSR : SearchRes SearchRes -> SearchRes [comm assoc] .
  eq minSR(allProven, SR) = SR .
  eq minSR(N NL, N' NL') = if N < N'
@@ -66,24 +81,39 @@ fmod GOAL is
  op finished : -> ProofOrder [ctor] .
  op _y_ : ProofOrder ProofOrder -> ProofOrder [ctor assoc id: finished] .
 
+ ***(
+  This function returns the "tail" of the list of open goals.
+ )
  op pop : ProofOrder -> ProofOrder .
  eq pop(finished) = finished .
  eq pop(NL y PO) = PO .
 
+ ***(
+  This function returns the "head" of the list of open goals.
+ )
  op fst : ProofOrder ~> NatList .
  eq fst(NL y PO) = NL .
 
+ ***(
+  This function returns the equation in the goal in the current node.
+ )
  op getGoal : ProofTree NatList ~> Equation .
  eq getGoal(| M, G, PrL, N |, nil) = getEq(G) .
  ceq getGoal(| M, G, PrL, N |, s(N') NL) = getGoal(P, NL)
   if P := getNth(PrL, N') .
 
+ ***(
+  This function traverses the list of proof trees and returns the nth.
+ )
  op getNth : ProofTreeList Nat ~> ProofTree .
  ceq getNth(P PrL, 0) = P
   if P =/= mtPT .
  ceq getNth(P PrL, s(N)) = getNth(PrL, N)
   if P =/= mtPT .
 
+ ***(
+  This function returns the module in the goal in the current node.
+ )
  op getMod : ProofTree NatList ~> Module .
  eq getMod(| M, G, PrL, N |, nil) = M .
  ceq getMod(| M, G, PrL, N |, s(N') NL) = getMod(P, NL)

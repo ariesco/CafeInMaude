@@ -797,6 +797,8 @@ fmod OPEN-CLOSE-PARSER is
  * to make the consistency of variable names
  * author: duongtd
  * date: 21/10/09
+ * This function takes into account the name of the induction variable in order
+ to avoid name clashes.
  *)
   op buildTermsCtors2 : OpDeclSet String Variable -> TermList .
   eq buildTermsCtors2(none, STR, V) = empty .
@@ -3234,7 +3236,7 @@ and \verb"sizeTL" just computes the size of a list of terms:
 
   op inferGoal : ScoreInfoSet ~> TermList .
   ceq inferGoal($ M, M', (T, TL)$ SIS) = TL2
-   if TL' := TL, completeTermList(SIS) /\
+   if TL' := TL, allReductions(SIS) /\
       TL1 := inferGoal(M, (T, TL')) /\
       TL2 := renameRepVars*(TL1) .
 

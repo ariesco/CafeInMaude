@@ -123,6 +123,9 @@ mod MTP is
                            preparsed: RDB', AtS >
   if < RDB', PSM', HSM', QIL > := procCafeMod('cmod*_`{_`}[T,T'], PSM, HSM, TSM, PM, MS, VIEWS) .
 
+ ***                        ***
+ ***          MOD!          ***
+ ***                        ***
  crl [mod!] :
      < cafeInMaude : CIM | state: executeComm, input: ('cmod!_`{_`}[T,T'], TL),
                            tsm: TSM, hsm: HSM, psorts: PSM, params: PM, views: VIEWS,

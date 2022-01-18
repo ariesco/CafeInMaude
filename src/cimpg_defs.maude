@@ -57,18 +57,23 @@ fmod SCORE-INFO-MAP is
  vars M M' : Module .
  var  TL : TermList .
 
+ ***(
+  This function introduces a ScoreInfo into the appropriate element of the ScoreInfoMap.
+ )
  op addSIM : ScoreInfoMap Qid ScoreInfo -> ScoreInfoMap .
  eq addSIM((Q : SIS) SIM, Q, SI) = (Q : SIS SI) SIM .
  eq addSIM(SIM, Q, SI) = (Q : SI) SIM .
 
- op completeTermList : ScoreInfoSet -> TermList .
- eq completeTermList(noScoreInfo) = empty .
- eq completeTermList($ M, M', TL $ SIS) = TL, completeTermList(SIS) .
-
+ ***(
+  This function returns the ScoreInfoSet associated to the given Qid.
+ )
  op _[_] : ScoreInfoMap Qid -> ScoreInfoSet .
  eq ((Q : SIS) SIM)[Q] = SIS .
  eq SIM[Q] = noScoreInfo [owise] .
 
+ ***(
+  This function extracts all the terms being reduced.
+ )
  op allReductions : ScoreInfoSet -> TermList .
  eq allReductions(noScoreInfo) = empty .
  eq allReductions($ M, M', TL $ SIS) = TL, allReductions(SIS) .
