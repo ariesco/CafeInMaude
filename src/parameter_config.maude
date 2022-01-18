@@ -1,3 +1,11 @@
+***(
+ CiMPG+F uses the constants in this module for its algorithms:
+ - backtrackLevels sets the number of case splittings that can be tried.
+ - numInstVars sets the number of variables that can be exhaustively instantiated
+ in order to prove the subgoal.
+ - extraImpLevels sets the number of extra implications (besides the current goal)
+ that can be used generate case splittings.
+)
 fmod PARAMETER-CONFIG is
   pr NAT .
 
