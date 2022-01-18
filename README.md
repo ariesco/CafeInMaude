@@ -3,7 +3,8 @@ CafeInMaude: A translation from CafeOBJ into Maude
 
 CafeInMaude is a tool to introduce CafeOBJ specifications into the Maude system. Please note
 that the current version of CafeInMaude runs in Maude alpha132 (December 2020), please visit
-the *previous versions* folder for Maude 2 versions.
+the *previous versions* folder for Maude 2 versions (note older versions do not support most
+of the features, like parallel execution).
 
 This tool has the following features:
 * Supports operators, predicates, equations, and transitions, and all their related
@@ -45,21 +46,61 @@ Using the tool
     $ maude -allow-files src/cafeInMaude.maude
 ```
 
-Once the tool is started, the **load** command can be used for loading files:
+Once the tool is started, the **load** command can be used for loading files. For example, we can load
+the 2-processes mutal exclusion protocol specification by typing:
 
 ```
     $ CafeInMaude> load ../examples/CCiMPG/2p-mutex/2p-mutex.cafe .
 ```
 
-In general, the examples in the **CCIMPG** folder provide a **commands_XXX.cafe** file with the
+Likewise, we would load the proof related to this protocol with the following command:
+
+```
+load ../examples/CCiMPG/2p-mutex/all_proofs.cafe .
+```
+
+Finally, we can set the file for storing proofs as follows:
+
+```
+set-output ../examples/CCiMPG/2p-mutex/2p-proof.cafe .
+```
+
+Because CiMPG+F supports parallel execution, we need to set the number of cores that
+will be used for parallel computation by:
+
+```
+set-cores 4 .
+```
+
+Because the open-close environments are named as **inv1** in the proofs, we can infer
+the proof using:
+
+```
+:infer-proof inv1 .
+```
+
+The proof can be stored in an external file by typing:
+
+```
+:save-proof .
+```
+
+This proof can be loaded using:
+
+```
+load ../examples/CCiMPG/2p-mutex/2p-proof.cafe .
+```
+
+In general, the examples in the **CCIMPG** folder provide a **commands_cimpg.cafe** file with the
 commands required to run the example. For example, the **2p-mutex** folder contains a
 **commands_cimpg.cafe** file that can be loaded as follows:
 
 ```
-    $ CafeInMaude> load load ../examples/CCiMPG/2p-mutex/commands_cimpg.cafe .
+    $ CafeInMaude> load ../examples/CCiMPG/2p-mutex/commands_cimpg.cafe .
 ```
 
-This file contains the commands for loading the modules, generating the proof, saving, and loading it.
+This file contains the commands for loading the modules, generating the proof, saving, and loading it,
+explained above.
 
 General commands
 ----------------

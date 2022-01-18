@@ -1,5 +1,5 @@
 ***(
- This module is in charge of implementeing the predefined (in CafeOBJ) search command.
+ This module is in charge of implementing the predefined (in CafeOBJ) search command.
  It defines functions for checking whether the command is a search predicate, for parsing it, and for solving it.
 )
 fmod SEARCH_PREDICATE is
