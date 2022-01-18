@@ -1,3 +1,6 @@
+***(
+ Predefined CafeOBJ module.
+)
 fmod 3TUPLE {C1 :: TRIV, C2 :: TRIV, C3 :: TRIV} is
     sort 3Tuple .
 

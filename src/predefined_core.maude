@@ -1,3 +1,6 @@
+***(
+ Predefined CafeOBJ module for equality.
+)
 fmod EQL is
   op _=_ : Universal Universal -> Bool [comm poly(1 2) prec 54] .
 
@@ -5,6 +8,9 @@ fmod EQL is
   eq (B:Bool = B:Bool) = true .
 endfm
 
+***(
+ Predefined CafeOBJ module for searches.
+)
 fmod RWL is
   pr NAT .
 
