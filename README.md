@@ -42,7 +42,7 @@ Using the tool
 1. The tool is started by just loading the **CafeInMaude.maude** file into the Maude system:
 
 ```
-    $ maude src/cafeInMaude.maude
+    $ maude -allow-files src/cafeInMaude.maude
 ```
 
 Once the tool is started, the **load** command can be used for loading files:
