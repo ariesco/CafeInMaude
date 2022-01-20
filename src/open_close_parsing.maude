@@ -2788,7 +2788,7 @@ and \verb"sizeTL" just computes the size of a list of terms:
   var  IP : ImpPair .
 
   ***(
-
+   Function that uses implications in order to generate new case splittings.
   )
   op tryImplication : Module Term TermList -> ImpTryRes .
   eq tryImplication(M, T, TL) = tryImplication(M, T, TL, extraImpLevels) .
@@ -2824,6 +2824,9 @@ and \verb"sizeTL" just computes the size of a list of terms:
       [IPL, true] := $tryImplication(M, '_implies_[T'', T], TL', TL', IP, s(N)) .
   eq $tryImplication(M, T, (T', TL), TL', IP, s(N)) = $tryImplication(M, T, TL, TL', IP, s(N)) [owise print "A"] .
 
+  ***(
+   Function that generates all possible instantiations.
+  )
   op allIns : Module TermSubPairSet -> TermSubPairSet [memo] .
   ceq allIns(M, [T, SB, Q] TSPS) = allIns(M, TSPS TSPS')
    if hasVars(T) /\
@@ -2839,20 +2842,31 @@ and \verb"sizeTL" just computes the size of a list of terms:
       C := qid(string(Q'') + "." + string(Ty)) .
   eq allIns(TSP, ODS, TSPS) = TSPS [owise] .
 
+  ***(
+   Function that computes a basic substitution, pairing variables and constants.
+  )
   op basicSB* : TermList TermList -> Substitution .
   eq basicSB*(empty, empty) = none .
   eq basicSB*((V, TL), (C, TL')) = V <- C ; basicSB*(TL, TL') .
   eq basicSB*((T, TL), (T', TL')) = basicSB*(TL, TL') [owise] .
 
-
-
+  ***(
+   Function that computes the number of variables in a term.
+  )
   op numVars : Term -> Nat .
   eq numVars(T) = size(getVars(T)) .
 
+  ***(
+   Function that computes the size of a term set.
+  )
   op size : TermSet -> Nat .
   eq size(T | TrS) = s(size(TrS)) .
   eq size(TrS) = 0 [owise] .
 
+  ***(
+   Function that extracts the label of the equation with lefthand side
+   the term given as parameter.
+  )
   op getLabel : Module Term ~> Qid [memo] .
   eq getLabel(M, T) = getLabel(getEqs(M), T) .
 
@@ -2867,6 +2881,10 @@ and \verb"sizeTL" just computes the size of a list of terms:
    if T1 := reduce(M, T) /\
       T2 := reduce(M, T') .
 
+  ***(
+   Function that decides whether the substitution can be computed at the top
+   or at the subterms level.
+  )
   op getImpSubs : Term Term -> Substitution .
   ceq getImpSubs(Q[TL], T) = getImpSubs*(TL, T)
    if tryMatch(Q[TL], T) == none or
@@ -2876,15 +2894,27 @@ and \verb"sizeTL" just computes the size of a list of terms:
       SB =/= none .
   eq getImpSubs(T, T') = none [owise] .
 
+  ***(
+   Function that traverses the list, trying the substitutions with the term
+   given as parameter.
+  )
   op getImpSubs* : TermList Term -> Substitution .
   eq getImpSubs*(empty, T) = none .
   eq getImpSubs*((T, TL), T') = getImpSubs(T, T') ; getImpSubs*(TL, T') .
 
+  ***(
+   Function that compares the operators at the top. If they are equal the
+   substitution is generated for the subterms, otherwise we traverse the
+   subterms of the second term.
+  )
   op tryMatch : Term Term ~> Substitution .
   eq tryMatch(Q[TL], Q[TL']) = tryMatch*(TL, TL') .
   ceq tryMatch(Q[TL], Q'[TL']) = traverseRest(Q[TL], TL')
    if Q =/= Q' .
 
+  ***(
+   Function that traverses the list, trying to find a substitution.
+  )
   op traverseRest : Term TermList ~> Substitution .
   ceq traverseRest(T, (T', TL)) = SB
    if SB := tryMatch(T, T') /\ SB =/= none .
@@ -2893,21 +2923,34 @@ and \verb"sizeTL" just computes the size of a list of terms:
       tryMatch(T, T') == none .
   eq traverseRest(T, empty) = none .
 
+  ***(
+   Function that traverses the subterms of two terms. They must have
+   the same size to return a valid substitution.
+  )
   op tryMatch* : TermList TermList ~> Substitution .
   eq tryMatch*(empty, empty) = none .
   eq tryMatch*((V, TL), (C, TL')) = V <- C ; tryMatch*(TL, TL') .
   eq tryMatch*((T, TL), (T', TL')) = tryMatch*(TL, TL') [owise] .
 
+  ***(
+   Function that applies a substitution to a term.
+  )
   op applyImpSub : Term Substitution -> Term .
   eq applyImpSub(Q[TL], SB) = Q[applyImpSub*(TL, SB)] .
   eq applyImpSub(C, SB) = C .
   eq applyImpSub(V, V <- T ; SB) = T .
   eq applyImpSub(V, SB) = V [owise] .
 
+  ***(
+   Auxiliary function for applying the substitution to all terms in the list.
+  )
   op applyImpSub* : TermList Substitution -> TermList .
   eq applyImpSub*((T, TL), SB) = applyImpSub(T, SB), applyImpSub*(TL, SB) .
   eq applyImpSub*(empty, SB) = empty .
 
+  ***(
+   Function that checks whether the term is a fresh constant.
+  )
   op isFreshCons : Module Term -> Bool .
   ceq isFreshCons(M, C) = true
    if Q := getName(C) /\
@@ -3259,12 +3302,19 @@ and \verb"sizeTL" just computes the size of a list of terms:
       not hasTermDefined(M, M', M'', T1, CS) .
   eq termDefinedInAll(SIS, M, T, T1) = true [owise] .
 
+  ***(
+   Function that looks for an instantiation of the term in a lefthand
+   side of an equation.
+  )
   op hasTermDefined : Module Module Module Term ConsSub -> Bool .
   ceq hasTermDefined(M, M', M'', T, CS) = true
    if eq T1 = T2 [AtS] . EqS := getEqs(M') /\
       T := instantiateVars(M, M'', T1, CS)  .
   eq hasTermDefined(M, M', M'', T, CS) = false [owise] .
 
+  ***(
+   Function that looks for equations containing the given term.
+  )
   op eqDefinedFor : Module Term -> Bool .
   ceq eqDefinedFor(M, T) = true
    if eq T = T' [AtS] . EqS := getEqs(M) .
@@ -3273,6 +3323,10 @@ and \verb"sizeTL" just computes the size of a list of terms:
   eq eqDefinedFor(M, '_=_[T, T']) = eqDefinedFor(M, T, T') .
   eq eqDefinedFor(M, T) = false [owise] .
 
+  ***(
+   Function that looks for equalities/equations containing the
+   terms or complementary equalities/equations.
+  )
   op eqDefinedFor : Module Term Term -> Bool .
   ceq eqDefinedFor(M, T, 'true.Bool) = true
    if eq T = 'false.Bool [AtS] . EqS := getEqs(M) .
@@ -3321,6 +3375,10 @@ and \verb"sizeTL" just computes the size of a list of terms:
       not hasEqDefined(M, M', M'', T1, T2, CS) .
   eq eqDefinedInAll(SIS, M, T, T1, T2) = true [owise] .
 
+  ***(
+   Function that looks for equalities/equations for the given terms,
+   assuming they are instantiated with the given substitution.
+  )
   op hasEqDefined : Module Module Module Term Term ConsSub -> Bool .
   ceq hasEqDefined(M, M', M'', T, T', CS) = true
    if eq T1 = T2 [AtS] . EqS := getEqs(M') /\
@@ -3332,6 +3390,9 @@ and \verb"sizeTL" just computes the size of a list of terms:
       T' := instantiateVars(M, M'', T2, CS) .
   eq hasEqDefined(M, M', M'', T, T', CS) = false [owise] .
 
+  ***(
+   Function that creates an equation for true-false.
+  )
   op ctfEq : Term Term -> Equation .
   eq ctfEq('_=_[T1, T2], 'false.Bool) = eq T1 = T2 [none] . .
   eq ctfEq(T1, T2) = if T2 == 'false.Bool
@@ -3339,6 +3400,9 @@ and \verb"sizeTL" just computes the size of a list of terms:
                      else eq T1 = T2 [none] .
                      fi [owise] .
 
+  ***(
+   Function that checks whether the nonexec attribute is in the set.
+  )
   op isExec : AttrSet -> Bool .
   eq isExec(nonexec AtS) = false .
   eq isExec(AtS) = true [owise] .
@@ -3368,6 +3432,9 @@ and \verb"sizeTL" just computes the size of a list of terms:
       SB := computeSub(T4, T3) .
   eq impRequired(SIS, M, T) = noImpRequired [owise] .
 
+  ***(
+   Function that extracts the implication from two terms.
+  )
   op getTermImplication : Module Module Term Term ConsSub -> TermList .
   ceq getTermImplication(M, M', '_implies_[T1, T2], T, CS) = T4
    if impLevels(T) == impLevels(T2) /\
@@ -3388,10 +3455,16 @@ and \verb"sizeTL" just computes the size of a list of terms:
   eq computeSub*(empty, empty) = none .
   eq computeSub*((T, TL), (T', TL')) = computeSub(T, T') ; computeSub*(TL, TL') .
 
+  ***(
+   Function that checks whether there is an implication on top.
+  )
   op implies? : Term -> Bool .
   eq implies?('_implies_[TL]) = true .
   eq implies?(T) = false [owise] .
 
+  ***(
+   Function that computes the implication levels.
+  )
   op impLevels : Term -> Nat .
   eq impLevels('_implies_[T, T']) = s(impLevels(T')) .
   eq impLevels(T) = 0 [owise] .
@@ -3419,6 +3492,9 @@ and \verb"sizeTL" just computes the size of a list of terms:
               fi .
   eq redRequired(SIS, M, T) = [false, SIS] [owise] .
 
+  ***(
+   Function that checks whether there is an equality at the top-
+  )
   op isEquality : Term -> Bool .
   eq isEquality('_=_[T1, T2]) = true .
   eq isEquality(T) = false [owise] .
@@ -3429,6 +3505,9 @@ and \verb"sizeTL" just computes the size of a list of terms:
   op samePremises : Module Module Module ConsSub -> Bool .
   eq samePremises(M, M', M'', CS) = samePremises(M, getEqs(M'), M'', CS) .
 
+  ***(
+   Function that checks whether two modules have the same premises, modulo substitution.
+  )
   op samePremises : Module EquationSet Module ConsSub -> Bool .
   ceq samePremises(M, eq T = T' [AtS] . EqS, M', CS) = exactEq(M', T1, T2) and
                                                        samePremises(M, EqS, M', CS)
@@ -3448,6 +3527,10 @@ and \verb"sizeTL" just computes the size of a list of terms:
   op consistentPremises : Module Module ConsSub -> Bool .
   eq consistentPremises(M, M', CS) = consistentPremises(getEqs(M), M, M', CS) .
 
+  ***(
+   Function that checks whether the premises in one of the modules could be extended
+   to the ones in the other.
+  )
   op consistentPremises : EquationSet Module Module ConsSub -> Bool [memo] .
   ceq consistentPremises(eq T = T' [AtS] . EqS, M, M', CS) = (exactEq(M', T1, T2) or-else
                                                               T3 =/= 'false.Bool) and
@@ -3492,6 +3575,9 @@ and \verb"sizeTL" just computes the size of a list of terms:
       not (getTerm(metaReduce(M'', '_=_[T1, T2])) :: Term) .
   eq consistentPremisesEq(EqS, M, M', M'', CS) = true [owise] .
 
+  ***(
+   Function that checks whether a term has another equation defined.
+  )
   op definedForOther : Module Term Term -> Bool .
   eq definedForOther(M, T, T') = definedForOther(M, getEqs(M), T, T') .
 
@@ -3505,6 +3591,9 @@ and \verb"sizeTL" just computes the size of a list of terms:
       T1 =/= T' .
   eq definedForOther(M, EqS, T, T') = false [owise] .
 
+  ***(
+   Function for extracting the name of the proof score.
+  )
   op getNameProofScore : ScoreInfoSet -> Qid .
   eq getNameProofScore($ M, M', (T, TL)$ SIS) = getNameProofScore(getImports(M')) .
 
@@ -3513,12 +3602,18 @@ and \verb"sizeTL" just computes the size of a list of terms:
   eq getNameProofScore(protecting 'EQL . IL) = getNameProofScore(IL) .
   eq getNameProofScore(including Q . IL) = cut(Q) [owise] .
 
+  ***(
+   Function that removes the postfix of the module name.
+  )
   op cut : Qid -> Qid .
   ceq cut(Q) = qid(substr(STR, 0, N))
    if STR := string(Q) /\
       N := find(STR, "-MODCAFE", 0) .
   eq cut(Q) = Q [owise] .
 
+  ***(
+   Function for renaming variables to avoid clashes.
+  )
   op renameRepVars : Term -> Term .
   ceq renameRepVars(T) = T
    if TrS := getVars(T) /\
@@ -3532,6 +3627,9 @@ and \verb"sizeTL" just computes the size of a list of terms:
   eq renameRepVars*(empty) = empty .
   eq renameRepVars*((T, TL)) = renameRepVars(T), renameRepVars*(TL) .
 
+  ***(
+   Function applying a substitution of variable by variable.
+  )
   op oneSub : Term Variable Variable -> Term .
   eq oneSub(Q[TL], V, V') = Q[oneSub*(TL, V, V')] .
   eq oneSub(V, V, V') = V' .
@@ -3544,17 +3642,26 @@ and \verb"sizeTL" just computes the size of a list of terms:
                                else TL, oneSub(T, V, V')
                                fi .
 
+  ***(
+   Function that creates fresh variables.
+  )
   op newVar : Variable TermSet Nat -> Variable .
   ceq newVar(V, V' | TrS, N) = newVar(V, TrS, s(N))
    if V' := qid(string(getName(V)) + string(N, 10) + ":" + string(getType(V))) .
   ceq newVar(V, TrS, N) = V'
    if V' := qid(string(getName(V)) + string(N, 10) + ":" + string(getType(V))) [owise] .
 
+  ***(
+   Function that removes repetitions.
+  )
   op moreThanOne : Term TermSet -> TermSet .
   ceq moreThanOne(T, V | TrS) = V
    if numReps(T, V) =/= 1 .
   eq moreThanOne(T, TrS) = emptyTermSet [owise] .
 
+  ***(
+   Function that computes the number of repetitions.
+  )
   op numReps : Term Variable -> Nat .
   eq numReps(C, V) = 0 .
   eq numReps(V, V') = if getName(V) == getName(V')
@@ -3567,6 +3674,9 @@ and \verb"sizeTL" just computes the size of a list of terms:
   eq numReps*(empty, V) = 0 .
   eq numReps*((T, TL), V) = numReps(T, V) + numReps*(TL, V) .
 
+  ***(
+   Function that infers the goallist from the ScoreInfoSet.
+  )
   op inferGoal : ScoreInfoSet ~> TermList .
   ceq inferGoal($ M, M', (T, TL)$ SIS) = TL2
    if TL' := TL, allReductions(SIS) /\
@@ -3576,18 +3686,28 @@ and \verb"sizeTL" just computes the size of a list of terms:
   sort InferenceResult .
   op [_,_] : Term TermList -> InferenceResult [ctor] .
 
+  ***(
+   Function that infers the goallist from the list of reductions.
+  )
   op inferGoal : Module TermList -> TermList .
   ceq inferGoal(M, (T, TL)) = T1, TL'
    if [T1, TL1] := $inferGoal(M, T, TL, empty) /\
       TL' := inferGoal(M, TL1) .
   eq inferGoal(M, empty) = empty .
 
+  ***(
+   Function that splits the different goals.
+  )
   op $inferGoal : Module Term TermList TermList ~> InferenceResult .
   eq $inferGoal(M, T, empty, TL') = [T, TL'] .
   ceq $inferGoal(M, T, (T', TL), TL') = $inferGoal(M, T'', TL, TL')
    if T'' := unifyGoal(M, T, T') .
   eq $inferGoal(M, T, (T', TL), TL') = $inferGoal(M, T, TL, (TL', T')) [owise] .
 
+  ***(
+   Function that unifies all goals, in the sense that all goals use the same
+   variables when required.
+  )
   op unifyGoal : Module Term Term ~> Term .
   eq unifyGoal(M, V, V') = V .
   eq unifyGoal(M, V, C) = V .
@@ -3607,10 +3727,14 @@ and \verb"sizeTL" just computes the size of a list of terms:
       Ty := getType(metaReduce(M, T)) /\
       V := qid(substr(string(Ty), 0, 1) + ":" + string(Ty)) [owise] .
 
+  ***(
+   Auxiliary function for traversing lists of terms.
+  )
   op unifyGoal* : Module TermList TermList ~> TermList .
   eq unifyGoal*(M, empty, empty) = empty .
   eq unifyGoal*(M, (T, TL), (T', TL')) = unifyGoal(M, T, T'), unifyGoal*(M, TL, TL') .
 
+  *** Printing function for proofs
   op printProof : Module Qid Qid TermList QidList -> QidList .
   eq printProof(M, Q, Q', TL, QIL) =
           '\n 'open Q' '. '\n
@@ -3620,6 +3744,7 @@ and \verb"sizeTL" just computes the size of a list of terms:
           QIL '\n
           'close .
 
+  *** Printing function for goals.
   op printGoals : Module TermList Qid Nat -> QidList .
   eq printGoals(M, empty, Q, N) = nil .
   ceq printGoals(M, (T, TL), Q, N) =
@@ -3631,11 +3756,15 @@ and \verb"sizeTL" just computes the size of a list of terms:
             else qid(string(Q) + string(N, 10))
             fi .
 
+  *** Printing function for substitutions.
   op printSub : Substitution -> QidList .
   eq printSub(none) = nil .
   eq printSub(V <- C ; SB) = V '<- getName(C) ';  printSub(SB) .
   eq printSub(V <- Q[TL] ; SB) = V '<- Q '`( printSub*(TL) '`) ';  printSub(SB) .
 
+  ***(
+   Auxiliary function for traversing all terms.
+  )
   op printSub* : TermList -> QidList .
   eq printSub*(empty) = nil .
   eq printSub*(C) = getName(C) .
@@ -3650,10 +3779,17 @@ and \verb"sizeTL" just computes the size of a list of terms:
   sort SISPair .
   op [_,_] : ScoreInfoSet ScoreInfoSet -> SISPair [ctor] .
 
+  ***(
+   Projection functions.
+  )
   ops fst snd : SISPair -> ScoreInfoSet .
   eq fst([SIS1, SIS2]) = SIS1 .
   eq snd([SIS1, SIS2]) = SIS2 .
 
+  ***(
+   Function that divides the ScoreInfoSet set into two sets, taking into account the
+   equations that are executable.
+  )
   op divideByExecEqs : ScoreInfoSet Nat -> SISPair .
   eq divideByExecEqs(SIS, N) = $divideByExecEqs(SIS, N, [noScoreInfo, noScoreInfo]) .
 
@@ -3668,6 +3804,9 @@ and \verb"sizeTL" just computes the size of a list of terms:
             fi
        fi .
 
+  ***(
+   Function that counts the number of executable equations.
+  )
   op numExecEqs : Module -> Nat .
   eq numExecEqs(M) = numExecEqs(getEqs(M)) .
 
