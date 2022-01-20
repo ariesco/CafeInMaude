@@ -51,9 +51,15 @@ fmod CafePARSER is
  var  MAS : MembAxSet .
  var  VIEW : View .
 
+  ***(
+   Function for parsing modules. It adds an empty database and proceeds with the next function.
+  )
   op procCafeMod : Term SortMap TheorySortMap TheorySortMap ParameterMap TheorySortMap SortSet -> CafeParseResult .
   eq procCafeMod(T, PSM, HSM, TSM, PMAP, MSS, SSV) = procCafeMod2(T, T, PSM, HSM, TSM, PMAP, MSS, SSV, mtRDB) .
 
+  ***(
+   Function that distinguishes the different types of modules, creates the corresponding empty module.
+  )
   op procCafeMod2 : Term Term SortMap TheorySortMap TheorySortMap ParameterMap TheorySortMap SortSet ResDatabase
                     -> CafeParseResult .
   eq procCafeMod2(T, 'cmod!_`{_`}['CafeToken[T'], T''], PSM, HSM, TSM, PMAP, MSS, SSV, DB) =
@@ -113,6 +119,9 @@ fmod CafePARSER is
  eq parseParList('_::_['token[T], T']) = downQid(T) :: parseModExp(T') .
  eq parseParList('_`,_[T, T']) = (parseParList(T), parseParList(T')) .
 
+ ***(
+  Function that
+ )
  op procCafeMod3 : Term Term Term Term Module SortMap TheorySortMap TheorySortMap ParameterMap
                    TheorySortMap SortSet ResDatabase -> CafeParseResult .
  ceq procCafeMod3(T, 'CafeToken[T'], empty, T'', U, PSM, HSM, TSM, PMAP, MSS, SSV, DB) =

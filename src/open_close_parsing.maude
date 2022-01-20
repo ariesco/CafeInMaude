@@ -58,9 +58,14 @@ fmod OPEN-CLOSE-PARSER is
  var  H : Header .
 
 
+ *** Constant module name.
  op openCloseModName : -> Qid .
  eq openCloseModName = 'OPEN_CLOSE .
 
+ ***(
+  Function in charge of parsing open-close environments.
+  First, it is created importing the module expression it opens.
+ )
  op procOpenCloseEnv : Term SortMap TheorySortMap ParameterMap TheorySortMap SortSet
                        -> CafeParseResult .
  ceq procOpenCloseEnv('copen_._close[T1, T2], PSM, TSM, PMAP, MSS, SSV) = < DB preOpen(M, Q, TrS, TL, TL'), nil >
@@ -69,9 +74,16 @@ fmod OPEN-CLOSE-PARSER is
      M := fmod openCloseModName is (including ME .) sorts none . none none none none endfm /\
      < Q, TrS, TL, TL' > := traverse(T2) .
 
+ ***(
+  Function that traverses a term standing for an open-close environment. It calls an auxiliary function using
+  empty accumulators.
+ )
  op traverse : Term -> OpenTraverse .
  eq traverse(T) = traverse(T, < 'no-label, emptyTermSet, empty, empty >) .
 
+ ***(
+  Function that traverses and orders all commands in an open-close environment.
+ )
  op traverse : Term OpenTraverse -> OpenTraverse .
  ceq traverse('__[T, T'], OT) = traverse(T', OT')
   if OT' := traverse(T, OT) .
@@ -109,14 +121,15 @@ fmod OPEN-CLOSE-PARSER is
                                                                 < QIL, TrS, TL, (TL',':def_=`:csv`[_`][T, T']) > .
  eq traverse(':def_=`:csvs`[_`]['CafeToken[T], 'CafeBubble[T']], < QIL, TrS, TL, TL' >) =
                                                                 < QIL, TrS, TL, (TL',':def_=`:csvs`[_`][T, T']) > .
-
-
  eq traverse(':postpone`..@CafeInductiveComm@, < QIL, TrS, TL, TL' >) = < QIL, TrS, TL, (TL', ':postpone`..@CafeInductiveComm@) > .
  eq traverse(':show`proof`..@CafeInductiveComm@, < QIL, TrS, TL, TL' >) = < QIL, TrS, TL, (TL', ':show`proof`..@CafeInductiveComm@) > .
  eq traverse(':desc`proof`..@CafeInductiveComm@, < QIL, TrS, TL, TL' >) = < QIL, TrS, TL, (TL', ':desc`proof`..@CafeInductiveComm@) > .
  eq traverse(':desc`..@CafeInductiveComm@, < QIL, TrS, TL, TL' >) = < QIL, TrS, TL, (TL', ':desc`..@CafeInductiveComm@) > .
  eq traverse(T, < QIL, TrS, TL, TL' >) = < QIL, (TrS | T), TL, TL' > [owise] .
 
+ ***(
+  Once all statements are traversed and separated, they are traversed in order to parse them.
+ )
  op parseOpenEnv : Module Module Qid TermSet TermList TermList ScoreInfoMap -> CafeParseResult .
  ceq parseOpenEnv(TOP, FLAT, Q, TrS, TL, TL', SIM) = < SIM' | QIL | QIL' >
   if Q =/= 'no-label /\
@@ -129,6 +142,9 @@ fmod OPEN-CLOSE-PARSER is
      QIL' := processRedThCommands(FLAT', TL', mtPT, 'foo:Foo, mtMacros, finished, VS, SIM) .
  eq parseOpenEnv(TOP, FLAT, Q, TrS, TL, TL', SIM) = < SIM | nil | 'Environment 'not 'parsed. > [owise] .
 
+ ***(
+  Reductions and commands are processed once all constants and the rest of elements have been introduced into the module.
+ )
  op processRedThCommands : Module TermList ProofTree Variable Macros ProofOrder VariableSet ScoreInfoMap -> QidList .
  eq processRedThCommands(M, empty, P, V, MACS, PO, VS, SIM) = nil .
  ceq processRedThCommands(M, ('red_.['CafeBubble[T]], TL), P, V, MACS, PO, VS, SIM) =
@@ -259,8 +275,9 @@ fmod OPEN-CLOSE-PARSER is
            processRedThCommands(M, TL, P, V, MACS, PO, VS, SIM) [owise] .
 
 
-
-
+ ***(
+  Reduction commands are evaluated.
+ )
  op evalRedCommand : Module Term VariableSet -> QidList .
  ceq evalRedCommand(M, T, VS) = QIL'
   if QIL := downQidList(T) /\
@@ -273,7 +290,9 @@ fmod OPEN-CLOSE-PARSER is
    if | T', QIL, ST | := changeSearch(M, T, mtST) /\
       {T'', Ty} := metaReduce(M, T') /\
       QIL' := printRedRes(M, T1, T'', Ty) .
-
+ ***(
+  Goal command.
+ )
   op evalGoalCommand : Module Term VariableSet -> GoalRes .
   ceq evalGoalCommand(M, T, VS) = [P, (nil).NatList, QIL']
    if TrS := getGoalEqs(T) /\
@@ -282,11 +301,16 @@ fmod OPEN-CLOSE-PARSER is
       QIL' := 'New 'goal 'introduced: '\n printGoals(P) '\n .
   eq evalGoalCommand(M, T, VS) = [mtPT, finished, '\n 'Error 'processing 'goal. '\n] [owise] .
 
-
+  ***(
+   Transforms a list of terms, definied at the metalevel with __, into a term set.
+  )
   op getGoalEqs : Term -> TermSet .
   eq getGoalEqs('__[T, T']) = T | getGoalEqs(T') .
   eq getGoalEqs(T) = T [owise] .
 
+  ***(
+   Apply command.
+  )
   op evalApply : Module Qid ProofTree Variable Macros ProofOrder -> GoalRes .
   ceq evalApply(M, 'si, P, V, MACS, PO) = [P', PO', QIL]
    if [P', PO'] := applyInduction(P, V, PO) /\
@@ -367,6 +391,10 @@ fmod OPEN-CLOSE-PARSER is
       QIL := '\n 'Generated 'new 'goals
              '\n printGoals(P') .
 
+  ***(
+   Function that extracts the constructors for the given sort. Constructors
+   for both the particular sort and supersorts.
+  )
   op getCtors : Module Sort -> OpDeclSet .
   eq getCtors(M, Srt) = getCtors(M, getOps(M), Srt) .
 
@@ -380,6 +408,9 @@ fmod OPEN-CLOSE-PARSER is
       sortLeq(M, Ty, Srt) .
   eq getCtors(M, ODS, Srt) = none [owise] .
 
+  ***(
+   Function that extracts the constructors exactly for that sort.
+  )
   op getExactCtors : Module Sort -> OpDeclSet .
   eq getExactCtors(M, Srt) = getExactCtors(M, getOps(M), Srt) .
 
@@ -388,6 +419,9 @@ fmod OPEN-CLOSE-PARSER is
                                                             getExactCtors(M, ODS, Srt) .
   eq getExactCtors(M, ODS, Srt) = none [owise] .
 
+  ***(
+   Function that builds terms with frest constants for the operators.
+  )
   op buildTermsCtors : OpDeclSet String -> TermList .
   eq buildTermsCtors(none, STR) = empty .
   ceq buildTermsCtors(OD ODS, STR) = (T, TL)
@@ -400,6 +434,10 @@ fmod OPEN-CLOSE-PARSER is
   ceq buildTermCtor(op Q : TyL -> Srt [AtS] ., STR) = Q[TL]
    if TL := buildArgs(TyL, empty, STR) [owise] .
 
+  ***(
+   Function that parses a substitution for an implication and generates
+   a well typed substitution.
+  )
   op procImpSub : Module Term ~> Substitution .
   eq procImpSub(M, '__[TL]) = $procImpSub(M, getOps(M), TL) .
 
@@ -490,6 +528,10 @@ fmod OPEN-CLOSE-PARSER is
       PrL' := createCTFTerm(ML, NL, Q, EqS) /\
       PO' := indProofOrder(fst(PO), size(TL')) y pop(PO) .
 
+  ***(
+   Function that removes equal terms module constant renaming. This is applied to case splittings
+   for sequences with the pattern empty - value sequence
+  )
   op joinConstantsEVS : TermList String Nat -> TermList .
   ceq joinConstantsEVS((TL, Q[C, T'], TL', Q[C', T'], TL''), St, N) =
                                             joinConstantsEVS((TL, Q[T'', T'], TL''), St, s(N))
@@ -506,6 +548,9 @@ fmod OPEN-CLOSE-PARSER is
       T'' := qid(substr(string(Ty), 0, 1) + string(N, 10) + St + string(Ty) + "." + string(Ty)) .
   eq joinConstantsESV(TL, St, N) = TL [owise] .
 
+  ***(
+   Function that builds the cases value - sequence sequence
+  )
   op buildVSS : Module Type String -> TermList .
   ceq buildVSS(M, Ty, St) = TL', TL
    if ODS := getExactCtors(M, Ty) /\
@@ -513,6 +558,9 @@ fmod OPEN-CLOSE-PARSER is
       SS := lesserSorts(M, Ty) /\
       TL' := buildTermsOrFreshConst(M, SS, St + "Sub") .
 
+  ***(
+   Function that builds the cases empty - value sequence
+  )
   op buildEVS : Module Type String -> TermList .
   ceq buildEVS(M, Ty, St) = combineEVS(TL, TL')
    if ODS := getExactCtors(M, Ty) /\
@@ -520,10 +568,16 @@ fmod OPEN-CLOSE-PARSER is
       SS := lesserSorts(M, Ty) /\
       TL' := buildTermsOrFreshConst(M, SS, St + "Sub") .
 
+  ***(
+   Function that orders the case splittings to work first with the constants.
+  )
   op combineEVS : TermList TermList ~> TermList .
   eq combineEVS((C, T), TL) = C, putTogetherEVS(T, TL) .
   eq combineEVS((T, C), TL) = C, putTogetherEVS(T, TL) .
 
+  ***(
+   Function that builds the cases empty - sequence value
+  )
   op buildESV : Module Type String -> TermList .
   ceq buildESV(M, Ty, St) = combineESV(TL, TL')
    if ODS := getExactCtors(M, Ty) /\
@@ -531,10 +585,16 @@ fmod OPEN-CLOSE-PARSER is
       SS := lesserSorts(M, Ty) /\
       TL' := buildTermsOrFreshConst(M, SS, St + "Sub") .
 
+  ***(
+   Function that orders the case splittings to work first with the constants.
+  )
   op combineESV : TermList TermList ~> TermList .
   eq combineESV((C, T), TL) = C, putTogetherESV(T, TL) .
   eq combineESV((T, C), TL) = C, putTogetherESV(T, TL) .
 
+  ***(
+   Function that builds the cases sequence - value sequence
+  )
   op buildSVS : Module Type String -> TermList .
   ceq buildSVS(M, Ty, St) = combineSVS(TL, TL'', TL')
    if ODS := getExactCtors(M, Ty) /\
@@ -543,23 +603,39 @@ fmod OPEN-CLOSE-PARSER is
       SS := lesserSorts(M, Ty) /\
       TL'' := buildTermsOrFreshConst(M, SS, St + "Sub") .
 
+  ***(
+   Function that orders the case splittings to work first with the constants.
+  )
   op combineSVS : TermList TermList TermList ~> TermList .
   eq combineSVS(TL, (C, T), TL') = C, putTogetherESV(T, TL) .
   eq combineSVS(TL, (T, C), TL') = C, putTogetherESV(T, TL) .
 
+  ***(
+   Function that introduces a term where the variable is located.
+  )
   op putTogetherEVS : Term TermList -> TermList .
   eq putTogetherEVS(T, empty) = empty .
   eq putTogetherEVS(Q[T, T'], (T1, TL)) = Q[T1, T'], putTogetherEVS(Q[T, T'], TL) .
 
+  ***(
+   Function that introduces a term where the variable is located.
+  )
   op putTogetherESV : Term TermList -> TermList .
   eq putTogetherESV(T, empty) = empty .
   eq putTogetherESV(Q[T, T'], (T1, TL)) = Q[T, T1], putTogetherESV(Q[T, T'], TL) .
 
+  ***(
+   Function that introduces a term where the variable is located.
+  )
   op putTogetherSVS : TermList Term TermList -> TermList .
   eq putTogetherSVS(empty, T, empty) = empty .
   eq putTogetherSVS((T1, TL), Q[T, T'], (T2, TL')) = Q[T1, T, T2],
                                                      putTogetherSVS(TL, Q[T, T'], TL') .
 
+  ***(
+   Function that builds terms for the given sorts. If no constructors are defined for these
+   sorts then a fresh constant is created.
+  )
   op buildTermsOrFreshConst : Module SortSet String -> TermList .
   eq buildTermsOrFreshConst(M, none, St) = empty .
   ceq buildTermsOrFreshConst(M, Srt ; SS, St) = TL, buildTermsOrFreshConst(M, SS, St)
@@ -571,7 +647,9 @@ fmod OPEN-CLOSE-PARSER is
       T := qid(St + string(Srt) + "." + string(Srt)) .
 
 
-
+  ***(
+   Function for applying macros.
+  )
   op $applyTermMacro : ProofTree ProofOrder Qid Term MacroLabel Type -> IndResPair .
   eq $applyTermMacro(mtPT, PO, Q, T, MLb, Ty) = [mtPT, finished] .
 
@@ -593,10 +671,16 @@ fmod OPEN-CLOSE-PARSER is
   op mtML : -> MList [ctor] .
   op _._ : MList MList -> MList [ctor assoc id: mtML] .
 
+  ***(
+   Function that makes sure the order for Booleans is always the same.
+  )
   op ordTrueFalse : TermList -> TermList .
   eq ordTrueFalse(('false.Bool, 'true.Bool)) = 'true.Bool, 'false.Bool .
   eq ordTrueFalse(TL) = TL [owise] .
 
+  ***(
+   Function that adds hypotheses into the module.
+  )
   op createModules : Module Term TermList -> MList .
   eq createModules(M, T, empty) = mtML .
   ceq createModules(M, T, ('true.Bool, TL)) = addHyp(M, Eq) . createModules(M, T, TL)
@@ -606,11 +690,17 @@ fmod OPEN-CLOSE-PARSER is
    if STR := createName(T') /\
       Eq := eq T = T' [metadata(STR)] . [owise] .
 
+  ***(
+   Function that adds a prefix for true-false case splitting.
+  )
   op createName : Term -> String .
   eq createName(C) = "CTF-" + string(getName(C)) .
   eq createName(V) = "CTF-" + string(getName(V)) .
   eq createName(Q[TL]) = "CTF-" + string(Q) .
 
+  ***(
+   Function that generates the case splittings for true-false.
+  )
   op createCTFTerm : MList NatList Qid EquationSet -> ProofTreeList .
   eq createCTFTerm(ML, NL, Q, EqS) = $createCTFTerm(ML, NL, Q, EqS, 1) .
 
@@ -670,11 +760,18 @@ fmod OPEN-CLOSE-PARSER is
    if [P', PO'] := applyInduction(| M', G, PrL, N |, V, PO) /\
       [P'', PO''] := applyInduction*(PrL', V, PO) .
 
+  ***(
+   Function that generates the children for the node when applying induction.
+   The term list includes the new subgoals.
+  )
   op subGoal* : Module Goal Variable Type TermList NatList Nat -> ProofTreeList .
   eq subGoal*(M, G, V, Ty, empty, NL, N) = mtPT .
   eq subGoal*(M, G, V, Ty, (T, TL), NL, N) = subGoal(M, getEq(G), V, Ty, T, NL, N)
                                              subGoal*(M, G, V, Ty, TL, NL, s(N)) .
 
+  ***(
+   Function that generates a new node.
+  )
   op subGoal : Module EquationSet Variable Type Term NatList Nat -> ProofTree .
   ceq subGoal(M, EqS, V, Ty, T, NL, N) =
             | addCons(M', T), [NL N, 'SI, makeSub(EqS, V, T), N == 1, false], mtPT, 1 |
@@ -682,10 +779,18 @@ fmod OPEN-CLOSE-PARSER is
       EqS' := createHI(EqS, V, TL) /\
       M' := addHyp(M, EqS') .
 
+  ***(
+   Function that generates constants for the terms in the list that have
+   the same sort as the one given as parameter.
+  )
   op getConstsOfSort : Module Term Type -> TermList .
   eq getConstsOfSort(M, Q[TL], Ty) = getConstsOfSort*(M, TL, Ty) .
   eq getConstsOfSort(M, T, Ty) = empty [owise] .
 
+  ***(
+   Function that generates constants for terms of the form Q[TL]
+   or keeps the constants if they have the appropriate sort.
+  )
   op $getConstsOfSort : Module Term Type -> TermList .
   eq $getConstsOfSort(M, Q[TL], Ty) = getConstsOfSort*(M, TL, Ty) .
   ceq $getConstsOfSort(M, C, Ty) = C
@@ -694,6 +799,10 @@ fmod OPEN-CLOSE-PARSER is
       sortLeq(M, Ty', Ty) .
   eq $getConstsOfSort(M, T, Ty) = empty [owise] .
 
+  ***(
+   Auxiliary function for traversing a list and generating constants
+   for each element.
+  )
   op getConstsOfSort* : Module TermList Type -> TermList .
   eq getConstsOfSort*(M, empty, Ty) = empty .
   eq getConstsOfSort*(M, (T, TL), Ty) = $getConstsOfSort(M, T, Ty),
@@ -707,6 +816,9 @@ fmod OPEN-CLOSE-PARSER is
       op Q : TyL -> Ty [AtS] . ODS := getOps(M) .
   eq addCons(M, T) = $addCons(M, T) [owise] .
 
+  ***(
+   Function that adds operators for the new constants.
+  )
   op $addCons : Module Term -> Module .
   eq $addCons(M, V) = M .
   ceq $addCons(M, C) = M
@@ -720,6 +832,9 @@ fmod OPEN-CLOSE-PARSER is
   eq $addCons*(M, empty) = M .
   eq $addCons*(M, (T, TL)) = $addCons*($addCons(M, T), TL) .
 
+  ***(
+   Function that checks whether a constant is defined in the module.
+  )
   op definedConst : Module Constant -> Bool .
   ceq definedConst(M, C) = true
    if Q := getName(C) /\
@@ -727,6 +842,9 @@ fmod OPEN-CLOSE-PARSER is
       op Q : TyL -> Ty [AtS] . ODS := getOps(M) .
   eq definedConst(M, C) = false [owise] .
 
+  ***(
+   Function that applies a singleton substitution to a equation set.
+  )
   op makeSub : EquationSet Variable Term -> EquationSet .
   eq makeSub(none, V, T) = none .
   eq makeSub(eq T = T' [AtS] . EqS, V, T1) =
@@ -736,11 +854,19 @@ fmod OPEN-CLOSE-PARSER is
          ceq subTerm(T, V, T1) = subTerm(T', V, T1) if subCond(COND, V, T1) [AtS] .
          makeSub(EqS, V, T1) .
 
+  ***(
+   Function that creates the induction hypotheses by substituting the
+   given variable by each one of the terms in the list in all the equations.
+  )
   op createHI : EquationSet Variable TermList -> EquationSet .
   eq createHI(none, V, TL) = none .
   eq createHI(Eq EqS, V, TL) = $createHI(Eq, V, TL)
                                createHI(EqS, V, TL) .
 
+  ***(
+   Function that creates the induction hypotheses by substituting the
+   given variable by each one of the terms in the list in the given equation.
+  )
   op $createHI : Equation Variable TermList -> EquationSet .
   eq $createHI(Eq, V, empty) = none .
   eq $createHI(eq T = T' [AtS] ., V, (T1, TL)) =
@@ -751,15 +877,24 @@ fmod OPEN-CLOSE-PARSER is
           if subCond(COND, V, T1) [metadata("HI") AtS] .
         $createHI(ceq T = T' if COND [AtS] ., V, TL) .
 
+  ***(
+   Function that substitutes a variable by a term in a given term.
+  )
   op subTerm : Term Variable Term -> Term .
   eq subTerm(Q[TL], V, T) = Q[subTermList(TL, V, T)] .
   eq subTerm(V, V, T) = T .
   eq subTerm(T, V, T') = T [owise] .
 
+  ***(
+   Auxiliary function for applying a singleton substitution in a term list.
+  )
   op subTermList : TermList Variable Term -> TermList .
   eq subTermList(empty, V, T) = empty .
   eq subTermList((T, TL), V, T') = subTerm(T, V, T'), subTermList(TL, V, T') .
 
+  ***(
+   Auxiliary function for applying a singleton substitution in a condition.
+  )
   op subCond : Condition Variable Term -> Condition .
   eq subCond(nil, V, T) = nil .
   eq subCond(T = T' /\ COND, V, T1) = subTerm(T, V, T1) = subTerm(T', V, T1) /\
@@ -771,12 +906,19 @@ fmod OPEN-CLOSE-PARSER is
   eq subCond(T => T' /\ COND, V, T1) = subTerm(T, V, T1) => subTerm(T', V, T1) /\
                                        subCond(COND, V, T1) .
 
+  ***(
+   Function that builds a term list of fresh constants using the type list
+   and the String for uniquely identifying terms.
+  )
   op buildArgs : TypeList TermList String -> TermList .
   eq buildArgs(nil, TL, STR) = empty .
   ceq buildArgs(Ty TyL, TL, STR) = (C, TL')
    if C := buildArg(Ty, TL, STR) /\
       TL' := buildArgs(TyL, (C, TL), STR) .
 
+  ***(
+   Auxiliary function for building a single constant.
+  )
   op buildArg : Type TermList String -> TermList .
   ceq buildArg(Ty, (TL, C, TL'), St) = $buildArg(Ty, (TL, TL'), St, 0)
    if STR := string(Ty) /\
@@ -785,6 +927,10 @@ fmod OPEN-CLOSE-PARSER is
    if STR := string(Ty) /\
       C := qid(substr(STR, 0, 1) + "#" + St + STR + "." + STR) [owise] .
 
+  ***(
+   Auxiliary function for building a single constant. It uses a natural number for
+   constants of the same sort.
+  )
   op $buildArg : Type TermList String Nat -> TermList .
   ceq $buildArg(Ty, (TL, C, TL'), St, N) = $buildArg(Ty, (TL, TL'), St, s(N))
    if STR := string(Ty) /\
@@ -921,6 +1067,10 @@ fmod OPEN-CLOSE-PARSER is
    if [P, PO'] := $applyTC(| M', G, PrL, N |, PO) /\
       [PrL'', PO''] := $applyTC*(PrL', PO) .
 
+  ***(
+   Function that transforms variables into constants.
+   Recursively applied to equation sets, equations, terms, and conditions.
+  )
   op vars2cons* : EquationSet Module NatList Nat -> ProofTreeList .
   eq vars2cons*(none, M, NL, N) = mtPT .
   ceq vars2cons*(Eq EqS, M, NL, N) = | M', [NL N, 'TC, Eq', N == 1, false], mtPT, 1 |
@@ -971,6 +1121,9 @@ fmod OPEN-CLOSE-PARSER is
       [T2, M''] := vars2cons(T', M') /\
       [CND, M'''] := vars2cons*(COND, M'') .
 
+  ***(
+   Function that computes the size of an equation set.
+  )
   op sizeEQS : EquationSet -> Nat .
   eq sizeEQS(none) = 0 .
   eq sizeEQS(Eq EqS) = s(sizeEQS(EqS)) .
@@ -990,6 +1143,9 @@ fmod OPEN-CLOSE-PARSER is
   eq selectGoal*(| M, [NL, CMD, EqS, CURR, PRVN], PrL, N' | PrL', NL') =
        selectGoal(| M, [NL, CMD, EqS, CURR, PRVN], PrL, N' |, NL') selectGoal*(PrL', NL') .
 
+  ***(
+   Function that transforms a Qid standing for a node identifier into a list of natural numbers.
+  )
   op qid2natlist : Qid -> NatList .
   eq qid2natlist(Q) = str2natlist(string(Q)) .
 
@@ -998,10 +1154,16 @@ fmod OPEN-CLOSE-PARSER is
    if N := find(S, "-", 0) .
   eq str2natlist(S) = rat(S, 10) [owise] .
 
+  ***(
+   Function for updating the proof order, moving the selected goal to the front.
+  )
   op selectGoal : ProofOrder NatList -> ProofOrder .
   eq selectGoal(PO y NL y PO', NL) = NL y PO y PO' .
   eq selectGoal(PO, NL) = PO [owise] .
 
+  ***(
+   Function for adding a operator declaration into the set.
+  )
   op addOp : Module OpDecl -> Module .
   eq addOp(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, OD) =
              fmod H is IL sorts SS . SSDS ODS OD MAS EqS endfm .
@@ -1012,6 +1174,9 @@ fmod OPEN-CLOSE-PARSER is
   eq addOp(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, OD) =
              th H is IL sorts SS . SSDS ODS OD MAS EqS RS endth .
 
+  ***(
+   Function for adding equation into a set, meta-represented.
+  )
   op addEqs : Term Term -> Term .
   eq addEqs('__[T1, T2], T) = '__[T1, addEqs(T2, T)] .
   eq addEqs(T, T') = '__[T, T'] [owise] .
@@ -1046,6 +1211,11 @@ fmod OPEN-CLOSE-PARSER is
   sort EquationReduction .
   op [_,_] : EquationSet Bool -> EquationReduction [ctor] .
 
+  ***(
+   Function that checks whether all equations are reduced to true.
+   For those that the terms are equal the equation is not modified,
+   otherwise the reduced terms are returned.
+  )
   op reduceAll : Module EquationSet -> EquationReduction .
   eq reduceAll(M, none) = [none, true] .
   ceq reduceAll(M, eq T = T' [AtS] . EqS) = [Eq EqS', B and B']
@@ -1057,12 +1227,18 @@ fmod OPEN-CLOSE-PARSER is
                  fi /\
       [EqS', B'] := reduceAll(M, EqS) .
 
+  ***(
+   Application of Red* command.
+  )
   op applyRed* : ProofTreeList -> ProofBool .
   eq applyRed*(mtPT) = [mtPT, false] .
   ceq applyRed*(| M, G, PrL, N' | PrL') = [P PrL'', B or B']
    if [P, B] := applyRed(| M, G, PrL, N' |) /\
       [PrL'', B'] := applyRed*(PrL') .
 
+  ***(
+   Application of Red- command.
+  )
   op applyRed- : ProofTree -> ProofBool .
   ceq applyRed-(| M, [NL, CMD, eq T = T' [AtS] ., true, PRVN], PrL, N' |) =
                [| M, [NL, CMD, eq T = T' [AtS] ., not B, B], PrL, N' |, B]
@@ -1073,6 +1249,9 @@ fmod OPEN-CLOSE-PARSER is
                          [| M, [NL, CMD, Eq, false, PRVN], PrL', N' |, B]
    if [PrL', B] := applyRed-*(PrL) .
 
+  ***(
+   Application of Red-* command.
+  )
   op applyRed-* : ProofTreeList -> ProofBool .
   eq applyRed-*(mtPT) = [mtPT, false] .
   ceq applyRed-*(| M, G, PrL, N' | PrL') = [P PrL'', B or B']
@@ -1141,6 +1320,8 @@ fmod OPEN-CLOSE-PARSER is
   *************************************************************************************
   *********************************** PRINT LEAVES ************************************
   *************************************************************************************
+  ***                  Auxiliary functions for pretty printing                      ***
+  *************************************************************************************
 
   op printGoals : ProofTree -> QidList .
   eq printGoals(mtPT) = nil .
@@ -1206,6 +1387,11 @@ fmod OPEN-CLOSE-PARSER is
   *********************************** INFER PROOF ************************************
   ************************************************************************************
 
+  ***(
+   Initial function for inferring a proof. This function first infers the goal from the
+   proof scores and then uses the auxiliary function developProof to try case splittings,
+   implications, and reductions.
+  )
   op inferProof : Module Qid ScoreInfoSet Macros -> QidList .
   ceq inferProof(M, Q, SIS, MACS) = printProof(M, Q, Q', TL, QIL)
    if Q' := getNameProofScore(SIS) /\
@@ -1216,6 +1402,11 @@ fmod OPEN-CLOSE-PARSER is
   eq inferProof(M, Q, SIS, MACS) = '\n '\! '\r 'Error 'while
                                    'generating 'proof '\o '\n [owise] .
 
+  ***(
+   Initial function for inferring a proof. The goal has been introduced by the user or
+   computed beforehand; then uses the auxiliary function developProof to try case splittings,
+   implications, and reductions.
+  )
   op inferWithGoalProof : Module Qid ScoreInfoSet Macros -> QidList .
   ceq inferWithGoalProof(M, Q, SIS, MACS) = printProof(M, Q, Q', TL, QIL)
    if Q' := getNameProofScore(SIS) /\
@@ -1229,6 +1420,11 @@ fmod OPEN-CLOSE-PARSER is
   eq inferWithGoalProof(M, Q, SIS, MACS) = '\n '\! '\r 'Error 'while
                                    'generating 'proof '\o '\n [print owise] .
 
+  ***(
+   Auxiliary function for inferring the goal. The reduction commands should have a single
+   variable, which stands for the induction variable. Then, we traverse the reduction commands
+   to infer the goal.
+  )
   op getGoal : ScoreInfoSet -> TermList .
   ceq getGoal($ M, M', (T, TL)$ SIS) = V, $getGoal($ M, M', (T, TL)$ SIS)
    if V := getVars(T) .
@@ -1239,6 +1435,10 @@ fmod OPEN-CLOSE-PARSER is
   eq $getGoal($ M, M', (T, TL)$ SIS) = getGoal(T),
                                        $getGoal($ M, M', TL $ SIS) .
 
+  ***(
+   When inferring the goal, constants are transformed into variable. This variables
+   will not be used for induction.
+  )
   op getGoal : Term -> Term .
   eq getGoal(V) = V .
   eq getGoal(C) = qid(string(getName(C)) + ":" + string(getType(C))) .
@@ -1248,6 +1448,9 @@ fmod OPEN-CLOSE-PARSER is
   eq getGoal*(empty) = empty .
   eq getGoal*((T, TL)) = getGoal(T), getGoal*(TL) .
 
+  ***(
+   A list of terms is transformed into an equation set by making them equal to true.
+  )
   op goalEqS : TermList Qid Nat -> EquationSet .
   eq goalEqS(empty, Q, N) = none .
   ceq goalEqS((T, TL), Q, N) = eq T = 'true.Bool [label(Q') nonexec] .
@@ -1257,6 +1460,14 @@ fmod OPEN-CLOSE-PARSER is
             else qid(string(Q) + string(N, 10))
             fi .
 
+  ***(
+   Function in charge of inferring a new proof. We follow the order discussed in
+   the paper. The order to apply the equations is:
+   * Applying induction if required.
+   * Applying the theorem of constants if required and not induction is required.
+   * Applying reduction if the previous conditions do not hold.
+   * Then, we distinguish the different case splittings.
+  )
   op developProof : ProofTree ProofOrder ScoreInfoSet Macros -> QidList .
   eq developProof(P, finished, SIS, MACS) = nil .
   ceq developProof(P, NL y PO, SIS, MACS) = QIL developProof(P', PO', SIS, MACS)
@@ -1571,19 +1782,6 @@ fmod OPEN-CLOSE-PARSER is
       TPS' := processEqualityTerm*(M, TrS' - TrS) /\
       TPS'' := (TPS' - TPS) [print "\nTrS " TrS "\n TrS'" TrS' "\nTPS " TPS "\nTPS' " TPS'' "\ninit-term " T] .
 
-*** For testing purposes, inv9 - rec2
-  op prior : TrialPairSet -> TrialPairSet .
-  eq prior(['_=_['dc['S#Sys.Sys],'_`,_['pbps1@PBPSeq.PBPSeq,'<_`,_>['p1@Packet.Packet,'b1@Bit.Bit]]],ctf] TPS) =
-      ['_=_['dc['S#Sys.Sys],'_`,_['pbps1@PBPSeq.PBPSeq,'<_`,_>['p1@Packet.Packet,'b1@Bit.Bit]]],ctf]
-      prior(TPS) .
-  eq prior(['_=_['sb['S#Sys.Sys],'b2@Bit.Bit],ctf] TPS) =
-                  ['_=_['sb['S#Sys.Sys],'b2@Bit.Bit],ctf] prior(TPS) .
-  eq prior(['_=_['p2s['S#Sys.Sys],'p2@Packet.Packet],ctf] TPS) =
-                  ['_=_['p2s['S#Sys.Sys],'p2@Packet.Packet],ctf] prior(TPS) .
-  eq prior(['pbps2@PBPSeq.PBPSeq,cesv] TPS) = ['pbps2@PBPSeq.PBPSeq,cesv] prior(TPS) .
-
-  eq prior(TPS) = mtTPS [owise] .
-
   var  MACS'' : Macros .
   var  IT : IT .
   var  ITL : ITL .
@@ -1600,6 +1798,10 @@ fmod OPEN-CLOSE-PARSER is
   eq (TPair TPS) - (TPair TPS') = TPS - TPS' .
   eq TPS - TPS' = TPS [owise] .
 
+  ***(
+   Backtracking function for trying case splittings.
+   Equations are expected to be applied top-down; conditions check what should happen first.
+  )
   op $tryCaseSplitting : IT Macros QidList TrialPairSet TrialPairSet String Nat Nat NatList
                          -> IR .
   eq $tryCaseSplitting([M, T, 0], MACS, QILR, TPS, TPS', S, INDENT, N', NL) =
@@ -1781,24 +1983,39 @@ fmod OPEN-CLOSE-PARSER is
                fi
                QIL QIL' [print "Case splitting cevs term applied " T' " - " B] .
 
+  ***(
+   Heuristic for prioritizing case splittings by empty - value sequence.
+  )
   op hasCEVS : TrialPairSet -> Bool .
   eq hasCEVS([T, cevs] TPS) = true .
   eq hasCEVS(TPS) = false [owise] .
 
+  ***(
+   Function that adds the given term and number to each module to create an ITL.
+  )
   op createITL : MList Term Nat -> ITL .
   eq createITL(mtML, T, N) = nilITL .
   eq createITL(M . ML, T, N) = [M, T, N] createITL(ML, T, N) .
 
+  ***(
+   Function for extracting the innermost equality.
+  )
   op getEq : Term ~> Equation .
   eq getEq('_=_[T, 'false.Bool]) = getEq(T) .
   eq getEq('_=_[T, T']) = eq T = T' [none] . .
 
+  ***(
+   Function that traverses the ITL to check whether it can be discharged.
+  )
   op tryCaseSplitting* : ITL Macros String Nat Nat NatList -> IR .
   ceq tryCaseSplitting*(IT ITL, MACS, S, INDENT, N, NL) = [QIL QIL', MACS'', B and B']
    if [QIL, MACS', B] := tryCaseSplitting(IT, MACS, nil, S + "-" + string(N, 10), INDENT, NL N) /\
       [QIL', MACS'', B'] := tryCaseSplitting*(ITL, MACS', S, INDENT, s(N), NL) .
   eq tryCaseSplitting*(nilITL, MACS, S, INDENT, N, NL) = [nil, MACS, true] .
 
+  ***(
+   Function that, given an equality, generates all the possible case splittings for it.
+  )
   op processEqualityTerm : Module Term -> TrialPairSet .
   ceq processEqualityTerm(M, T) = mtTPS
    if hasVars(T) .
@@ -1874,22 +2091,35 @@ fmod OPEN-CLOSE-PARSER is
       not es&esCheck(M, T', T) [print "es&es 2 " T " = " T'] .
   eq processEqualityTerm(M, T) = $processEqualityTerm(M, T) . *** [owise print "Eq terms owise " T] .
 
+  ***(
+   Function that checks whether a term is a subterm of another term.
+  )
   op subterm : Term Term -> Bool .
   eq subterm(T, Q[TL, T, TL']) = true .
   eq subterm(T, T') = false [owise] .
 
+  ***(
+   Function that checks whether a term list has constants from the theorem of constants.
+  )
   op anyTC : Module TermList -> Bool .
   eq anyTC(M, empty) = false .
   eq anyTC(M, (Q[TL], TL')) = false .
   eq anyTC(M, (V, TL)) = false .
   eq anyTC(M, (C, TL)) = fromTC(getOps(M), C) or-else anyTC(M, TL) .
 
+  ***(
+   Function that checks whether a constant has information in the operator declaration
+   indicating it was generated by the theorem of constants.
+  )
   op fromTC : OpDeclSet Constant -> Bool .
   ceq fromTC(op Q : nil -> Ty [metadata("tc")] . ODS, C) = true
    if Q := getName(C) /\
       Ty := getType(C) .
   eq fromTC(ODS, C) = false [owise] .
 
+  ***(
+   Function that generates case splittings from equalities.
+  )
   op $processEqualityTerm : Module Term -> TrialPairSet .
   ceq $processEqualityTerm(M, '_=_[T1, T2]) = mtTPS
    if allCtor(M, T1) /\
@@ -1955,14 +2185,24 @@ fmod OPEN-CLOSE-PARSER is
                                          fi
    if TPS := processEq*(M, T, EqS) . *** [print "Double $$: " T " returns " TPS] .
 
+  ***(
+   Function that checks whether a term is built at top by the same constructor, and this
+   constructor builds sequences.
+  )
   op sameSeqCtor : Module Term Term -> Bool .
   eq sameSeqCtor(M, Q[TL], Q[TL']) = seqCtor(getOps(M), Q) .
   eq sameSeqCtor(M, T, T') = false [owise] .
 
+  ***(
+   Function that checks whether the given Qid is a sequence constructor.
+  )
   op seqCtor : OpDeclSet Qid -> Bool .
   eq seqCtor(op Q : TyL -> Ty [ctor assoc AtS] . ODS, Q) = true .
   eq seqCtor(ODS, Q) = false [owise] .
 
+  ***(
+   Function that checks whether a constant in an equality is being checked against a sequence.
+  )
   op const2seq : Module Term Term -> Bool .
   ceq const2seq(M, C, Q[T, TL]) = true
    if seqCtor(getOps(M), Q) /\
@@ -1971,10 +2211,17 @@ fmod OPEN-CLOSE-PARSER is
       isCevs(M, T) .
   eq const2seq(M, T, T') = false [owise] .
 
+  ***(
+   Function that checks whether the constructor has an identity.
+  )
   op hasId : OpDeclSet Qid -> Bool .
   eq hasId(op Q : TyL -> Ty [id(T) AtS] . ODS, Q) = true .
   eq hasId(ODS, Q) = false [owise] .
 
+
+  ***(
+   Function that checks whether the terms are unary sequences, so the equality must not be modified.
+  )
   op unarySeqCheck : Module Term Term -> Bool .
   ceq unarySeqCheck(M, Q[TL], Q'[TL']) = (not isCtor(getOps(M), Q)) and-then
                                          (not isCtor(getOps(M), Q')) and-then
@@ -1985,6 +2232,9 @@ fmod OPEN-CLOSE-PARSER is
   op seqEqConst2Seq : Module Term Term ~> TrialPairSet .
   eq seqEqConst2Seq(M, C, Q[T, TL]) = [T, cevs] . *** ['_=_[C, TL], ctf] . *** If the first fails the second makes no sense
 
+  ***(
+   Decision procedure for joining terms.
+  )
   op sees&seCheck : Module Term Term -> Bool .
   ceq sees&seCheck(M, T, T') = true
    if sameSeqCtor(M, T, T') /\
@@ -1999,9 +2249,15 @@ fmod OPEN-CLOSE-PARSER is
       T5 =/= T1 .
   eq sees&seCheck(M, T, T') = false [owise] .
 
+  ***(
+   Decision procedure for joining terms.
+  )
   op seese&se : Term Term ~> TrialPairSet .
   eq seese&se(Q[T1, T2, T3, T4, T5], Q[T6, T7]) = ['_=_[T6, Q[T1, T2, T3, T4]], ctf] .
 
+  ***(
+   Decision procedure for joining terms.
+  )
   op seese&seCheck : Module Term Term -> Bool .
   ceq seese&seCheck(M, T, T') = true
    if sameSeqCtor(M, T, T') /\
@@ -2016,11 +2272,17 @@ fmod OPEN-CLOSE-PARSER is
       not isCevs(M, T7)  .
   eq seese&seCheck(M, T, T') = false [owise] .
 
+  ***(
+   Decision procedure for joining terms.
+  )
   op sees&se : Module Term Term -> TrialPairSet .
   ceq sees&se(M, Q[T1, T2, T3, T4], Q[T5, T6]) = [T4, cesv]
    if eq '_=_[T5, Q[T1, T2]] = 'false.Bool [AtS] . EqS := getEqs(M) .
   eq sees&se(M, Q[T1, T2, T3, T4], Q[T5, T6]) = ['_=_[T5, Q[T1, T2]], ctf] [owise] .
 
+  ***(
+   Decision procedure for joining terms.
+  )
   op es&sesCheck : Module Term Term -> Bool .
   eq es&sesCheck(M, T, Q[T', TL]) =
                              es&sesSize(M, T, Q[T', TL]) and-then
@@ -2028,6 +2290,9 @@ fmod OPEN-CLOSE-PARSER is
                              sameSeqCtor(M, T, Q[T', TL]) and-then
                              isCevs(M, T') .
 
+  ***(
+   Decision procedure for joining terms.
+  )
   op se&sesCheck : Module Term Term -> Bool .
   eq se&sesCheck(M, T, Q[TL, T']) =
                              es&sesSize(M, T, Q[TL, T']) and-then
@@ -2035,6 +2300,9 @@ fmod OPEN-CLOSE-PARSER is
                              sameSeqCtor(M, T, Q[TL, T']) and-then
                              isCevs(M, T') .
 
+  ***(
+   Decision procedure for joining terms.
+  )
   op es&esCheck : Module Term Term -> Bool .
   eq es&esCheck(M, T, T') = sameSeqCtor(M, T, T') and-then
                             not sameSize(T, T') and-then
@@ -2042,14 +2310,24 @@ fmod OPEN-CLOSE-PARSER is
                             firstIsElem(M, T) and-then
                             firstIsElem(M, T') .
 
+  ***(
+   Function that checks whether the first term in the sequence is a single element
+   (not a sequence).
+  )
   op firstIsElem : Module Term -> Bool .
   eq firstIsElem(M, Q[T, TL]) = not isCevs(M, T) .
   eq firstIsElem(M, T) = false [owise] .
 
+  ***(
+   Auxiliary function for checking the size of the sequences.
+  )
   op es&sesSize : Module Term Term -> Bool .
   eq es&sesSize(M, Q[TL], Q[TL']) = (size(TL) + 1) == size(TL') .
   eq es&sesSize(M, T, T') = false [owise] .
 
+  ***(
+   Auxiliary functions for checking the types of the sequences.
+  )
   op es&sesTypes : Module Term Term -> Bool .
   eq es&sesTypes(M, Q[TL], Q[T', TL']) = es&sesTypes*(M, TL, TL') .
 
@@ -2082,22 +2360,25 @@ fmod OPEN-CLOSE-PARSER is
   eq sameSize(Q[TL], V) = true .
   eq sameSize(T, T') = true [owise] .
 
+  ***(
+   Heuristics for generating equalities from sequences. When the sequences have the same size
+   this function pairs each element in one with the corresponding one in the other.
+  )
   op seqEqualities : Module Term Term ~> TrialPairSet .
   eq seqEqualities(M, Q[TL], Q[TL']) = seqEqualities*(M, TL, TL') .
 
+  ***(
+   Auxiliary function for traversing lists and creating equalities.
+  )
   op seqEqualities* : Module TermList TermList ~> TrialPairSet .
   eq seqEqualities*(M, empty, empty) = mtTPS .
   eq seqEqualities*(M, (T, TL), (T', TL')) = processEqualityTerm(M, '_=_[T, T'])
                                              seqEqualities*(M, TL, TL') [print "Sequence inference " T " = " T'] .
 
-  op divideEqSeq : Module Term Term ~> TrialPairSet .
-  eq divideEqSeq(M, Q[TL], Q[TL']) = divideEqSeq*(M, TL, TL') .
-
-  op divideEqSeq* : Module TermList TermList ~> TrialPairSet .
-  eq divideEqSeq*(M, empty, empty) = mtTPS .
-  eq divideEqSeq*(M, (T, TL), (T', TL')) = processEqualityTerm(M, '_=_[T, T'])
-                                           divideEqSeq*(M, TL, TL') .
-
+  ***(
+   Auxiliary function for traversing all subterms and generating the
+   corresponding case splittings.
+  )
   op decomposeTerm : Module Term -> TrialPairSet .
   eq decomposeTerm(M, V) = mtTPS .
   eq decomposeTerm(M, C) = if allCtor(M, C) or isFreshCons(M, C)
@@ -2119,10 +2400,16 @@ fmod OPEN-CLOSE-PARSER is
                                     fi
                                fi .
 
+  ***(
+   Auxiliary function for traversing lists of terms.
+  )
   op decomposeTerm* : Module TermList -> TrialPairSet .
   eq decomposeTerm*(M, empty) = mtTPS .
   eq decomposeTerm*(M, (T, TL)) = decomposeTerm(M, T) decomposeTerm*(M, TL) .
 
+  ***(
+   Function that checks if the term corresponds to a case splitting for empty - value sequence
+  )
   op isCevs : Module Term -> Bool .
   eq isCevs(M, V) = false .
   ceq isCevs(M, C) = (not isCtor(getOps(M), getName(C))) and
@@ -2131,23 +2418,38 @@ fmod OPEN-CLOSE-PARSER is
   ceq isCevs(M, Q[TL]) = allConstants(TL) and isCevs(Ty, getSubsorts(M), getOps(M))
    if Ty := getType(metaReduce(M, Q[TL])) .
 
+  ***(
+   Function that checks whether all the elements in the list are constants.
+  )
   op allConstants : TermList -> Bool .
   eq allConstants(empty) = true .
   eq allConstants((C, TL)) = allConstants(TL) .
   eq allConstants(TL) = false [owise] .
 
+  ***(
+   Auxiliary function for checking subsorts.
+  )
   op isCevs : Type SubsortDeclSet OpDeclSet -> Bool .
   eq isCevs(Ty, subsort Ty' < Ty . SSDS, ODS) = isCevs(Ty, ODS) .
   eq isCevs(Ty, SSDS, ODS) = false [owise] .
 
+  ***(
+   Auxiliary function for checking assoc attribute.
+  )
   op isCevs : Type OpDeclSet -> Bool .
   eq isCevs(Ty, op Q : TyL -> Ty [ctor assoc id(T) AtS] . ODS) = true .
   eq isCevs(Ty, ODS) = false [owise] .
 
+  ***(
+   Auxiliary function for checking constructors.
+  )
   op isCtor : OpDeclSet Qid -> Bool .
   eq isCtor(op Q : TyL -> Ty [ctor AtS] . ODS, Q) = true .
   eq isCtor(ODS, Q) = false [owise] .
 
+  ***(
+   Function that checks whether the term contains built-in Boolean functions.
+  )
   op containsBoolOps : Term -> Bool .
   eq containsBoolOps(V) = false .
   eq containsBoolOps(C) = false .
@@ -2155,10 +2457,17 @@ fmod OPEN-CLOSE-PARSER is
    if (Q == '_or_) or (Q == '_and_) or (Q == '_xor_) or (Q == 'if_then_else_fi) .
   eq containsBoolOps(Q[TL]) = containsBoolOps*(TL) [owise] .
 
+  ***(
+   Auxiliary function for traversing a term list.
+  )
   op containsBoolOps* : TermList -> Bool .
   eq containsBoolOps*(empty) = false .
   eq containsBoolOps*((T, TL)) = containsBoolOps(T) or-else containsBoolOps*(TL) .
 
+  ***(
+   Function that traverses the equations in the module, looking for those whose lefthand
+   side metaXmatches the term, so the initial case splittings are computed.
+  )
   op processEq* : Module Term EquationSet -> TrialPairSet .
   eq processEq*(M, T, EqS) = processEq*(M, T, EqS, mtTPS) .
 
@@ -2196,6 +2505,9 @@ fmod OPEN-CLOSE-PARSER is
    if T1 := substitute(T, SB) /\
       T2 := substitute(T', SB) .
 
+  ***(
+   We look for the first condition that does not hold.
+  )
   op processCond : Module Condition Substitution -> TrialPairSet .
   eq processCond(M, nil, SB) = mtTPS .
   ceq processCond(M, T = T' /\ COND, SB) =
@@ -2209,6 +2521,9 @@ fmod OPEN-CLOSE-PARSER is
   eq processEqualityTerm*(M, T | TrS) = processEqualityTerm(M, T)
                                         processEqualityTerm*(M, TrS) .
 
+  ***(
+   Function that checks whether the term is built only with constructors.
+  )
   op allCtor : Module Term -> Bool .
   eq allCtor(M, T) = allCtor(getOps(M), T) .
 
@@ -2224,6 +2539,9 @@ fmod OPEN-CLOSE-PARSER is
   eq allCtor*(ODS, empty) = true .
   eq allCtor*(ODS, (T, TL)) = allCtor(ODS, T) and allCtor*(ODS, TL) .
 
+  ***(
+   Function that checks that the term does not contain constructors.
+  )
   op noneCtor : Module Term -> Bool .
   eq noneCtor(M, T) = noneCtor(getOps(M), T) .
 
@@ -2241,6 +2559,9 @@ fmod OPEN-CLOSE-PARSER is
   eq noneCtor*(ODS, empty) = true .
   eq noneCtor*(ODS, (T, TL)) = noneCtor(ODS, T) and noneCtor*(ODS, TL) .
 
+  ***(
+   Function that transforms a term list into a term set.
+  )
   op tl2ts : TermList -> TermSet .
   eq tl2ts(empty) = emptyTermSet .
   eq tl2ts((T, TL)) = T | tl2ts(TL) .
@@ -2332,6 +2653,9 @@ and \verb"sizeTL" just computes the size of a list of terms:
   eq getEqualityTerms*(M, (T, TL), T') = getEqualityTerms(M, T, T') |
                                          getEqualityTerms*(M, TL, T') .
 
+  ***(
+   Function for changing the order in an equality if it generates non-termination.
+  )
   op reorder : Module Term Term -> Term .
   eq reorder(M, '_=_[C, T], Q[TL, C, TL']) = '_=_[T, C] .
   ceq reorder(M, '_=_[Q[TL], C], Q'[TL']) = '_=_[C, Q[TL]]
@@ -2369,15 +2693,15 @@ and \verb"sizeTL" just computes the size of a list of terms:
 
   op [_,_] : ImpPairList Bool -> ImpTryRes [ctor] .
 
-
-
-
-
-
   var SB? : [Substitution] .
   var SB' : Substitution .
   var TS? : [TermSet] .
 
+  ***(
+   Function for generating a presubstitution. Pre-substitutions are computed by generating,
+   in an equality Q[T1, ..., Ti, ..., Tn] = Q[T'1, ..., Vi, ..., T'n], the substitution
+   Vi |-> Ti
+  )
   op preSubstitution : Module Term Term ~> SbSet .
   eq preSubstitution(M, T, T') = preSubstitution(M, T, T', 0) .
 
@@ -2390,6 +2714,9 @@ and \verb"sizeTL" just computes the size of a list of terms:
    if TrS := getEquals(reduce(M, '_implies_[T, T'])) /\
       SB := traverseEquals(M, TrS, N, none) .
 
+  ***(
+   Function that traverses all equalities looking for substitutions.
+  )
   op traverseEquals : Module TermSet Nat Substitution ~> Substitution .
   ceq traverseEquals(M, ('_=_[T, T']) | TrS, N, SB) =
                                                 traverseEquals(M, TrS, N, SB ; SB?)
@@ -2420,6 +2747,9 @@ and \verb"sizeTL" just computes the size of a list of terms:
       SB? :: Substitution .
   eq traverseEquals(M, TrS, N, SB) = SB [owise] .
 
+  ***(
+   Function that extracts all the equalities in a term.
+  )
   op getEquals : Term -> TermSet .
   eq getEquals(T) = getEquals(T, emptyTermSet) .
 
@@ -2457,6 +2787,9 @@ and \verb"sizeTL" just computes the size of a list of terms:
   var  IPL' : ImpPairList .
   var  IP : ImpPair .
 
+  ***(
+
+  )
   op tryImplication : Module Term TermList -> ImpTryRes .
   eq tryImplication(M, T, TL) = tryImplication(M, T, TL, extraImpLevels) .
 
