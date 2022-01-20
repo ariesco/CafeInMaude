@@ -367,12 +367,16 @@ fmod PARSING-MODULE-AUXILIARY is
  eq (Q |-> (nil).ParameterDeclList) = empty .
 
  ***(
-  This functions checks
+  This functions checks whether the module name is included in the theory map.
  )
  op isATheory : Qid TheorySortMap -> Bool .
  eq isATheory(Q, (TSM, Q -> SS)) = true .
  eq isATheory(Q, TSM) = false [owise] .
 
+ ***(
+  Function that generates a module from a theory. Used for creating parameterized
+  theories, which is not supported by Maude.
+ )
  op changeTheoryByModule : Term Bool TheorySortMap -> ModuleExpression .
  ceq changeTheoryByModule(Q[TL], B, TSM) = Q[TL']
   if Q =/= 'token /\
@@ -390,22 +394,34 @@ fmod PARSING-MODULE-AUXILIARY is
  eq changeTheoryByModule*((T, TL), B, TSM) = changeTheoryByModule(T, B, TSM),
                                              changeTheoryByModule*(TL, B, TSM) .
 
+ ***(
+  Function that checks whether the Qid is in the set.
+ )
  op viewInSet : Qid SortSet -> Bool .
  eq viewInSet(Q, Q ; SS) = true .
  eq viewInSet(Q, SS) = false [owise] .
 
+ ***(
+  Function that adds a new hidden sort to the set.
+ )
  op addHiddenSort : TheorySortMap Qid SortSet -> TheorySortMap .
  eq addHiddenSort((Q -> SS, HSM), Q, SS') = (Q -> (SS ; SS'), HSM) .
  eq addHiddenSort(HSM, Q, SS) = Q -> SS, HSM [owise] .
 
+ ***(
+  Down function for sorts
+ )
  op sort2sort : Term ~> Sort .
  eq sort2sort('CafeToken[T]) = downQid(T) .
  eq sort2sort('token[T]) = downQid(T) .
 
- op sortViewId : ParameterDeclList Term -> Term .
+ ***(
+  Function that returns a list of terms sorting the list of parameter declarations.
+ )
+ op sortViewId : ParameterDeclList Term -> TermList .
  ceq sortViewId(PDL, Q[T, TL]) = Q[T, TL]
   if Q =/= '_`,_ or-else not usesSugar(T) .
- eq sortViewId(PDL, Q[TL]) = sortViewIdAux(PDL, TL) .
+ eq sortViewId(PDL, Q[TL]) = sortViewIdAux(PDL, TL) [owise] .
 
  op sortViewIdAux : ParameterDeclList TermList -> TermList .
  eq sortViewIdAux(nil, TL) = empty .
@@ -414,10 +430,16 @@ fmod PARSING-MODULE-AUXILIARY is
  eq sortViewIdAux((Q :: ME, PDL), TL) = '_`,_[find(Q, TL),
                                         sortViewIdAux(PDL, TL)] [owise] .
 
+ ***(
+  Function that checks whether the instantiation is defined on-the-fly.
+ )
  op usesSugar : Term -> Bool .
  eq usesSugar('_<=_[TL]) = true .
  eq usesSugar(T) = false [owise] .
 
+ ***(
+  Function that looks for the term mentioning the Qid.
+ )
  op find : Qid TermList -> Term .
  eq find(Q, ('_`,_[T, T'], TL)) = find(Q, (T, T', TL)) .
  eq find(Q, ('_<=_['token[T], T'], TL)) = if Q == downQid(T)
@@ -425,12 +447,18 @@ fmod PARSING-MODULE-AUXILIARY is
                                           else find(Q, TL)
                                           fi .
 
+ ***(
+  Function that imports the predefined BOOL module.
+ )
  op addBool : Term -> Term .
  eq addBool(T) = if addsBool?(T)
                  then T
                  else '__['inc`(_`)['token[''BOOL.Qid]], T]
                  fi .
 
+ ***(
+  Function that checks whether the module includes BOOL.
+ )
  op addsBool? : Term -> Bool .
  eq addsBool?('__[TL]) = addsBool?*(TL) .
  eq addsBool?('pr`(_`)[Q[''BOOL.Qid]]) = true .
@@ -447,30 +475,52 @@ fmod PARSING-MODULE-AUXILIARY is
  eq addsBool?*((T, TL)) = addsBool?(T) or addsBool?*(TL) .
  eq addsBool?*(empty) = false .
 
+ ***(
+  Function that includes a new entry in the SortMap, indicating that
+  the corresponding module has a particular sort as principal sort.
+ )
  op add2PrincipalMap : Qid Qid SortMap -> SortMap .
  eq add2PrincipalMap(QI, QI', (QI |-> Q, PSM)) = QI |-> QI', PSM .
  eq add2PrincipalMap(QI, QI', PSM) = QI |-> QI', PSM [owise] .
 
+ ***(
+  Function that extracts a Qid, standing for a name, from a bubble.
+ )
  op opNameFromBubble : Term -> Qid .
  ceq opNameFromBubble('neCafeTokenList[T]) = qid(S)
   if QIL := downQidList(T) /\
      S := qidlist2string(QIL) .
 
+ ***(
+  Function that transforms a QidList into a String.
+ )
  op qidlist2string : QidList -> String .
  eq qidlist2string(nil) = "" .
  eq qidlist2string(Q QIL) = string(Q) + qidlist2string(QIL) .
 
+ ***(
+  Function that checks whether the given sort is in the set.
+ )
  op _in_ : Qid SortSet -> Bool .
  eq Q in (Q ; SS) = true .
  eq Q in SS = false [owise] .
 
+ ***(
+  Function that checks whether the given sort is in the set.
+ )
  op _in_ : Qid TheorySortMap -> Bool .
  eq Q in (Q -> SS, TSM) = true .
  eq Q in TSM = false [owise] .
 
+ ***(
+  Function that extracts the sort identifier from a CafeToken.
+ )
  op getSort : Term ~> Term .
  eq getSort('CafeToken[T]) = downQid(T) .
 
+ ***(
+  Function that creates a new name for a view defined on-the-fly.
+ )
  op getNewName : SortSet Nat -> Qid .
  ceq getNewName(SS, N) = if Q in SS
                          then getNewName(SS, s(N))
@@ -478,13 +528,22 @@ fmod PARSING-MODULE-AUXILIARY is
                          fi
   if Q := createViewName(N) .
 
+ ***(
+  Function that creates a new View identifier.
+ )
  op createViewName : Nat -> Qid .
  eq createViewName(N) = qid("OTF-VIEW" + string(N, 10)) .
 
+ ***(
+  Function that creates a new module name for a theory.
+ )
  op newName : TheorySortMap Qid -> Qid .
  eq newName((Q -> SS, TSM), Q) = qid(string(Q) + "-MODCAFE") .
  eq newName(TSM, Q) = Q [owise] .
 
+ ***(
+  Function that extracts the sort names from a sort/subsort declaration.
+ )
  op getSorts : TermList SortSet -> SortSet .
  eq getSorts(empty, SS) = none .
  eq getSorts('__[TL], SS) = getSorts(TL, SS) .
@@ -497,21 +556,33 @@ fmod PARSING-MODULE-AUXILIARY is
   if Q := downQid(T) /\
      not (Q in SS) .
 
+ ***(
+  Function that creates a set of op declarations from an "ops" declaration.
+ )
  op createOps : Qid TermList TermList -> TermSet .
  eq createOps(Q, '__[TL], TL') = createOps(Q, TL, TL') .
  eq createOps(Q, (T, TL), TL') = (Q['neCafeTokenList[T], TL']) | createOps(Q, TL, TL') .
  eq createOps(Q, empty, TL) = emptyTermSet .
 
+ ***(
+  Function in charge of taking a level down a type list.
+ )
  op downTypeList : TermList -> TypeList .
  eq downTypeList('__[TL]) = downTypeList(TL) .
  eq downTypeList(('CafeToken[T], TL)) = downQid(T) downTypeList(TL) .
  eq downTypeList(empty) = nil .
 
+ ***(
+  Function that takes a level down the attribute declarations.
+ )
  op downAttributes : Module TermList -> AttrSet .
  eq downAttributes(M, '__[TL]) = downAttributes(M, TL) .
  eq downAttributes(M, (T, TL)) = downAttribute(M, T) downAttributes(M, TL) .
  eq downAttributes(M, empty) = none .
 
+ ***(
+  Function that takes a level down an attribute declaration.
+ )
  op downAttribute : Module Term -> AttrSet .
  eq downAttribute(M, 'constr.@CafeAttr@) = ctor .
  eq downAttribute(M, 'assoc.@CafeAttr@) = assoc .
@@ -533,6 +604,10 @@ fmod PARSING-MODULE-AUXILIARY is
   if Q := downQid(T) /\
      N := rat(string(Q), 10) .
 
+ ***(
+  Function that modifies the importation declaration to fulfill
+  Maude restrictions.
+ )
  op modifyImport : Import TheorySortMap -> Import .
  ceq modifyImport(protecting ME ., TSM) = including ME .
   if atLeastOneTheory(ME, TSM) .
@@ -542,6 +617,10 @@ fmod PARSING-MODULE-AUXILIARY is
   if atLeastOneTheory(ME, TSM) .
  eq modifyImport(I, TSM) = I [owise] .
 
+ ***(
+  Function that checks whether at least one theory is imported in the
+  module expression.
+ )
  op atLeastOneTheory : ModuleExpression TheorySortMap -> Bool .
  eq atLeastOneTheory(Q, TSM) = Q in TSM .
  eq atLeastOneTheory(ME + ME', TSM) = atLeastOneTheory(ME, TSM) or
@@ -550,11 +629,17 @@ fmod PARSING-MODULE-AUXILIARY is
  eq atLeastOneTheory(ME * (RS), TSM) = getModuleExpressionName(ME) in TSM .
  eq atLeastOneTheory(ME, TSM) = false [owise] .
 
+ ***(
+  Function that extracts the top Qid from a module expression.
+ )
  op getModuleExpressionName : ModuleExpression ~> Qid .
  eq getModuleExpressionName(Q) = Q .
  eq getModuleExpressionName(ME{NPL}) = getModuleExpressionName(ME) .
  eq getModuleExpressionName(ME * (RS)) = getModuleExpressionName(ME) .
 
+ ***(
+  Function that creates variables from terms adding the sort.
+ )
  op createVars : TermList String -> VariableSet .
  eq createVars('__[TL], S) = createVars(TL, S) .
  eq createVars(empty, S) = none .
@@ -562,10 +647,17 @@ fmod PARSING-MODULE-AUXILIARY is
   if Q := downQid(T) /\
      V := qid(string(Q) + ":" + S) .
 
+ ***(
+  Function that rebuilds (elevating one level) a term list.
+ )
  op rebuild : TermList -> Term .
  eq rebuild(T) = T .
  eq rebuild(TL) = '__[TL] .
 
+ ***(
+  Function that extracts attributes that might be placed in the label of the equation.
+  If checks they are enclosed into curly braces.
+ )
  op cafeEqAtS2maudeEqAts* : TermList -> BubbleParsing .
  ceq cafeEqAtS2maudeEqAts*((TL, ''`{.Qid, ''owise.Qid, TL'', ''`}.Qid)) = < TL, owise AtS >
   if AtS := getAts(TL'') .
@@ -575,6 +667,9 @@ fmod PARSING-MODULE-AUXILIARY is
   if St := metadataString(TL'') .
  eq cafeEqAtS2maudeEqAts*(TL) = < TL, none > [owise] .
 
+ ***(
+  Function that extracts attributes that might be placed in the label of the equation.
+ )
  op getAts : TermList -> AttrSet .
  eq getAts((''owise.Qid, TL'')) = owise .
  eq getAts((''nonexec.Qid, TL'')) = nonexec .
@@ -582,14 +677,19 @@ fmod PARSING-MODULE-AUXILIARY is
   if St := metadataString(TL'') .
  eq getAts(empty) = none .
 
+ ***(
+  Function that extracts the string in the metadata attribute.
+ )
  op metadataString : TermList -> String .
  eq metadataString(empty) = "" .
  eq metadataString((T, TL)) = string(downQid(T)) + metadataString(TL) .
 
+ *** Error module name message.
  op errModName : -> QidList .
  eq errModName = '\n '\r 'ERROR: '\o 'The 'module 'name 'is 'not 'a
                 'valid 'identifier. .
 
+ *** Parameterized theory warning message.
  op paramThWarn : -> QidList .
  eq paramThWarn = '\n '\r 'Warning: '\o 'Parameterized 'theories 'are 'not 'allowed
                   'in 'Maude. '\n 'The 'module 'was 'introduced 'with '\g 'tight '\o
@@ -602,6 +702,10 @@ fmod ATTRIBUTE-UPDATING is
   var TSM : TheorySortMap .
   var M : Module .
 
+  ***(
+   Function that updates the sorts in theories if the given
+   module is a theory.
+  )
   op updateTSM : Module TheorySortMap -> TheorySortMap .
   ceq updateTSM(M, TSM) = TSM, getName(M) -> getSorts(M)
    if isATheory(M) .
@@ -616,6 +720,9 @@ fmod OPEN-CLOSE-AUX is
  var  M : Module .
  vars T T' : Term .
 
+ ***(
+  Function that, recursively, applies metaParse to all terms in reduction commands.
+ )
  op parseRedTerms : Module TermList VariableSet -> TermList .
  eq parseRedTerms(M, (T, TL), VS) = parseRedTerm(M, T, VS), parseRedTerms(M, TL, VS) .
  eq parseRedTerms(M, empty, VS) = empty .
@@ -652,10 +759,16 @@ mod TASKS is
  op noOccupation : -> MIOccupationSet [ctor] .
  op __ : MIOccupationSet MIOccupationSet -> MIOccupationSet [ctor assoc comm id: noOccupation] .
 
+ ***(
+  Function that computes the number of cores that are currently started.
+ )
  op numCoresStarted : MIOccupationSet -> Nat .
  eq numCoresStarted(noOccupation) = 0 .
  eq numCoresStarted(MIOP MIOS) = s(numCoresStarted(MIOS)) .
 
+ ***(
+  Function that checks whether all cores are idle.
+ )
  op allIdle : MIOccupationSet -> Bool .
  ceq allIdle([O, T] MIOS) = false
   if T =/= noTask .
@@ -674,6 +787,9 @@ fmod PRINT-TPS is
  op po : -> PrintOptionSet .
  eq po = mixfix number rat format .
 
+ ***(
+  Printing function for case splittings.
+ )
  op printTPS : Module TrialPairSet TrialPairSet -> String .
  eq printTPS(M, TPS, TPS') = if TPS == mtTPS
                              then ""
@@ -683,7 +799,9 @@ fmod PRINT-TPS is
                              then ""
                              else "The following case splittings are recommended when using premises:" + $printTPS(M, TPS')
                              fi .
-
+ ***(
+  Printing function for particular case splittings.
+ )
  op $printTPS : Module TrialPairSet -> String .
  eq $printTPS(M, mtTPS) = "\n" .
  eq $printTPS(M, [T, ctf] TPS) = "\n Case splitting by true-false recommended for "
@@ -710,12 +828,18 @@ fmod SUBS is
  var T : Term .
  var Q : Qid .
 
+ ***(
+  Function that applies a substitution to a term.
+ )
  op substitute : Term Substitution -> Term .
  eq substitute(Q[TL], SB) = Q[substitute*(TL, SB)] .
  eq substitute(C, SB) = C .
  eq substitute(V, V <- T ; SB) = T .
  eq substitute(T, SB) = T [owise] .
 
+ ***(
+  Function that applies a substitution to a list of terms.
+ )
  op substitute* : TermList Substitution -> TermList .
  eq substitute*(empty, SB) = empty .
  eq substitute*((T, TL), SB) = substitute(T, SB), substitute*(TL, SB) .
@@ -739,6 +863,10 @@ fmod ADD-PROVEN is
  var  Q : Qid .
  var  N : Nat .
 
+ ***(
+  Function that adds equations to the module in the proof tree. This function is used when independent
+  goals are being proven and we want to use them as induction hypotheses.
+ )
  op addProvenGoals : ProofTree EquationSet Variable -> ProofTree .
  ceq addProvenGoals(| M, G, PTL, N |, EqS, V) = | M, G, PTL', N |
   if PTL' := addProvenGoals*(PTL, EqS, V) .
@@ -759,6 +887,9 @@ fmod ADD-PROVEN is
      M' := addHyp(M, EqS') .
  eq addProvenGoals(M, EqS, V) = M [owise] .
 
+ ***(
+  Function that applies a singleton substitution (in the induction variable).
+ )
  op subsituteIndVar : EquationSet Variable Constant Nat -> EquationSet .
  eq subsituteIndVar(none, V, C, N) = none .
  ceq subsituteIndVar(eq T = T' [AttS] . EqS, V, C, N) = eq substitute(T, V <- C) = T' [metadata("HI") label(Q) nonexec AttS] .

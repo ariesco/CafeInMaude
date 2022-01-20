@@ -16,7 +16,7 @@ load open_close_parsing.maude
 load command_parsing.maude
 load io.maude
 
-mod MTP is
+mod CIMPG-IO is
  pr (MAYBE * (op maybe to null)){Oid} .
  pr META-CIM-SIGN .
  pr PREPARSING .

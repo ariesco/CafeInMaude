@@ -15,41 +15,70 @@ fmod COMMAND-PARSING is
  vars T T' : Term .
  vars Q Q' : Qid .
 
+ ***(
+  Function that removes the top operator for meta-represented lists.
+ )
  op extractTerms : Term -> TermList .
  eq extractTerms('__[TL]) = extractTerms*(TL) .
  eq extractTerms(T) = T [owise] .
 
+ ***(
+  Auxiliary function for applying extractTerms to all the elements of the list.
+ )
  op extractTerms* : TermList -> TermList .
  eq extractTerms*(empty) = empty .
  eq extractTerms*((T, TL)) = extractTerms(T), extractTerms*(TL) .
 
+ ***(
+  Function that creates a list of load commands from a list of terms.
+ )
  op generateLoadList : Term -> TermList .
  eq generateLoadList('__[T, T']) = generateLoadList(T), generateLoadList(T') .
  eq generateLoadList(T) = 'load_.['token[T]] [owise] .
 
+ ***(
+  Function that creates a list of apply commands from a list of terms.
+ )
  op createApplyComms : Term -> TermList .
  eq createApplyComms('__[T, T']) = ':applyComm[T], createApplyComms(T') .
  eq createApplyComms(T) = ':applyComm[T] [owise] .
 
+ ***(
+  Printing function for goals.
+ )
  op printGoal : TermList -> String .
  eq printGoal('__[T, T']) = printGoal(T) + "\n" + printGoal(T') .
  eq printGoal('eq_=_.['CafeBubble[T], 'CafeBubble[T']]) = "eq " + printTokens(downQidList(T)) + " = " +
                                                                   printTokens(downQidList(T')) + " ." .
 
+ ***(
+  Printing function for macros.
+ )
  op printEqMacro : Term -> String .
  eq printEqMacro('eq_=_.['CafeBubble[T],'CafeBubble[T']]) = "eq " + printTokens(downQidList(T)) + " = " +
                                                                     printTokens(downQidList(T')) + " ." .
  eq printEqMacro(T) = "" [owise] .
 
+
+ ***(
+  Printing function for tokens.
+ )
  op printTokenDown : Term -> String .
  eq printTokenDown(T) = printTokens(downQidList(T)) .
 
+ ***(
+  Function for getting the ScoreInfoSet of the given node.
+ )
  op getSIS : ProofTree NatList ScoreInfoSet -> ScoreInfoSet .
  ceq getSIS(PT, NL, SIS) = $getSIS(Q', SIS, noScoreInfo)
   if eq Q[TL] = 'true.Bool [AtS] . EqS := getGoal(PT, NL) /\
      Q' := getInductiveCase(TL) .
  eq getSIS(PT, NL, SIS) = SIS [owise] .
 
+ ***(
+  Function for extracting the current case, which must be at the top
+  (the rest are variables/constants).
+ )
  op getInductiveCase : TermList ~> Qid .
  eq getInductiveCase((Q[TL], TL')) = Q .
  eq getInductiveCase((T, TL)) = getInductiveCase(TL) [owise] .
@@ -61,6 +90,10 @@ fmod COMMAND-PARSING is
                                          fi .
  eq $getSIS(Q, SIS, SIS') = SIS' [owise] .
 
+ ***(
+  Function that checks whether a term is applying the same inductive case
+  as the one given as parameter (Qid).
+ )
  op sameCase : Qid Term -> Bool .
  eq sameCase(Q, '_implies_[T, T']) = sameCase(Q, T') .
  eq sameCase(Q, Q'[TL]) = Q == getInductiveCase(TL) [owise] .
@@ -82,6 +115,9 @@ mod CIMPA-COMMANDS-PROCESSING is
  var  S : String .
  vars Q Q' : Qid .
 
+ ***(
+  Function that creates the list of tasks for cores from the inductive cases.
+ )
  op taskQueueForInductiveCases : ProofTree ProofOrder ScoreInfoSet Macros -> TaskQueue .
  ceq taskQueueForInductiveCases(PT, NL y PO, SIS, MACS) = [NL, 'OPEN-CLOSE-PARSER, T]
                                                           taskQueueForInductiveCases(PT, PO, SIS, MACS)
@@ -94,6 +130,9 @@ mod CIMPA-COMMANDS-PROCESSING is
      T := 'developProof[MPT, MNL, MSIS, MMACS] .
  eq taskQueueForInductiveCases(PT, finished, SIS, MACS) = mtTQueue .
 
+ ***(
+  Function that adds a postfix for avoiding name clash.
+ )
  op renameCTF : QidList String -> QidList .
  eq renameCTF(QIL, S) = renameCTF(QIL, nil, S) .
 

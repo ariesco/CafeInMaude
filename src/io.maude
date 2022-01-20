@@ -831,7 +831,7 @@ mod CIMPA-IO is
           "\n:ind on (" + string(metaPrettyPrint(M, V, po)) + ")" +
           "\n:apply(si)" /\
      PT'' := addProvenGoals(PT', PROVEN, V) /\
-     TQ' := taskQueueForInductiveCases(PT'', PO, SIS, mtMacros) .
+     TQ' := taskQueueForInductiveCases(PT'', PO, SIS, mtMacros) [print "infer1"] .
 
      var TT TT' TT'' : Term .
      var Q'' : Qid .
@@ -859,7 +859,7 @@ mod CIMPA-IO is
      TL' := inferGoal(SIS) /\
      EqS := goalEqS(TL', Q, 0) /\
      PT' := | M, [nil, 'root, EqS, true, false], mtPT, 1 | /\
-     S := "\n:goal{\n" + printTokens(printEqS(M, EqS, ')) + "}" .
+     S := "\n:goal{\n" + printTokens(printEqS(M, EqS, ')) + "}" [print "infer2"] .
 
  crl [infer-proof-with-goal] :
      < cafeInMaude : CIM | state: executeComm, input: (':infer-proof_.['token[T]], TL),
@@ -877,7 +877,7 @@ mod CIMPA-IO is
      S := "\n:ind on (" + string(metaPrettyPrint(M, V, po)) + ")" +
           "\n:apply(si)" /\
      PT'' := addProvenGoals(PT', PROVEN, V) /\
-     TQ' := taskQueueForInductiveCases(PT'', PO, SIS, MACS) .
+     TQ' := taskQueueForInductiveCases(PT'', PO, SIS, MACS) [print "infer3"] .
 
  *** Currently not fully supported by Maude due to blocking I/O
  crl [infer-proof] :
