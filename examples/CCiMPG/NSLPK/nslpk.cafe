@@ -7,22 +7,27 @@
 --     = ((enc2(Q1,N1,N2,intr) \in nw(S))
 --        implies (p1(N2) = intr or p2(N2) = intr or N2 \in nonces(S))) .
 --
-
+-- Module for principals
 mod* PRIN {
   [Prin]
   op intr : -> Prin {constr}
 }
 
+-- Module for random numbers
 mod* RAND {
   [Rand]
+-- Initial value
   op seed : -> Rand {constr}
+-- Next value
   op next : Rand -> Rand {constr}
   vars R1 R2 : Rand
+-- Equality for constructors
   eq (seed = next(R1)) = false .
   eq (R1 = next(R1)) = false .
   eq (next(R1) = next(R2)) = (R1 = R2) .
 }
 
+-- Nonces
 mod! NONCE {
   pr(PRIN + RAND)
   [Nonce]
@@ -32,18 +37,22 @@ mod! NONCE {
   op r  : Nonce -> Rand
   vars P1 P2 P12 P22 : Prin
   vars R1 R2 : Rand
+-- Projection function
   eq p1(n(P1,P2,R1)) = P1 .
   eq p2(n(P1,P2,R1)) = P2 .
   eq r(n(P1,P2,R1))  = R1 .
+-- Equality for nonces. Two nonces are equal if their components are equal.
   eq (n(P1,P2,R1) = n(P12,P22,R2)) = (P1 = P12 and P2 = P22 and R1 = R2) .
 }
 
 mod! CIPHER {
   pr(NONCE)
   [Cipher1 Cipher2 Cipher3 < Cipher]
+-- Constructors
   op enc1 : Prin Nonce Prin -> Cipher1 {constr}
   op enc2 : Prin Nonce Nonce Prin -> Cipher2 {constr}
   op enc3 : Prin Nonce -> Cipher3 {constr}
+-- Projection functions
   op k    : Cipher -> Prin
   op n1   : Cipher -> Nonce
   op n2   : Cipher2 -> Nonce
@@ -61,6 +70,7 @@ mod! CIPHER {
   eq n2(enc2(K1,N1,N2,P1)) = N2 .
   eq p(enc1(K1,N1,P1)) = P1 .
   eq p(enc2(K1,N1,N2,P1)) = P1 .
+-- Equalities
   eq (enc1(K1,N11,P1) = enc1(K2,N12,P2)) = (K1 = K2 and N11 = N12 and P1 = P2) .
   eq (enc1(K1,N11,P1) = enc2(K2,N12,N22,P2)) = false .
   eq (enc1(K1,N11,P1) = enc3(K2,N12)) = false .
@@ -69,6 +79,7 @@ mod! CIPHER {
   eq (enc3(K1,N11) = enc3(K2,N12)) = (K1 = K2 and N11 = N12) .
 }
 
+-- Set
 mod! BAG (M :: TRIV) {
   [Elt.M < Bag]
   op empty : -> Bag {constr}
@@ -77,6 +88,7 @@ mod! BAG (M :: TRIV) {
   vars X Y : Elt.M
   var S : Bag
   eq (empty S) = S .
+-- Membership for sets
   eq X \in empty = false .
   eq X \in Y = (X = Y) .
   eq X \in (Y S) = (X = Y) or (X \in S) .
@@ -94,6 +106,7 @@ view TRIV2CIPHER from TRIV to CIPHER {
   sort Elt -> Cipher
 }
 
+-- A set of ciphered messages is a Network
 mod! NETWORK {
   pr(BAG(M <= TRIV2CIPHER)*{sort Bag -> Network})
 }
@@ -128,6 +141,7 @@ mod* NSLPK {
   eq nonces(send1(S,P1,P2))
      = (if P2 = intr then (n(P1,P2,rand(S)) nonces(S)) else nonces(S) fi) .
   -- send2
+  -- Effective condition: the previous message is in the network
   op c-send2 : Sys Prin Prin Nonce -> Bool
   eq c-send2(S,P1,P2,N1) = enc1(P1,N1,P2) \in nw(S) .
   --
@@ -139,6 +153,7 @@ mod* NSLPK {
       if c-send2(S,P1,P2,N1) .
   ceq send2(S,P1,P2,N1)         = S if not c-send2(S,P1,P2,N1) .
   -- send3
+  -- Effective condition: the previous messages are in the network
   op c-send3 : Sys Prin Prin Nonce Nonce -> Bool
   eq c-send3(S,P1,P2,N1,N2) = enc2(P1,N1,N2,P2) \in nw(S) and enc1(P2,N1,P1) \in nw(S) .
   --
@@ -149,6 +164,7 @@ mod* NSLPK {
       if c-send3(S,P1,P2,N1,N2) .
   ceq send3(S,P1,P2,N1,N2)         = S if not c-send3(S,P1,P2,N1,N2) .
   -- fake1
+  -- Effective condition: the real message is in the network
   op c-fake1 : Sys Prin Prin Nonce -> Bool
   eq c-fake1(S,P1,P2,N1) = N1 \in nonces(S) .
   --
@@ -158,6 +174,7 @@ mod* NSLPK {
   ceq fake1(S,P1,P2,N1)         = S if not c-fake1(S,P1,P2,N1) .
   -- fake2
   op c-fake2 : Sys Prin Prin Nonce Nonce -> Bool
+  -- Effective condition: the real messages are in the network
   eq c-fake2(S,P1,P2,N1,N2) = N1 \in nonces(S) and N2 \in nonces(S) .
   --
   eq  rand(fake2(S,P1,P2,N1,N2))   = rand(S) .
@@ -165,6 +182,7 @@ mod* NSLPK {
   eq  nonces(fake2(S,P1,P2,N1,N2)) = nonces(S) .
   ceq fake2(S,P1,P2,N1,N2)         = S if not c-fake2(S,P1,P2,N1,N2) .
   -- fake3
+  -- Effective condition: the real messages are in the network
   op c-fake3 : Sys Prin Nonce -> Bool
   eq c-fake3(S,P1,N1) = N1 \in nonces(S) .
   --
