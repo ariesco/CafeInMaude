@@ -101,7 +101,7 @@ commands required to run the example using proof scores. For example, the **2p-m
 
 Likewise, we include a **commands_generate.cafe** file with the commands for running the example and inferring
 the proof without proof scores. For example, the **2p-mutex** folder contains a
-**commands_cimpg.cafe** file that can be loaded as follows:
+**commands_generate.cafe** file that can be loaded as follows:
 
 ```
     $ CafeInMaude> load ../examples/CCiMPG/2p-mutex/commands_generate.cafe .
