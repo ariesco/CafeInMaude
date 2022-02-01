@@ -92,14 +92,22 @@ load ../examples/CCiMPG/2p-mutex/2p-proof.cafe .
 ```
 
 In general, the examples in the **CCIMPG** folder provide a **commands_cimpg.cafe** file with the
-commands required to run the example. For example, the **2p-mutex** folder contains a
+commands required to run the example using proof scores. For example, the **2p-mutex** folder contains a
 **commands_cimpg.cafe** file that can be loaded as follows:
 
 ```
     $ CafeInMaude> load ../examples/CCiMPG/2p-mutex/commands_cimpg.cafe .
 ```
 
-This file contains the commands for loading the modules, generating the proof, saving, and loading it,
+Likewise, we include a **commands_generate.cafe** file with the commands for running the example and inferring
+the proof without proof scores. For example, the **2p-mutex** folder contains a
+**commands_cimpg.cafe** file that can be loaded as follows:
+
+```
+    $ CafeInMaude> load ../examples/CCiMPG/2p-mutex/commands_generate.cafe .
+```
+
+These files contain the commands for loading the modules, generating the proof, saving, and loading it,
 explained above.
 
 General commands

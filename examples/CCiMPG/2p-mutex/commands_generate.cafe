@@ -15,9 +15,10 @@ close
 :save-proof .
 
 eof
-
+-- For loading the generated proof
 load ../examples/CCiMPG/2p-mutex/2p-generate-proof.cafe .
 
 eof
 
+-- For loading this file
 load ../examples/CCiMPG/2p-mutex/commands_generate.cafe .
