@@ -25,13 +25,6 @@ set-output ../examples/CCiMPG/NSLPK/nslpk-proof-generate_inv3.cafe .
 
 eof
 
-load ../examples/CCiMPG/NSLPK/commands_tosem.cafe .
-
-Suggested configuration:
-  eq backtrackLevels = 6 .
-  eq numInstVars = 2 .
-  eq extraImpLevels = 1 .
-
 -- inv1
 
 :proven(inv2(S:Sys, N1:Nonce, Q:Prin))
@@ -73,3 +66,11 @@ open NSLPK .
 close
 
 -- end inv3
+
+-- For loading this file
+load ../examples/CCiMPG/NSLPK/commands_generate_with_proven.cafe .
+
+Suggested configuration:
+  eq backtrackLevels = 6 .
+  eq numInstVars = 2 .
+  eq extraImpLevels = 1 .

@@ -21,11 +21,15 @@ eof
 
 :save-proof .
 
+-- For loading the generated proof
 load ../examples/CCiMPG/NSLPK/nslpk-proof-generate.cafe .
 
 eof
 
+-- For loading this file
 load ../examples/CCiMPG/NSLPK/commands_generate.cafe .
+
+eof
 
 Suggested configuration:
   eq backtrackLevels = 6 .

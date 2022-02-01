@@ -11,8 +11,10 @@ eof
 
 :save-proof .
 
+-- For loading the generated proof
 load ../examples/CCiMPG/NSLPK/nslpk-proof.cafe .
 
 eof
 
+-- For loading this file
 load ../examples/CCiMPG/NSLPK/commands_cimpg.cafe .
