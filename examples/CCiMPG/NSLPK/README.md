@@ -12,3 +12,14 @@ This folder contains the following files:
 * **commands_generate.cafe**, which contains the CiMPG+F commands for generating **nslpk-proof-generate.cafe**.
 * **nslpk-proof.cafe**, which contains the CiMPA script generated for the three invariants by using the proof score in **all_proofs.cafe**.
 * **commands_cimpg.cafe**, which contains the CiMPG+F commands for generating **nslpk-proof.cafe**.
+
+Generating a proof script using proof scores
+--------------------------------------------
+
+As indicated above, the instructions for
+
+Inferring a proof script assuming invariants are mutually dependent
+-------------------------------------------------------------------
+
+Inferring a proof script
+------------------------

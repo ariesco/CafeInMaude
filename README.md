@@ -56,39 +56,39 @@ the 2-processes mutal exclusion protocol specification by typing:
 Likewise, we would load the proof related to this protocol with the following command:
 
 ```
-load ../examples/CCiMPG/2p-mutex/all_proofs.cafe .
+    $ CafeInMaude> load ../examples/CCiMPG/2p-mutex/all_proofs.cafe .
 ```
 
 Finally, we can set the file for storing proofs as follows:
 
 ```
-set-output ../examples/CCiMPG/2p-mutex/2p-proof.cafe .
+    $ CafeInMaude> set-output ../examples/CCiMPG/2p-mutex/2p-proof.cafe .
 ```
 
 Because CiMPG+F supports parallel execution, we need to set the number of cores that
 will be used for parallel computation by:
 
 ```
-set-cores 4 .
+    $ CafeInMaude> set-cores 4 .
 ```
 
 Because the open-close environments are named as **inv1** in the proofs, we can infer
 the proof using:
 
 ```
-:infer-proof inv1 .
+    $ CafeInMaude> :infer-proof inv1 .
 ```
 
 The proof can be stored in an external file by typing:
 
 ```
-:save-proof .
+    $ CafeInMaude> :save-proof .
 ```
 
 This proof can be loaded using:
 
 ```
-load ../examples/CCiMPG/2p-mutex/2p-proof.cafe .
+    $ CafeInMaude> load ../examples/CCiMPG/2p-mutex/2p-proof.cafe .
 ```
 
 In general, the examples in the **CCIMPG** folder provide a **commands_cimpg.cafe** file with the
