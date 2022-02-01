@@ -19,7 +19,7 @@ close
 
 -- Introduce the path of the file you want to create.
 
-set-output ../examples/CCiMPG/NSLPK/nslpk-proof-generate_jss_inv3.cafe .
+set-output ../examples/CCiMPG/NSLPK/nslpk-proof-generate_inv3.cafe .
 
 :save-proof .
 
