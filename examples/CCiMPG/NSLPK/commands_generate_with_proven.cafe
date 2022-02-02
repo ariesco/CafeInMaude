@@ -2,7 +2,7 @@ load ../examples/CCiMPG/NSLPK/nslpk.cafe .
 
 set-cores 4 .
 
--- Introduce commands indicated above depending on the invariant you want to prove
+-- Introduce commands indicated below depending on the invariant you want to prove
 
 open NSLPK .
   :id(proofNSLPK)
@@ -52,7 +52,7 @@ open NSLPK .
   red inv2(S:Sys, n1, q) .
 close
 
-- end inv2
+-- end inv2
 
 -- inv3
 
