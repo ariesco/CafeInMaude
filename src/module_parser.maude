@@ -868,7 +868,33 @@ the list, applying the appropriate function to each element:
   eq parseBubbles(('cq_=_if_.['CafeBubble[T],'CafeBubble[T'],'CafeBubble[T'']]) | TrS, TOP, FLAT, VS) =
                                     parseBubbles(('ceq_=_if_.['CafeBubble[T],'CafeBubble[T'],'CafeBubble[T'']]) | TrS, TOP, FLAT, VS) .
   eq parseBubbles(emptyTermSet, TOP, FLAT, VS) = < addEqual&SearchEqs(TOP), addEqual&SearchEqs(FLAT), VS, nil > .
+
+***(
+ * supporting sort predicate, for example:
+ * ceq (N:Nat = 0) = false if (N:Nat :is NzNat) .
+)
+  ceq parseBubbles(('ceq_=_if_.['CafeBubble[T],'CafeBubble[T'],'CafeBubble[T'']]) | TrS, TOP, FLAT, VS) = parseBubbles(TrS, TOP', FLAT', VS)
+   if [ QIL, AtS' ] := improveLabel(downQidList(T)) /\
+      VS' := varsFromQidList(QIL) /\
+      {T1, Srt} := metaParse(FLAT, VS, QIL, anyType) /\
+      < T''', AtS > := cafeEqAtS2maudeEqAts(T') /\
+      QIL' := downQidList(T'') /\
+      occurs(':is, QIL') /\
+      T2 := getTerm(metaParse(FLAT, VS ; VS', downQidList(T'''), Srt)) /\
+      T3 := getTerm(metaParse(FLAT, VS ; VS', replaceSortPred(QIL'), 'Bool)) /\
+      EqS := ceq T1 = T2 if T3 = 'true.Bool [AtS AtS'] . /\
+      TOP' := addEqs(TOP, EqS) /\
+      FLAT' := addEqs(FLAT, EqS) .
+
   eq parseBubbles(T | TrS, TOP, FLAT, VS) = parseBubbles(TrS, TOP, FLAT, VS) [owise print "Owise: " T] .
+
+***(
+ * axuliary functions
+ * replace all ':is to '::
+)
+  op replaceSortPred : QidList -> QidList .
+  eq replaceSortPred(QIL ':is QIL') = replaceSortPred(QIL) ':: replaceSortPred(QIL') .
+  eq replaceSortPred(QIL) = QIL [owise] .
 
   ***(
    Function for parsing bubbles in views.
